@@ -22,6 +22,7 @@ In order to build chronos, you need development files of:
 * libev
 * mysqlclient
 * sqlite3
+
 To build, you need a C++14 compiler and cmake.
 
 ### Building
