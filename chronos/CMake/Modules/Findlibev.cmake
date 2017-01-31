@@ -1,0 +1,7 @@
+find_path(LIBEV_INCLUDE_DIRS ev.h)
+
+find_library(LIBEV_LIBRARIES NAMES libev ev)
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(libev DEFAULT_MSG LIBEV_LIBRARIES LIBEV_INCLUDE_DIRS)
+mark_as_advanced(LIBEV_INCLUDE_DIRS LIBEV_LIBRARIES)
