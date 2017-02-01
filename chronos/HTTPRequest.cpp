@@ -44,9 +44,8 @@ size_t curlHeaderFunction(char *buffer, size_t size, size_t nitems, void *userda
 
 }
 
-HTTPRequest::HTTPRequest(CURLM *curlMultiHandle)
-	: multiHandle{curlMultiHandle},
-	  result{std::make_unique<JobResult>()}
+HTTPRequest::HTTPRequest()
+	: result{std::make_unique<JobResult>()}
 {
 	maxSize = App::getInstance()->config->getInt("request_max_size");
 	memset(curlError, 0, sizeof(curlError));
@@ -177,8 +176,10 @@ void HTTPRequest::done(CURLcode res)
 		onDone();
 }
 
-void HTTPRequest::submit()
+void HTTPRequest::submit(CURLM *curlMultiHandle)
 {
+	multiHandle 		= curlMultiHandle;
+
 	result->dateStarted 	= Utils::getTimestampMS();
 	result->jitter 			= result->dateStarted - result->datePlanned;
 
@@ -234,9 +235,9 @@ void HTTPRequest::submit()
 	}
 }
 
-HTTPRequest *HTTPRequest::fromURL(const std::string &url, int userID, const std::shared_ptr<WorkerThread> &wt)
+HTTPRequest *HTTPRequest::fromURL(const std::string &url, int userID)
 {
-	HTTPRequest *req = new HTTPRequest(wt->curlHandle);
+	HTTPRequest *req = new HTTPRequest();
 	req->result->userID = userID;
 	req->result->url = url;
 	req->url = url;

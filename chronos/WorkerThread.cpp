@@ -182,7 +182,7 @@ void WorkerThread::runJobs()
 		++runningJobs;
 
 		job->onDone = std::bind(&WorkerThread::jobDone, this, job);
-		job->submit();
+		job->submit(curlHandle);
 	}
 }
 

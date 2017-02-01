@@ -26,7 +26,7 @@ namespace Chronos
 	class HTTPRequest
 	{
 	private:
-		HTTPRequest(CURLM *curlMultiHandle);
+		HTTPRequest();
 
 		HTTPRequest(const HTTPRequest &other) = delete;
 		HTTPRequest(HTTPRequest &&other) = delete;
@@ -37,9 +37,9 @@ namespace Chronos
 		~HTTPRequest();
 
 	public:
-		static HTTPRequest *fromURL(const std::string &url, int userID, const std::shared_ptr<WorkerThread> &wt);
+		static HTTPRequest *fromURL(const std::string &url, int userID);
 
-		void submit();
+		void submit(CURLM *curlMultiHandle);
 		void done(CURLcode res);
 
 		bool processData(const std::string &headers);

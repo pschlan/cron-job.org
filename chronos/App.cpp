@@ -91,7 +91,7 @@ void App::processJobs(int hour, int minute, int month, int mday, int wday, int y
 		MYSQL_ROW row;
 		while((row = res->fetchRow()) != nullptr)
 		{
-			HTTPRequest *req = HTTPRequest::fromURL(row[0], atoi(row[10]), wt);
+			HTTPRequest *req = HTTPRequest::fromURL(row[0], atoi(row[10]));
 			req->result->jobID 			= atoi(row[1]);
 			req->result->datePlanned	= (uint64_t)timestamp * 1000;
 			req->result->notifyFailure 	= strcmp(row[5], "1") == 0;
