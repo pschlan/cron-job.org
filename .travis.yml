@@ -1,0 +1,23 @@
+language: cpp
+compiler:
+- gcc
+os:
+- linux
+sudo: required
+dist: trusty
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - gcc-5
+    - g++-5
+    - libcurl-dev
+    - libev-dev
+    - libsqlite-dev
+    - libmysqlclient-dev 
+script:
+- cd chronos
+- mkdir build
+- cd build
+- cmake .. && make
