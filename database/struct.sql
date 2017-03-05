@@ -15,8 +15,24 @@ CREATE TABLE `job` (
   `last_duration` int(11) NOT NULL DEFAULT '0',
   `fail_counter` int(11) NOT NULL DEFAULT '0',
   `save_responses` tinyint(4) NOT NULL DEFAULT '0',
+  `request_method` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`jobid`),
   KEY `userid` (`userid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `job_body` (
+  `jobid` int(11) NOT NULL DEFAULT '0',
+  `body` text NOT NULL,
+  PRIMARY KEY (`jobid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `job_header` (
+  `jobheaderid` int(11) NOT NULL AUTO_INCREMENT,
+  `jobid` int(11) NOT NULL DEFAULT '0',
+  `key` varchar(64) NOT NULL DEFAULT '',
+  `value` varchar(255) NOT NULL DEFAULT '',
+  PRIMARY KEY (`jobheaderid`),
+  KEY `jobid` (`jobid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `job_hours` (

@@ -59,6 +59,12 @@ HTTPRequest::~HTTPRequest()
 		curl_easy_cleanup(easy);
 		easy = nullptr;
 	}
+
+	if(headerList != nullptr)
+	{
+		curl_slist_free_all(headerList);
+		headerList = nullptr;
+	}
 }
 
 void HTTPRequest::processHeaders(const std::string &headers)
@@ -218,6 +224,59 @@ void HTTPRequest::submit(CURLM *curlMultiHandle)
 	curl_easy_setopt(easy, CURLOPT_SSL_VERIFYPEER,		0);
 	curl_easy_setopt(easy, CURLOPT_SSL_VERIFYHOST,		0);
 	curl_easy_setopt(easy, CURLOPT_IPRESOLVE,			CURL_IPRESOLVE_V4);
+
+	if(requestMethod == RequestMethod::POST || requestMethod == RequestMethod::PUT)
+	{
+		curl_easy_setopt(easy, CURLOPT_POSTFIELDSIZE,	requestBody.size());
+		curl_easy_setopt(easy, CURLOPT_POSTFIELDS,	requestBody.c_str());
+	}
+
+	switch(requestMethod)
+	{
+	case RequestMethod::GET:
+		curl_easy_setopt(easy, CURLOPT_HTTPGET,		1);
+		break;
+
+	case RequestMethod::POST:
+		curl_easy_setopt(easy, CURLOPT_POST,		1);
+		break;
+
+	case RequestMethod::HEAD:
+		curl_easy_setopt(easy, CURLOPT_NOBODY,		1);
+		break;
+
+	case RequestMethod::OPTIONS:
+		curl_easy_setopt(easy, CURLOPT_CUSTOMREQUEST,	"OPTIONS");
+		break;
+
+	case RequestMethod::PUT:
+		curl_easy_setopt(easy, CURLOPT_POST,		1);
+		curl_easy_setopt(easy, CURLOPT_CUSTOMREQUEST, 	"PUT");
+		break;
+
+	case RequestMethod::DELETE:
+		curl_easy_setopt(easy, CURLOPT_CUSTOMREQUEST,	"DELETE");
+		break;
+
+	case RequestMethod::TRACE:
+		curl_easy_setopt(easy, CURLOPT_CUSTOMREQUEST,	"TRACE");
+		break;
+
+	case RequestMethod::CONNECT:
+		curl_easy_setopt(easy, CURLOPT_CUSTOMREQUEST,	"CONNECT");
+		break;
+	}
+
+	if(!requestHeaders.empty())
+	{
+		for(const auto &header : requestHeaders)
+		{
+			std::string head = header.first + ": " + header.second;
+			headerList = curl_slist_append(headerList, head.c_str());
+		}
+
+		curl_easy_setopt(easy, CURLOPT_HTTPHEADER,	headerList);
+	}
 
 	if(useAuth)
 	{

@@ -15,6 +15,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <curl/curl.h>
 
@@ -22,6 +23,18 @@ namespace Chronos
 {
 	class WorkerThread;
 	class JobResult;
+
+	enum class RequestMethod : int
+	{
+		GET		= 0,
+		POST		= 1,
+		OPTIONS		= 2,
+		HEAD		= 3,
+		PUT		= 4,
+		DELETE		= 5,
+		TRACE		= 6,
+		CONNECT		= 7
+	};
 
 	class HTTPRequest
 	{
@@ -50,6 +63,9 @@ namespace Chronos
 		bool useAuth = false;
 		std::string authUsername;
 		std::string authPassword;
+		RequestMethod requestMethod = RequestMethod::GET;
+		std::vector<std::pair<std::string, std::string>> requestHeaders;
+		std::string requestBody;
 		std::unique_ptr<JobResult> result;
 
 		std::function<void()> onDone;
@@ -57,6 +73,7 @@ namespace Chronos
 	private:
 		CURL *easy = nullptr;
 		CURLM *multiHandle = nullptr;
+		struct curl_slist *headerList = nullptr;
 		bool isValid = false;
 		char curlError[CURL_ERROR_SIZE];
 		size_t maxSize;

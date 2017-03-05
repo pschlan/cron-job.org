@@ -66,18 +66,21 @@ void App::processJobs(int hour, int minute, int month, int mday, int wday, int y
 				<< "timestamp = " << timestamp
 				<< std::endl;
 
-	auto res = db->query("SELECT TRIM(`url`),`job`.`jobid`,`auth_enable`,`auth_user`,`auth_pass`,`notify_failure`,`notify_success`,`notify_disable`,`fail_counter`,`save_responses`,`userid` FROM `job` "
+	auto res = db->query("SELECT TRIM(`url`),`job`.`jobid`,`auth_enable`,`auth_user`,`auth_pass`,`notify_failure`,`notify_success`,`notify_disable`,`fail_counter`,`save_responses`,`userid`,`request_method`,COUNT(`job_header`.`jobheaderid`),`job_body`.`body` FROM `job` "
 									"INNER JOIN `job_hours` ON `job_hours`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_mdays` ON `job_mdays`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_wdays` ON `job_wdays`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_minutes` ON `job_minutes`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_months` ON `job_months`.`jobid`=`job`.`jobid` "
+									"LEFT JOIN `job_header` ON `job_header`.`jobid`=`job`.`jobid` "
+									"LEFT JOIN `job_body` ON `job_body`.`jobid`=`job`.`jobid` "
 									"WHERE (`hour`=-1 OR `hour`=%d) "
 									"AND (`minute`=-1 OR `minute`=%d) "
 									"AND (`mday`=-1 OR `mday`=%d) "
 									"AND (`wday`=-1 OR `wday`=%d) "
 									"AND (`month`=-1 OR `month`=%d) "
 									"AND `enabled`=1 "
+									"GROUP BY `job`.`jobid` "
 									"ORDER BY `fail_counter` ASC, `last_duration` ASC",
 									hour, minute, mday, wday, month);
 
@@ -104,6 +107,22 @@ void App::processJobs(int hour, int minute, int month, int mday, int wday, int y
 				req->useAuth 		= true;
 				req->authUsername 	= row[3];
 				req->authPassword 	= row[4];
+			}
+			req->requestMethod		= static_cast<RequestMethod>(atoi(row[11]));
+
+			if(row[12] != NULL && atoi(row[12]) > 0)
+			{
+				auto headerRes = db->query("SELECT `key`,`value` FROM `job_header` WHERE `jobid`=%s",
+					row[1]);
+				while(MYSQL_ROW row = headerRes->fetchRow())
+				{
+					req->requestHeaders.push_back({ std::string(row[0]), std::string(row[1]) });
+				}
+			}
+
+			if(row[13] != NULL)
+			{
+				req->requestBody	= row[13];
 			}
 
 			wt->addJob(req);
