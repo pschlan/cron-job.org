@@ -16,6 +16,7 @@ addons:
     - libev-dev
     - libsqlite-dev
     - libmysqlclient-dev 
+env: COMPILER=g++-5
 script:
 - cd chronos
 - mkdir build
