@@ -1,22 +1,21 @@
-language: cpp
-compiler:
-- gcc
-os:
-- linux
+language: generic 
 sudo: required
 dist: trusty
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    packages:
-    - gcc-5
-    - g++-5
-    - libcurl4-openssl-dev
-    - libev-dev
-    - libsqlite-dev
-    - libmysqlclient-dev 
-env: COMPILER_NAME=gcc CXX=g++-5 CC=gcc-5
+matrix:
+  include:
+    - os: linux
+      env: COMPILER_NAME=gcc CXX=g++-5 CC=gcc-5
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - gcc-5
+          - g++-5
+          - libcurl4-openssl-dev
+          - libev-dev
+          - libsqlite-dev
+          - libmysqlclient-dev
 script:
 - cd chronos
 - mkdir build
