@@ -16,7 +16,7 @@ addons:
     - libev-dev
     - libsqlite-dev
     - libmysqlclient-dev 
-env: COMPILER=g++-5
+env: COMPILER_NAME=gcc CXX=g++-5 CC=gcc-5
 script:
 - cd chronos
 - mkdir build
