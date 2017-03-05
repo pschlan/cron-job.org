@@ -12,7 +12,7 @@ addons:
     packages:
     - gcc-5
     - g++-5
-    - libcurl-dev
+    - libcurl4-openssl-dev
     - libev-dev
     - libsqlite-dev
     - libmysqlclient-dev 
