@@ -1,6 +1,8 @@
 cron-job.org
 ============
 
+[![Build Status](https://travis-ci.org/pschlan/cron-job.org.svg?branch=master)](https://travis-ci.org/pschlan/cron-job.org)
+
 Structure
 ---------
 * `database` contains the MySQL database structure.
