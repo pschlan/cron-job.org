@@ -28,6 +28,7 @@ namespace Chronos
 		std::string toString(int num, int places);
 		bool directoryExists(const std::string &path);
 		bool mkPath(const std::string &path, const mode_t mode = 0755);
+		std::string toLower(const std::string &str);
 	};
 };
 

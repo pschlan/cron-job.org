@@ -271,6 +271,9 @@ void HTTPRequest::submit(CURLM *curlMultiHandle)
 	{
 		for(const auto &header : requestHeaders)
 		{
+			std::string lowerKey = Utils::toLower(header.first);
+			if(lowerKey == "user-agent" || lowerKey == "connection")
+				continue;
 			std::string head = header.first + ": " + header.second;
 			headerList = curl_slist_append(headerList, head.c_str());
 		}

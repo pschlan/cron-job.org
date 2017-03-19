@@ -11,8 +11,10 @@
 
 #include "Utils.h"
 
+#include <algorithm>
 #include <iostream>
 #include <sstream>
+#include <string>
 
 #include <unistd.h>
 #include <sys/stat.h>
@@ -122,3 +124,11 @@ bool Utils::mkPath(const std::string &path, const mode_t mode)
 	}
 	return true;
 }
+
+std::string Utils::toLower(const std::string &str)
+{
+	std::string result;
+	std::transform(str.begin(), str.end(), result.begin(), ::tolower);
+	return result;
+}
+
