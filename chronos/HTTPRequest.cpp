@@ -158,7 +158,7 @@ void HTTPRequest::done(CURLcode res)
 
 			result->httpStatus = httpCode;
 
-			if(httpCode == 200)
+			if((httpCode >= 200) && (httpCode < 300))
 			{
 				result->status 	= JOBSTATUS_OK;
 			}
