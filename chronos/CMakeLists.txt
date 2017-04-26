@@ -18,7 +18,19 @@ set(SOURCES
 	WorkerThread.cpp
 )
 
-add_executable(${PROJECT_NAME} ${SOURCES})
+set(CCTZ_SOURCES
+	cctz/src/civil_time_detail.cc
+	cctz/src/time_zone_fixed.cc
+	cctz/src/time_zone_format.cc
+	cctz/src/time_zone_if.cc
+	cctz/src/time_zone_impl.cc
+	cctz/src/time_zone_info.cc
+	cctz/src/time_zone_libc.cc
+	cctz/src/time_zone_lookup.cc
+	cctz/src/time_zone_posix.cc
+)
+
+add_executable(${PROJECT_NAME} ${SOURCES} ${CCTZ_SOURCES})
 
 find_package(MySQLClient REQUIRED)
 find_package(CURL REQUIRED)
@@ -26,7 +38,9 @@ find_package(libev REQUIRED)
 find_package(SQLite REQUIRED)
 find_package(Threads REQUIRED)
 
-include_directories(${MySQLClient_INCLUDE_DIRS}
+include_directories(
+	cctz/include/
+	${MySQLClient_INCLUDE_DIRS}
 	${CURL_INCLUDE_DIRS}
 	${LIBEV_INCLUDE_DIRS}
 	${SQLITE_INCLUDE_DIRS}

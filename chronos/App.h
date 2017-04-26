@@ -24,6 +24,7 @@ namespace Chronos
 {
 	class MySQL_DB;
 	class UpdateThread;
+	class WorkerThread;
 
 	class App
 	{
@@ -47,7 +48,9 @@ namespace Chronos
 	private:
 		void startUpdateThread();
 		void stopUpdateThread();
-		void processJobs(int hour, int minute, int month, int mday, int wday, int year, time_t timestamp);
+		void processJobs(time_t forTime, time_t plannedTime);
+		void processJobsForTimeZone(int hour, int minute, int month, int mday, int wday, int year, time_t timestamp, const std::string &timeZone,
+						const std::shared_ptr<WorkerThread> &wt);
 		int calcJitterCorrectionOffset();
 
 	public:

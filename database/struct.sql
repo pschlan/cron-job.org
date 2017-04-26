@@ -111,6 +111,7 @@ CREATE TABLE `user` (
   `lastlogin_ip` varchar(48) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `lastlogin_date` int(11) NOT NULL DEFAULT '0',
   `lastlogin_lang` varchar(4) NOT NULL DEFAULT 'de',
+  `timezone` varchar(255) NOT NULL DEFAULT 'Europe/Berlin',
   PRIMARY KEY (`userid`),
   KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

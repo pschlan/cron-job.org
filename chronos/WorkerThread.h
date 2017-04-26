@@ -48,6 +48,7 @@ namespace Chronos
 
 	public:
 		void addJob(HTTPRequest *req);
+		bool empty() const { return requestQueue.empty(); }
 		void run();
 		void threadMain();
 		void jobDone(HTTPRequest *req);

@@ -15,6 +15,9 @@
 #include <iostream>
 #include <functional>
 
+#include <civil_time.h>
+#include <time_zone.h>
+
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
@@ -55,23 +58,79 @@ App *App::getInstance()
         return(App::instance);
 }
 
-void App::processJobs(int hour, int minute, int month, int mday, int wday, int year, time_t timestamp)
+void App::processJobs(time_t forTime, time_t plannedTime)
 {
 	std::cout 	<< "App::processJobs(): Called for "
+				<< "forTime = " << forTime << ", "
+				<< "plannedTime = " << plannedTime
+				<< std::endl;
+
+	struct tm *t = gmtime(&plannedTime);
+	std::shared_ptr<WorkerThread> wt = std::make_shared<WorkerThread>(t->tm_mday, t->tm_mon+1, t->tm_year+1900, t->tm_hour, t->tm_min);
+
+	MYSQL_ROW row;
+	auto res = db->query("SELECT DISTINCT(`timezone`) FROM `user`");
+	while((row = res->fetchRow()) != nullptr)
+	{
+		std::string timeZone(row[0]);
+
+		cctz::time_zone tz;
+		if(!cctz::load_time_zone(timeZone, &tz))
+		{
+			std::cout << "App::processJobs(): Failed to load time zone: " << timeZone << ", skipping" << std::endl;
+			continue;
+		}
+
+		auto civilTime = cctz::convert(std::chrono::system_clock::from_time_t(forTime), tz);
+		auto cWDay = cctz::get_weekday(cctz::civil_day(civilTime));
+		int wday = -1;
+		switch(cWDay)
+		{
+		case cctz::weekday::monday:	wday = 1;	break;
+		case cctz::weekday::tuesday:	wday = 2;	break;
+		case cctz::weekday::wednesday:	wday = 3;	break;
+		case cctz::weekday::thursday:	wday = 4;	break;
+		case cctz::weekday::friday:	wday = 5;	break;
+		case cctz::weekday::saturday:	wday = 6;	break;
+		case cctz::weekday::sunday:	wday = 0;	break;
+		default:			wday = -1;	break;
+		}
+
+		processJobsForTimeZone(civilTime.hour(), civilTime.minute(), civilTime.month(), civilTime.day(), wday, civilTime.year(),
+			plannedTime, timeZone, wt);
+	}
+
+	if(!wt->empty())
+	{
+		std::cout << "App::processJobs(): Starting worker thread" << std::endl;
+		wt->run();
+	}
+	else
+	{
+		std::cout << "App::processJobs(): No jobs" << std::endl;
+	}
+}
+
+void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int wday, int year, time_t timestamp, const std::string &timeZone,
+	const std::shared_ptr<WorkerThread> &wt)
+{
+	std::cout 	<< "App::processJobsForTimeZone(): Called for "
 				<< "hour = " << hour << ", "
 				<< "minute = " << minute << ", "
 				<< "month = " << month << ", "
 				<< "mday = " << mday << ", "
 				<< "wday = " << wday << ", "
-				<< "timestamp = " << timestamp
+				<< "timestamp = " << timestamp << ", "
+				<< "timeZone = " << timeZone
 				<< std::endl;
 
-	auto res = db->query("SELECT TRIM(`url`),`job`.`jobid`,`auth_enable`,`auth_user`,`auth_pass`,`notify_failure`,`notify_success`,`notify_disable`,`fail_counter`,`save_responses`,`userid`,`request_method`,COUNT(`job_header`.`jobheaderid`),`job_body`.`body` FROM `job` "
+	auto res = db->query("SELECT TRIM(`url`),`job`.`jobid`,`auth_enable`,`auth_user`,`auth_pass`,`notify_failure`,`notify_success`,`notify_disable`,`fail_counter`,`save_responses`,`job`.`userid`,`request_method`,COUNT(`job_header`.`jobheaderid`),`job_body`.`body` FROM `job` "
 									"INNER JOIN `job_hours` ON `job_hours`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_mdays` ON `job_mdays`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_wdays` ON `job_wdays`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_minutes` ON `job_minutes`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_months` ON `job_months`.`jobid`=`job`.`jobid` "
+									"INNER JOIN `user` ON `job`.`userid`=`user`.`userid` "
 									"LEFT JOIN `job_header` ON `job_header`.`jobid`=`job`.`jobid` "
 									"LEFT JOIN `job_body` ON `job_body`.`jobid`=`job`.`jobid` "
 									"WHERE (`hour`=-1 OR `hour`=%d) "
@@ -79,18 +138,17 @@ void App::processJobs(int hour, int minute, int month, int mday, int wday, int y
 									"AND (`mday`=-1 OR `mday`=%d) "
 									"AND (`wday`=-1 OR `wday`=%d) "
 									"AND (`month`=-1 OR `month`=%d) "
+									"AND `user`.`timezone`='%q' "
 									"AND `enabled`=1 "
 									"GROUP BY `job`.`jobid` "
 									"ORDER BY `fail_counter` ASC, `last_duration` ASC",
-									hour, minute, mday, wday, month);
+									hour, minute, mday, wday, month, timeZone.c_str());
 
 	int jobCount = res->numRows();
 	std::cout << "App::processJobs(): " << jobCount << " jobs found" << std::endl;
 
 	if(jobCount > 0)
 	{
-		std::shared_ptr<WorkerThread> wt = std::make_shared<WorkerThread>(mday, month, year, hour, minute);
-
 		MYSQL_ROW row;
 		while((row = res->fetchRow()) != nullptr)
 		{
@@ -127,14 +185,11 @@ void App::processJobs(int hour, int minute, int month, int mday, int wday, int y
 
 			wt->addJob(req);
 		}
-
-		std::cout << "App::processJobs(): Starting worker thread" << std::endl;
-		wt->run();
 	}
 
 	res.reset();
 
-	std::cout << "App::processJobs(): Finished" << std::endl;
+	std::cout << "App::processJobsForTimeZone(): Finished" << std::endl;
 }
 
 void App::signalHandler(int sig)
@@ -172,7 +227,7 @@ int App::run()
 
 			if(!firstLoop || t->tm_sec == 59 - jitterCorrectionOffset)
 			{
-				processJobs(t->tm_hour, t->tm_min, t->tm_mon+1, t->tm_mday, t->tm_wday, t->tm_year+1900, currentTime - t->tm_sec);
+				processJobs(currentTime, currentTime - t->tm_sec);
 				jitterCorrectionOffset = calcJitterCorrectionOffset();
 			}
 
