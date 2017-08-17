@@ -200,6 +200,8 @@ void App::signalHandler(int sig)
 
 int App::run()
 {
+	setlocale(LC_ALL, "en_US.UTF-8");
+
 	curl_global_init(CURL_GLOBAL_ALL);
 	MySQL_DB::libInit();
 
