@@ -12,15 +12,15 @@ Structure
 chronos
 -------
 ### Concept
-chronos checks the MySQL database every minute to collect all jobs to execute. For every minute, a thread is spawned which processes all the jobs. Actual HTTP fetching is done using the excellent CURL multi library with libev as library used to provide the event loop. Together with the c-ares resovler this allows for thousands of parallel HTTP requests.
+chronos checks the MySQL database every minute to collect all jobs to execute. For every minute, a thread is spawned which processes all the jobs. Actual HTTP fetching is done using the excellent CURL multi library with libev as library used to provide the event loop. Together with the c-ares resolver this allows for thousands of parallel HTTP requests.
 
-cron-job.org supports storing the job results for the user's convenience. This can quickly lead to I/O bottleneck when storing the result data in a MySQL database. (Which also has the downside that cleaning up old entries is extremely expensive.) To solve this issue, chronos stores the results in per-user per-day SQLite databases. Cleaning up old entries is as easy as deleting the corresponding day's databases.
+cron-job.org supports storing the job results for the user's convenience. This can quickly lead to I/O bottlenecks when storing the result data in a MySQL database. (Which also has the downside that cleaning up old entries is extremely expensive.) To solve this issue, chronos stores the results in per-user per-day SQLite databases. Cleaning up old entries is as easy as deleting the corresponding day's databases.
 
 The whole software is optimized on performance rather than on data integrity, i.e. when your server crashes or you have a power outage / hardware defect, the job history is most likely lost. Since this is volatile data anyway, it's not considered a big issue.
 
 ### Prerequisites
 In order to build chronos, you need development files of:
-* curl (preferably with c-ares as resolver)
+* curl (preferably with c-ares as resolver and libidn2 for IDN support)
 * libev
 * mysqlclient
 * sqlite3
