@@ -87,6 +87,7 @@ namespace Chronos
 		int year;
 		int hour;
 		int minute;
+		bool inRunJobs = false;
 	};
 };
 

@@ -174,6 +174,11 @@ void WorkerThread::run()
 
 void WorkerThread::runJobs()
 {
+	if(inRunJobs)
+		return;
+
+	inRunJobs = true;
+
 	while(runningJobs < parallelJobs && !requestQueue.empty())
 	{
 		HTTPRequest *job = requestQueue.front();
@@ -184,6 +189,8 @@ void WorkerThread::runJobs()
 		job->onDone = std::bind(&WorkerThread::jobDone, this, job);
 		job->submit(curlHandle);
 	}
+
+	inRunJobs = false;
 }
 
 void WorkerThread::jobDone(HTTPRequest *req)
