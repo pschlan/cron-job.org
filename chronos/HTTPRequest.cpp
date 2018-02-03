@@ -223,6 +223,7 @@ void HTTPRequest::submit(CURLM *curlMultiHandle)
 	curl_easy_setopt(easy, CURLOPT_USERAGENT,			App::getInstance()->config->get("user_agent").c_str());
 	curl_easy_setopt(easy, CURLOPT_SSL_VERIFYPEER,		0);
 	curl_easy_setopt(easy, CURLOPT_SSL_VERIFYHOST,		0);
+	curl_easy_setopt(easy, CURLOPT_CAINFO,			NULL);
 	curl_easy_setopt(easy, CURLOPT_IPRESOLVE,			CURL_IPRESOLVE_V4);
 
 	if(requestMethod == RequestMethod::POST || requestMethod == RequestMethod::PUT)
