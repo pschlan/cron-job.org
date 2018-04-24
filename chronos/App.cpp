@@ -25,10 +25,74 @@
 #include <unistd.h>
 
 #include <curl/curl.h>
+#include <openssl/crypto.h>
 
 #include "UpdateThread.h"
 #include "WorkerThread.h"
 #include "Config.h"
+
+namespace
+{
+
+int g_numLocks = 0;
+pthread_mutex_t *g_sslLocks = nullptr;
+
+unsigned long sslThreadIdCallback()
+{
+	return static_cast<unsigned long>(pthread_self());
+}
+
+void sslLockCallback(int mode, int type, const char * /*file*/, int /*line*/)
+{
+	if(mode & CRYPTO_LOCK)
+	{
+		pthread_mutex_lock(&(g_sslLocks[type]));
+	}
+	else
+	{
+		pthread_mutex_unlock(&(g_sslLocks[type]));
+	}
+}
+
+void initSSLLocks()
+{
+	g_numLocks = CRYPTO_num_locks();
+	if(g_numLocks <= 0)
+	{
+		std::cerr << "CRYPTOP_num_locks() <= 0!" << std::endl;
+		return;
+	}
+
+	g_sslLocks = reinterpret_cast<pthread_mutex_t *>(OPENSSL_malloc(g_numLocks * sizeof(pthread_mutex_t)));
+	if(g_sslLocks == nullptr)
+	{
+		std::cerr << "OPENSSL_malloc() failed!" << std::endl;
+		return;
+	}
+
+	for(int i = 0; i < g_numLocks; ++i)
+	{
+		pthread_mutex_init(&(g_sslLocks[i]), nullptr);
+	}
+
+	CRYPTO_set_id_callback(sslThreadIdCallback);
+	CRYPTO_set_locking_callback(sslLockCallback);
+}
+
+void uninitSSLLocks()
+{
+	CRYPTO_set_locking_callback(nullptr);
+
+	for(int i = 0; i < g_numLocks; ++i)
+	{
+		pthread_mutex_destroy(&(g_sslLocks[i]));
+	}
+
+	OPENSSL_free(g_sslLocks);
+	g_sslLocks = nullptr;
+}
+
+}
 
 using namespace Chronos;
 
@@ -204,6 +268,7 @@ int App::run()
 
 	curl_global_init(CURL_GLOBAL_ALL);
 	MySQL_DB::libInit();
+	initSSLLocks();
 
 	db = createMySQLConnection();
 	startUpdateThread();
@@ -243,6 +308,7 @@ int App::run()
 
 	this->stopUpdateThread();
 
+	uninitSSLLocks();
 	MySQL_DB::libCleanup();
 	curl_global_cleanup();
 

@@ -37,6 +37,7 @@ find_package(CURL REQUIRED)
 find_package(libev REQUIRED)
 find_package(SQLite REQUIRED)
 find_package(Threads REQUIRED)
+find_package(OpenSSL REQUIRED)
 
 include_directories(
 	cctz/include/
@@ -44,6 +45,7 @@ include_directories(
 	${CURL_INCLUDE_DIRS}
 	${LIBEV_INCLUDE_DIRS}
 	${SQLITE_INCLUDE_DIRS}
+	${OPENSSL_INCLUDE_DIR}
 )
 target_link_libraries(${PROJECT_NAME}
 	${MySQLClient_LIBRARIES}
@@ -51,6 +53,7 @@ target_link_libraries(${PROJECT_NAME}
 	${LIBEV_LIBRARIES}
 	${SQLITE_LIBRARIES}
 	${CMAKE_THREAD_LIBS_INIT}
+	${OPENSSL_CRYPTO_LIBRARY}
 )
 
 include_directories(${PROJECT_SOURCE_DIR})
