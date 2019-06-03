@@ -37,9 +37,9 @@ namespace
 int g_numLocks = 0;
 pthread_mutex_t *g_sslLocks = nullptr;
 
-unsigned long sslThreadIdCallback()
+void sslThreadIdCallback(CRYPTO_THREADID *threadId)
 {
-	return static_cast<unsigned long>(pthread_self());
+	CRYPTO_THREADID_set_pointer(threadId, reinterpret_cast<void *>(pthread_self()));
 }
 
 void sslLockCallback(int mode, int type, const char * /*file*/, int /*line*/)
@@ -75,7 +75,7 @@ void initSSLLocks()
 		pthread_mutex_init(&(g_sslLocks[i]), nullptr);
 	}
 
-	CRYPTO_set_id_callback(sslThreadIdCallback);
+	CRYPTO_THREADID_set_callback(sslThreadIdCallback);
 	CRYPTO_set_locking_callback(sslLockCallback);
 }
 
