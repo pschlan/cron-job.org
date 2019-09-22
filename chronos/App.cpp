@@ -133,7 +133,7 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 	std::shared_ptr<WorkerThread> wt = std::make_shared<WorkerThread>(t->tm_mday, t->tm_mon+1, t->tm_year+1900, t->tm_hour, t->tm_min);
 
 	MYSQL_ROW row;
-	auto res = db->query("SELECT DISTINCT(`timezone`) FROM `user`");
+	auto res = db->query("SELECT DISTINCT(`timezone`) FROM `job`");
 	while((row = res->fetchRow()) != nullptr)
 	{
 		std::string timeZone(row[0]);
@@ -150,14 +150,14 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 		int wday = -1;
 		switch(cWDay)
 		{
-		case cctz::weekday::monday:	wday = 1;	break;
+		case cctz::weekday::monday:		wday = 1;	break;
 		case cctz::weekday::tuesday:	wday = 2;	break;
 		case cctz::weekday::wednesday:	wday = 3;	break;
 		case cctz::weekday::thursday:	wday = 4;	break;
-		case cctz::weekday::friday:	wday = 5;	break;
+		case cctz::weekday::friday:		wday = 5;	break;
 		case cctz::weekday::saturday:	wday = 6;	break;
-		case cctz::weekday::sunday:	wday = 0;	break;
-		default:			wday = -1;	break;
+		case cctz::weekday::sunday:		wday = 0;	break;
+		default:						wday = -1;	break;
 		}
 
 		processJobsForTimeZone(civilTime.hour(), civilTime.minute(), civilTime.month(), civilTime.day(), wday, civilTime.year(),
@@ -194,7 +194,6 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 									"INNER JOIN `job_wdays` ON `job_wdays`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_minutes` ON `job_minutes`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_months` ON `job_months`.`jobid`=`job`.`jobid` "
-									"INNER JOIN `user` ON `job`.`userid`=`user`.`userid` "
 									"LEFT JOIN `job_header` ON `job_header`.`jobid`=`job`.`jobid` "
 									"LEFT JOIN `job_body` ON `job_body`.`jobid`=`job`.`jobid` "
 									"WHERE (`hour`=-1 OR `hour`=%d) "
@@ -202,7 +201,7 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 									"AND (`mday`=-1 OR `mday`=%d) "
 									"AND (`wday`=-1 OR `wday`=%d) "
 									"AND (`month`=-1 OR `month`=%d) "
-									"AND `user`.`timezone`='%q' "
+									"AND `job`.`timezone`='%q' "
 									"AND `enabled`=1 "
 									"GROUP BY `job`.`jobid` "
 									"ORDER BY `fail_counter` ASC, `last_duration` ASC",
