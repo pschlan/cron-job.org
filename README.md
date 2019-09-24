@@ -7,6 +7,7 @@ Structure
 ---------
 * `database` contains the MySQL database structure.
 * `chronos` is cron-job.org's cron job execution daemon and is responsible for fetching the jobs.
+* `protocol` contains the interface definitions for interaction between system nodes.
 * `web` contains the web interface (coming soon)
 
 chronos
@@ -18,12 +19,18 @@ cron-job.org supports storing the job results for the user's convenience. This c
 
 The whole software is optimized on performance rather than on data integrity, i.e. when your server crashes or you have a power outage / hardware defect, the job history is most likely lost. Since this is volatile data anyway, it's not considered a big issue.
 
+`chronos` can now run on multiple nodes. Each node requires an own MySQL server/database and stores its own jobs. The host
+running the web interface also manages the user database and an association between job and node. The web interface can
+create, delete, update and fetch jobs and job logs from the particular node via a Thrift-based protocol defined in the
+`protocol` folder.
+
 ### Prerequisites
 In order to build chronos, you need development files of:
 * curl (preferably with c-ares as resolver and libidn2 for IDN support)
 * libev
 * mysqlclient
 * sqlite3
+* thrift (compiler and libthrift)
 
 To build, you need a C++14 compiler and cmake.
 
