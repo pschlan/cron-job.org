@@ -58,25 +58,12 @@ void UpdateThread::addResult(std::unique_ptr<JobResult> result)
 
 void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 {
-	std::string userPathPart = Utils::userPathPart(result->userID);
-
 	struct tm tmStruct = { 0 };
 	time_t tmTime = result->datePlanned / 1000;
 	if(gmtime_r(&tmTime, &tmStruct) == nullptr)
 		throw std::runtime_error("gmtime_r returned nullptr");
 
-	// e.g. /var/lib/cron-job.org/%u
-	std::string dbDirPath = userDbFilePathScheme;
-	Utils::replace(dbDirPath, "%u", userPathPart);
-	if(!Utils::directoryExists(dbDirPath))
-		Utils::mkPath(dbDirPath);
-
-	// e.g. joblog-%m-%d.db
-	std::string dbFileName = userDbFileNameScheme;
-	Utils::replace(dbFileName, "%d", Utils::toString(tmStruct.tm_mday, 2));
-	Utils::replace(dbFileName, "%m", Utils::toString(tmStruct.tm_mon, 2));
-
-	std::string dbFilePath = dbDirPath + "/" + dbFileName;
+	std::string dbFilePath = Utils::userDbFilePath(userDbFilePathScheme, userDbFileNameScheme, result->userID, tmStruct.tm_mday, tmStruct.tm_mon);
 	int jobLogID = 0;
 	int jobLogIDDay = tmStruct.tm_mday;
 	int jobLodIDMonth = tmStruct.tm_mon;

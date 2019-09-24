@@ -144,6 +144,9 @@ std::unique_ptr<MySQL_Result> MySQL_DB::query(const char *szQuery, ...)
 			case 'u':
 				strQuery.append(std::to_string(va_arg(arglist, unsigned long)));
 				break;
+			case 'v':
+				strQuery.append(std::to_string(va_arg(arglist, long long)));
+				break;
 			case 'q':
 				szArg = va_arg(arglist, char *);
 				szBuff2 = new char[strlen(szArg)*2+1];

@@ -29,6 +29,7 @@
 
 #include "UpdateThread.h"
 #include "WorkerThread.h"
+#include "NodeService.h"
 #include "Config.h"
 
 namespace
@@ -272,6 +273,11 @@ int App::run()
 	db = createMySQLConnection();
 	startUpdateThread();
 
+	if(config->getInt("node_service_enable"))
+	{
+		startNodeServiceThread();
+	}
+
 	signal(SIGINT, App::signalHandler);
 
 	bool firstLoop = true;
@@ -305,6 +311,11 @@ int App::run()
 		}
 	}
 
+	if(config->getInt("node_service_enable"))
+	{
+		stopNodeServiceThread();
+	}
+
 	this->stopUpdateThread();
 
 	uninitSSLLocks();
@@ -334,6 +345,25 @@ void App::updateThreadMain()
 	}
 }
 
+void App::nodeServiceThreadMain()
+{
+	std::cout << "App::nodeServiceThreadMain(): Entered" << std::endl;
+
+	try
+	{
+		nodeServiceObj = std::make_unique<NodeService>(config->get("node_service_interface"), config->getInt("node_service_port"));
+		nodeServiceObj->run();
+		nodeServiceObj.reset();
+	}
+	catch(const std::runtime_error &ex)
+	{
+		std::cout << "Node service thread runtime error: " << ex.what() << std::endl;
+		stop = true;
+	}
+
+	std::cout << "App::nodeServiceThreadMain(): Finished" << std::endl;
+}
+
 void App::startUpdateThread()
 {
 	updateThread = std::thread(std::bind(&App::updateThreadMain, this));
@@ -343,6 +373,17 @@ void App::stopUpdateThread()
 {
 	updateThreadObj->stopThread();
 	updateThread.join();
+}
+
+void App::startNodeServiceThread()
+{
+	nodeServiceThread = std::thread(std::bind(&App::nodeServiceThreadMain, this));
+}
+
+void App::stopNodeServiceThread()
+{
+	nodeServiceObj->stop();
+	nodeServiceThread.join();
 }
 
 std::unique_ptr<MySQL_DB> App::createMySQLConnection()

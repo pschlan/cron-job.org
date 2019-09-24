@@ -60,7 +60,7 @@ namespace Chronos
 	class SQLite_DB
 	{
 	public:
-		SQLite_DB(const std::string &fileName, const int BusyTimeoutMs = 2500);
+		SQLite_DB(const std::string &fileName, const bool readOnly = false, const int BusyTimeoutMs = 2500);
 		~SQLite_DB();
 
 		SQLite_DB(const SQLite_DB &other) = delete;

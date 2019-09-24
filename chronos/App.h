@@ -25,6 +25,7 @@ namespace Chronos
 	class MySQL_DB;
 	class UpdateThread;
 	class WorkerThread;
+	class NodeService;
 
 	class App
 	{
@@ -42,12 +43,15 @@ namespace Chronos
 		static App *getInstance();
 		static void signalHandler(int sig);
 		void updateThreadMain();
+		void nodeServiceThreadMain();
 		int run();
 		std::unique_ptr<MySQL_DB> createMySQLConnection();
 
 	private:
 		void startUpdateThread();
 		void stopUpdateThread();
+		void startNodeServiceThread();
+		void stopNodeServiceThread();
 		void processJobs(time_t forTime, time_t plannedTime);
 		void processJobsForTimeZone(int hour, int minute, int month, int mday, int wday, int year, time_t timestamp, const std::string &timeZone,
 						const std::shared_ptr<WorkerThread> &wt);
@@ -60,8 +64,10 @@ namespace Chronos
 		bool stop = false;
 		static App *instance;
 		std::thread updateThread;
+		std::thread nodeServiceThread;
 		std::unique_ptr<MySQL_DB> db;
 		std::unique_ptr<UpdateThread> updateThreadObj;
+		std::unique_ptr<NodeService> nodeServiceObj;
 	};
 };
 
