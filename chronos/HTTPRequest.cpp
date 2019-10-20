@@ -226,7 +226,7 @@ void HTTPRequest::submit(CURLM *curlMultiHandle)
 	curl_easy_setopt(easy, CURLOPT_CAINFO,			NULL);
 	curl_easy_setopt(easy, CURLOPT_IPRESOLVE,			CURL_IPRESOLVE_V4);
 
-	if(requestMethod == RequestMethod::POST || requestMethod == RequestMethod::PUT)
+	if(requestMethod == RequestMethod::POST || requestMethod == RequestMethod::PUT || requestMethod == RequestMethod::PATCH)
 	{
 		curl_easy_setopt(easy, CURLOPT_POSTFIELDSIZE,	requestBody.size());
 		curl_easy_setopt(easy, CURLOPT_POSTFIELDS,	requestBody.c_str());
@@ -265,6 +265,11 @@ void HTTPRequest::submit(CURLM *curlMultiHandle)
 
 	case RequestMethod::CONNECT:
 		curl_easy_setopt(easy, CURLOPT_CUSTOMREQUEST,	"CONNECT");
+		break;
+
+	case RequestMethod::PATCH:
+		curl_easy_setopt(easy, CURLOPT_POST,            1);
+		curl_easy_setopt(easy, CURLOPT_CUSTOMREQUEST,	"PATCH");
 		break;
 	}
 

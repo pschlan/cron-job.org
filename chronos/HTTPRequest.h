@@ -33,7 +33,8 @@ namespace Chronos
 		PUT		= 4,
 		DELETE		= 5,
 		TRACE		= 6,
-		CONNECT		= 7
+		CONNECT		= 7,
+		PATCH		= 8
 	};
 
 	class HTTPRequest
