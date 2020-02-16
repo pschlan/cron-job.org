@@ -101,7 +101,6 @@ CREATE TABLE `user` (
   `email` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `password` varchar(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `password_salt` varchar(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `salutation` enum('mr','mrs') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'mr',
   `firstname` varchar(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `lastname` varchar(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `signup_ip` varchar(48) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
