@@ -2,7 +2,6 @@ set(NAME protocol)
 
 find_package(ThriftCompiler REQUIRED)
 find_package(LibThrift REQUIRED)
-find_package(Boost REQUIRED COMPONENTS headers)
 
 thrift_compile(protocol.thrift cpp protocol-cpp)
 thrift_compile(protocol.thrift php:nsglobal=chronos protocol-php)
@@ -22,5 +21,5 @@ target_include_directories(${NAME}
 )
 target_link_libraries(${NAME}
     PUBLIC
-        ${LIBTHRIFT_LINK_LIBRARIES}
+        ${LIBTHRIFT_LIBRARIES}
 )
