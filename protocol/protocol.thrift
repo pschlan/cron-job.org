@@ -116,6 +116,24 @@ struct JobLogEntry
     8: JobStatus status;
     9: string statusText;
     10: i16 httpStatus;
+    11: i16 mday;
+    12: i16 month;
+    13: optional string headers;
+    14: optional string body;
+}
+
+struct UserDetails
+{
+    1: i64 userId;
+    2: string email;
+    3: string firstName;
+    4: string lastName;
+    5: string language;
+}
+
+struct Phrases
+{
+    1: map<string, map<string, string>> phrases;
 }
 
 exception ResourceNotFound  {}
@@ -131,6 +149,7 @@ service ChronosNode
     Job getJobDetails(1: JobIdentifier identifier) throws(1: ResourceNotFound rnf, 2: InternalError ie);
 
     list<JobLogEntry> getJobLog(1: JobIdentifier identifier, 2: i16 maxEntries) throws(1: InternalError ie, 2: InvalidArguments ia);
+    JobLogEntry getJobLogDetails(1: i64 userId, 2: i16 mday, 3: i16 month, 4: i64 jobLogId) throws(1: ResourceNotFound rnf, 2: Forbidden ad, 3: InternalError ie, 4: InvalidArguments ia);
 
     void createOrUpdateJob(1: Job job) throws(1: ResourceNotFound rnf, 2: Forbidden ad, 3: InternalError ie, 4: InvalidArguments ia);
 
@@ -142,4 +161,6 @@ service ChronosMaster
     bool ping();
 
     void reportNodeStats(1: i32 nodeId, 2: NodeStatsEntry stats);
+    UserDetails getUserDetails(1: i64 userId) throws(1: ResourceNotFound rnf, 2: InternalError ie);
+    Phrases getPhrases() throws(1: InternalError ie);
 }

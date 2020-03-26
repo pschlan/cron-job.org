@@ -45,6 +45,7 @@ namespace Chronos
 		void reset();
 		int intValue(const std::string &field);
 		std::string stringValue(const std::string &field);
+		bool hasField(const std::string &field) const;
 
 	private:
 		int fieldIndex(const std::string &field);

@@ -56,7 +56,7 @@ public:
             std::unique_ptr<MySQL_DB> db(App::getInstance()->createMySQLConnection());
 
 	        MYSQL_ROW row;
-            auto res = db->query("SELECT `jobid`,`userid`,`enabled`,`title`,`save_responses`,`last_status`,`last_fetch`,`last_duration`,`fail_counter`,`url`,`request_method` FROM `job` WHERE `userid`=%v",
+            auto res = db->query("SELECT `jobid`,`userid`,`enabled`,`title`,`save_responses`,`last_status`,`last_fetch`,`last_duration`,`fail_counter`,`url`,`request_method`,`timezone` FROM `job` WHERE `userid`=%v",
                 userId);
             _return.reserve(res->numRows());
             while((row = res->fetchRow()))
@@ -80,6 +80,15 @@ public:
                 job.data.url = row[9];
                 job.data.requestMethod = static_cast<RequestMethod::type>(std::stoi(row[10])); //!< @todo Nicer conversion
                 job.__isset.data = true;
+
+                job.schedule.timezone = row[11];
+                job.__isset.schedule = true;
+
+                getJobSchedule(db, job.identifier, "hour",      job.schedule.hours);
+                getJobSchedule(db, job.identifier, "mday",      job.schedule.mdays);
+                getJobSchedule(db, job.identifier, "minute",    job.schedule.minutes);
+                getJobSchedule(db, job.identifier, "month",     job.schedule.months);
+                getJobSchedule(db, job.identifier, "wday",      job.schedule.wdays);
 
                 _return.push_back(job);
             }
@@ -305,8 +314,6 @@ public:
             db->query("DELETE FROM `job_header` WHERE `jobid`=%v",  identifier.jobId);
             db->query("DELETE FROM `job` WHERE `jobid`=%v",         identifier.jobId);
             db->query("COMMIT");
-
-            //! @todo Delete Notifications?
         }
         catch(const std::exception &ex)
         {
@@ -342,6 +349,45 @@ public:
         {
             std::cout << "ChronosNodeHandler::getJobLog(): Exception: "  << ex.what() << std::endl;
             throw InternalError();
+        }
+    }
+
+    void getJobLogDetails(JobLogEntry &_return, const int64_t userId, const int16_t mday, const int16_t month, const int64_t jobLogId) override
+    {
+        using namespace Chronos;
+
+        std::cout << "ChronosNodeHandler::getJobLogDetails(" << userId << ", " << mday << ", " << month << ", " << jobLogId << ")" << std::endl;
+
+        std::string dbFilePath = Utils::userDbFilePath(userDbFilePathScheme, userDbFileNameScheme, userId, mday, month);
+        std::unique_ptr<SQLite_DB> userDB;
+
+        try
+        {
+            userDB = std::make_unique<SQLite_DB>(dbFilePath.c_str(), true /* read only */);
+
+            auto stmt = userDB->prepare("SELECT * FROM \"joblog\" LEFT JOIN \"joblog_response\" ON \"joblog_response\".\"joblogid\"=\"joblog\".\"joblogid\" WHERE \"joblog\".\"joblogid\"=:joblogid");
+            stmt->bind(":joblogid", jobLogId);
+
+            while(stmt->execute())
+            {
+                _return = convertToJobLogEntry(stmt, userId, mday, month);
+
+                if(stmt->hasField("headers"))
+                    _return.headers = stmt->stringValue("headers");
+                if(stmt->hasField("body"))
+                    _return.body = stmt->stringValue("body");
+
+                _return.__isset.headers = true;
+                _return.__isset.body = true;
+
+                return;
+            }
+
+            throw ResourceNotFound();
+        }
+        catch(const std::exception &ex)
+        {
+            throw ResourceNotFound();
         }
     }
 
@@ -437,20 +483,27 @@ private:
 
         while(stmt->execute())
         {
-            JobLogEntry entry;
-            entry.jobLogId                  = stmt->intValue("joblogid");
-            entry.jobIdentifier.userId      = identifier.userId;
-            entry.jobIdentifier.jobId       = stmt->intValue("jobid");
-            entry.date                      = stmt->intValue("date");
-            entry.datePlanned               = stmt->intValue("date_planned");
-            entry.jitter                    = stmt->intValue("jitter");
-            entry.url                       = stmt->stringValue("url");
-            entry.duration                  = stmt->intValue("duration");
-            entry.status                    = static_cast<JobStatus::type>(stmt->intValue("status")); //!< @todo Nicer conversion
-            entry.statusText                = stmt->stringValue("status_text");
-            entry.httpStatus                = stmt->intValue("http_status");
-            _return.push_back(entry);
+            _return.push_back(convertToJobLogEntry(stmt, identifier.userId, mday, month));
         }
+    }
+
+    JobLogEntry convertToJobLogEntry(const std::unique_ptr<Chronos::SQLite_Statement> &stmt, int64_t userId, int16_t mday, int16_t month) const
+    {
+        JobLogEntry entry;
+        entry.jobLogId                  = stmt->intValue("joblogid");
+        entry.jobIdentifier.userId      = userId;
+        entry.jobIdentifier.jobId       = stmt->intValue("jobid");
+        entry.date                      = stmt->intValue("date");
+        entry.datePlanned               = stmt->intValue("date_planned");
+        entry.jitter                    = stmt->intValue("jitter");
+        entry.url                       = stmt->stringValue("url");
+        entry.duration                  = stmt->intValue("duration");
+        entry.status                    = static_cast<JobStatus::type>(stmt->intValue("status")); //!< @todo Nicer conversion
+        entry.statusText                = stmt->stringValue("status_text");
+        entry.httpStatus                = stmt->intValue("http_status");
+        entry.mday                      = mday;
+        entry.month                     = month;
+        return entry;
     }
 
     std::string userDbFilePathScheme;

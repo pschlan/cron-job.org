@@ -165,5 +165,13 @@ std::string SQLite_Statement::stringValue(const std::string &field)
 	auto it = columns.find(field);
 	if(it == columns.end())
 		throw std::runtime_error("Field not found: " + field);
-	return std::string(reinterpret_cast<const char *>(sqlite3_column_text(stmt, it->second)));
+	const unsigned char *columnText = sqlite3_column_text(stmt, it->second);
+	if(columnText == nullptr)
+		return {};
+	return std::string(reinterpret_cast<const char *>(columnText));
+}
+
+bool SQLite_Statement::hasField(const std::string &field) const
+{
+	return(columns.find(field) != columns.end());
 }

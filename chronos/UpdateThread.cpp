@@ -18,6 +18,7 @@
 
 #include "App.h"
 #include "Notification.h"
+#include "NotificationThread.h"
 #include "SQLite.h"
 #include "Utils.h"
 
@@ -159,7 +160,7 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 	}
 	res.reset();
 
-	bool createNotificationRow = false;
+	bool createNotification = false;
 	NotificationType_t notificationType;
 
 	// disable job?
@@ -172,7 +173,7 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 		// notify?
 		if(result->notifyDisable)
 		{
-			createNotificationRow 		= true;
+			createNotification 			= true;
 			notificationType 			= NOTIFICATION_TYPE_DISABLE;
 		}
 	}
@@ -182,7 +183,7 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 		&& result->status != JOBSTATUS_OK
 		&& failCounter == 1)
 	{
-		createNotificationRow 		= true;
+		createNotification 			= true;
 		notificationType 			= NOTIFICATION_TYPE_FAILURE;
 	}
 
@@ -192,18 +193,26 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 		&& result->oldFailCounter > 0
 		&& failCounter == 0)
 	{
-		createNotificationRow 		= true;
+		createNotification 			= true;
 		notificationType 			= NOTIFICATION_TYPE_SUCCESS;
 	}
 
-	if(createNotificationRow)
+	if(createNotification)
 	{
-		db->query("INSERT INTO `notification`(`jobid`,`joblogid`,`date`,`type`) "
-			"VALUES(%d,%d,%d,%d)",
-			result->jobID,
-			jobLogID,
-			static_cast<int>(time(NULL)),
-			static_cast<int>(notificationType));
+		Notification n;
+		n.userID = result->userID;
+		n.jobID = result->jobID;
+		n.date = time(NULL);
+		n.dateStarted = result->dateStarted / 1000;
+		n.datePlanned = result->datePlanned / 1000;
+		n.type = notificationType;
+		n.url = result->url;
+		n.title = result->title;
+		n.status = result->status;
+		n.statusText = result->statusText;
+		n.httpStatus = result->httpStatus;
+		n.failCounter = failCounter;
+		NotificationThread::getInstance()->addNotification(std::move(n));
 	}
 }
 

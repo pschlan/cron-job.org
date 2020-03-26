@@ -12,6 +12,8 @@ set(SOURCES
 	Utils.cpp
 	WorkerThread.cpp
 	NodeService.cpp
+	MasterService.cpp
+	NotificationThread.cpp
 )
 
 set(CCTZ_SOURCES

@@ -66,12 +66,6 @@ CREATE TABLE `job_wdays` (
   PRIMARY KEY (`jobid`,`wday`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE `jobdeletequeue` (
-  `jobid` int(11) NOT NULL DEFAULT '0',
-  `date` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`jobid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
 CREATE TABLE `notification` (
   `notificationid` int(11) NOT NULL AUTO_INCREMENT,
   `jobid` int(11) NOT NULL DEFAULT '0',
@@ -80,48 +74,13 @@ CREATE TABLE `notification` (
   `date_processed` int(14) NOT NULL DEFAULT '0',
   `type` tinyint(4) NOT NULL DEFAULT '0',
   `status` tinyint(4) NOT NULL DEFAULT '0',
+  `date_started` int(14) NOT NULL DEFAULT '0',
+  `date_planned` int(14) NOT NULL DEFAULT '0',
+  `url` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `excution_status` tinyint(4) NOT NULL DEFAULT '0',
+  `excution_status_text` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `excution_http_status` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`notificationid`),
   KEY `jobid` (`jobid`),
   KEY `joblogid` (`joblogid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-CREATE TABLE `stats` (
-  `d` tinyint(4) NOT NULL DEFAULT '0',
-  `m` tinyint(4) NOT NULL DEFAULT '0',
-  `y` int(11) NOT NULL DEFAULT '0',
-  `h` tinyint(4) NOT NULL DEFAULT '0',
-  `i` tinyint(4) NOT NULL DEFAULT '0',
-  `jobs` int(11) NOT NULL DEFAULT '0',
-  `jitter` double NOT NULL DEFAULT '0',
-  PRIMARY KEY (`d`,`m`,`y`,`h`,`i`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-CREATE TABLE `user` (
-  `userid` int(11) NOT NULL AUTO_INCREMENT,
-  `status` tinyint(4) NOT NULL DEFAULT '0',
-  `email` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `password` varchar(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `password_salt` varchar(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `firstname` varchar(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `lastname` varchar(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `signup_ip` varchar(48) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `signup_date` int(11) NOT NULL DEFAULT '0',
-  `verification_token` varchar(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `verification_date` int(11) NOT NULL DEFAULT '0',
-  `lastlogin_ip` varchar(48) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `lastlogin_date` int(11) NOT NULL DEFAULT '0',
-  `lastlogin_lang` varchar(4) NOT NULL DEFAULT 'de',
-  `timezone` varchar(32) NOT NULL DEFAULT 'Europe/Berlin',
-  PRIMARY KEY (`userid`),
-  KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-CREATE TABLE `user_pwreset` (
-  `userid` int(11) NOT NULL DEFAULT '0',
-  `expires` int(11) NOT NULL DEFAULT '0',
-  `token` varchar(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `password` varchar(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `password_salt` varchar(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  PRIMARY KEY (`userid`),
-  KEY `expires` (`expires`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

@@ -12,6 +12,8 @@
 #ifndef _NOTIFICATION_H_
 #define _NOTIFICATION_H_
 
+#include "JobResult.h"
+
 namespace Chronos
 {
 	enum NotificationType_t
@@ -19,6 +21,22 @@ namespace Chronos
 		NOTIFICATION_TYPE_FAILURE	= 0,
 		NOTIFICATION_TYPE_SUCCESS	= 1,
 		NOTIFICATION_TYPE_DISABLE	= 2
+	};
+
+	struct Notification
+	{
+		int userID = 0;
+		int jobID = 0;
+		uint64_t date = 0;			// in ms
+		uint64_t dateStarted = 0;	// in ms
+		uint64_t datePlanned = 0;	// in ms
+		NotificationType_t type;
+		std::string url;
+		std::string title;
+		JobStatus_t status = JOBSTATUS_UNKNOWN;
+		std::string statusText;
+		int httpStatus = 0;
+		int failCounter = 0;
 	};
 };
 
