@@ -154,6 +154,8 @@ service ChronosNode
     void createOrUpdateJob(1: Job job) throws(1: ResourceNotFound rnf, 2: Forbidden ad, 3: InternalError ie, 4: InvalidArguments ia);
 
     void deleteJob(1: JobIdentifier identifier) throws(1: ResourceNotFound rnf, 2: InternalError ie);
+
+    # @todo: Get notifications (for display in web interface)
 }
 
 service ChronosMaster

@@ -77,9 +77,9 @@ CREATE TABLE `notification` (
   `date_started` int(14) NOT NULL DEFAULT '0',
   `date_planned` int(14) NOT NULL DEFAULT '0',
   `url` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `excution_status` tinyint(4) NOT NULL DEFAULT '0',
-  `excution_status_text` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `excution_http_status` int(11) NOT NULL DEFAULT '0',
+  `execution_status` tinyint(4) NOT NULL DEFAULT '0',
+  `execution_status_text` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `execution_http_status` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`notificationid`),
   KEY `jobid` (`jobid`),
   KEY `joblogid` (`joblogid`)
