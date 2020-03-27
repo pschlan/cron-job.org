@@ -1,22 +1,3 @@
-CREATE TABLE `notification` (
-  `notificationid` int(11) NOT NULL AUTO_INCREMENT,
-  `jobid` int(11) NOT NULL DEFAULT '0',
-  `joblogid` int(11) unsigned NOT NULL DEFAULT '0',
-  `date` int(14) NOT NULL DEFAULT '0',
-  `date_processed` int(14) NOT NULL DEFAULT '0',
-  `type` tinyint(4) NOT NULL DEFAULT '0',
-  `status` tinyint(4) NOT NULL DEFAULT '0',
-  `date_started` int(14) NOT NULL DEFAULT '0',
-  `date_planned` int(14) NOT NULL DEFAULT '0',
-  `url` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `excution_status` tinyint(4) NOT NULL DEFAULT '0',
-  `excution_status_text` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `excution_http_status` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`notificationid`),
-  KEY `jobid` (`jobid`),
-  KEY `joblogid` (`joblogid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
 CREATE TABLE `nodestats`(
   `nodeid` int(11) NOT NULL,
   `d` tinyint(4) NOT NULL DEFAULT '0',

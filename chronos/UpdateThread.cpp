@@ -212,6 +212,20 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 		n.statusText = result->statusText;
 		n.httpStatus = result->httpStatus;
 		n.failCounter = failCounter;
+
+		db->query("INSERT INTO `notification`(`jobid`,`joblogid`,`date`,`type`,`date_started`,`date_planned`,`url`,`execution_status`,`execution_status_text`,`execution_http_status`) "
+			"VALUES(%d,%d,%u,%u,%u,%u,'%q',%u,'%q',%u)",
+			result->jobID,
+			jobLogID,
+			static_cast<unsigned long>(time(NULL)),
+			static_cast<unsigned long>(n.type),
+			static_cast<unsigned long>(n.dateStarted),
+			static_cast<unsigned long>(n.datePlanned),
+			n.url.c_str(),
+			static_cast<unsigned long>(n.status),
+			n.statusText.c_str(),
+			static_cast<unsigned long>(n.httpStatus));
+
 		NotificationThread::getInstance()->addNotification(std::move(n));
 	}
 }

@@ -64,6 +64,7 @@ namespace Chronos
 		void processJobs(time_t forTime, time_t plannedTime);
 		void processJobsForTimeZone(int hour, int minute, int month, int mday, int wday, int year, time_t timestamp, const std::string &timeZone,
 						const std::shared_ptr<WorkerThread> &wt);
+		void cleanUpNotifications();
 		int calcJitterCorrectionOffset();
 
 	public:

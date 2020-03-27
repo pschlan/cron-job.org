@@ -136,6 +136,28 @@ struct Phrases
     1: map<string, map<string, string>> phrases;
 }
 
+enum NotificationType
+{
+    FAILURE             = 0,
+    SUCCESS             = 1,
+    DISABLE             = 2
+}
+
+struct NotificationEntry
+{
+    1: i64 notificationId;
+    2: i64 jobLogId;
+    3: JobIdentifier jobIdentifier;
+    4: i64 date;
+    5: NotificationType type;
+    6: i64 dateStarted;
+    7: i64 datePlanned;
+    8: string url;
+    9: JobStatus executionStatus;
+    10: string executionStatusText;
+    11: i16 httpStatus;
+}
+
 exception ResourceNotFound  {}
 exception Forbidden         {}
 exception InvalidArguments  {}
@@ -153,9 +175,9 @@ service ChronosNode
 
     void createOrUpdateJob(1: Job job) throws(1: ResourceNotFound rnf, 2: Forbidden ad, 3: InternalError ie, 4: InvalidArguments ia);
 
-    void deleteJob(1: JobIdentifier identifier) throws(1: ResourceNotFound rnf, 2: InternalError ie);
+    list<NotificationEntry> getNotifications(1: i64 userId, 2: i16 maxEntries) throws(1: InternalError ie, 2: InvalidArguments ia);
 
-    # @todo: Get notifications (for display in web interface)
+    void deleteJob(1: JobIdentifier identifier) throws(1: ResourceNotFound rnf, 2: InternalError ie);
 }
 
 service ChronosMaster

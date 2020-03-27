@@ -305,14 +305,15 @@ public:
                 throw ResourceNotFound();
 
             db->query("BEGIN");
-            db->query("DELETE FROM `job_hours` WHERE `jobid`=%v",   identifier.jobId);
-            db->query("DELETE FROM `job_mdays` WHERE `jobid`=%v",   identifier.jobId);
-            db->query("DELETE FROM `job_minutes` WHERE `jobid`=%v", identifier.jobId);
-            db->query("DELETE FROM `job_months` WHERE `jobid`=%v",  identifier.jobId);
-            db->query("DELETE FROM `job_wdays` WHERE `jobid`=%v",   identifier.jobId);
-            db->query("DELETE FROM `job_body` WHERE `jobid`=%v",    identifier.jobId);
-            db->query("DELETE FROM `job_header` WHERE `jobid`=%v",  identifier.jobId);
-            db->query("DELETE FROM `job` WHERE `jobid`=%v",         identifier.jobId);
+            db->query("DELETE FROM `notification` WHERE `jobid`=%v",    identifier.jobId);
+            db->query("DELETE FROM `job_hours` WHERE `jobid`=%v",       identifier.jobId);
+            db->query("DELETE FROM `job_mdays` WHERE `jobid`=%v",       identifier.jobId);
+            db->query("DELETE FROM `job_minutes` WHERE `jobid`=%v",     identifier.jobId);
+            db->query("DELETE FROM `job_months` WHERE `jobid`=%v",      identifier.jobId);
+            db->query("DELETE FROM `job_wdays` WHERE `jobid`=%v",       identifier.jobId);
+            db->query("DELETE FROM `job_body` WHERE `jobid`=%v",        identifier.jobId);
+            db->query("DELETE FROM `job_header` WHERE `jobid`=%v",      identifier.jobId);
+            db->query("DELETE FROM `job` WHERE `jobid`=%v",             identifier.jobId);
             db->query("COMMIT");
         }
         catch(const std::exception &ex)
@@ -388,6 +389,60 @@ public:
         catch(const std::exception &ex)
         {
             throw ResourceNotFound();
+        }
+    }
+
+    void getNotifications(std::vector<NotificationEntry> &_return, const int64_t userId, const int16_t maxEntries) override
+    {
+        using namespace Chronos;
+
+        std::cout << "ChronosNodeHandler::getNotifications(" << userId << ")" << std::endl;
+
+        if(userId <= 0)
+            throw InvalidArguments();
+
+        try
+        {
+            std::unique_ptr<MySQL_DB> db(App::getInstance()->createMySQLConnection());
+
+	        MYSQL_ROW row;
+            auto res = db->query("SELECT `notification`.`joblogid`,`notification`.`jobid`,`job`.`userid`,`notification`.`date`,`notification`.`type`,`notification`.`date_started`,`notification`.`date_planned`,`notification`.`url`,`notification`.`execution_status`,`notification`.`execution_status_text`,`notification`.`execution_http_status` "
+                "FROM `notification` "
+                "INNER JOIN `job` ON `job`.`jobid`=`notification`.`jobid` "
+                "WHERE `job`.`userid`=%v "
+                "ORDER BY `notification`.`notificationid` DESC LIMIT %u",
+                userId,
+                static_cast<unsigned long>(maxEntries));
+            _return.reserve(res->numRows());
+            while((row = res->fetchRow()))
+            {
+                NotificationEntry n;
+
+                n.notificationId = std::stoll(row[0]);
+
+                n.jobIdentifier.jobId = std::stoll(row[1]);
+                n.jobIdentifier.userId = std::stoll(row[2]);
+
+                n.date = std::stoll(row[3]);
+
+                n.type = static_cast<NotificationType::type>(std::stoi(row[4])); //!< @todo Nicer conversion
+
+                n.dateStarted = std::stoll(row[5]);
+                n.datePlanned = std::stoll(row[6]);
+
+                n.url = row[7];
+
+                n.executionStatus = static_cast<JobStatus::type>(std::stoi(row[8])); //!< @todo Nicer conversion
+                n.executionStatusText = row[9];
+                n.httpStatus = std::stoi(row[10]);
+
+                _return.push_back(n);
+            }
+        }
+        catch(const std::exception &ex)
+        {
+            std::cout << "ChronosNodeHandler::getNotifications(): Exception: "  << ex.what() << std::endl;
+            throw InternalError();
         }
     }
 

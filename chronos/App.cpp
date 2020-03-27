@@ -260,6 +260,16 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 	std::cout << "App::processJobsForTimeZone(): Finished" << std::endl;
 }
 
+void App::cleanUpNotifications()
+{
+	std::cout << "App::cleanUpNotifications()" << std::endl;
+
+    static constexpr const int TIME_ONE_DAY = 86400;
+
+	db->query("DELETE FROM `notification` WHERE `date` < UNIX_TIMESTAMP()-%d",
+		TIME_ONE_DAY);
+}
+
 void App::signalHandler(int sig)
 {
 	if(sig == SIGINT)
@@ -313,6 +323,8 @@ int App::run()
 				{
 					processJobs(currentTime, currentTime - t->tm_sec);
 					jitterCorrectionOffset = calcJitterCorrectionOffset();
+
+					cleanUpNotifications();
 				}
 
 				firstLoop = false;
