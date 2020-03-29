@@ -16,8 +16,15 @@ matrix:
           - libev-dev
           - libsqlite-dev
           - libmysqlclient-dev
+          - libboost-all-dev
+          - flex
+          - bison
+          - pkg-config
+before_script:
+- wget https://ftp.fau.de/apache/thrift/0.13.0/thrift-0.13.0.tar.gz
+- tar -xzf thrift-0.13.0.tar.gz
+- pushd thrift-0.13.0 && ./configure --prefix=/usr && make && msudo make install && popd
 script:
-- cd chronos
 - mkdir build
 - cd build
 - cmake .. && make
