@@ -18,7 +18,8 @@ CREATE TABLE `job` (
   `request_method` tinyint(4) NOT NULL DEFAULT '0',
   `timezone` varchar(32) NOT NULL DEFAULT 'Europe/Berlin',
   PRIMARY KEY (`jobid`),
-  KEY `userid` (`userid`)
+  KEY `userid` (`userid`),
+  KEY `timezone` (`timezone`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `job_body` (
