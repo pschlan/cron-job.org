@@ -136,7 +136,7 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 	std::shared_ptr<WorkerThread> wt = std::make_shared<WorkerThread>(t->tm_mday, t->tm_mon+1, t->tm_year+1900, t->tm_hour, t->tm_min);
 
 	MYSQL_ROW row;
-	auto res = db->query("SELECT DISTINCT(`timezone`) FROM `job`");
+	auto res = db->query("SELECT DISTINCT(`timezone`) FROM `job` WHERE `enabled`=1");
 	while((row = res->fetchRow()) != nullptr)
 	{
 		std::string timeZone(row[0]);
