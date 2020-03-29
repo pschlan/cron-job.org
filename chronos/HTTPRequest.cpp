@@ -226,7 +226,7 @@ void HTTPRequest::submit(CURLM *curlMultiHandle)
 	curl_easy_setopt(easy, CURLOPT_CAINFO,			NULL);
 	curl_easy_setopt(easy, CURLOPT_IPRESOLVE,			CURL_IPRESOLVE_V4);
 
-	if(requestMethod == RequestMethod::POST || requestMethod == RequestMethod::PUT || requestMethod == RequestMethod::PATCH)
+	if(requestMethod == RequestMethod::POST || requestMethod == RequestMethod::PUT || requestMethod == RequestMethod::PATCH || requestMethod == RequestMethod::DELETE)
 	{
 		curl_easy_setopt(easy, CURLOPT_POSTFIELDSIZE,	requestBody.size());
 		curl_easy_setopt(easy, CURLOPT_POSTFIELDS,	requestBody.c_str());
@@ -256,6 +256,7 @@ void HTTPRequest::submit(CURLM *curlMultiHandle)
 		break;
 
 	case RequestMethod::DELETE:
+		curl_easy_setopt(easy, CURLOPT_POST,		1);
 		curl_easy_setopt(easy, CURLOPT_CUSTOMREQUEST,	"DELETE");
 		break;
 
