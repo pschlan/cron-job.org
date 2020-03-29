@@ -178,6 +178,8 @@ service ChronosNode
     list<NotificationEntry> getNotifications(1: i64 userId, 2: i16 maxEntries) throws(1: InternalError ie, 2: InvalidArguments ia);
 
     void deleteJob(1: JobIdentifier identifier) throws(1: ResourceNotFound rnf, 2: InternalError ie);
+
+    void disableJobsForUser(1: i64 userId) throws(1: InternalError ie);
 }
 
 service ChronosMaster

@@ -446,6 +446,26 @@ public:
         }
     }
 
+    void disableJobsForUser(const int64_t userId) override
+    {
+        using namespace Chronos;
+
+        std::cout << "ChronosNodeHandler::disableJobsForUser(" << userId << ")" << std::endl;
+
+        try
+        {
+            std::unique_ptr<MySQL_DB> db(App::getInstance()->createMySQLConnection());
+
+            db->query("UPDATE `job` SET `enabled`=0 WHERE `userid`=%v",
+                userId);
+        }
+        catch(const std::exception &ex)
+        {
+            std::cout << "ChronosNodeHandler::disableJobsForUser(): Exception: "  << ex.what() << std::endl;
+            throw InternalError();
+        }
+    }
+
 private:
     template<typename T>
     void getJobSchedule(std::unique_ptr<Chronos::MySQL_DB> &db, const JobIdentifier &identifier, const char *name, std::set<T> &target) const
