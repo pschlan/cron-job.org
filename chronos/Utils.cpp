@@ -84,6 +84,24 @@ std::string Utils::userPathPart(const int userID)
 	return result;
 }
 
+std::string Utils::userDbFilePath(const std::string &userDbFilePathScheme, const std::string &userDbFileNameScheme, const int userID, const int mday, const int month)
+{
+	const std::string userPart = userPathPart(userID);
+
+	// e.g. /var/lib/cron-job.org/%u
+	std::string dbDirPath = userDbFilePathScheme;
+	Utils::replace(dbDirPath, "%u", userPart);
+	if(!Utils::directoryExists(dbDirPath))
+		Utils::mkPath(dbDirPath);
+
+	// e.g. joblog-%m-%d.db
+	std::string dbFileName = userDbFileNameScheme;
+	Utils::replace(dbFileName, "%d", Utils::toString(mday, 2));
+	Utils::replace(dbFileName, "%m", Utils::toString(month, 2));
+
+	return dbDirPath + "/" + dbFileName;
+}
+
 std::string Utils::toString(int num, int places)
 {
 	std::string result = std::to_string(num);

@@ -18,6 +18,7 @@
 
 #include "App.h"
 #include "Notification.h"
+#include "NotificationThread.h"
 #include "SQLite.h"
 #include "Utils.h"
 
@@ -58,25 +59,12 @@ void UpdateThread::addResult(std::unique_ptr<JobResult> result)
 
 void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 {
-	std::string userPathPart = Utils::userPathPart(result->userID);
-
 	struct tm tmStruct = { 0 };
 	time_t tmTime = result->datePlanned / 1000;
 	if(gmtime_r(&tmTime, &tmStruct) == nullptr)
 		throw std::runtime_error("gmtime_r returned nullptr");
 
-	// e.g. /var/lib/cron-job.org/%u
-	std::string dbDirPath = userDbFilePathScheme;
-	Utils::replace(dbDirPath, "%u", userPathPart);
-	if(!Utils::directoryExists(dbDirPath))
-		Utils::mkPath(dbDirPath);
-
-	// e.g. joblog-%m-%d.db
-	std::string dbFileName = userDbFileNameScheme;
-	Utils::replace(dbFileName, "%d", Utils::toString(tmStruct.tm_mday, 2));
-	Utils::replace(dbFileName, "%m", Utils::toString(tmStruct.tm_mon, 2));
-
-	std::string dbFilePath = dbDirPath + "/" + dbFileName;
+	std::string dbFilePath = Utils::userDbFilePath(userDbFilePathScheme, userDbFileNameScheme, result->userID, tmStruct.tm_mday, tmStruct.tm_mon);
 	int jobLogID = 0;
 	int jobLogIDDay = tmStruct.tm_mday;
 	int jobLodIDMonth = tmStruct.tm_mon;
@@ -172,7 +160,7 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 	}
 	res.reset();
 
-	bool createNotificationRow = false;
+	bool createNotification = false;
 	NotificationType_t notificationType;
 
 	// disable job?
@@ -185,7 +173,7 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 		// notify?
 		if(result->notifyDisable)
 		{
-			createNotificationRow 		= true;
+			createNotification 			= true;
 			notificationType 			= NOTIFICATION_TYPE_DISABLE;
 		}
 	}
@@ -195,7 +183,7 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 		&& result->status != JOBSTATUS_OK
 		&& failCounter == 1)
 	{
-		createNotificationRow 		= true;
+		createNotification 			= true;
 		notificationType 			= NOTIFICATION_TYPE_FAILURE;
 	}
 
@@ -205,18 +193,40 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 		&& result->oldFailCounter > 0
 		&& failCounter == 0)
 	{
-		createNotificationRow 		= true;
+		createNotification 			= true;
 		notificationType 			= NOTIFICATION_TYPE_SUCCESS;
 	}
 
-	if(createNotificationRow)
+	if(createNotification)
 	{
-		db->query("INSERT INTO `notification`(`jobid`,`joblogid`,`date`,`type`) "
-			"VALUES(%d,%d,%d,%d)",
+		Notification n;
+		n.userID = result->userID;
+		n.jobID = result->jobID;
+		n.date = time(NULL);
+		n.dateStarted = result->dateStarted / 1000;
+		n.datePlanned = result->datePlanned / 1000;
+		n.type = notificationType;
+		n.url = result->url;
+		n.title = result->title;
+		n.status = result->status;
+		n.statusText = result->statusText;
+		n.httpStatus = result->httpStatus;
+		n.failCounter = failCounter;
+
+		db->query("INSERT INTO `notification`(`jobid`,`joblogid`,`date`,`type`,`date_started`,`date_planned`,`url`,`execution_status`,`execution_status_text`,`execution_http_status`) "
+			"VALUES(%d,%d,%u,%u,%u,%u,'%q',%u,'%q',%u)",
 			result->jobID,
 			jobLogID,
-			static_cast<int>(time(NULL)),
-			static_cast<int>(notificationType));
+			static_cast<unsigned long>(time(NULL)),
+			static_cast<unsigned long>(n.type),
+			static_cast<unsigned long>(n.dateStarted),
+			static_cast<unsigned long>(n.datePlanned),
+			n.url.c_str(),
+			static_cast<unsigned long>(n.status),
+			n.statusText.c_str(),
+			static_cast<unsigned long>(n.httpStatus));
+
+		NotificationThread::getInstance()->addNotification(std::move(n));
 	}
 }
 

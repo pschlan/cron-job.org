@@ -18,9 +18,10 @@
 
 using namespace Chronos;
 
-SQLite_DB::SQLite_DB(const std::string &fileName, const int BusyTimeoutMs) : strFileName(fileName)
+SQLite_DB::SQLite_DB(const std::string &fileName, const bool readOnly, const int BusyTimeoutMs) : strFileName(fileName)
 {
-	int res = sqlite3_open(strFileName.c_str(), &handle);
+	int res = sqlite3_open_v2(strFileName.c_str(), &handle,
+		readOnly ? SQLITE_OPEN_READONLY : SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nullptr);
 	if(res != SQLITE_OK)
 	{
 		std::stringstream err;
@@ -125,14 +126,14 @@ int SQLite_Statement::fieldIndex(const std::string &field)
 bool SQLite_Statement::execute()
 {
 	int res = sqlite3_step(stmt);
-	if(res != SQLITE_OK && res != SQLITE_DONE)
+	if(res != SQLITE_OK && res != SQLITE_DONE && res != SQLITE_ROW)
 	{
 		std::stringstream err;
 		err << "Failed to execute query: "
 			<< sqlite3_errstr(res);
 		throw std::runtime_error(err.str());
 	}
-	if(res == SQLITE_OK && !columnsFetched)
+	if((res == SQLITE_OK || res == SQLITE_ROW) && !columnsFetched)
 	{
 		columns.clear();
 		for(int i = 0; i < sqlite3_column_count(stmt); ++i)
@@ -141,7 +142,7 @@ bool SQLite_Statement::execute()
 		}
 		columnsFetched = true;
 	}
-	return(res == SQLITE_OK);
+	return(res == SQLITE_OK || res == SQLITE_ROW);
 }
 
 void SQLite_Statement::reset()
@@ -164,5 +165,13 @@ std::string SQLite_Statement::stringValue(const std::string &field)
 	auto it = columns.find(field);
 	if(it == columns.end())
 		throw std::runtime_error("Field not found: " + field);
-	return std::string(reinterpret_cast<const char *>(sqlite3_column_text(stmt, it->second)));
+	const unsigned char *columnText = sqlite3_column_text(stmt, it->second);
+	if(columnText == nullptr)
+		return {};
+	return std::string(reinterpret_cast<const char *>(columnText));
+}
+
+bool SQLite_Statement::hasField(const std::string &field) const
+{
+	return(columns.find(field) != columns.end());
 }

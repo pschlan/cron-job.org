@@ -45,6 +45,7 @@ namespace Chronos
 		void reset();
 		int intValue(const std::string &field);
 		std::string stringValue(const std::string &field);
+		bool hasField(const std::string &field) const;
 
 	private:
 		int fieldIndex(const std::string &field);
@@ -60,7 +61,7 @@ namespace Chronos
 	class SQLite_DB
 	{
 	public:
-		SQLite_DB(const std::string &fileName, const int BusyTimeoutMs = 2500);
+		SQLite_DB(const std::string &fileName, const bool readOnly = false, const int BusyTimeoutMs = 2500);
 		~SQLite_DB();
 
 		SQLite_DB(const SQLite_DB &other) = delete;

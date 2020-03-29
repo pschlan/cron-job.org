@@ -1,6 +1,6 @@
 language: generic 
 sudo: required
-dist: trusty
+dist: xenial
 matrix:
   include:
     - os: linux
@@ -16,8 +16,15 @@ matrix:
           - libev-dev
           - libsqlite-dev
           - libmysqlclient-dev
+          - libboost-all-dev
+          - flex
+          - bison
+          - pkg-config
+before_script:
+- wget https://ftp.fau.de/apache/thrift/0.13.0/thrift-0.13.0.tar.gz
+- tar -xzf thrift-0.13.0.tar.gz
+- pushd thrift-0.13.0 && ./configure --prefix=/usr --with-php=no --with-erlang=no --with-go=no --with-java=no --with-python=no --with-py3=no --with-ruby=no --with-nodejs=no --with-c_glib=no --with-cpp=yes && make && sudo make install && popd
 script:
-- cd chronos
 - mkdir build
 - cd build
 - cmake .. && make

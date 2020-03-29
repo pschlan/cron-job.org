@@ -24,7 +24,10 @@ namespace Chronos
 {
 	class MySQL_DB;
 	class UpdateThread;
+	class NotificationThread;
 	class WorkerThread;
+	class NodeService;
+	class MasterService;
 
 	class App
 	{
@@ -42,15 +45,26 @@ namespace Chronos
 		static App *getInstance();
 		static void signalHandler(int sig);
 		void updateThreadMain();
+		void notificationThreadMain();
+		void nodeServiceThreadMain();
+		void masterServiceThreadMain();
 		int run();
 		std::unique_ptr<MySQL_DB> createMySQLConnection();
+		std::unique_ptr<MySQL_DB> createMasterMySQLConnection();
 
 	private:
 		void startUpdateThread();
 		void stopUpdateThread();
+		void startNotificationThread();
+		void stopNotificationThread();
+		void startNodeServiceThread();
+		void stopNodeServiceThread();
+		void startMasterServiceThread();
+		void stopMasterServiceThread();
 		void processJobs(time_t forTime, time_t plannedTime);
 		void processJobsForTimeZone(int hour, int minute, int month, int mday, int wday, int year, time_t timestamp, const std::string &timeZone,
 						const std::shared_ptr<WorkerThread> &wt);
+		void cleanUpNotifications();
 		int calcJitterCorrectionOffset();
 
 	public:
@@ -60,8 +74,14 @@ namespace Chronos
 		bool stop = false;
 		static App *instance;
 		std::thread updateThread;
+		std::thread notificationThread;
+		std::thread nodeServiceThread;
+		std::thread masterServiceThread;
 		std::unique_ptr<MySQL_DB> db;
 		std::unique_ptr<UpdateThread> updateThreadObj;
+		std::unique_ptr<NotificationThread> notificationThreadObj;
+		std::unique_ptr<NodeService> nodeServiceObj;
+		std::unique_ptr<MasterService> masterServiceObj;
 	};
 };
 

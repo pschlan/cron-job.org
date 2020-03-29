@@ -1,9 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
-project(chronos)
-
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMake/Modules")
-
-set(CMAKE_CXX_STANDARD 14)
+set(NAME chronos)
 
 set(SOURCES
 	main.cpp
@@ -16,6 +11,9 @@ set(SOURCES
 	UpdateThread.cpp
 	Utils.cpp
 	WorkerThread.cpp
+	NodeService.cpp
+	MasterService.cpp
+	NotificationThread.cpp
 )
 
 set(CCTZ_SOURCES
@@ -30,7 +28,7 @@ set(CCTZ_SOURCES
 	cctz/src/time_zone_posix.cc
 )
 
-add_executable(${PROJECT_NAME} ${SOURCES} ${CCTZ_SOURCES})
+add_executable(${NAME} ${SOURCES} ${CCTZ_SOURCES})
 
 find_package(MySQLClient REQUIRED)
 find_package(CURL REQUIRED)
@@ -47,16 +45,17 @@ include_directories(
 	${SQLITE_INCLUDE_DIRS}
 	${OPENSSL_INCLUDE_DIR}
 )
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(${NAME}
 	${MySQLClient_LIBRARIES}
 	${CURL_LIBRARIES}
 	${LIBEV_LIBRARIES}
 	${SQLITE_LIBRARIES}
 	${CMAKE_THREAD_LIBS_INIT}
 	${OPENSSL_CRYPTO_LIBRARY}
+	protocol
 )
 
-include_directories(${PROJECT_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+install(TARGETS ${NAME} DESTINATION bin)
 

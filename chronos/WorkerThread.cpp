@@ -18,6 +18,13 @@
 #include "UpdateThread.h"
 #include "App.h"
 
+#include <thrift/protocol/TBinaryProtocol.h>
+#include <thrift/transport/TSocket.h>
+#include <thrift/transport/TBufferTransports.h>
+#include <thrift/transport/TTransportUtils.h>
+
+#include "ChronosMaster.h"
+
 using namespace Chronos;
 
 namespace {
@@ -214,17 +221,38 @@ void WorkerThread::jobDone(HTTPRequest *req)
 
 void WorkerThread::addStat()
 {
+	std::shared_ptr<apache::thrift::transport::TTransport> masterSocket
+		= std::make_shared<apache::thrift::transport::TSocket>(
+			App::getInstance()->config->get("master_service_address"),
+			App::getInstance()->config->getInt("master_service_port"));
+	std::shared_ptr<apache::thrift::transport::TTransport> masterTransport
+		= std::make_shared<apache::thrift::transport::TBufferedTransport>(masterSocket);
+	std::shared_ptr<apache::thrift::protocol::TProtocol> masterProtocol
+		= std::make_shared<apache::thrift::protocol::TBinaryProtocol>(masterTransport);
+	std::shared_ptr<ChronosMasterClient> masterClient
+		= std::make_shared<ChronosMasterClient>(masterProtocol);
+
 	try
 	{
-		std::unique_ptr<MySQL_DB> db(App::getInstance()->createMySQLConnection());
+		masterTransport->open();
 
-		db->query("REPLACE INTO `stats`(`d`,`m`,`y`,`h`,`i`,`jobs`,`jitter`) VALUES(%d,%d,%d,%d,%d,%d,%f)",
-			mday, month, year, hour, minute,
-			jobCount, jitterSum / static_cast<double>(jobCount));
+		NodeStatsEntry stats;
+		stats.d = mday;
+		stats.m = month;
+		stats.y = year;
+		stats.h = hour;
+		stats.i = minute;
+		stats.jobs = jobCount;
+		stats.jitter = jitterSum / static_cast<double>(jobCount);
+
+		masterClient->reportNodeStats(App::getInstance()->config->getInt("node_id"),
+			stats);
+
+		masterTransport->close();
 	}
-	catch(const std::exception &ex)
+	catch(const apache::thrift::TException &ex)
 	{
-		std::cout << "WorkerThread::addStat(): Exception: "  << ex.what() << std::endl;
+		std::cerr << "WorkerThread::addStat(): Failed to report node stats: " << ex.what() << std::endl;
 	}
 }
 

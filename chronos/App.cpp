@@ -28,7 +28,10 @@
 #include <openssl/crypto.h>
 
 #include "UpdateThread.h"
+#include "NotificationThread.h"
 #include "WorkerThread.h"
+#include "NodeService.h"
+#include "MasterService.h"
 #include "Config.h"
 
 namespace
@@ -133,7 +136,7 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 	std::shared_ptr<WorkerThread> wt = std::make_shared<WorkerThread>(t->tm_mday, t->tm_mon+1, t->tm_year+1900, t->tm_hour, t->tm_min);
 
 	MYSQL_ROW row;
-	auto res = db->query("SELECT DISTINCT(`timezone`) FROM `user`");
+	auto res = db->query("SELECT DISTINCT(`timezone`) FROM `job` WHERE `enabled`=1");
 	while((row = res->fetchRow()) != nullptr)
 	{
 		std::string timeZone(row[0]);
@@ -150,14 +153,14 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 		int wday = -1;
 		switch(cWDay)
 		{
-		case cctz::weekday::monday:	wday = 1;	break;
+		case cctz::weekday::monday:		wday = 1;	break;
 		case cctz::weekday::tuesday:	wday = 2;	break;
 		case cctz::weekday::wednesday:	wday = 3;	break;
 		case cctz::weekday::thursday:	wday = 4;	break;
-		case cctz::weekday::friday:	wday = 5;	break;
+		case cctz::weekday::friday:		wday = 5;	break;
 		case cctz::weekday::saturday:	wday = 6;	break;
-		case cctz::weekday::sunday:	wday = 0;	break;
-		default:			wday = -1;	break;
+		case cctz::weekday::sunday:		wday = 0;	break;
+		default:						wday = -1;	break;
 		}
 
 		processJobsForTimeZone(civilTime.hour(), civilTime.minute(), civilTime.month(), civilTime.day(), wday, civilTime.year(),
@@ -188,13 +191,12 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 				<< "timeZone = " << timeZone
 				<< std::endl;
 
-	auto res = db->query("SELECT TRIM(`url`),`job`.`jobid`,`auth_enable`,`auth_user`,`auth_pass`,`notify_failure`,`notify_success`,`notify_disable`,`fail_counter`,`save_responses`,`job`.`userid`,`request_method`,COUNT(`job_header`.`jobheaderid`),`job_body`.`body` FROM `job` "
+	auto res = db->query("SELECT TRIM(`url`),`job`.`jobid`,`auth_enable`,`auth_user`,`auth_pass`,`notify_failure`,`notify_success`,`notify_disable`,`fail_counter`,`save_responses`,`job`.`userid`,`request_method`,COUNT(`job_header`.`jobheaderid`),`job_body`.`body`,`title` FROM `job` "
 									"INNER JOIN `job_hours` ON `job_hours`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_mdays` ON `job_mdays`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_wdays` ON `job_wdays`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_minutes` ON `job_minutes`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_months` ON `job_months`.`jobid`=`job`.`jobid` "
-									"INNER JOIN `user` ON `job`.`userid`=`user`.`userid` "
 									"LEFT JOIN `job_header` ON `job_header`.`jobid`=`job`.`jobid` "
 									"LEFT JOIN `job_body` ON `job_body`.`jobid`=`job`.`jobid` "
 									"WHERE (`hour`=-1 OR `hour`=%d) "
@@ -202,7 +204,7 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 									"AND (`mday`=-1 OR `mday`=%d) "
 									"AND (`wday`=-1 OR `wday`=%d) "
 									"AND (`month`=-1 OR `month`=%d) "
-									"AND `user`.`timezone`='%q' "
+									"AND `job`.`timezone`='%q' "
 									"AND `enabled`=1 "
 									"GROUP BY `job`.`jobid` "
 									"ORDER BY `fail_counter` ASC, `last_duration` ASC",
@@ -247,6 +249,8 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 				req->requestBody	= row[13];
 			}
 
+			req->result->title = row[14];
+
 			wt->addJob(req);
 		}
 	}
@@ -254,6 +258,16 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 	res.reset();
 
 	std::cout << "App::processJobsForTimeZone(): Finished" << std::endl;
+}
+
+void App::cleanUpNotifications()
+{
+	std::cout << "App::cleanUpNotifications()" << std::endl;
+
+    static constexpr const int TIME_ONE_DAY = 86400;
+
+	db->query("DELETE FROM `notification` WHERE `date` < UNIX_TIMESTAMP()-%d",
+		TIME_ONE_DAY);
 }
 
 void App::signalHandler(int sig)
@@ -270,43 +284,77 @@ int App::run()
 	MySQL_DB::libInit();
 	initSSLLocks();
 
-	db = createMySQLConnection();
-	startUpdateThread();
-
 	signal(SIGINT, App::signalHandler);
 
-	bool firstLoop = true;
-	struct tm lastTime = { 0 };
-	int jitterCorrectionOffset = calcJitterCorrectionOffset();
-	while(!stop)
+	if(config->getInt("master_service_enable"))
 	{
-		time_t currentTime = time(nullptr) + jitterCorrectionOffset;
-		struct tm *t = localtime(&currentTime);
+		startMasterServiceThread();
+	}
 
-		if(t->tm_min > lastTime.tm_min
-			|| t->tm_hour > lastTime.tm_hour
-			|| t->tm_mday > lastTime.tm_mday
-			|| t->tm_mon > lastTime.tm_mon
-			|| t->tm_year > lastTime.tm_year)
+	if(config->getInt("node_service_enable"))
+	{
+		startNodeServiceThread();
+	}
+
+	if(config->getInt("job_executor_enable"))
+	{
+		db = createMySQLConnection();
+		startNotificationThread();
+		startUpdateThread();
+
+		bool firstLoop = true;
+		struct tm lastTime = { 0 };
+		int jitterCorrectionOffset = calcJitterCorrectionOffset();
+		while(!stop)
 		{
-			// update last time
-			memcpy(&lastTime, t, sizeof(struct tm));
+			time_t currentTime = time(nullptr) + jitterCorrectionOffset;
+			struct tm *t = localtime(&currentTime);
 
-			if(!firstLoop || t->tm_sec == 59 - jitterCorrectionOffset)
+			if(t->tm_min > lastTime.tm_min
+				|| t->tm_hour > lastTime.tm_hour
+				|| t->tm_mday > lastTime.tm_mday
+				|| t->tm_mon > lastTime.tm_mon
+				|| t->tm_year > lastTime.tm_year)
 			{
-				processJobs(currentTime, currentTime - t->tm_sec);
-				jitterCorrectionOffset = calcJitterCorrectionOffset();
-			}
+				// update last time
+				memcpy(&lastTime, t, sizeof(struct tm));
 
-			firstLoop = false;
+				if(!firstLoop || t->tm_sec == 59 - jitterCorrectionOffset)
+				{
+					processJobs(currentTime, currentTime - t->tm_sec);
+					jitterCorrectionOffset = calcJitterCorrectionOffset();
+
+					cleanUpNotifications();
+				}
+
+				firstLoop = false;
+			}
+			else
+			{
+				usleep(100*1000);
+			}
 		}
-		else
+
+		stopUpdateThread();
+		stopNotificationThread();
+	}
+	else
+	{
+		while(!stop)
 		{
 			usleep(100*1000);
 		}
 	}
 
-	this->stopUpdateThread();
+	if(config->getInt("node_service_enable"))
+	{
+		stopNodeServiceThread();
+	}
+
+	if(config->getInt("master_service_enable"))
+	{
+		stopMasterServiceThread();
+	}
 
 	uninitSSLLocks();
 	MySQL_DB::libCleanup();
@@ -335,6 +383,59 @@ void App::updateThreadMain()
 	}
 }
 
+void App::notificationThreadMain()
+{
+	try
+	{
+		notificationThreadObj = std::make_unique<NotificationThread>();
+		notificationThreadObj->run();
+		notificationThreadObj.reset();
+	}
+	catch(const std::runtime_error &ex)
+	{
+		std::cout << "Notification thread runtime error: " << ex.what() << std::endl;
+		stop = true;
+	}
+}
+
+void App::nodeServiceThreadMain()
+{
+	std::cout << "App::nodeServiceThreadMain(): Entered" << std::endl;
+
+	try
+	{
+		nodeServiceObj = std::make_unique<NodeService>(config->get("node_service_interface"), config->getInt("node_service_port"));
+		nodeServiceObj->run();
+		nodeServiceObj.reset();
+	}
+	catch(const std::runtime_error &ex)
+	{
+		std::cout << "Node service thread runtime error: " << ex.what() << std::endl;
+		stop = true;
+	}
+
+	std::cout << "App::nodeServiceThreadMain(): Finished" << std::endl;
+}
+
+void App::masterServiceThreadMain()
+{
+	std::cout << "App::masterServiceThreadMain(): Entered" << std::endl;
+
+	try
+	{
+		masterServiceObj = std::make_unique<MasterService>(config->get("master_service_interface"), config->getInt("master_service_port"));
+		masterServiceObj->run();
+		masterServiceObj.reset();
+	}
+	catch(const std::runtime_error &ex)
+	{
+		std::cout << "Master service thread runtime error: " << ex.what() << std::endl;
+		stop = true;
+	}
+
+	std::cout << "App::masterServiceThreadMain(): Finished" << std::endl;
+}
+
 void App::startUpdateThread()
 {
 	updateThread = std::thread(std::bind(&App::updateThreadMain, this));
@@ -346,6 +447,39 @@ void App::stopUpdateThread()
 	updateThread.join();
 }
 
+void App::startNotificationThread()
+{
+	notificationThread = std::thread(std::bind(&App::notificationThreadMain, this));
+}
+
+void App::stopNotificationThread()
+{
+	notificationThreadObj->stopThread();
+	notificationThread.join();
+}
+
+void App::startNodeServiceThread()
+{
+	nodeServiceThread = std::thread(std::bind(&App::nodeServiceThreadMain, this));
+}
+
+void App::stopNodeServiceThread()
+{
+	nodeServiceObj->stop();
+	nodeServiceThread.join();
+}
+
+void App::startMasterServiceThread()
+{
+	masterServiceThread = std::thread(std::bind(&App::masterServiceThreadMain, this));
+}
+
+void App::stopMasterServiceThread()
+{
+	masterServiceObj->stop();
+	masterServiceThread.join();
+}
+
 std::unique_ptr<MySQL_DB> App::createMySQLConnection()
 {
 	return(std::make_unique<MySQL_DB>(config->get("mysql_host"),
@@ -353,4 +487,13 @@ std::unique_ptr<MySQL_DB> App::createMySQLConnection()
 						config->get("mysql_pass"),
 						config->get("mysql_db"),
 						config->get("mysql_sock")));
+}
+
+std::unique_ptr<MySQL_DB> App::createMasterMySQLConnection()
+{
+	return(std::make_unique<MySQL_DB>(config->get("master_mysql_host"),
+						config->get("master_mysql_user"),
+						config->get("master_mysql_pass"),
+						config->get("master_mysql_db"),
+						config->get("master_mysql_sock")));
 }

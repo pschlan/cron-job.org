@@ -41,6 +41,7 @@ namespace Chronos
 		uint64_t dateDone = 0 ;		// in ms
 		int jitter = 0;				// in ms
 		std::string url;
+		std::string title;
 		int duration = 0;			// in ms
 		JobStatus_t status = JOBSTATUS_UNKNOWN;
 		int httpStatus = 0;
