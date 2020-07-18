@@ -366,7 +366,10 @@ public:
         {
             userDB = std::make_unique<SQLite_DB>(dbFilePath.c_str(), true /* read only */);
 
-            auto stmt = userDB->prepare("SELECT * FROM \"joblog\" LEFT JOIN \"joblog_response\" ON \"joblog_response\".\"joblogid\"=\"joblog\".\"joblogid\" WHERE \"joblog\".\"joblogid\"=:joblogid");
+            auto stmt = userDB->prepare("SELECT * FROM \"joblog\" "
+                "LEFT JOIN \"joblog_response\" ON \"joblog_response\".\"joblogid\"=\"joblog\".\"joblogid\" "
+                "LEFT JOIN \"joblog_stats\" ON \"joblog_stats\".\"joblogid\"=\"joblog\".\"joblogid\" "
+                "WHERE \"joblog\".\"joblogid\"=:joblogid");
             stmt->bind(":joblogid", jobLogId);
 
             while(stmt->execute())
@@ -377,7 +380,6 @@ public:
                     _return.headers = stmt->stringValue("headers");
                 if(stmt->hasField("body"))
                     _return.body = stmt->stringValue("body");
-
                 _return.__isset.headers = true;
                 _return.__isset.body = true;
 
@@ -578,6 +580,18 @@ private:
         entry.httpStatus                = stmt->intValue("http_status");
         entry.mday                      = mday;
         entry.month                     = month;
+
+        if(stmt->hasField("name_lookup") && !stmt->isNull("name_lookup"))
+        {
+            entry.stats.nameLookup      = stmt->intValue("name_lookup");
+            entry.stats.connect         = stmt->intValue("connect");
+            entry.stats.appConnect      = stmt->intValue("app_connect");
+            entry.stats.preTransfer     = stmt->intValue("pre_transfer");
+            entry.stats.startTransfer   = stmt->intValue("start_transfer");
+            entry.stats.total           = stmt->intValue("total");
+            entry.__isset.stats         = true;
+        }
+
         return entry;
     }
 

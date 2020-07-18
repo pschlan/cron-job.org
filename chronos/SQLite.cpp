@@ -165,6 +165,14 @@ int SQLite_Statement::intValue(int fieldNo)
 	return sqlite3_column_int(stmt, fieldNo);
 }
 
+bool SQLite_Statement::isNull(const std::string &field)
+{
+	auto it = columns.find(field);
+	if(it == columns.end())
+		throw std::runtime_error("Field not found: " + field);
+	return sqlite3_column_type(stmt, it->second) == SQLITE_NULL;
+}
+
 std::string SQLite_Statement::stringValue(const std::string &field)
 {
 	auto it = columns.find(field);

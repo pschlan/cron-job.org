@@ -104,6 +104,16 @@ struct NodeStatsEntry
     7: double jitter;
 }
 
+struct JobLogStatsEntry
+{
+    1: i32 nameLookup;
+    2: i32 connect;
+    3: i32 appConnect;
+    4: i32 preTransfer;
+    5: i32 startTransfer;
+    6: i32 total;
+}
+
 struct JobLogEntry
 {
     1: i64 jobLogId;
@@ -120,6 +130,7 @@ struct JobLogEntry
     12: i16 month;
     13: optional string headers;
     14: optional string body;
+    15: optional JobLogStatsEntry stats;
 }
 
 struct UserDetails
