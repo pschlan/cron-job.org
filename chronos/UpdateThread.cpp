@@ -59,6 +59,8 @@ void UpdateThread::addResult(std::unique_ptr<JobResult> result)
 
 void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 {
+	const int DB_SCHEMA_VERSION = 1;
+
 	struct tm tmStruct = { 0 };
 	time_t tmTime = result->datePlanned / 1000;
 	if(gmtime_r(&tmTime, &tmStruct) == nullptr)
@@ -75,31 +77,47 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 
 		userDB->prepare("PRAGMA synchronous = OFF")->execute();
 
-		userDB->prepare("CREATE TABLE IF NOT EXISTS \"joblog\"("
-			"	\"joblogid\" INTEGER PRIMARY KEY ASC,"
-			"	\"jobid\" INTEGER NOT NULL,"
-			"	\"date\" INTEGER NOT NULL,"
-			"	\"date_planned\" INTEGER NOT NULL,"
-			"	\"jitter\" INTEGER NOT NULL,"
-			"	\"url\" TEXT NOT NULL,"
-			"	\"duration\" INTEGER NOT NULL,"
-			"	\"status\" INTEGER NOT NULL,"
-			"	\"status_text\" TEXT NOT NULL,"
-			"	\"http_status\" INTEGER NOT NULL,"
-			"	\"created\" INTEGER NOT NULL"
-			")")->execute();
-		userDB->prepare("CREATE INDEX IF NOT EXISTS \"idx_joblog_jobid\" ON \"joblog\" (\"jobid\")")->execute();
+		int currentSchemaVersion = 0;
+		auto stmt = userDB->prepare("PRAGMA user_version");
+		while(stmt->execute())
+		{
+			currentSchemaVersion = stmt->intValue(0);
+		}
 
-		userDB->prepare("CREATE TABLE IF NOT EXISTS \"joblog_response\"("
-			"	\"joblogid\" INTEGER PRIMARY KEY,"
-			"	\"jobid\" INTEGER NOT NULL,"
-			"	\"date\" INTEGER NOT NULL,"
-			"	\"headers\" TEXT NOT NULL,"
-			"	\"body\" TEXT NOT NULL,"
-			"	\"created\" INTEGER NOT NULL"
-			")")->execute();
+		if(currentSchemaVersion == 0)
+		{
+			userDB->prepare("CREATE TABLE IF NOT EXISTS \"joblog\"("
+				"	\"joblogid\" INTEGER PRIMARY KEY ASC,"
+				"	\"jobid\" INTEGER NOT NULL,"
+				"	\"date\" INTEGER NOT NULL,"
+				"	\"date_planned\" INTEGER NOT NULL,"
+				"	\"jitter\" INTEGER NOT NULL,"
+				"	\"url\" TEXT NOT NULL,"
+				"	\"duration\" INTEGER NOT NULL,"
+				"	\"status\" INTEGER NOT NULL,"
+				"	\"status_text\" TEXT NOT NULL,"
+				"	\"http_status\" INTEGER NOT NULL,"
+				"	\"created\" INTEGER NOT NULL"
+				")")->execute();
+			userDB->prepare("CREATE INDEX IF NOT EXISTS \"idx_joblog_jobid\" ON \"joblog\" (\"jobid\")")->execute();
 
-		auto stmt = userDB->prepare("INSERT INTO \"joblog\"(\"jobid\",\"date\",\"date_planned\",\"jitter\",\"url\",\"duration\",\"status\",\"status_text\",\"http_status\",\"created\") "
+			userDB->prepare("CREATE TABLE IF NOT EXISTS \"joblog_response\"("
+				"	\"joblogid\" INTEGER PRIMARY KEY,"
+				"	\"jobid\" INTEGER NOT NULL,"
+				"	\"date\" INTEGER NOT NULL,"
+				"	\"headers\" TEXT NOT NULL,"
+				"	\"body\" TEXT NOT NULL,"
+				"	\"created\" INTEGER NOT NULL"
+				")")->execute();
+		}
+
+		if(currentSchemaVersion != DB_SCHEMA_VERSION)
+		{
+			std::string pragmaQuery = "PRAGMA user_version = " + std::to_string(DB_SCHEMA_VERSION);
+			userDB->prepare(pragmaQuery)->execute();
+		}
+
+		stmt = userDB->prepare("INSERT INTO \"joblog\"(\"jobid\",\"date\",\"date_planned\",\"jitter\",\"url\",\"duration\",\"status\",\"status_text\",\"http_status\",\"created\") "
 			"VALUES(:jobid,:date,:date_planned,:jitter,:url,:duration,:status,:status_text,:http_status,strftime('%s', 'now'))");
 		stmt->bind(":jobid", 		result->jobID);
 		stmt->bind(":date", 		static_cast<int>(result->dateStarted / 1000));

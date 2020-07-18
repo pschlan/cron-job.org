@@ -160,6 +160,11 @@ int SQLite_Statement::intValue(const std::string &field)
 	return sqlite3_column_int(stmt, it->second);
 }
 
+int SQLite_Statement::intValue(int fieldNo)
+{
+	return sqlite3_column_int(stmt, fieldNo);
+}
+
 std::string SQLite_Statement::stringValue(const std::string &field)
 {
 	auto it = columns.find(field);
