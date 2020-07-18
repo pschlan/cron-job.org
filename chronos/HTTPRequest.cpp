@@ -112,11 +112,47 @@ void HTTPRequest::done(CURLcode res)
 	if(clientIP != nullptr)
 		result->peerAddress = clientIP;
 
-	getRes = curl_easy_getinfo(easy, CURLINFO_PRIMARY_PORT, 	&clientPort);
+	getRes = curl_easy_getinfo(easy, CURLINFO_PRIMARY_PORT, 		&clientPort);
 	if(getRes != CURLE_OK)
 		clientPort = 0;
 	if(clientPort > 0)
 		result->peerPort = clientPort;
+
+	curl_off_t timeNameLookup = 0;
+	getRes = curl_easy_getinfo(easy, CURLINFO_NAMELOOKUP_TIME_T, 	&timeNameLookup);
+	if (getRes != CURLE_OK)
+		timeNameLookup = 0;
+	result->timeNameLookup = timeNameLookup;
+
+	curl_off_t timeConnect = 0;
+	getRes = curl_easy_getinfo(easy, CURLINFO_CONNECT_TIME_T, 		&timeConnect);
+	if (getRes != CURLE_OK)
+		timeConnect = 0;
+	result->timeConnect = timeConnect;
+
+	curl_off_t timeAppConnect = 0;
+	getRes = curl_easy_getinfo(easy, CURLINFO_APPCONNECT_TIME_T, 	&timeAppConnect);
+	if (getRes != CURLE_OK)
+		timeAppConnect = 0;
+	result->timeAppConnect = timeAppConnect;
+
+	curl_off_t timePreTransfer = 0;
+	getRes = curl_easy_getinfo(easy, CURLINFO_PRETRANSFER_TIME_T, 	&timePreTransfer);
+	if (getRes != CURLE_OK)
+		timePreTransfer = 0;
+	result->timePreTransfer = timePreTransfer;
+
+	curl_off_t timeStartTransfer = 0;
+	getRes = curl_easy_getinfo(easy, CURLINFO_STARTTRANSFER_TIME_T,	&timeStartTransfer);
+	if (getRes != CURLE_OK)
+		timeStartTransfer = 0;
+	result->timeStartTransfer = timeStartTransfer;
+
+	curl_off_t timeTotal = 0;
+	getRes = curl_easy_getinfo(easy, CURLINFO_TOTAL_TIME_T,			&timeTotal);
+	if (getRes != CURLE_OK)
+		timeTotal = 0;
+	result->timeTotal = timeTotal;
 
 	switch(res)
 	{

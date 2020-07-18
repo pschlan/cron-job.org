@@ -55,6 +55,13 @@ namespace Chronos
 		int oldFailCounter = 0;
 		std::string peerAddress;
 		int peerPort = 0;
+
+		int timeNameLookup = 0;		// in us
+		int timeConnect = 0;		// in us
+		int timeAppConnect = 0;		// in us
+		int timePreTransfer = 0;	// in us
+		int timeStartTransfer = 0;	// in us
+		int timeTotal = 0;			// in us
 	};
 };
 

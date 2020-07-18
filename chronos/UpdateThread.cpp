@@ -59,7 +59,7 @@ void UpdateThread::addResult(std::unique_ptr<JobResult> result)
 
 void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 {
-	const int DB_SCHEMA_VERSION = 1;
+	const int DB_SCHEMA_VERSION = 2;
 
 	struct tm tmStruct = { 0 };
 	time_t tmTime = result->datePlanned / 1000;
@@ -84,7 +84,7 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 			currentSchemaVersion = stmt->intValue(0);
 		}
 
-		if(currentSchemaVersion == 0)
+		if(currentSchemaVersion < 1)
 		{
 			userDB->prepare("CREATE TABLE IF NOT EXISTS \"joblog\"("
 				"	\"joblogid\" INTEGER PRIMARY KEY ASC,"
@@ -109,6 +109,23 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 				"	\"body\" TEXT NOT NULL,"
 				"	\"created\" INTEGER NOT NULL"
 				")")->execute();
+		}
+
+		if(currentSchemaVersion < 2)
+		{
+			userDB->prepare("CREATE TABLE IF NOT EXISTS \"joblog_stats\"("
+				"	\"joblogid\" INTEGER PRIMARY KEY,"
+				"	\"jobid\" INTEGER NOT NULL,"
+				"	\"date\" INTEGER NOT NULL,"
+				"	\"status\" INTEGER NOT NULL,"
+				"	\"name_lookup\" INTEGER NOT NULL,"
+				"	\"connect\" INTEGER NOT NULL,"
+				"	\"app_connect\" INTEGER NOT NULL,"
+				"	\"pre_transfer\" INTEGER NOT NULL,"
+				"	\"start_transfer\" INTEGER NOT NULL,"
+				"	\"total\" INTEGER NOT NULL"
+				")")->execute();
+			userDB->prepare("CREATE INDEX IF NOT EXISTS \"idx_stats_jobid\" ON \"joblog_stats\" (\"jobid\")")->execute();
 		}
 
 		if(currentSchemaVersion != DB_SCHEMA_VERSION)
@@ -143,6 +160,20 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 			stmt->bind(":body", 	result->responseBody);
 			stmt->execute();
 		}
+
+		stmt = userDB->prepare("INSERT INTO \"joblog_stats\"(\"joblogid\",\"jobid\",\"date\",\"status\",\"name_lookup\",\"connect\",\"app_connect\",\"pre_transfer\",\"start_transfer\",\"total\") "
+			"VALUES(:joblogid,:jobid,:date,:status,:name_lookup,:connect,:app_connect,:pre_transfer,:start_transfer,:total)");
+		stmt->bind(":joblogid", 		jobLogID);
+		stmt->bind(":jobid", 			result->jobID);
+		stmt->bind(":date", 			static_cast<int>(result->dateStarted / 1000));
+		stmt->bind(":status",			static_cast<int>(result->status));
+		stmt->bind(":name_lookup",		result->timeNameLookup);
+		stmt->bind(":connect",			result->timeConnect);
+		stmt->bind(":app_connect",		result->timeAppConnect);
+		stmt->bind(":pre_transfer",		result->timePreTransfer);
+		stmt->bind(":start_transfer",	result->timeStartTransfer);
+		stmt->bind(":total",			result->timeTotal);
+		stmt->execute();
 	}
 	catch(const std::exception &ex)
 	{
