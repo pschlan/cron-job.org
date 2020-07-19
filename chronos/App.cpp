@@ -133,8 +133,16 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 				<< std::endl;
 
 	struct tm *t = gmtime(&plannedTime);
-	std::shared_ptr<WorkerThread> wt = std::make_shared<WorkerThread>(t->tm_mday, t->tm_mon+1, t->tm_year+1900, t->tm_hour, t->tm_min);
 
+	const std::size_t numThreads = config->getInt("num_threads");
+
+	std::vector<std::shared_ptr<WorkerThread>> workerThreads;
+	for (std::size_t i = 0; i < numThreads; ++i)
+	{
+		workerThreads.push_back(std::make_shared<WorkerThread>(t->tm_mday, t->tm_mon+1, t->tm_year+1900, t->tm_hour, t->tm_min));
+	}
+
+	std::size_t i = 0;
 	MYSQL_ROW row;
 	auto res = db->query("SELECT DISTINCT(`timezone`) FROM `job` WHERE `enabled`=1");
 	while((row = res->fetchRow()) != nullptr)
@@ -163,18 +171,27 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 		default:						wday = -1;	break;
 		}
 
+		const auto &wt = workerThreads[i % numThreads];
+
 		processJobsForTimeZone(civilTime.hour(), civilTime.minute(), civilTime.month(), civilTime.day(), wday, civilTime.year(),
 			plannedTime, timeZone, wt);
+
+		++i;
 	}
 
-	if(!wt->empty())
+	for(std::size_t i = 0; i < numThreads; ++i)
 	{
-		std::cout << "App::processJobs(): Starting worker thread" << std::endl;
-		wt->run();
-	}
-	else
-	{
-		std::cout << "App::processJobs(): No jobs" << std::endl;
+		const auto &wt = workerThreads[i];
+
+		if(!wt->empty())
+		{
+			std::cout << "App::processJobs(): Starting worker thread " << i << std::endl;
+			wt->run();
+		}
+		else
+		{
+			std::cout << "App::processJobs(): No jobs for worker thread " << i << std::endl;
+		}
 	}
 }
 
