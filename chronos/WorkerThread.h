@@ -49,6 +49,7 @@ namespace Chronos
 	public:
 		void addJob(HTTPRequest *req);
 		bool empty() const { return requestQueue.empty(); }
+		std::size_t numJobs() const { return requestQueue.size(); }
 		void run();
 		void threadMain();
 		void jobDone(HTTPRequest *req);

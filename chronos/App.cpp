@@ -171,12 +171,8 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 		default:						wday = -1;	break;
 		}
 
-		const auto &wt = workerThreads[i % numThreads];
-
 		processJobsForTimeZone(civilTime.hour(), civilTime.minute(), civilTime.month(), civilTime.day(), wday, civilTime.year(),
-			plannedTime, timeZone, wt);
-
-		++i;
+			plannedTime, timeZone, workerThreads, i, numThreads);
 	}
 
 	for(std::size_t i = 0; i < numThreads; ++i)
@@ -185,7 +181,7 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 
 		if(!wt->empty())
 		{
-			std::cout << "App::processJobs(): Starting worker thread " << i << std::endl;
+			std::cout << "App::processJobs(): Starting worker thread " << i << " with " << wt->numJobs() << " jobs" << std::endl;
 			wt->run();
 		}
 		else
@@ -196,7 +192,7 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 }
 
 void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int wday, int year, time_t timestamp, const std::string &timeZone,
-	const std::shared_ptr<WorkerThread> &wt)
+	const std::vector<std::shared_ptr<WorkerThread>> &workerThreads, std::size_t &i, std::size_t numThreads)
 {
 	std::cout 	<< "App::processJobsForTimeZone(): Called for "
 				<< "hour = " << hour << ", "
@@ -268,7 +264,10 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 
 			req->result->title = row[14];
 
+			const auto &wt = workerThreads[i % numThreads];
 			wt->addJob(req);
+
+			++i;
 		}
 	}
 

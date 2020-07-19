@@ -14,6 +14,7 @@
 
 #include <memory>
 #include <thread>
+#include <vector>
 
 #include <time.h>
 
@@ -63,7 +64,7 @@ namespace Chronos
 		void stopMasterServiceThread();
 		void processJobs(time_t forTime, time_t plannedTime);
 		void processJobsForTimeZone(int hour, int minute, int month, int mday, int wday, int year, time_t timestamp, const std::string &timeZone,
-						const std::shared_ptr<WorkerThread> &wt);
+						const std::vector<std::shared_ptr<WorkerThread>> &workerThreads, std::size_t &i, std::size_t numThreads);
 		void cleanUpNotifications();
 		int calcJitterCorrectionOffset();
 
