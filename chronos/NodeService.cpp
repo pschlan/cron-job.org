@@ -545,12 +545,15 @@ private:
             return;
         }
 
-        std::string query = "SELECT \"joblogid\",\"jobid\",\"date\",\"date_planned\",\"jitter\",\"url\",\"duration\",\"status\",\"status_text\",\"http_status\" FROM \"joblog\" ";
+
+        std::string query = "SELECT \"joblog\".\"joblogid\",\"joblog\".\"jobid\",\"joblog\".\"date\",\"date_planned\",\"jitter\",\"url\",\"duration\",\"joblog\".\"status\",\"status_text\",\"http_status\",\"name_lookup\",\"connect\",\"app_connect\",\"pre_transfer\",\"start_transfer\",\"total\" FROM \"joblog\" "
+            "LEFT JOIN \"joblog_stats\" ON \"joblog_stats\".\"joblogid\"=\"joblog\".\"joblogid\" ";
         if(identifier.jobId > 0)
         {
-            query += "WHERE \"jobid\"=:jobid ";
+            query += "WHERE \"joblog\".\"jobid\"=:jobid ";
         }
-        query += "ORDER BY \"joblogid\" DESC LIMIT " + std::to_string(maxEntries);
+        query += "ORDER BY \"joblog\".\"joblogid\" DESC LIMIT " + std::to_string(maxEntries);
+
 
         auto stmt = userDB->prepare(query);
         if(identifier.jobId > 0)
