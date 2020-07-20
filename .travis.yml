@@ -1,6 +1,6 @@
 language: generic 
 sudo: required
-dist: xenial
+dist: bionic
 matrix:
   include:
     - os: linux
