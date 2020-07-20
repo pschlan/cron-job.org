@@ -52,10 +52,14 @@ public:
         {
             std::unique_ptr<MySQL_DB> db(App::getInstance()->createMasterMySQLConnection());
 
-            db->query("REPLACE INTO `nodestats`(`nodeid`,`d`,`m`,`y`,`h`,`i`,`jobs`,`jitter`) VALUES(%v,%d,%d,%d,%d,%d,%v,%f)",
+            db->query("INSERT INTO `nodestats`(`nodeid`,`d`,`m`,`y`,`h`,`i`,`jobs`,`jitter`) VALUES(%v,%d,%d,%d,%d,%d,%v,%f) "
+                "ON DUPLICATE KEY UPDATE `jobs`=`jobs`+%v,`jitter`=(`jobs`*`jitter`+%f)/(`jobs`+%v)",
                 nodeId,
                 stats.d, stats.m, stats.y, stats.h, stats.i,
-                stats.jobs, stats.jitter);
+                stats.jobs, stats.jitter,
+                stats.jobs,
+                stats.jobs * stats.jitter,
+                stats.jobs);
         }
         catch(const std::exception &ex)
         {
