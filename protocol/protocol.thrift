@@ -24,6 +24,12 @@ enum RequestMethod
     CONNECT             = 7
 }
 
+enum JobType
+{
+    DEFAULT             = 0,
+    MONITORING          = 1
+}
+
 struct JobIdentifier
 {
     1: i64 jobId;
@@ -35,6 +41,7 @@ struct JobMetadata
     1: bool enabled;
     2: string title;
     3: bool saveResponses;
+    4: JobType type;
 }
 
 struct JobExecutionInfo

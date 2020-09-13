@@ -56,7 +56,7 @@ public:
             std::unique_ptr<MySQL_DB> db(App::getInstance()->createMySQLConnection());
 
 	        MYSQL_ROW row;
-            auto res = db->query("SELECT `jobid`,`userid`,`enabled`,`title`,`save_responses`,`last_status`,`last_fetch`,`last_duration`,`fail_counter`,`url`,`request_method`,`timezone` FROM `job` WHERE `userid`=%v",
+            auto res = db->query("SELECT `jobid`,`userid`,`enabled`,`title`,`save_responses`,`last_status`,`last_fetch`,`last_duration`,`fail_counter`,`url`,`request_method`,`timezone`,`type` FROM `job` WHERE `userid`=%v",
                 userId);
             _return.reserve(res->numRows());
             while((row = res->fetchRow()))
@@ -69,6 +69,7 @@ public:
                 job.metaData.enabled = std::strcmp(row[2], "1") == 0;
                 job.metaData.title = row[3];
                 job.metaData.saveResponses = std::strcmp(row[4], "1") == 0;
+                job.metaData.type = static_cast<JobType::type>(std::stoi(row[12])); //!< @todo Nicer conversion
                 job.__isset.metaData = true;
 
                 job.executionInfo.lastStatus = static_cast<JobStatus::type>(std::stoi(row[5])); //!< @todo Nicer conversion
@@ -113,7 +114,7 @@ public:
 	        MYSQL_ROW row;
             auto res = db->query("SELECT `jobid`,`userid`,`enabled`,`title`,`save_responses`,`last_status`,`last_fetch`,"
                     "`last_duration`,`fail_counter`,`url`,`request_method`,`auth_enable`,`auth_user`,`auth_pass`,"
-                    "`notify_failure`,`notify_success`,`notify_disable`,`timezone` "
+                    "`notify_failure`,`notify_success`,`notify_disable`,`timezone`,`type` "
                     "FROM `job` WHERE `jobid`=%v AND `userid`=%v",
                 identifier.jobId,
                 identifier.userId);
@@ -127,6 +128,7 @@ public:
                 _return.metaData.enabled = std::strcmp(row[2], "1") == 0;
                 _return.metaData.title = row[3];
                 _return.metaData.saveResponses = std::strcmp(row[4], "1") == 0;
+                _return.metaData.type = static_cast<JobType::type>(std::stoi(row[18])); //!< @todo Nicer conversion
                 _return.__isset.metaData = true;
 
                 _return.executionInfo.lastStatus = static_cast<JobStatus::type>(std::stoi(row[5])); //!< @todo Nicer conversion
@@ -215,10 +217,11 @@ public:
 
             if(job.__isset.metaData)
             {
-                db->query("UPDATE `job` SET `enabled`=%d, `title`='%q', `save_responses`=%d WHERE `jobid`=%v",
+                db->query("UPDATE `job` SET `enabled`=%d, `title`='%q', `save_responses`=%d, `typed`=%d WHERE `jobid`=%v",
                     job.metaData.enabled ? 1 : 0,
                     job.metaData.title.c_str(),
                     job.metaData.saveResponses ? 1 : 0,
+                    job.metaData.type,
                     job.identifier.jobId);
             }
 

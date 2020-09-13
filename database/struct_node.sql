@@ -1,6 +1,7 @@
 CREATE TABLE `job` (
   `jobid` int(11) NOT NULL AUTO_INCREMENT,
   `userid` int(11) NOT NULL DEFAULT '0',
+  `type` tinyint(4) NOT NULL DEFAULT '0',
   `enabled` tinyint(4) NOT NULL DEFAULT '1',
   `title` varchar(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `url` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
