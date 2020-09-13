@@ -175,6 +175,10 @@ public:
 
             _return.__isset.extendedData = true;
         }
+	catch(const ResourceNotFound &ex)
+	{
+		throw ex;
+	}
         catch(const std::exception &ex)
         {
             std::cout << "ChronosNodeHandler::getJobDetails(): Exception: "  << ex.what() << std::endl;
