@@ -12,6 +12,8 @@
 #include "UpdateThread.h"
 
 #include <iostream>
+#include <sstream>
+#include <cmath>
 
 #include <stdlib.h>
 #include <time.h>
@@ -33,9 +35,10 @@ UpdateThread::UpdateThread()
 
 	UpdateThread::instance 	= this;
 
-	maxFailures 			= App::getInstance()->config->getInt("max_failures");
-	userDbFilePathScheme 	= App::getInstance()->config->get("user_db_file_path_scheme");
-	userDbFileNameScheme 	= App::getInstance()->config->get("user_db_file_name_scheme");
+	maxFailures 				= App::getInstance()->config->getInt("max_failures");
+	userDbFilePathScheme 		= App::getInstance()->config->get("user_db_file_path_scheme");
+	userDbFileNameScheme 		= App::getInstance()->config->get("user_db_file_name_scheme");
+	userTimeDbFileNameScheme 	= App::getInstance()->config->get("user_time_db_file_name_scheme");
 }
 
 UpdateThread::~UpdateThread()
@@ -60,6 +63,7 @@ void UpdateThread::addResult(std::unique_ptr<JobResult> result)
 void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 {
 	const int DB_SCHEMA_VERSION = 2;
+	const int TIMEDB_SCHEMA_VERSION = 1;
 
 	struct tm tmStruct = { 0 };
 	time_t tmTime = result->datePlanned / 1000;
@@ -213,7 +217,7 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 	NotificationType_t notificationType;
 
 	// disable job?
-	if(failCounter > maxFailures)
+	if(failCounter > maxFailures && result->jobType != JobType_t::MONITORING)
 	{
 		// disable
 		db->query("UPDATE `job` SET `enabled`=0,`fail_counter`=0 WHERE `jobid`=%d",
@@ -276,6 +280,107 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 			static_cast<unsigned long>(n.httpStatus));
 
 		NotificationThread::getInstance()->addNotification(std::move(n));
+	}
+
+	if(result->jobType == JobType_t::MONITORING)
+	{
+		std::string timeDbFilePath = Utils::userTimeDbFilePath(userDbFilePathScheme, userTimeDbFileNameScheme, result->userID, tmStruct.tm_year + 1900);
+
+		try
+		{
+			std::unique_ptr<SQLite_DB> timeDB = std::make_unique<SQLite_DB>(timeDbFilePath.c_str());
+
+			timeDB->prepare("PRAGMA synchronous = OFF")->execute();
+
+			int currentSchemaVersion = 0;
+			auto stmt = timeDB->prepare("PRAGMA user_version");
+			while(stmt->execute())
+			{
+				currentSchemaVersion = stmt->intValue(0);
+			}
+
+			if(currentSchemaVersion < 1)
+			{
+				timeDB->prepare("CREATE TABLE IF NOT EXISTS \"joblog_histogram\"("
+					"	\"jobid\" INTEGER NOT NULL,"
+					"	\"date\" INTEGER NOT NULL,"
+					"	\"bin_0\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_1\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_2\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_3\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_4\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_5\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_6\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_7\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_8\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_9\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_10\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_11\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_12\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_13\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_14\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_15\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_16\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_17\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_18\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_19\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_20\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_21\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_22\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_23\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_24\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_25\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_26\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_27\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_28\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_29\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_30\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"bin_31\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"count_success\" INTEGER NOT NULL DEFAULT 0,"
+					"	\"count_failure\" INTEGER NOT NULL DEFAULT 0,"
+					" 	PRIMARY KEY(\"jobid\", \"date\")"
+					")")->execute();
+				timeDB->prepare("CREATE INDEX IF NOT EXISTS \"idx_histogram_jobid\" ON \"joblog_histogram\" (\"jobid\")")->execute();
+				timeDB->prepare("CREATE INDEX IF NOT EXISTS \"idx_histogram_jobid_date\" ON \"joblog_histogram\" (\"jobid\", \"date\")")->execute();
+			}
+
+			if(currentSchemaVersion != TIMEDB_SCHEMA_VERSION)
+			{
+				std::string pragmaQuery = "PRAGMA user_version = " + std::to_string(TIMEDB_SCHEMA_VERSION);
+				timeDB->prepare(pragmaQuery)->execute();
+			}
+
+			const unsigned int bin = std::min(31u, static_cast<unsigned int>(ceil(log(result->timeTotal / 1000) / log(sqrt(2)))));
+			const unsigned int startedTimestamp = static_cast<unsigned int>(result->dateStarted / 1000);
+
+			std::stringstream query;
+
+			if(result->status == JobStatus_t::JOBSTATUS_OK)
+			{
+				query 	<< "INSERT INTO \"joblog_histogram\"(\"jobid\", \"date\", \"bin_" << bin << "\", \"count_success\") "
+						<< "VALUES(:jobid, :date, 1, 1) "
+						<< "ON CONFLICT(\"jobid\", \"date\") DO UPDATE SET "
+						<< "	\"bin_" << bin << "\" = \"bin_" << bin << "\" + excluded.\"bin_" << bin << "\", "
+						<< "	\"count_success\" = \"count_success\" + excluded.\"count_success\"";
+			}
+			else
+			{
+				query 	<< "INSERT INTO \"joblog_histogram\"(\"jobid\", \"date\",\"count_failure\") "
+						<< "VALUES(:jobid, :date, 1) "
+						<< "ON CONFLICT(\"jobid\", \"date\") DO UPDATE SET "
+						<< "	\"count_failure\" = \"count_failure\" + excluded.\"count_failure\"";
+			}
+
+			stmt = timeDB->prepare(query.str());
+			stmt->bind(":jobid", 			result->jobID);
+			stmt->bind(":date", 			startedTimestamp - (startedTimestamp % 86400));
+			stmt->execute();
+		}
+		catch(const std::exception &ex)
+		{
+			std::cout << "Error SQLite query: " << ex.what() << std::endl;
+			return;
+		}
 	}
 }
 

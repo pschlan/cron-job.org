@@ -11,6 +11,7 @@
 
 #include "NodeService.h"
 
+#include <algorithm>
 #include <iostream>
 
 #include <thrift/protocol/TBinaryProtocol.h>
@@ -30,12 +31,19 @@ using namespace ::apache::thrift::server;
 
 namespace {
 
+constexpr const int TIME_ONE_DAY = 86400;
+
+}
+
+namespace {
+
 class ChronosNodeHandler : virtual public ChronosNodeIf
 {
 public:
     ChronosNodeHandler()
         : userDbFilePathScheme(Chronos::App::getInstance()->config->get("user_db_file_path_scheme")),
-          userDbFileNameScheme(Chronos::App::getInstance()->config->get("user_db_file_name_scheme"))
+          userDbFileNameScheme(Chronos::App::getInstance()->config->get("user_db_file_name_scheme")),
+          userTimeDbFileNameScheme(Chronos::App::getInstance()->config->get("user_time_db_file_name_scheme"))
     {
     }
 
@@ -217,7 +225,7 @@ public:
 
             if(job.__isset.metaData)
             {
-                db->query("UPDATE `job` SET `enabled`=%d, `title`='%q', `save_responses`=%d, `typed`=%d WHERE `jobid`=%v",
+                db->query("UPDATE `job` SET `enabled`=%d, `title`='%q', `save_responses`=%d, `type`=%d WHERE `jobid`=%v",
                     job.metaData.enabled ? 1 : 0,
                     job.metaData.title.c_str(),
                     job.metaData.saveResponses ? 1 : 0,
@@ -332,8 +340,6 @@ public:
 
     void getJobLog(std::vector<JobLogEntry> &_return, const JobIdentifier &identifier, const int16_t maxEntries) override
     {
-        static constexpr const int TIME_ONE_DAY = 86400;
-
         std::cout << "ChronosNodeHandler::getJobLog(" << identifier.jobId << ", " << identifier.userId << ", " << maxEntries << ")" << std::endl;
 
         if(maxEntries <= 0)
@@ -455,6 +461,124 @@ public:
         }
     }
 
+    void getTimeSeriesData(TimeSeriesData &_return, const JobIdentifier &identifier, const double p) override
+    {
+        std::cout << "ChronosNodeHandler::getTimeSeriesData(" << identifier.jobId << ", " << identifier.userId << ")" << std::endl;
+
+        struct tm now           = timeStruct(0);
+        struct tm tmYesterday   = timeStruct(- TIME_ONE_DAY);
+
+        getDayTimeSeriesForYear(_return.last12Months, identifier, now.tm_year + 1900 - 1, now.tm_mon, now.tm_mday, p);
+        getDayTimeSeriesForYear(_return.last12Months, identifier, now.tm_year + 1900, 0, 1, p);
+
+        std::vector<JobLogEntry> jobLog;
+        getJobLogForDay(jobLog,  identifier, tmYesterday.tm_mday, tmYesterday.tm_mon, -1);
+        getJobLogForDay(jobLog,  identifier, now.tm_mday, now.tm_mon, -1);
+
+        std::vector<TimeSeriesDataEntry> jobLogTimeSeries;
+        jobLogTimeSeries.reserve(jobLog.size());
+
+        for(const auto &entry : jobLog)
+        {
+            TimeSeriesDataEntry td;
+            td.date = entry.date;
+            td.uptimeCounter = (entry.status == JobStatus::OK) ? 1 : 0;
+            td.uptimeDenominator = 1;
+            td.duration = entry.stats.total / 1000;
+
+            jobLogTimeSeries.push_back(td);
+        }
+
+        _return.last24Hours = downsampleTimeSeriesData(jobLogTimeSeries, time(nullptr) - 86400, 15 * 60, p);
+    }
+
+    std::vector<TimeSeriesDataEntry> downsampleTimeSeriesData(const std::vector<TimeSeriesDataEntry> &in, const time_t minDate, const int seconds, const double p)
+    {
+        std::map<int64_t, std::vector<TimeSeriesDataEntry>> aggregate;
+        for (const auto &entry : in)
+        {
+            if (entry.date < minDate)
+            {
+                continue;
+            }
+
+            TimeSeriesDataEntry newEntry(entry);
+            newEntry.date -= newEntry.date % seconds;
+
+            aggregate[newEntry.date].push_back(newEntry);
+        }
+
+        std::vector<TimeSeriesDataEntry> result;
+        result.reserve(aggregate.size());
+
+        for (const auto &entry : aggregate)
+        {
+            TimeSeriesDataEntry resultEntry;
+            resultEntry.date = entry.first;
+            resultEntry.uptimeCounter = 0;
+            resultEntry.uptimeDenominator = 0;
+
+            for (const auto &singleEntry : entry.second)
+            {
+                resultEntry.uptimeCounter += singleEntry.uptimeCounter;
+                resultEntry.uptimeDenominator += singleEntry.uptimeDenominator;
+            }
+
+            resultEntry.duration = calculatePercentile<int64_t, TimeSeriesDataEntry>(entry.second,
+                [] (const TimeSeriesDataEntry &entry) { return entry.duration; },
+                [] (const TimeSeriesDataEntry &entry) { return entry.uptimeCounter == 1; },
+                p);
+
+            result.push_back(resultEntry);
+        }
+
+        return result;
+    }
+
+    template<typename T, typename S>
+    T calculatePercentile(const std::vector<S> &in,
+        const std::function<T(const S &)> &getFunction,
+        const std::function<bool(const S &)> &filterFunction,
+        const double p)
+    {
+        std::vector<T> values;
+        values.reserve(in.size());
+        std::for_each(in.begin(), in.end(), [&values, &getFunction, &filterFunction] (const S &s) {
+            if(filterFunction(s))
+            {
+                values.push_back(getFunction(s));
+            }
+        });
+
+        if(values.empty())
+        {
+            return -1;
+        }
+
+        if(values.size() == 1)
+        {
+            return values.at(0);
+        }
+
+        std::sort(values.begin(), values.end());
+
+        double rank = std::max(0., static_cast<double>(values.size()) * p - 1);
+        std::size_t index1 = std::floor(rank);
+        if(std::fabs(rank - index1) < 0.0001)
+        {
+            return values.at(index1);
+        }
+
+        std::size_t index2 = std::ceil(rank);
+
+        const T value1 = values.at(index1);
+        const T value2 = values.at(index2);
+
+        const double frac = rank - std::floor(rank);
+
+        return static_cast<T>(static_cast<double>(value1) + static_cast<double>((value2 - value1)) * frac);
+    }
+
     void disableJobsForUser(const int64_t userId) override
     {
         using namespace Chronos;
@@ -476,6 +600,88 @@ public:
     }
 
 private:
+    void getDayTimeSeriesForYear(std::vector<TimeSeriesDataEntry> &dest, const JobIdentifier &identifier, const int year, const int minMonth = 0, const int minDay = 1, const double p = 0.99) const
+    {
+        using namespace Chronos;
+
+        std::string timeDbFilePath = Utils::userTimeDbFilePath(userDbFilePathScheme, userTimeDbFileNameScheme, identifier.userId, year);
+        std::unique_ptr<SQLite_DB> timeDB;
+
+        try
+        {
+            timeDB = std::make_unique<SQLite_DB>(timeDbFilePath.c_str(), true /* read only */);
+        }
+        catch(const std::exception &ex)
+        {
+            //! @note Ignore failures during open (the db probably doesn't exist because there's no log entry on that day)
+            return;
+        }
+
+        struct tm startTime = { 0 };
+        startTime.tm_year = year + 1900;
+        startTime.tm_mon = minMonth;
+        startTime.tm_mday = minDay;
+
+        time_t startDate = timegm(&startTime);
+
+        std::string query = "SELECT * FROM \"joblog_histogram\" "
+            "WHERE \"jobid\"=:jobid AND \"date\">=:startDate";
+        query += " ORDER BY \"date\" ASC";
+
+        auto stmt = timeDB->prepare(query);
+        stmt->bind(":jobid", identifier.jobId);
+        stmt->bind(":startDate", startDate);
+
+        while(stmt->execute())
+        {
+            TimeSeriesDataEntry entry;
+            entry.date              = stmt->intValue("date");
+            entry.duration          = static_cast<int>(round(computerPercentileFromHistogramRow<32>(stmt, p)));
+            entry.uptimeCounter     = stmt->intValue("count_success");
+            entry.uptimeDenominator = entry.uptimeCounter + stmt->intValue("count_failure");
+            dest.push_back(entry);
+        }
+    }
+
+    template<std::size_t N_BINS>
+    double computerPercentileFromHistogramRow(const std::unique_ptr<Chronos::SQLite_Statement> &stmt, double p = 0.99) const
+    {
+        int binSum = 0;
+        std::vector<int> binValues(N_BINS);
+
+        for(std::size_t i = 0; i < N_BINS; ++i)
+        {
+            const std::string binName = "bin_" + std::to_string(i);
+            int binValue = stmt->intValue(binName);
+
+            binValues[i] = binValue;
+            binSum += binValue;
+        }
+
+        if(binSum == 0)
+        {
+            return -1.;
+        }
+
+        int runningBinSum = 0;
+        for(std::size_t i = 0; i < N_BINS; ++i)
+        {
+            double prevEcdf = static_cast<double>(runningBinSum) / static_cast<double>(binSum);
+            runningBinSum += binValues[i];
+            double curEcdf = static_cast<double>(runningBinSum) / static_cast<double>(binSum);
+
+            if (p > prevEcdf && p <= curEcdf)
+            {
+                double x0 = i > 0 ? pow(sqrt(2), i - 1) : 0;
+                double x1 = pow(sqrt(2), i);
+
+                return (x0 + (x1 - x0) * (p - prevEcdf) / (curEcdf - prevEcdf));
+            }
+        }
+
+        return 0.;
+    }
+
     template<typename T>
     void getJobSchedule(std::unique_ptr<Chronos::MySQL_DB> &db, const JobIdentifier &identifier, const char *name, std::set<T> &target) const
     {
@@ -552,15 +758,17 @@ private:
             return;
         }
 
-
         std::string query = "SELECT \"joblog\".\"joblogid\",\"joblog\".\"jobid\",\"joblog\".\"date\",\"date_planned\",\"jitter\",\"url\",\"duration\",\"joblog\".\"status\",\"status_text\",\"http_status\",\"name_lookup\",\"connect\",\"app_connect\",\"pre_transfer\",\"start_transfer\",\"total\" FROM \"joblog\" "
             "LEFT JOIN \"joblog_stats\" ON \"joblog_stats\".\"joblogid\"=\"joblog\".\"joblogid\" ";
         if(identifier.jobId > 0)
         {
             query += "WHERE \"joblog\".\"jobid\"=:jobid ";
         }
-        query += "ORDER BY \"joblog\".\"joblogid\" DESC LIMIT " + std::to_string(maxEntries);
-
+        query += "ORDER BY \"joblog\".\"joblogid\" DESC";
+        if(maxEntries > 0)
+        {
+            query += " LIMIT " + std::to_string(maxEntries);
+        }
 
         auto stmt = userDB->prepare(query);
         if(identifier.jobId > 0)
@@ -607,6 +815,7 @@ private:
 
     std::string userDbFilePathScheme;
     std::string userDbFileNameScheme;
+    std::string userTimeDbFileNameScheme;
 };
 
 }

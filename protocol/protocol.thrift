@@ -176,6 +176,20 @@ struct NotificationEntry
     11: i16 httpStatus;
 }
 
+struct TimeSeriesDataEntry
+{
+    1: i64 date;
+    2: i32 duration;
+    3: i32 uptimeCounter;
+    4: i32 uptimeDenominator;
+}
+
+struct TimeSeriesData
+{
+    1: list<TimeSeriesDataEntry> last24Hours;
+    2: list<TimeSeriesDataEntry> last12Months;
+}
+
 exception ResourceNotFound  {}
 exception Forbidden         {}
 exception InvalidArguments  {}
@@ -194,6 +208,8 @@ service ChronosNode
     void createOrUpdateJob(1: Job job) throws(1: ResourceNotFound rnf, 2: Forbidden ad, 3: InternalError ie, 4: InvalidArguments ia);
 
     list<NotificationEntry> getNotifications(1: i64 userId, 2: i16 maxEntries) throws(1: InternalError ie, 2: InvalidArguments ia);
+
+    TimeSeriesData getTimeSeriesData(1: JobIdentifier identifier, 2: double p) throws(1: ResourceNotFound rnf, 2: InternalError ie);
 
     void deleteJob(1: JobIdentifier identifier) throws(1: ResourceNotFound rnf, 2: InternalError ie);
 

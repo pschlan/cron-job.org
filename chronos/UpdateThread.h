@@ -55,6 +55,7 @@ namespace Chronos
 		int maxFailures = 0;
 		std::string userDbFilePathScheme;
 		std::string userDbFileNameScheme;
+		std::string userTimeDbFileNameScheme;
 	};
 };
 

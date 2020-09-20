@@ -204,7 +204,7 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 				<< "timeZone = " << timeZone
 				<< std::endl;
 
-	auto res = db->query("SELECT TRIM(`url`),`job`.`jobid`,`auth_enable`,`auth_user`,`auth_pass`,`notify_failure`,`notify_success`,`notify_disable`,`fail_counter`,`save_responses`,`job`.`userid`,`request_method`,COUNT(`job_header`.`jobheaderid`),`job_body`.`body`,`title` FROM `job` "
+	auto res = db->query("SELECT TRIM(`url`),`job`.`jobid`,`auth_enable`,`auth_user`,`auth_pass`,`notify_failure`,`notify_success`,`notify_disable`,`fail_counter`,`save_responses`,`job`.`userid`,`request_method`,COUNT(`job_header`.`jobheaderid`),`job_body`.`body`,`title`,`job`.`type` FROM `job` "
 									"INNER JOIN `job_hours` ON `job_hours`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_mdays` ON `job_mdays`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_wdays` ON `job_wdays`.`jobid`=`job`.`jobid` "
@@ -262,7 +262,8 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 				req->requestBody	= row[13];
 			}
 
-			req->result->title = row[14];
+			req->result->title		= row[14];
+			req->result->jobType  	= static_cast<JobType_t>(atoi(row[15]));
 
 			const auto &wt = workerThreads[i % numThreads];
 			wt->addJob(req);

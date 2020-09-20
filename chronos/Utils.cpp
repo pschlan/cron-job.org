@@ -102,6 +102,23 @@ std::string Utils::userDbFilePath(const std::string &userDbFilePathScheme, const
 	return dbDirPath + "/" + dbFileName;
 }
 
+std::string Utils::userTimeDbFilePath(const std::string &userDbFilePathScheme, const std::string &userTimeDbFileNameScheme, const int userID, const int year)
+{
+	const std::string userPart = userPathPart(userID);
+
+	// e.g. /var/lib/cron-job.org/%u
+	std::string dbDirPath = userDbFilePathScheme;
+	Utils::replace(dbDirPath, "%u", userPart);
+	if(!Utils::directoryExists(dbDirPath))
+		Utils::mkPath(dbDirPath);
+
+	// e.g. timeseries-%y.db
+	std::string dbFileName = userTimeDbFileNameScheme;
+	Utils::replace(dbFileName, "%y", Utils::toString(year, 4));
+
+	return dbDirPath + "/" + dbFileName;
+}
+
 std::string Utils::toString(int num, int places)
 {
 	std::string result = std::to_string(num);

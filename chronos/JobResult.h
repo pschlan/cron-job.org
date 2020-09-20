@@ -32,6 +32,12 @@ namespace Chronos
 		JOBSTATUS_FAILED_OTHERS 	= 9
 	};
 
+	enum class JobType_t : int
+	{
+		DEFAULT		= 0,
+		MONITORING	= 1
+	};
+
 	struct JobResult
 	{
 		int userID = 0;
@@ -62,6 +68,8 @@ namespace Chronos
 		int timePreTransfer = 0;	// in us
 		int timeStartTransfer = 0;	// in us
 		int timeTotal = 0;			// in us
+
+		JobType_t jobType = JobType_t::DEFAULT;
 	};
 };
 
