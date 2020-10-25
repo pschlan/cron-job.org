@@ -132,14 +132,16 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 				<< "plannedTime = " << plannedTime
 				<< std::endl;
 
-	struct tm *t = gmtime(&plannedTime);
+	struct tm t = { 0 };
+	if(gmtime_r(&plannedTime, &t) == nullptr)
+		throw std::runtime_error("gmtime_r returned nullptr");
 
 	const std::size_t numThreads = config->getInt("num_threads");
 
 	std::vector<std::shared_ptr<WorkerThread>> workerThreads;
 	for (std::size_t i = 0; i < numThreads; ++i)
 	{
-		workerThreads.push_back(std::make_shared<WorkerThread>(t->tm_mday, t->tm_mon+1, t->tm_year+1900, t->tm_hour, t->tm_min));
+		workerThreads.push_back(std::make_shared<WorkerThread>(t.tm_mday, t.tm_mon+1, t.tm_year+1900, t.tm_hour, t.tm_min));
 	}
 
 	std::size_t i = 0;
@@ -325,20 +327,22 @@ int App::run()
 		while(!stop)
 		{
 			time_t currentTime = time(nullptr) + jitterCorrectionOffset;
-			struct tm *t = localtime(&currentTime);
+			struct tm t = { 0 };
+			if(gmtime_r(&currentTime, &t) == nullptr)
+				throw std::runtime_error("gmtime_r returned nullptr");
 
-			if(t->tm_min > lastTime.tm_min
-				|| t->tm_hour > lastTime.tm_hour
-				|| t->tm_mday > lastTime.tm_mday
-				|| t->tm_mon > lastTime.tm_mon
-				|| t->tm_year > lastTime.tm_year)
+			if(t.tm_min > lastTime.tm_min
+				|| t.tm_hour > lastTime.tm_hour
+				|| t.tm_mday > lastTime.tm_mday
+				|| t.tm_mon > lastTime.tm_mon
+				|| t.tm_year > lastTime.tm_year)
 			{
 				// update last time
-				memcpy(&lastTime, t, sizeof(struct tm));
+				memcpy(&lastTime, &t, sizeof(struct tm));
 
-				if(!firstLoop || t->tm_sec == 59 - jitterCorrectionOffset)
+				if(!firstLoop || t.tm_sec == 59 - jitterCorrectionOffset)
 				{
-					processJobs(currentTime, currentTime - t->tm_sec);
+					processJobs(currentTime, currentTime - t.tm_sec);
 					jitterCorrectionOffset = calcJitterCorrectionOffset();
 
 					cleanUpNotifications();
