@@ -137,9 +137,10 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 		throw std::runtime_error("gmtime_r returned nullptr");
 
 	const std::size_t numThreads = config->getInt("num_threads");
+	const std::size_t numMonitoringThreads = config->getInt("num_monitoring_threads");
 
 	std::vector<std::shared_ptr<WorkerThread>> workerThreads;
-	for (std::size_t i = 0; i < numThreads; ++i)
+	for (std::size_t i = 0; i < numThreads + numMonitoringThreads; ++i)
 	{
 		workerThreads.push_back(std::make_shared<WorkerThread>(t.tm_mday, t.tm_mon+1, t.tm_year+1900, t.tm_hour, t.tm_min));
 	}
@@ -174,10 +175,10 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 		}
 
 		processJobsForTimeZone(civilTime.hour(), civilTime.minute(), civilTime.month(), civilTime.day(), wday, civilTime.year(),
-			plannedTime, timeZone, workerThreads, i, numThreads);
+			plannedTime, timeZone, workerThreads, i, numThreads, numMonitoringThreads);
 	}
 
-	for(std::size_t i = 0; i < numThreads; ++i)
+	for(std::size_t i = 0; i < numThreads + numMonitoringThreads; ++i)
 	{
 		const auto &wt = workerThreads[i];
 
@@ -194,7 +195,7 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 }
 
 void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int wday, int year, time_t timestamp, const std::string &timeZone,
-	const std::vector<std::shared_ptr<WorkerThread>> &workerThreads, std::size_t &i, std::size_t numThreads)
+	const std::vector<std::shared_ptr<WorkerThread>> &workerThreads, std::size_t &i, std::size_t numThreads, std::size_t numMonitoringThreads)
 {
 	std::cout 	<< "App::processJobsForTimeZone(): Called for "
 				<< "hour = " << hour << ", "
@@ -222,7 +223,7 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 									"AND `job`.`timezone`='%q' "
 									"AND `enabled`=1 "
 									"GROUP BY `job`.`jobid` "
-									"ORDER BY `fail_counter` ASC, `last_duration` ASC",
+									"ORDER BY `fail_counter` ASC, `job`.`jobid` ASC",
 									hour, minute, mday, wday, month, timeZone.c_str());
 
 	int jobCount = res->numRows();
@@ -267,7 +268,7 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 			req->result->title		= row[14];
 			req->result->jobType  	= static_cast<JobType_t>(atoi(row[15]));
 
-			const auto &wt = workerThreads[i % numThreads];
+			const auto &wt = workerThreads[req->result->jobType == JobType_t::MONITORING ? ((i % numMonitoringThreads) + numThreads) : (i % numThreads)];
 			wt->addJob(req);
 
 			++i;
