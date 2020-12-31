@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/time.h>
+#include <arpa/inet.h>
 
 using namespace Chronos;
 
@@ -167,3 +168,36 @@ std::string Utils::toLower(const std::string &str)
 	return result;
 }
 
+std::vector<std::string> Utils::split(const std::string &str, char delimiter)
+{
+	std::vector<std::string> result;
+
+	std::size_t last = 0;
+	std::size_t pos = 0;
+	while((pos = str.find(delimiter, last)) != std::string::npos)
+	{
+		result.push_back(str.substr(last, pos - last));
+		last = pos + 1;
+	}
+
+	result.push_back(str.substr(last));
+
+	return result;
+}
+
+Utils::Subnet::Subnet(const std::string &cidrNotation)
+{
+	std::size_t slashPos = cidrNotation.find('/');
+	if(slashPos == std::string::npos || slashPos < 1)
+		throw std::runtime_error("Invalid CIDR notation: " + cidrNotation);
+
+	const std::string addressString = cidrNotation.substr(0, slashPos);
+	const std::string bitsString = cidrNotation.substr(slashPos + 1);
+
+	int nBits = std::stoi(bitsString);
+	if(nBits > 32)
+		throw std::runtime_error("Invalid CIDR bits: " + cidrNotation);
+
+	this->netmask = ::htonl(0xFFFFFFFF << (32 - nBits));
+	this->maskedAddress = ::inet_addr(addressString.c_str()) & this->netmask;
+}

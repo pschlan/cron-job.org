@@ -16,6 +16,8 @@
 #include <errno.h>
 #include <string.h>
 
+#include <netinet/in.h>
+
 #include "WorkerThread.h"
 #include "JobResult.h"
 #include "Utils.h"
@@ -40,6 +42,22 @@ size_t curlHeaderFunction(char *buffer, size_t size, size_t nitems, void *userda
 	std::string headerData(buffer, realSize);
 	static_cast<HTTPRequest *>(userdata)->processHeaders(headerData);
 	return realSize;
+}
+
+curl_socket_t curlOpenSocketFunction(void *userdata, curlsocktype purpose, struct curl_sockaddr *address)
+{
+	if(purpose != CURLSOCKTYPE_IPCXN)
+	{
+		std::cerr << "Invalid socket purpose: " << purpose << std::endl;
+		return CURL_SOCKET_BAD;
+	}
+
+	if(!static_cast<HTTPRequest *>(userdata)->verifyPeerAddress(address->addrlen, &address->addr))
+	{
+		return CURL_SOCKET_BAD;
+	}
+
+	return ::socket(address->family, address->socktype, address->protocol);
 }
 
 }
@@ -98,6 +116,25 @@ bool HTTPRequest::processData(const std::string &data)
 	}
 
 	return true;
+}
+
+bool HTTPRequest::verifyPeerAddress(unsigned int addressLength, const struct sockaddr *address) const
+{
+	//! @note We don't support IPv6 at the moment.
+	if(address->sa_family != AF_INET)
+	{
+		std::cerr << "Unsupported sa_family: " << address->sa_family << std::endl;
+		return false;
+	}
+
+	if(addressLength != sizeof(struct sockaddr_in))
+	{
+		std::cerr << "Invalid AF_INET address length: " << addressLength << std::endl;
+		return false;
+	}
+
+	const struct sockaddr_in *inAddress = reinterpret_cast<const struct sockaddr_in *>(address);
+	return !App::getInstance()->isIpAddressBlocked(inAddress->sin_addr.s_addr);
 }
 
 void HTTPRequest::done(CURLcode res)
@@ -254,12 +291,14 @@ void HTTPRequest::submit(CURLM *curlMultiHandle)
 	curl_easy_setopt(easy, CURLOPT_WRITEDATA,			this);
 	curl_easy_setopt(easy, CURLOPT_HEADERFUNCTION,		curlHeaderFunction);
 	curl_easy_setopt(easy, CURLOPT_HEADERDATA,			this);
+	curl_easy_setopt(easy, CURLOPT_OPENSOCKETFUNCTION, 	curlOpenSocketFunction);
+	curl_easy_setopt(easy, CURLOPT_OPENSOCKETDATA,		this);
 	curl_easy_setopt(easy, CURLOPT_TIMEOUT,				App::getInstance()->config->getInt("request_timeout"));
 	curl_easy_setopt(easy, CURLOPT_MAXFILESIZE,			maxSize);
 	curl_easy_setopt(easy, CURLOPT_USERAGENT,			App::getInstance()->config->get("user_agent").c_str());
 	curl_easy_setopt(easy, CURLOPT_SSL_VERIFYPEER,		0);
 	curl_easy_setopt(easy, CURLOPT_SSL_VERIFYHOST,		0);
-	curl_easy_setopt(easy, CURLOPT_CAINFO,			NULL);
+	curl_easy_setopt(easy, CURLOPT_CAINFO,				NULL);
 	curl_easy_setopt(easy, CURLOPT_IPRESOLVE,			CURL_IPRESOLVE_V4);
 
 	if(requestMethod == RequestMethod::POST || requestMethod == RequestMethod::PUT || requestMethod == RequestMethod::PATCH || requestMethod == RequestMethod::DELETE)

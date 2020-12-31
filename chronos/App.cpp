@@ -14,6 +14,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <functional>
+#include <algorithm>
 
 #include <civil_time.h>
 #include <time_zone.h>
@@ -111,6 +112,15 @@ App::App(int argc, char *argv[])
 
 	this->config 		= std::make_shared<Config>(argv[1]);
 	App::instance		= this;
+
+	std::vector<std::string> blockedSubnetStrings = Utils::split(this->config->get("blocked_subnets"), ' ');
+	std::for_each(blockedSubnetStrings.begin(), blockedSubnetStrings.end(), [this] (const std::string &subnet) {
+		const std::string trimmedSubnet = Utils::trim(subnet);
+		if(!trimmedSubnet.empty())
+		{
+			blockedSubnets.emplace_back(trimmedSubnet);
+		}
+	});
 }
 
 App::~App()
@@ -123,6 +133,16 @@ App *App::getInstance()
         if(App::instance == nullptr)
                 throw std::runtime_error("No app instance available");
         return(App::instance);
+}
+
+bool App::isIpAddressBlocked(in_addr_t ipAddress) const
+{
+	for(const auto &subnet : blockedSubnets)
+	{
+		if(subnet.contains(ipAddress))
+			return true;
+	}
+	return false;
 }
 
 void App::processJobs(time_t forTime, time_t plannedTime)

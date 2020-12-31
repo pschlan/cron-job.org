@@ -13,9 +13,12 @@
 #define _UTILS_H_
 
 #include <string>
+#include <vector>
 
 #include <stdint.h>
 #include <sys/stat.h>
+
+#include <netinet/in.h>
 
 namespace Chronos
 {
@@ -31,6 +34,23 @@ namespace Chronos
 		bool directoryExists(const std::string &path);
 		bool mkPath(const std::string &path, const mode_t mode = 0755);
 		std::string toLower(const std::string &str);
+		std::vector<std::string> split(const std::string &str, char delimiter);
+
+		class Subnet
+		{
+		public:
+			Subnet(const std::string &cidrNotation);
+
+		public:
+			bool contains(in_addr_t ipAddress) const
+			{
+				return (ipAddress & this->netmask) == this->maskedAddress;
+			}
+
+		private:
+			in_addr_t maskedAddress;
+			in_addr_t netmask;
+		};
 	};
 };
 

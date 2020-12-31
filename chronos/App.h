@@ -20,6 +20,7 @@
 
 #include "MySQL.h"
 #include "Config.h"
+#include "Utils.h"
 
 namespace Chronos
 {
@@ -71,6 +72,7 @@ namespace Chronos
 
 	public:
 		std::shared_ptr<Config> config;
+		bool isIpAddressBlocked(in_addr_t ipAddress) const;
 
 	private:
 		bool stop = false;
@@ -84,6 +86,7 @@ namespace Chronos
 		std::unique_ptr<NotificationThread> notificationThreadObj;
 		std::unique_ptr<NodeService> nodeServiceObj;
 		std::unique_ptr<MasterService> masterServiceObj;
+		std::vector<Utils::Subnet> blockedSubnets;
 	};
 };
 
