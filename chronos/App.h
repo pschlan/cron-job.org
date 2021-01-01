@@ -68,7 +68,6 @@ namespace Chronos
 						const std::vector<std::shared_ptr<WorkerThread>> &workerThreads, std::size_t &i, std::size_t numThreads,
 						std::size_t numMonitoringThreads);
 		void cleanUpNotifications();
-		int calcJitterCorrectionOffset();
 
 	public:
 		std::shared_ptr<Config> config;

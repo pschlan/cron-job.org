@@ -130,9 +130,9 @@ App::~App()
 
 App *App::getInstance()
 {
-        if(App::instance == nullptr)
-                throw std::runtime_error("No app instance available");
-        return(App::instance);
+	if(App::instance == nullptr)
+			throw std::runtime_error("No app instance available");
+	return(App::instance);
 }
 
 bool App::isIpAddressBlocked(in_addr_t ipAddress) const
@@ -196,6 +196,18 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 
 		processJobsForTimeZone(civilTime.hour(), civilTime.minute(), civilTime.month(), civilTime.day(), wday, civilTime.year(),
 			plannedTime, timeZone, workerThreads, i, numThreads, numMonitoringThreads);
+	}
+
+	std::cout << "App::processJobs(): Waiting for plannedTime = " << plannedTime << "..." << std::endl;
+	while(time(nullptr) < plannedTime && !stop)
+	{
+		usleep(100*1000);
+	}
+
+	if(stop)
+	{
+		std::cout << "App::processJobs(): Stop requested, aborting." << std::endl;
+		return;
 	}
 
 	for(std::size_t i = 0; i < numThreads + numMonitoringThreads; ++i)
@@ -342,12 +354,10 @@ int App::run()
 		startNotificationThread();
 		startUpdateThread();
 
-		bool firstLoop = true;
 		struct tm lastTime = { 0 };
-		int jitterCorrectionOffset = calcJitterCorrectionOffset();
 		while(!stop)
 		{
-			time_t currentTime = time(nullptr) + jitterCorrectionOffset;
+			time_t currentTime = time(nullptr);
 			struct tm t = { 0 };
 			if(gmtime_r(&currentTime, &t) == nullptr)
 				throw std::runtime_error("gmtime_r returned nullptr");
@@ -361,15 +371,8 @@ int App::run()
 				// update last time
 				memcpy(&lastTime, &t, sizeof(struct tm));
 
-				if(!firstLoop || t.tm_sec == 59 - jitterCorrectionOffset)
-				{
-					processJobs(currentTime, currentTime - t.tm_sec);
-					jitterCorrectionOffset = calcJitterCorrectionOffset();
-
-					cleanUpNotifications();
-				}
-
-				firstLoop = false;
+				processJobs(currentTime + 60, currentTime + 60 - t.tm_sec);
+				cleanUpNotifications();
 			}
 			else
 			{
@@ -403,11 +406,6 @@ int App::run()
 	curl_global_cleanup();
 
 	return(1);
-}
-
-int App::calcJitterCorrectionOffset()
-{
-	return 1; //! @todo
 }
 
 void App::updateThreadMain()

@@ -46,7 +46,7 @@ To build, you need a C++14 compiler and cmake.
 
 General notes
 -------------
-* Web interface and jitter correction algorithm are still missing in this repository and will be added as soon as they've been refactored to a presentable state.
+* Web interface is still missing in this repository and will be added as soon.
 * We strongly recommend to build CURL using the c-ares resolver. Otherwise every request might spawn its own thread for DNS resolving and your machine will run out of resources *very* soon.
 * Before running chronos, ensure that the limit of open files/sockets is not set too low. You might want to run `ulimit -n 65536` or similar first.
 * If data integrity is not important for you, we highly recommend to set `innodb_flush_log_at_trx_commit=0` and `innodb_flush_method=O_DIRECT` in your MySQL config for best performance. Otherwise the update thread (which is responsible for storing the job resuls) might lag behind the actual job executions quite soon.
