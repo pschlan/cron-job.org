@@ -198,6 +198,6 @@ Utils::Subnet::Subnet(const std::string &cidrNotation)
 	if(nBits > 32)
 		throw std::runtime_error("Invalid CIDR bits: " + cidrNotation);
 
-	this->netmask = ::htonl(0xFFFFFFFF << (32 - nBits));
+	this->netmask = htonl(0xFFFFFFFF << (32 - nBits));
 	this->maskedAddress = ::inet_addr(addressString.c_str()) & this->netmask;
 }
