@@ -8,7 +8,9 @@ Structure
 * `database` contains the MySQL database structure.
 * `chronos` is cron-job.org's cron job execution daemon and is responsible for fetching the jobs.
 * `protocol` contains the interface definitions for interaction between system nodes.
-* `web` contains the web interface (coming soon)
+* `frontend` contains the web interface (console; coming soon)
+* `statuspage` contains the status page UI (coming soon)
+* `api` contains the server API used by web interface and status page UI.
 
 chronos
 -------
@@ -43,6 +45,21 @@ To build, you need a C++14 compiler and cmake.
 1. Ensure you've imported the DB scheme from the `database` folder
 2. Customize `chronos.cfg` according to your system (especially add your MySQL login)
 3. Execute `./chronos /path/to/chronos.cfg`
+
+API
+---
+The API is written in PHP and needs to be hosted on a webserver (cron-job.org uses nginx with php-fpm). It is used by the console and the status page UI.
+
+### Prerequisites
+* nginx with php-fpm (PHP 7)
+* Optionally, a redis instance to support API call rate limiting
+
+### Getting started
+* Copy the api/ folder to your webserver
+* Create a copy of `config/config.inc.default.php` as `lib/config.inc.php` and customize it according to your environment
+
+### Notes
+* When changing the thrift protocol, don't forget to re-compile the PHP glue code and copy it to `lib/protocol/`. When committing, include the updated PHP code. Currently, this is a manual step.
 
 General notes
 -------------
