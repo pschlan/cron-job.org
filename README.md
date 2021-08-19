@@ -8,7 +8,7 @@ Structure
 * `database` contains the MySQL database structure.
 * `chronos` is cron-job.org's cron job execution daemon and is responsible for fetching the jobs.
 * `protocol` contains the interface definitions for interaction between system nodes.
-* `frontend` contains the web interface (console; coming soon)
+* `frontend` contains the web interface
 * `statuspage` contains the status page UI (coming soon)
 * `api` contains the server API used by web interface and status page UI.
 
@@ -76,7 +76,6 @@ The frontend is written in JavaScript using React and material-ui. You need `npm
 
 General notes
 -------------
-* Web interface is still missing in this repository and will be added as soon.
 * We strongly recommend to build CURL using the c-ares resolver. Otherwise every request might spawn its own thread for DNS resolving and your machine will run out of resources *very* soon.
 * Before running chronos, ensure that the limit of open files/sockets is not set too low. You might want to run `ulimit -n 65536` or similar first.
 * If data integrity is not important for you, we highly recommend to set `innodb_flush_log_at_trx_commit=0` and `innodb_flush_method=O_DIRECT` in your MySQL config for best performance. Otherwise the update thread (which is responsible for storing the job resuls) might lag behind the actual job executions quite soon.
