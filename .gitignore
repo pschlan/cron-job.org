@@ -1,1 +1,5 @@
 .DS_Store
+/frontend/build
+/frontend/node_modules
+/frontend/src/utils/Config.js
+/api/config/config.inc.php

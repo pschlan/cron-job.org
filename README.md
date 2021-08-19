@@ -55,11 +55,24 @@ The API is written in PHP and needs to be hosted on a webserver (cron-job.org us
 * Optionally, a redis instance to support API call rate limiting
 
 ### Getting started
-* Copy the api/ folder to your webserver
+* Copy the `api/` folder to your webserver
 * Create a copy of `config/config.inc.default.php` as `lib/config.inc.php` and customize it according to your environment
 
 ### Notes
 * When changing the thrift protocol, don't forget to re-compile the PHP glue code and copy it to `lib/protocol/`. When committing, include the updated PHP code. Currently, this is a manual step.
+
+Frontend
+--------
+The frontend is written in JavaScript using React and material-ui. You need `npm` to build it.
+
+### Prerequisites
+* Node.js
+
+### Getting started
+* Go to the `frontend/` folder
+* Install all required dependencies by running `npm install`
+* Create a copy of `src/utils/Config.default.js` as `src/utils/Config.js` and customize it according to your environment
+* Run the web interface via `npm start`
 
 General notes
 -------------
