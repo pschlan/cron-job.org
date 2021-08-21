@@ -1,0 +1,35 @@
+{
+  "common": {
+    "poweredBy": "powered by",
+    "refresh": "Aktualisieren"
+  },
+  "timespan": {
+    "1year": "1 Jahr",
+    "6months": "6 Monate",
+    "1month": "1 Monat",
+    "1week": "1 Woche",
+    "1day": "1 Tag"
+  },
+  "status": {
+    "availability": "Verfügbarkeit",
+    "availabilityWarning": "Verfügbarkeits-Warnung",
+    "availabilityError": "Verfügbarkeits-Problem",
+    "lowAvailabilityText": "Wir verzeichnen derzeit eine reduzierte Verfügbarkeit von {{percent}} % in den letzten 30 Minuten.",
+    "latency": "Latenz",
+    "latencyWarning": "Latenz-Warnung",
+    "latencyError": "Latenz-Problem",
+    "highLatencyText": "Wir verzeichnen derzeit eine ungewöhnlich hohe Latenz von {{ms}} ms in den letzten 30 Minuten.",
+    "healthy": "OK",
+    "allSystemsRunAsExpected": "Alle Systeme funktionieren derzeit wie erwartet."
+  },
+  "error": {
+    "404": {
+      "title": "Seite nicht gefunden",
+      "text": "Die angeforderte Status-Seite konnte nicht gefunden werden. Bitte prüfen Sie Ihren Link und versuchen Sie es erneut."
+    },
+    "other": {
+      "title": "Status-Seite konnte nicht geladen werden",
+      "text": "Entschuldigung, wir können die Status-Seite leider derzeit nicht laden. Bitte versuchen Sie es später erneut."
+    }
+  }
+}

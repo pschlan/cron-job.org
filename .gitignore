@@ -2,4 +2,7 @@
 /frontend/build
 /frontend/node_modules
 /frontend/src/utils/Config.js
+/statuspage/build
+/statuspage/node_modules
+/statuspage/src/utils/Config.js
 /api/config/config.inc.php
