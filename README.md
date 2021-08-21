@@ -9,7 +9,7 @@ Structure
 * `chronos` is cron-job.org's cron job execution daemon and is responsible for fetching the jobs.
 * `protocol` contains the interface definitions for interaction between system nodes.
 * `frontend` contains the web interface
-* `statuspage` contains the status page UI (coming soon)
+* `statuspage` contains the status page UI
 * `api` contains the server API used by web interface and status page UI.
 
 chronos
@@ -70,6 +70,19 @@ The frontend is written in JavaScript using React and material-ui. You need `npm
 
 ### Getting started
 * Go to the `frontend/` folder
+* Install all required dependencies by running `npm install`
+* Create a copy of `src/utils/Config.default.js` as `src/utils/Config.js` and customize it according to your environment
+* Run the web interface via `npm start`
+
+Status Page Frontend
+--------------------
+The status page frontend is written in JavaScript using React and material-ui. You need `npm` to build it.
+
+### Prerequisites
+* Node.js
+
+### Getting started
+* Go to the `statuspage/` folder
 * Install all required dependencies by running `npm install`
 * Create a copy of `src/utils/Config.default.js` as `src/utils/Config.js` and customize it according to your environment
 * Run the web interface via `npm start`
