@@ -198,11 +198,12 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 			plannedTime, timeZone, workerThreads, i, numThreads, numMonitoringThreads);
 	}
 
-	std::cout << "App::processJobs(): Waiting for plannedTime = " << plannedTime << "..." << std::endl;
+	std::cout << "App::processJobs(): Waiting for plannedTime = " << plannedTime << ", curTime = " << time(nullptr) << "..." << std::endl;
 	while(time(nullptr) < plannedTime && !stop)
 	{
-		usleep(100*1000);
+		usleep(1*1000);
 	}
+	std::cout << "App::processJobs(): Done waiting for plannedTime = " << plannedTime << "." << std::endl;
 
 	if(stop)
 	{

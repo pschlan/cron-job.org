@@ -57,7 +57,29 @@ curl_socket_t curlOpenSocketFunction(void *userdata, curlsocktype purpose, struc
 		return CURL_SOCKET_BAD;
 	}
 
-	return ::socket(address->family, address->socktype, address->protocol);
+	const int result = ::socket(address->family, address->socktype, address->protocol);
+
+	if(result == -1)
+	{
+		const int savedErrNo = errno;
+		switch(savedErrNo)
+		{
+		case EMFILE:
+			std::cerr << "ALERT! curlOpenSocketFunction(): socket() returned EMFILE - check thread/request count in config!" << std::endl;
+			break;
+		case ENFILE:
+			std::cerr << "ALERT! curlOpenSocketFunction(): socket() returned ENFILE - check thread/request count in config!" << std::endl;
+			break;
+		case ENOBUFS:
+		case ENOMEM:
+			std::cerr << "ALERT! curlOpenSocketFunction(): socket() returned ENOBUFS/ENOMEM - check thread/request count in config!" << std::endl;
+			break;
+		default:
+			break;
+		}
+	}
+
+	return result;
 }
 
 }

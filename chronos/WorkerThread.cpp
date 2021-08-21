@@ -170,10 +170,10 @@ void WorkerThread::addJob(HTTPRequest *req)
 
 void WorkerThread::run()
 {
-	keepAlive = shared_from_this();
-
 	if(requestQueue.empty())
 		return;
+
+	keepAlive = shared_from_this();
 
 	workerThread = std::thread(std::bind(&WorkerThread::threadMain, this));
 	workerThread.detach();
@@ -203,6 +203,23 @@ void WorkerThread::runJobs()
 void WorkerThread::jobDone(HTTPRequest *req)
 {
 	jitterSum += req->result->jitter;
+	if(req->result->jitter > jitterMax)
+	{
+		jitterMax = req->result->jitter;
+	}
+	if(req->result->jitter < jitterMin)
+	{
+		jitterMin = req->result->jitter;
+	}
+
+	if(req->result->status == JOBSTATUS_OK)
+	{
+		++succeededJobs;
+	}
+	else
+	{
+		++failedJobs;
+	}
 
 	// push result to result queue
 	UpdateThread::getInstance()->addResult(std::move(req->result));
@@ -236,6 +253,9 @@ void WorkerThread::addStat()
 	{
 		masterTransport->open();
 
+		const double jitterAvg = jitterSum / static_cast<double>(jobCount);
+		const double failureRate = static_cast<double>(failedJobs) / static_cast<double>(jobCount);
+
 		NodeStatsEntry stats;
 		stats.d = mday;
 		stats.m = month;
@@ -243,12 +263,15 @@ void WorkerThread::addStat()
 		stats.h = hour;
 		stats.i = minute;
 		stats.jobs = jobCount;
-		stats.jitter = jitterSum / static_cast<double>(jobCount);
+		stats.jitter = jitterAvg;
 
 		masterClient->reportNodeStats(App::getInstance()->config->getInt("node_id"),
 			stats);
 
 		masterTransport->close();
+
+		std::cout << "WorkerThread::addStat(): mday = " << mday << ", month = " << month << ", hour = " << hour << ", minute = " << minute
+			<< ": jobCount = " << jobCount << ", succeededJobs = " << succeededJobs << ", failedJobs = " << failedJobs << " (" << (failureRate * 100.0) << " %), jitterMin = " << jitterMin << ", jitterMax = " << jitterMax << ", jitterAvg = " << jitterAvg << std::endl;
 	}
 	catch(const apache::thrift::TException &ex)
 	{

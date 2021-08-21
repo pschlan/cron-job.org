@@ -82,7 +82,11 @@ namespace Chronos
 		int parallelJobs;
 		int curlStillRunning = 0;
 		double jitterSum = 0;
+		int jitterMax = 0;
+		int jitterMin = std::numeric_limits<int>::max();
 		int jobCount = 0;
+		int succeededJobs = 0;
+		int failedJobs = 0;
 		int mday;
 		int month;
 		int year;
