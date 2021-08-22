@@ -158,11 +158,17 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 
 	const std::size_t numThreads = config->getInt("num_threads");
 	const std::size_t numMonitoringThreads = config->getInt("num_monitoring_threads");
+	const std::size_t parallelRequests = App::getInstance()->config->getInt("parallel_requests");
+	const std::size_t parallelMonitoringRequests = App::getInstance()->config->getInt("parallel_monitoring_requests");
+	const std::size_t deferMonitorJobsMs = App::getInstance()->config->getInt("defer_monitor_jobs_ms");
 
 	std::vector<std::shared_ptr<WorkerThread>> workerThreads;
 	for (std::size_t i = 0; i < numThreads + numMonitoringThreads; ++i)
 	{
-		workerThreads.push_back(std::make_shared<WorkerThread>(t.tm_mday, t.tm_mon+1, t.tm_year+1900, t.tm_hour, t.tm_min));
+		workerThreads.push_back(std::make_shared<WorkerThread>(
+			t.tm_mday, t.tm_mon+1, t.tm_year+1900, t.tm_hour, t.tm_min,
+			i >= numThreads ? parallelMonitoringRequests : parallelRequests,
+			i >= numThreads ? deferMonitorJobsMs : 0));
 	}
 
 	std::size_t i = 0;

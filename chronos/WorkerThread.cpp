@@ -51,10 +51,9 @@ void evEventFunction(EV_P_ struct ev_io *w, int revents)
 
 }
 
-WorkerThread::WorkerThread(int mday, int month, int year, int hour, int minute)
-	: mday(mday), month(month), year(year), hour(hour), minute(minute)
+WorkerThread::WorkerThread(int mday, int month, int year, int hour, int minute, std::size_t parallelJobs, std::size_t deferMs)
+	: mday(mday), month(month), year(year), hour(hour), minute(minute), parallelJobs(parallelJobs), deferMs(deferMs)
 {
-	parallelJobs = App::getInstance()->config->getInt("parallel_requests");
 }
 
 WorkerThread::~WorkerThread()
@@ -246,7 +245,8 @@ void WorkerThread::jobDone(HTTPRequest *req)
 
 	// clean up
 	delete req;
-	--runningJobs;
+	if(runningJobs > 0)
+		--runningJobs;
 
 	// start more jobs
 	runJobs();
@@ -304,6 +304,12 @@ void WorkerThread::threadMain()
 	try
 	{
 		std::cout << "WorkerThread::threadMain(): Entered" << std::endl;
+
+		if(deferMs > 0)
+		{
+			std::cout << "WorkerThread::threadMain(): Deferring thread by " << deferMs << " ms..." << std::endl;
+			usleep(deferMs * 1000);
+		}
 
 		jobCount = requestQueue.size();
 

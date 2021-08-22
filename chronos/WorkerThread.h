@@ -37,7 +37,7 @@ namespace Chronos
 	class WorkerThread : public std::enable_shared_from_this<WorkerThread>
 	{
 	public:
-		WorkerThread(int mday, int month, int year, int hour, int minute);
+		WorkerThread(int mday, int month, int year, int hour, int minute, std::size_t parallelJobs, std::size_t deferMs);
 		~WorkerThread();
 
 	private:
@@ -77,9 +77,10 @@ namespace Chronos
 		struct ev_timer timerEvent;
 		std::shared_ptr<WorkerThread> keepAlive;
 		std::queue<HTTPRequest *> requestQueue;
-		int runningJobs = 0;
+		std::size_t runningJobs = 0;
 		std::thread workerThread;
-		int parallelJobs;
+		std::size_t parallelJobs;
+		std::size_t deferMs;
 		int curlStillRunning = 0;
 		double jitterSum = 0;
 		int jitterMax = 0;
