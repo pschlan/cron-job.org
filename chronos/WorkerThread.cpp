@@ -84,17 +84,37 @@ void WorkerThread::checkResults()
 
 int WorkerThread::timerFunction(CURLM *multi, long timeout_ms)
 {
-	ev_timer_stop(evLoop, &timerEvent);
-	if(timeout_ms > 0)
+	if(ev_is_active(&timerEvent))
 	{
-		double t = static_cast<double>(timeout_ms) / 1000;
-		ev_timer_init(&timerEvent, ::evTimerFunction, t, 0);
+		// Short cut for the case were curl asks for lots of timeout_ms = 0 timers
+		// when adding the easy handles to the multi handle in a loop. We want to avoid
+		// calling ev_timer_stop(), ev_timer_set(), ev_timer_start() for each of those.
+		if(timeout_ms == 0)
+		{
+			ev_tstamp remaining = ev_timer_remaining(evLoop, &timerEvent);
+			if (remaining < 10e-3)
+			{
+				return 0;
+			}
+		}
+
+		ev_timer_stop(evLoop, &timerEvent);
+	}
+
+	// Set timer
+	if(timeout_ms >= 0)
+	{
+		double t = static_cast<double>(timeout_ms) / 1000.d;
+		ev_timer_set(&timerEvent, t, 0);
 		ev_timer_start(evLoop, &timerEvent);
 	}
-	else
+
+	// Stop timer
+	else if (timeout_ms == -1)
 	{
-		::evTimerFunction(evLoop, &timerEvent, 0);
+
 	}
+
 	return 0;
 }
 
