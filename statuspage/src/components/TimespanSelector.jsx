@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { makeStyles, Tab, Tabs } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
 
@@ -19,11 +19,11 @@ export default function TimespanSelector({ onChange = (value) => null }) {
   const classes = useStyles();
   const { t } = useTranslation();
 
-  const onChangeHook = useCallback(onChange, []);
+  const onChangeHook = useRef(onChange, []);
   const [value, setValue] = useState('1day');
 
   useEffect(() => {
-    onChangeHook(value);
+    onChangeHook.current(value);
   }, [onChangeHook, value]);
 
   return <div className={classes.div}>
