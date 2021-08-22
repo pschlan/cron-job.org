@@ -1,8 +1,9 @@
-language: generic
 dist: bionic
 jobs:
   include:
-    - os: linux
+    - name: Chronos
+      language: generic
+      os: linux
       env: COMPILER_NAME=gcc CXX=g++-5 CC=gcc-5
       addons:
         apt:
@@ -27,6 +28,16 @@ jobs:
       - tar -xzf thrift-0.13.0.tar.gz
       - pushd thrift-0.13.0 && ./configure --prefix=/usr --with-php=no --with-erlang=no --with-go=no --with-java=no --with-python=no --with-py3=no --with-ruby=no --with-nodejs=no --with-c_glib=no --with-cpp=yes && make && sudo make install && popd
       script:
-      - mkdir build
-      - cd build
+      - mkdir ${TRAVIS_BUILD_DIR}/build
+      - cd ${TRAVIS_BUILD_DIR}/build
       - cmake -DCMAKE_INSTALL_PREFIX=/usr/local .. && make
+    - name: Frontend
+      language: node_js
+      node_js:
+      - 16
+      before_script:
+      - cd ${TRAVIS_BUILD_DIR}/frontend
+      - npm install
+      script:
+      - npm run build
+
