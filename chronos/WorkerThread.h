@@ -85,6 +85,9 @@ namespace Chronos
 		double jitterSum = 0;
 		int jitterMax = 0;
 		int jitterMin = std::numeric_limits<int>::max();
+		double timeTotalSum = 0;
+		int timeTotalMax = 0;
+		int timeTotalMin = std::numeric_limits<int>::max();
 		int jobCount = 0;
 		int succeededJobs = 0;
 		int failedJobs = 0;

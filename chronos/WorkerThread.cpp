@@ -231,6 +231,17 @@ void WorkerThread::jobDone(HTTPRequest *req)
 		jitterMin = req->result->jitter;
 	}
 
+	int timeTotalMs = req->result->timeTotal / 1000;
+	timeTotalSum += timeTotalMs;
+	if(timeTotalMs > timeTotalMax)
+	{
+		timeTotalMax = timeTotalMs;
+	}
+	if(timeTotalMs < timeTotalMin)
+	{
+		timeTotalMin = timeTotalMs;
+	}
+
 	if(req->result->status == JOBSTATUS_OK)
 	{
 		++succeededJobs;
@@ -274,6 +285,7 @@ void WorkerThread::addStat()
 		masterTransport->open();
 
 		const double jitterAvg = jitterSum / static_cast<double>(jobCount);
+		const double timeTotalAvg = timeTotalSum / static_cast<double>(jobCount);
 		const double failureRate = static_cast<double>(failedJobs) / static_cast<double>(jobCount);
 
 		NodeStatsEntry stats;
@@ -290,8 +302,11 @@ void WorkerThread::addStat()
 
 		masterTransport->close();
 
-		std::cout << "WorkerThread::addStat(): mday = " << mday << ", month = " << month << ", hour = " << hour << ", minute = " << minute
-			<< ": jobCount = " << jobCount << ", succeededJobs = " << succeededJobs << ", failedJobs = " << failedJobs << " (" << (failureRate * 100.0) << " %), jitterMin = " << jitterMin << ", jitterMax = " << jitterMax << ", jitterAvg = " << jitterAvg << std::endl;
+		std::cout << "WorkerThread::addStat(): mday = " << mday << ", month = " << month << ", hour = " << hour << ", minute = " << minute << ": "
+			<< "jobCount = " << jobCount << ", succeededJobs = " << succeededJobs << ", failedJobs = " << failedJobs << " (" << (failureRate * 100.0) << " %), "
+			<< "jitterMin = " << jitterMin << ", jitterMax = " << jitterMax << ", jitterAvg = " << jitterAvg << ", "
+			<< "timeTotalMin = " << timeTotalMin << ", timeTotalMax = " << timeTotalMax << ", timeTotalAvg = " << timeTotalAvg << ", "
+			<< std::endl;
 	}
 	catch(const apache::thrift::TException &ex)
 	{
