@@ -89,13 +89,19 @@ HTTPRequest::HTTPRequest()
 {
 	maxSize = App::getInstance()->config->getInt("request_max_size");
 	memset(curlError, 0, sizeof(curlError));
+
+	setupEasyHandle();
 }
 
 HTTPRequest::~HTTPRequest()
 {
 	if(easy != nullptr)
 	{
-		curl_multi_remove_handle(multiHandle, easy);
+		if(addedToMulti)
+		{
+			curl_multi_remove_handle(multiHandle, easy);
+			addedToMulti = false;
+		}
 		curl_easy_cleanup(easy);
 		easy = nullptr;
 	}
@@ -277,28 +283,15 @@ void HTTPRequest::done(CURLcode res)
 		onDone();
 }
 
-void HTTPRequest::submit(CURLM *curlMultiHandle)
+void HTTPRequest::setupEasyHandle()
 {
-	multiHandle 		= curlMultiHandle;
-
-	result->dateStarted 	= Utils::getTimestampMS();
-	result->jitter 			= result->dateStarted - result->datePlanned;
-
-	if(!isValid)
+	if(easy != nullptr)
 	{
-		strcpy(curlError, "Job not valid");
-		done(CURLE_OBSOLETE);
 		return;
 	}
 
 	easy = curl_easy_init();
-	if(easy == nullptr)
-	{
-		std::cout << "Handle creation failed!" << std::endl;
-		strcpy(curlError, "Failed to create handle!");
-		done(CURLE_OBSOLETE);
-		return;
-	}
+	addedToMulti = false;
 
 	curl_easy_setopt(easy, CURLOPT_DNS_CACHE_TIMEOUT,	0);
 	curl_easy_setopt(easy, CURLOPT_FORBID_REUSE,		1);
@@ -306,7 +299,6 @@ void HTTPRequest::submit(CURLM *curlMultiHandle)
 	curl_easy_setopt(easy, CURLOPT_PRIVATE,				this);
 	curl_easy_setopt(easy, CURLOPT_PROTOCOLS,			CURLPROTO_HTTP | CURLPROTO_HTTPS);
 	curl_easy_setopt(easy, CURLOPT_FOLLOWLOCATION, 		0);
-	curl_easy_setopt(easy, CURLOPT_URL, 				url.c_str());
 	curl_easy_setopt(easy, CURLOPT_NOPROGRESS,			1);
 	curl_easy_setopt(easy, CURLOPT_ERRORBUFFER,			curlError);
 	curl_easy_setopt(easy, CURLOPT_WRITEFUNCTION,		curlWriteFunction);
@@ -322,6 +314,31 @@ void HTTPRequest::submit(CURLM *curlMultiHandle)
 	curl_easy_setopt(easy, CURLOPT_SSL_VERIFYHOST,		0);
 	curl_easy_setopt(easy, CURLOPT_CAINFO,				NULL);
 	curl_easy_setopt(easy, CURLOPT_IPRESOLVE,			CURL_IPRESOLVE_V4);
+}
+
+void HTTPRequest::submit(CURLM *curlMultiHandle)
+{
+	multiHandle 			= curlMultiHandle;
+
+	result->dateStarted 	= Utils::getTimestampMS();
+	result->jitter 			= result->dateStarted - result->datePlanned;
+
+	if(!isValid)
+	{
+		strcpy(curlError, "Job not valid");
+		done(CURLE_OBSOLETE);
+		return;
+	}
+
+	if(easy == nullptr)
+	{
+		std::cout << "Handle creation failed!" << std::endl;
+		strcpy(curlError, "Failed to create handle!");
+		done(CURLE_OBSOLETE);
+		return;
+	}
+
+	curl_easy_setopt(easy, CURLOPT_URL, 				url.c_str());
 
 	if(requestMethod == RequestMethod::POST || requestMethod == RequestMethod::PUT || requestMethod == RequestMethod::PATCH || requestMethod == RequestMethod::DELETE)
 	{
@@ -375,8 +392,8 @@ void HTTPRequest::submit(CURLM *curlMultiHandle)
 	{
 		for(const auto &header : requestHeaders)
 		{
-			std::string lowerKey = Utils::toLower(header.first);
-			if(lowerKey == "user-agent" || lowerKey == "connection")
+			if (strcasecmp(header.first.c_str(), "user-agent") == 0
+				|| strcasecmp(header.first.c_str(), "connection") == 0)
 				continue;
 			std::string head = header.first + ": " + header.second;
 			headerList = curl_slist_append(headerList, head.c_str());
@@ -399,6 +416,8 @@ void HTTPRequest::submit(CURLM *curlMultiHandle)
 		done(CURLE_OBSOLETE);
 		return;
 	}
+	else
+		addedToMulti = true;
 }
 
 HTTPRequest *HTTPRequest::fromURL(const std::string &url, int userID)

@@ -74,8 +74,12 @@ namespace Chronos
 		std::function<void()> onDone;
 
 	private:
+		void setupEasyHandle();
+
+	private:
 		CURL *easy = nullptr;
 		CURLM *multiHandle = nullptr;
+		bool addedToMulti = false;
 		struct curl_slist *headerList = nullptr;
 		bool isValid = false;
 		char curlError[CURL_ERROR_SIZE];
