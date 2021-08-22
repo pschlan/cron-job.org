@@ -41,4 +41,13 @@ jobs:
       - npm install
       script:
       - npm run build
-
+    - name: StatusPage
+      language: node_js
+      node_js:
+      - 16
+      before_script:
+      - cd ${TRAVIS_BUILD_DIR}/statuspage
+      - cp src/utils/Config.default.js src/utils/Config.js
+      - npm install
+      script:
+      - npm run build
