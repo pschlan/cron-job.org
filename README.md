@@ -15,7 +15,7 @@ Structure
 chronos
 -------
 ### Concept
-chronos checks the MySQL database every minute to collect all jobs to execute. For every minute, a thread is spawned which processes all the jobs. Actual HTTP fetching is done using the excellent CURL multi library with libev as library used to provide the event loop. Together with the c-ares resolver this allows for thousands of parallel HTTP requests.
+chronos checks the MySQL database every minute to collect all jobs to execute. For every minute, a thread is spawned which processes all the jobs. Actual HTTP fetching is done using the excellent curl multi library with libev as library used to provide the event loop. Together with the c-ares resolver this allows for thousands of parallel HTTP requests.
 
 cron-job.org supports storing the job results for the user's convenience. This can quickly lead to I/O bottlenecks when storing the result data in a MySQL database. (Which also has the downside that cleaning up old entries is extremely expensive.) To solve this issue, chronos stores the results in per-user per-day SQLite databases. Cleaning up old entries is as easy as deleting the corresponding day's databases.
 
@@ -89,7 +89,7 @@ The status page frontend is written in JavaScript using React and material-ui. Y
 
 General notes
 -------------
-* We strongly recommend to build CURL using the c-ares resolver. Otherwise every request might spawn its own thread for DNS resolving and your machine will run out of resources *very* soon.
+* We strongly recommend to build curl using the c-ares resolver. Otherwise every request might spawn its own thread for DNS resolving and your machine will run out of resources *very* soon.
 * Before running chronos, ensure that the limit of open files/sockets is not set too low. You might want to run `ulimit -n 65536` or similar first.
 * If data integrity is not important for you, we highly recommend to set `innodb_flush_log_at_trx_commit=0` and `innodb_flush_method=O_DIRECT` in your MySQL config for best performance. Otherwise the update thread (which is responsible for storing the job resuls) might lag behind the actual job executions quite soon.
 * Parts of the source are quite old and from early stages of the project and might require a refactoring sooner or later.
