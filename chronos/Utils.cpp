@@ -72,6 +72,7 @@ std::string Utils::userPathPart(const int userID)
 	std::string userIdHex = ss.str();
 
 	std::string result;
+	result.reserve(userIdHex.length() * 2);
 	for(size_t i = 0; i < userIdHex.length(); ++i)
 	{
 		result += userIdHex[i];
@@ -90,15 +91,12 @@ std::string Utils::userDbFilePath(const std::string &userDbFilePathScheme, const
 	const std::string userPart = userPathPart(userID);
 
 	// e.g. /var/lib/cron-job.org/%u
-	std::string dbDirPath = userDbFilePathScheme;
-	Utils::replace(dbDirPath, "%u", userPart);
+	std::string dbDirPath = formatString(userDbFilePathScheme, {{'u', userPart}});
 	if(!Utils::directoryExists(dbDirPath))
 		Utils::mkPath(dbDirPath);
 
 	// e.g. joblog-%m-%d.db
-	std::string dbFileName = userDbFileNameScheme;
-	Utils::replace(dbFileName, "%d", Utils::toString(mday, 2));
-	Utils::replace(dbFileName, "%m", Utils::toString(month, 2));
+	std::string dbFileName = formatString(userDbFileNameScheme, {{'d', Utils::toString(mday, 2)}, {'m', Utils::toString(month, 2)}});
 
 	return dbDirPath + "/" + dbFileName;
 }
@@ -108,14 +106,12 @@ std::string Utils::userTimeDbFilePath(const std::string &userDbFilePathScheme, c
 	const std::string userPart = userPathPart(userID);
 
 	// e.g. /var/lib/cron-job.org/%u
-	std::string dbDirPath = userDbFilePathScheme;
-	Utils::replace(dbDirPath, "%u", userPart);
+	std::string dbDirPath = formatString(userDbFilePathScheme, {{'u', userPart}});
 	if(!Utils::directoryExists(dbDirPath))
 		Utils::mkPath(dbDirPath);
 
 	// e.g. timeseries-%y.db
-	std::string dbFileName = userTimeDbFileNameScheme;
-	Utils::replace(dbFileName, "%y", Utils::toString(year, 4));
+	std::string dbFileName = formatString(userTimeDbFileNameScheme, {{'y', Utils::toString(year, 4)}});
 
 	return dbDirPath + "/" + dbFileName;
 }
@@ -181,6 +177,35 @@ std::vector<std::string> Utils::split(const std::string &str, char delimiter)
 	}
 
 	result.push_back(str.substr(last));
+
+	return result;
+}
+
+std::string Utils::formatString(const std::string &in, const std::unordered_map<char, std::string> &arguments)
+{
+	std::string result;
+	result.reserve(in.size());
+
+	for(auto it = in.begin(); it != in.end(); ++it)
+	{
+		if(*it == '%' && it != in.end())
+		{
+			char c = *++it;
+			auto argIt = arguments.find(c);
+			if(argIt != arguments.end())
+			{
+				result.append(argIt->second);
+			}
+			else
+			{
+				result.append(1, c);
+			}
+		}
+		else
+		{
+			result.append(1, *it);
+		}
+	}
 
 	return result;
 }

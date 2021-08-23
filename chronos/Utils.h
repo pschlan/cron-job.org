@@ -13,6 +13,7 @@
 #define _UTILS_H_
 
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <stdint.h>
@@ -35,6 +36,7 @@ namespace Chronos
 		bool mkPath(const std::string &path, const mode_t mode = 0755);
 		std::string toLower(const std::string &str);
 		std::vector<std::string> split(const std::string &str, char delimiter);
+		std::string formatString(const std::string &in, const std::unordered_map<char, std::string> &arguments);
 
 		class Subnet
 		{
