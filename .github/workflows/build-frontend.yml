@@ -34,3 +34,11 @@ jobs:
       working-directory: ./frontend
     - run: npm run build --if-present
       working-directory: ./frontend
+    - name: 'Upload new assets to s3'
+      uses: chrislennon/action-aws-cli@v1.1
+    - run: aws s3 sync ./build s3://$FRONTEND_S3_BUCKET_NAME --exclude "*.map"
+      working-directory: ./frontend
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        FRONTEND_S3_BUCKET_NAME: ${{ secrets.FRONTEND_S3_BUCKET_NAME }}
