@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { TextField, Button, Grid, Link, makeStyles, Typography } from '@material-ui/core';
+import { TextField, Button, Grid, Link, makeStyles, Typography, FormControlLabel, Checkbox } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 import { Link as RouterLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -13,7 +13,7 @@ const useStyles = makeStyles(themes => ({
     marginTop: themes.spacing(1)
   },
   submit: {
-    margin: themes.spacing(3, 0, 2)
+    margin: themes.spacing(1, 0, 2)
   },
   error: {
     margin: themes.spacing(2, 0)
@@ -25,6 +25,7 @@ export default function Login() {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState();
   const passwordField = useRef();
@@ -36,7 +37,7 @@ export default function Login() {
     setIsLoading(true);
     setErrorMessage();
 
-    login(email, password)
+    login(email, password, rememberMe)
       .then(response => dispatch(setAuthToken(response.token)))
       .catch(error => {
         if (error.response && error.response.status === 410) {
@@ -84,9 +85,10 @@ export default function Login() {
         value={password}
         error={!!errorMessage}
         ref={passwordField} />
-      {/*<FormControlLabel
+      <FormControlLabel
         control={<Checkbox value="remember" color="primary" />}
-        label={t('login.rememberme')} />*/}
+        onChange={({target}) => setRememberMe(target.checked)}
+        label={t('login.rememberme')} />
       <Button
         type="submit"
         fullWidth

@@ -1,12 +1,13 @@
 import axios from 'axios'
 import { Config } from './Config';
 import { store } from '../redux';
-import { endSession, setAuthToken } from '../redux/actions';
+import { setAuthToken } from '../redux/actions';
 import i18n from 'i18next';
 import { snackbarRef } from '../App';
 import { getLanguageCode } from '../hooks/useLanguageCode';
+import { logOut } from './Utils';
 
-function performRequest(method, payload, authenticated = true) {
+function performRequest(method, payload, authenticated = true, isLogoutRequest = false) {
   const auth = store && store.getState().auth;
   const authHeaders = authenticated && auth && auth.session ? {
     'Authorization': 'Bearer ' + auth.session.token
@@ -21,7 +22,7 @@ function performRequest(method, payload, authenticated = true) {
     };
     const data = JSON.stringify(payload);
 
-    axios.post(Config.apiURL, data, { headers })
+    axios.post(Config.apiURL, data, { headers, withCredentials: true })
       .then((response) => {
         if ('x-refreshed-token' in response.headers) {
           store.dispatch(setAuthToken(response.headers['x-refreshed-token']));
@@ -29,8 +30,8 @@ function performRequest(method, payload, authenticated = true) {
         resolve(response.data);
       })
       .catch((error ) => {
-        if (error.response && error.response.status === 401 && authenticated) {
-          store && store.dispatch(endSession());
+        if (error.response && error.response.status === 401 && authenticated && !isLogoutRequest) {
+          store && logOut(store.dispatch);
           return;
         }
         if (error.response && error.response.status === 429) {
@@ -43,11 +44,16 @@ function performRequest(method, payload, authenticated = true) {
   });
 }
 
-export function login(email, password) {
+export function login(email, password, rememberMe = false) {
   return performRequest('Login', {
     email,
-    password
+    password,
+    rememberMe
   }, false);
+}
+
+export function logout() {
+  return performRequest('Logout', null, true, true);
 }
 
 export function refreshSession() {

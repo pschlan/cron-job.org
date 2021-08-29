@@ -5,7 +5,7 @@ import { Alert, AlertTitle } from '@material-ui/lab';
 import { deleteAccount } from '../../utils/API';
 import { useSnackbar } from 'notistack';
 import { useDispatch } from 'react-redux';
-import { endSession } from '../../redux/actions';
+import { logOut } from '../../utils/Utils';
 
 const useStyles = makeStyles(theme => ({
     deleteAccountDialog: {
@@ -32,7 +32,7 @@ export default function DeleteAccountDialog({ currentEmailAddress, onClose }) {
       deleteAccount(emailAddress)
         .then(() => {
           enqueueSnackbar(t('settings.accountDeleted'), { variant: 'success' });
-          dispatch(endSession());
+          logOut(dispatch);
         })
         .catch(() => {
           enqueueSnackbar(t('settings.failedToDeleteAccount'), { variant: 'error' });

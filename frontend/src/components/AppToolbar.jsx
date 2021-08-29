@@ -1,6 +1,5 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { endSession } from '../redux/actions';
 import { Button, Box, IconButton } from '@material-ui/core';
 import { Config } from '../utils/Config';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +11,7 @@ import ExpandIcon from '@material-ui/icons/ExpandMore';
 import ActionMenu from './misc/ActionMenu';
 import useLanguageCode from '../hooks/useLanguageCode';
 import useViewport from '../hooks/useViewport';
+import { logOut } from '../utils/Utils';
 
 export default function AppToolbar() {
   const dispatch = useDispatch();
@@ -33,7 +33,7 @@ export default function AppToolbar() {
       />
     <IconButton
       color='inherit'
-      onClick={() => dispatch(endSession())}
+      onClick={() => logOut(dispatch)}
       >
       <LogoutIcon />
     </IconButton>
@@ -54,7 +54,7 @@ export default function AppToolbar() {
     </Box>
     <Button
       color='inherit'
-      onClick={() => dispatch(endSession())}
+      onClick={() => logOut(dispatch)}
       startIcon={<LogoutIcon />}
       >
       {t('common.logout')}
