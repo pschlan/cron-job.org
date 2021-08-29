@@ -1,0 +1,39 @@
+name: Build and deploy frontend
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build-frontend:
+    runs-on: ubuntu-latest
+    environment: beta
+    strategy:
+      matrix:
+        node-version: [16.x]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: ./frontend/package-lock.json
+    - run: 'echo "$FRONTEND_CONFIG" > ./src/utils/Config.js'
+      shell: bash
+      env:
+        FRONTEND_CONFIG: ${{secrets.FRONTEND_CONFIG}}
+      working-directory: ./frontend
+    - run: npm ci
+      working-directory: ./frontend
+    - run: npm run build
+      working-directory: ./frontend
+    - name: Deploy to S3/CloudFront
+      run: aws s3 sync ./build s3://$FRONTEND_S3_BUCKET --exclude "*.map" && aws cloudfront create-invalidation --distribution-id $FRONTEND_CF_DISTRIBUTION_ID --paths "/*"
+      working-directory: ./frontend
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: eu-west-1
+        FRONTEND_S3_BUCKET: ${{ secrets.FRONTEND_S3_BUCKET }}
+        FRONTEND_CF_DISTRIBUTION_ID: ${{ secrets.FRONTEND_CF_DISTRIBUTION_ID }}
