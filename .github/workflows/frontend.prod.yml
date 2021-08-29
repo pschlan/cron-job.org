@@ -7,7 +7,9 @@ on:
 jobs:
   build-frontend:
     runs-on: ubuntu-latest
-    environment: prod
+    environment:
+      name: prod
+      url: https://console.cron-job.org
     strategy:
       matrix:
         node-version: [16.x]

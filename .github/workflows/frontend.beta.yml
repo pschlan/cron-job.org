@@ -7,7 +7,9 @@ on:
 jobs:
   build-frontend:
     runs-on: ubuntu-latest
-    environment: beta
+    environment:
+      name: beta
+      url: https://console.beta.cron-job.org
     strategy:
       matrix:
         node-version: [16.x]
