@@ -1,0 +1,42 @@
+name: Build and deploy statuspage
+
+on:
+  push:
+    branches: [ prod, actions-status ]
+
+jobs:
+  build-statuspage:
+    runs-on: ubuntu-latest
+    environment: prod
+    strategy:
+      matrix:
+        node-version: [16.x]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: ./statuspage/package-lock.json
+    - run: 'echo "$STATUSPAGE_CONFIG" > ./src/utils/Config.js'
+      shell: bash
+      env:
+        STATUSPAGE_CONFIG: ${{secrets.STATUSPAGE_CONFIG}}
+      working-directory: ./statuspage
+    - run: npm ci
+      working-directory: ./statuspage
+    - run: npm run build
+      working-directory: ./statuspage
+    - name: Deploy via SSH
+      run: |
+        mkdir -p ~/.ssh
+        chmod 0700 ~/.ssh
+        touch ~/.ssh/id_rsa_statuspage
+        chmod 0600 ~/.ssh/id_rsa_statuspage
+        echo "$STATUSPAGE_SSH_KEY" > ~/.ssh/id_rsa_statuspage
+        rsync -avz -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_rsa_statuspage" ./build/ $STATUSPAGE_DEST
+        rm ~/.ssh/id_rsa_statuspage
+      env:
+        STATUSPAGE_SSH_KEY: ${{secrets.STATUSPAGE_SSH_KEY}}
+        STATUSPAGE_DEST: ${{secrets.STATUSPAGE_DEST}}
