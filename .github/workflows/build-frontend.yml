@@ -5,7 +5,7 @@ name: Build Frontend
 
 on:
   push:
-    branches: [ prod ]
+    branches: [ prod, actions-test ]
 
 jobs:
   build-frontend:
