@@ -7,6 +7,7 @@ on:
 jobs:
   build-frontend:
     runs-on: ubuntu-latest
+    environment: prod
     strategy:
       matrix:
         node-version: [16.x]
@@ -23,12 +24,14 @@ jobs:
       env:
         FRONTEND_CONFIG: ${{secrets.FRONTEND_CONFIG}}
       working-directory: ./frontend
+    - run: ls -l ./src/utils/Config.js
+      working-directory: ./frontend
     - run: npm ci
       working-directory: ./frontend
     - run: npm run build
       working-directory: ./frontend
     - name: Deploy to S3
-      run: echo "$FRONTEND_S3_BUCKET" && aws s3 sync ./build s3://$FRONTEND_S3_BUCKET --exclude "*.map"
+      run: aws s3 sync ./build s3://$FRONTEND_S3_BUCKET --exclude "*.map"
       working-directory: ./frontend
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
