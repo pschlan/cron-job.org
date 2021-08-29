@@ -92,3 +92,11 @@ CREATE TABLE `userdeletelog` (
     `email_salt` varchar(16) NOT NULL DEFAULT '',
     PRIMARY KEY (`userid`)
 ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `refreshtoken`(
+    `token` varchar(64) NOT NULL DEFAULT '',
+    `userid` int(11) NOT NULL DEFAULT 0,
+    `device` varchar(255) NOT NULL DEFAULT '',
+    `expires` int(11) NOT NULL DEFAULT 0,
+    PRIMARY KEY(`token`)
+) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

@@ -5,6 +5,7 @@ require_once('./lib/Database.php');
 require_once('./lib/RedisConnection.php');
 require_once('./lib/Language.php');
 require_once('./lib/APIDispatcher.php');
+require_once('./resources/User.php');
 
 Language::initialize();
 Database::initialize(
@@ -24,4 +25,5 @@ if (isset($config['redis'])) {
 
 $dispatcher = new APIDispatcher();
 $dispatcher->registerDirectory('./apimethods/');
+$dispatcher->registerRefreshTokenHandler(UserManager::getRefreshTokenHandler());
 $dispatcher->dispatch();

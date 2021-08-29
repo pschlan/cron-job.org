@@ -6,6 +6,7 @@ require_once('SessionToken.php');
 
 class APIDispatcher {
   private $handlers = array();
+  private $refreshTokenHandler = false;
 
   public function register($class) {
     $this->handlers[$class::name()] = function() use($class) {
@@ -37,6 +38,10 @@ class APIDispatcher {
     }
   }
 
+  public function registerRefreshTokenHandler($handler) {
+    $this->refreshTokenHandler = $handler;
+  }
+
   private function authenticate() {
     $headers = apache_request_headers();
     if (!isset($headers['Authorization']) || strpos($headers['Authorization'], ' ') === false) {
@@ -51,13 +56,33 @@ class APIDispatcher {
     return SessionToken::fromJwt($payload);
   }
 
+  private function validateRefreshToken($sessionToken) {
+    if (!$this->refreshTokenHandler || !isset($_COOKIE['refreshToken'])) {
+      return false;
+    }
+
+    $refreshToken = $_COOKIE['refreshToken'];
+    if ($this->refreshTokenHandler->validateRefreshToken($refreshToken, intval($sessionToken->userId), intval($sessionToken->userGroupId))) {
+      return true;
+    }
+
+    return false;
+  }
+
   public function dispatch() {
     global $config;
 
-    //! @todo If we want to scope this down, we need to find a way to allow all the status page domains
-    //!       or alternatively proxy the GetPublicStatusPage API from the status page server, altering the
-    //!       Access-Control-Allow-Origin header.
-    header('Access-Control-Allow-Origin: *');
+    $origin = strtolower($_SERVER['HTTP_ORIGIN']);
+
+    if (in_array($origin, $config['allowCredentialsOrigins'])) {
+      header('Access-Control-Allow-Origin: ' . $origin);
+      header('Access-Control-Allow-Credentials: true');
+    } else {
+      //! @todo If we want to scope this down, we need to find a way to allow all the status page domains
+      //!       or alternatively proxy the GetPublicStatusPage API from the status page server, altering the
+      //!       Access-Control-Allow-Origin header.
+      header('Access-Control-Allow-Origin: *');
+    }
 
     if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
       header('HTTP/1.1 204 No Content');
@@ -106,7 +131,9 @@ class APIDispatcher {
           $sessionToken = $this->authenticate();
 
           if ($sessionToken->isExpired()) {
-            throw new UnauthorizedAPIException();
+            if (!$this->validateRefreshToken($sessionToken)) {
+              throw new UnauthorizedAPIException();
+            }
           }
         } catch (Exception $e) {
           throw new UnauthorizedAPIException();

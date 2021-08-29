@@ -29,7 +29,7 @@ class Login extends AbstractAPIMethod {
 
   public function execute($request, $sessionToken, $language) {
     try {
-      $result = UserManager::login($request->email, $request->password, $language);
+      $result = UserManager::login($request->email, $request->password, isset($request->rememberMe) && $request->rememberMe, $language);
       if ($result) {
         return $result;
       }

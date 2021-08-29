@@ -44,6 +44,26 @@ class UserGroup {
   }
 }
 
+class RefreshTokenHandler {
+  public function validateRefreshToken($refreshToken, $userId, $userGroupId) {
+    if (empty($refreshToken) || $userId <= 0) {
+      return false;
+    }
+
+    $stmt = Database::get()->prepare('SELECT `refreshtoken`.`userid` AS `userId`, `refreshtoken`.`expires` AS `expires`, `user`.`usergroupid` AS `userGroupId` FROM `refreshtoken` '
+      . 'INNER JOIN `user` ON `user`.`userid`=`refreshtoken`.`userid` WHERE `refreshtoken`.`token`=:token');
+    $stmt->execute([':token' => $refreshToken]);
+
+    if ($tokenRow = $stmt->fetch(PDO::FETCH_OBJ)) {
+      if (intval($tokenRow->userId) === intval($userId) && intval($tokenRow->userGroupId) === intval($userGroupId) && $tokenRow->expires > time()) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+}
+
 class UserManager {
   private $authToken;
 
@@ -51,6 +71,10 @@ class UserManager {
 
   function __construct($authToken) {
     $this->authToken = $authToken;
+  }
+
+  public static function getRefreshTokenHandler() {
+    return new RefreshTokenHandler();
   }
 
   public function getProfile() {
@@ -85,7 +109,7 @@ class UserManager {
     return $stmt->fetch();
   }
 
-  public static function login($email, $password, $language) {
+  public static function login($email, $password, $rememberMe, $language) {
     $stmt = Database::get()->prepare('SELECT '
       . '`userid` AS `userId`, `password`, `password_salt` AS `passwordSalt`, `status`, `usergroupid` AS `userGroupId` '
       . 'FROM `user` WHERE `email`=:email');
@@ -103,6 +127,10 @@ class UserManager {
               ':userId'           => $userRow->userId
             ]);
 
+          if ($rememberMe) {
+            self::setRefreshTokenCookie(self::createRefreshToken($userRow->userId, $_SERVER['HTTP_USER_AGENT']));
+          }
+
           return (object) [
             'token' => (new SessionToken($userRow->userId, $userRow->userGroupId))->toJwt()
           ];
@@ -115,6 +143,46 @@ class UserManager {
     }
 
     return false;
+  }
+
+  public function logout() {
+    if (isset($_COOKIE['refreshToken']) && !empty($_COOKIE['refreshToken'])) {
+      $stmt = Database::get()->prepare('DELETE FROM `refreshtoken` WHERE `token`=:token AND `userId`=:userId');
+      $stmt->execute([
+        ':token'  => $_COOKIE['refreshToken'],
+        ':userId' => $this->authToken->userId
+      ]);
+    }
+    self::setRefreshTokenCookie('');
+  }
+
+  private static function setRefreshTokenCookie($value) {
+    global $config;
+
+    setcookie('refreshToken', $value, [
+      'expires' => $value === '' ? time() - $config['refreshTokenValiditySeconds'] : time() + $config['refreshTokenValiditySeconds'],
+      'secure' => true,
+      'httponly' => true,
+      'samesite' => 'Strict',
+      'path' => '/'
+    ]);
+  }
+
+  private function createRefreshToken($userId, $device) {
+    global $config;
+
+    $token = self::generateToken($config['refreshTokenLength']);
+    $expires = time() + $config['refreshTokenValiditySeconds'];
+
+    $stmt = Database::get()->prepare('INSERT INTO `refreshtoken`(`token`, `userid`, `device`, `expires`) VALUES(:token, :userId, :device, :expires)');
+    $stmt->execute([
+      ':token'    => $token,
+      ':userId'   => $userId,
+      ':device'   => $device,
+      ':expires'  => $expires
+    ]);
+
+    return $token;
   }
 
   public function changeEmail($newEmail, $language) {

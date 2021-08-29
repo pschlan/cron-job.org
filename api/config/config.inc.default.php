@@ -24,6 +24,9 @@ $config = array(
   'frontendURL'                     => 'https://console.example.com/',
   'statusPageDomain'                => 'status.example.com',
 
+  //! @note Origins which are allowed to access the API as the console including the 'Remember me' feature.
+  'allowCredentialsOrigins'         => ['https://console.example.com'],
+
   //! @note The logo is used in sent HTML emails.
   'logoURL'                         => 'https://example.com/img/logo.png',
 
@@ -51,11 +54,13 @@ $config = array(
   'emailVerificationTokenLifetime'  => 3 * 86400,
   'lostPasswordTokenLifetime'       => 3 * 86400,
   'accountConfirmationTokenLifetime'=> 3 * 86400,
+  'refreshTokenValiditySeconds'     => 365 * 86400,
 
   //! @note The minimum password length can be configured here, and should match
   //!       the value in the frontend config.
   'minPasswordLength'               => 8,
   'passwordSaltLength'              => 16,
+  'refreshTokenLength'              => 64,
 
   //! @note This is the length of auto-generated unique IDs oft status pages.
   'statusPageUniqueIdLength'        => 8,
