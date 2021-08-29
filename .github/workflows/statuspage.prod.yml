@@ -2,7 +2,7 @@ name: Build and deploy statuspage
 
 on:
   push:
-    branches: [ prod, actions-status ]
+    branches: [ prod ]
 
 jobs:
   build-statuspage:
