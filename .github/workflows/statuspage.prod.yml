@@ -37,6 +37,7 @@ jobs:
         echo "$STATUSPAGE_SSH_KEY" > ~/.ssh/id_rsa_statuspage
         rsync -avz -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_rsa_statuspage" --exclude "*.map" ./build/ $STATUSPAGE_DEST
         rm ~/.ssh/id_rsa_statuspage
+      working-directory: ./statuspage
       env:
         STATUSPAGE_SSH_KEY: ${{secrets.STATUSPAGE_SSH_KEY}}
         STATUSPAGE_DEST: ${{secrets.STATUSPAGE_DEST}}
