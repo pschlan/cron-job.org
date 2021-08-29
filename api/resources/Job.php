@@ -380,4 +380,27 @@ class JobManager {
       return false;
     }
   }
+
+  public function deleteAllJobs() {
+    $nodes = (new NodeManager($this->authToken))->getUserJobNodes();
+    $someFailed = false;
+
+    foreach ($nodes as $node) {
+      try {
+        $client = $node->connect();
+
+        $nodeJobs = $client->getJobsForUser($this->authToken->userId);
+        foreach ($nodeJobs as $nodeJob) {
+          $client->deleteJob(Job::createIdentifier($nodeJob->identifier->jobId, $this->authToken->userId));
+
+          $stmt = Database::get()->prepare('DELETE FROM `job` WHERE `jobid`=:jobId AND `userid`=:userId');
+          $stmt->execute(array(':userId' => $this->authToken->userId, ':jobId' => $nodeJob->identifier->jobId));
+        }
+      } catch (Exception $ex) {
+        $someFailed = true;
+      }
+    }
+
+    return !$someFailed;
+  }
 }

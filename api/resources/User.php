@@ -15,6 +15,8 @@ class UserBannedException extends Exception {}
 class AccountNotFoundException extends Exception {}
 class EmailAddresInUseException extends Exception {}
 class TokenExpiredException extends Exception {}
+class FailedToDeleteAccountException extends Exception {}
+class InvalidEmailAddressException extends Exception {}
 
 class UserProfile {
   public const STATUS_CREATED = 0;
@@ -52,7 +54,7 @@ class UserManager {
   }
 
   public function getProfile() {
-    $stmt = Database::get()->prepare('SELECT `firstname` AS `firstName`, `lastname` AS `lastName`, `timezone`, `email`, `signup_date` AS `signupDate` FROM `user` WHERE `userid`=:userId');
+    $stmt = Database::get()->prepare('SELECT `firstname` AS `firstName`, `lastname` AS `lastName`, `timezone`, `email`, `signup_date` AS `signupDate`, `newsletter_subscribe` AS `newsletterSubscribe` FROM `user` WHERE `userid`=:userId');
     $stmt->setFetchMode(PDO::FETCH_CLASS, UserProfile::class);
     $stmt->execute(array(':userId' => $this->authToken->userId));
     return $stmt->fetch();
@@ -67,6 +69,9 @@ class UserManager {
         'timezone'    => $profile->timezone,
         'userId'      => $this->authToken->userId
       ));
+    if (isset($profile->newsletterSubscribe) && in_array($profile->newsletterSubscribe, ['yes', 'no', 'undefined'])) {
+      $this->updateNewsletterSubscribe($profile->newsletterSubscribe);
+    }
     return true;
   }
 
@@ -173,6 +178,16 @@ class UserManager {
       ->execute([
         ':language'   => $language,
         ':userId'     => $this->authToken->userId
+      ]);
+    return true;
+  }
+
+  public function updateNewsletterSubscribe($newsletterSubscribe) {
+    Database::get()
+      ->prepare('UPDATE `user` SET `newsletter_subscribe`=:newsletterSubscribe WHERE `userid`=:userId')
+      ->execute([
+        ':newsletterSubscribe'  => $newsletterSubscribe,
+        ':userId'               => $this->authToken->userId
       ]);
     return true;
   }
@@ -350,6 +365,60 @@ class UserManager {
       ':oldPasswordSalt'    => $userRow->passwordSalt,
       ':oldPasswordHash'    => $userRow->password,
       ':userId'             => $this->authToken->userId
+    ]);
+
+    return true;
+  }
+
+  public function deleteAccount($emailAddress) {
+    //! @todo There's a possible race condition here: A resource could be added while we're deleting the account, leading to dangling resources.
+
+    require_once('StatusPage.php');
+    require_once('Job.php');
+
+    $profile = $this->getProfile();
+    if (strtolower($profile->email) !== strtolower($emailAddress)) {
+      throw new InvalidEmailAddressException();
+    }
+
+    $emailSalt = self::generateSalt();
+    $emailHash = self::computePasswordHash(strtolower($emailAddress), $emailSalt);
+
+    $stmt = Database::get()->prepare('REPLACE INTO `userdeletelog`(`userid`,`date`,`source`,`date_finished`,`email`,`email_salt`) VALUES(:userId, :date, :source, :dateFinished, :email, :emailSalt)');
+    $stmt->execute([
+      ':userId'             => $this->authToken->userId,
+      ':date'               => time(),
+      ':source'             => 'api',
+      ':dateFinished'       => 0,
+      ':email'              => $emailHash,
+      ':emailSalt'          => $emailSalt
+    ]);
+
+    $statusPageManager = new StatusPageManager($this->authToken);
+    $statusPages = $statusPageManager->getStatusPages();
+    foreach ($statusPages->statusPages as $statusPage) {
+      $statusPageManager->deleteStatusPage($statusPage->statusPageId, true);
+    }
+
+    $jobManager = new JobManager($this->authToken);
+    if (!$jobManager->deleteAllJobs()) {
+      throw new FailedToDeleteAccountException();
+    }
+
+    $stmt = Database::get()->prepare('DELETE FROM `job` WHERE `userid`=:userId');
+    $stmt->execute([
+      ':userId'             => $this->authToken->userId
+    ]);
+
+    $stmt = Database::get()->prepare('DELETE FROM `user` WHERE `userid`=:userId');
+    $stmt->execute([
+      ':userId'             => $this->authToken->userId
+    ]);
+
+    $stmt = Database::get()->prepare('UPDATE `userdeletelog` SET `date_finished`=:dateFinished WHERE `userid`=:userId');
+    $stmt->execute([
+      ':userId'             => $this->authToken->userId,
+      ':dateFinished'       => time()
     ]);
 
     return true;

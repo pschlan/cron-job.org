@@ -362,9 +362,9 @@ class StatusPageManager {
     }
   }
 
-  public function deleteStatusPage($statusPageId) {
+  public function deleteStatusPage($statusPageId, $force = false) {
     $statusPage = $this->getStatusPage($statusPageId);
-    if ($statusPage->enabled) {
+    if ($statusPage->enabled && $force !== true) {
       throw new StatusPagePublishedException();
     }
 
