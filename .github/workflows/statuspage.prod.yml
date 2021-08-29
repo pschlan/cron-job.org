@@ -7,9 +7,9 @@ on:
 jobs:
   build-statuspage:
     runs-on: ubuntu-latest
-    if: github.repository == ‘pschlan/cron-job.org’
+    if: github.repository == 'pschlan/cron-job.org'
     environment:
-      name: prod
+      name: statuspage-prod
       url: https://status.cron-job.org
     strategy:
       matrix:
