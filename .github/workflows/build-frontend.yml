@@ -25,7 +25,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
         cache-dependency-path: ./frontend/package-lock.json
-    - run: cp ./utils/Config.default.js ./utils/Config.js
+    - run: cp ./src/utils/Config.default.js ./src/utils/Config.js
       working-directory: ./frontend
     - run: npm ci
       working-directory: ./frontend
