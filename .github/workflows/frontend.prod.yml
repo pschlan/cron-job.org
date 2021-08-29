@@ -2,7 +2,7 @@ name: Build and deploy frontend
 
 on:
   push:
-    branches: [ prod, actions-test ]
+    branches: [ prod ]
 
 jobs:
   build-frontend:
