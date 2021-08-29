@@ -7,7 +7,8 @@ CREATE TABLE `nodestats`(
   `i` tinyint(4) NOT NULL DEFAULT '0',
   `jobs` int(11) NOT NULL DEFAULT '0',
   `jitter` double NOT NULL DEFAULT '0',
-  PRIMARY KEY (`nodeid`,`d`,`m`,`y`,`h`,`i`)
+  PRIMARY KEY (`nodeid`,`d`,`m`,`y`,`h`,`i`),
+  KEY `idx_dmy` (`d`, `m`, `y`)
 ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `user` (
