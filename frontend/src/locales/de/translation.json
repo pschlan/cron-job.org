@@ -97,7 +97,13 @@
     "successfulJobs": "erfolgreiche Cronjobs",
     "failedJobs": "fehlgeschlagene Cronjobs",
     "likeService": "Finden Sie {{serviceName}} nützlich?",
-    "donateText": "Helfen Sie uns mit einer Spende in beliebiger Höhe, {{serviceName}} werbefrei und kostenlos zu halten. {{serviceName}} ist ein reines Non-Profit-Projekt und Ihre Spenden werden ausschließlich für die Weiterentwicklung und die Server-Kosten verwendet. Vielen Dank für Ihre Unterstützung!"
+    "donateText": "Helfen Sie uns mit einer Spende in beliebiger Höhe, {{serviceName}} werbefrei und kostenlos zu halten. {{serviceName}} ist ein reines Non-Profit-Projekt und Ihre Spenden werden ausschließlich für die Weiterentwicklung und die Server-Kosten verwendet. Vielen Dank für Ihre Unterstützung!",
+    "newsletterTitle": "{{serviceName}}-Newsletter",
+    "newsletterText": "Verpassen Sie keine Neuigkeiten und Ankündigungen von {{serviceName}} und abonnieren Sie nun unseren kostenlosen Newsletter! Unser Newsletter wird ausschließlich verwendet, um Neuigkeiten rund um {{serviceName}} zu kommunizieren.",
+    "noThanks": "Nein Danke",
+    "subscribe": "Abonnieren",
+    "failedToSaveNewsletter": "Entschuldigung, aber wir konnten Ihre Entscheidung gerade nicht speichern. Bitte versuchen Sie es später erneut.",
+    "newsletterSaved": "Vielen Dank, wir haben Ihre Newsletter-Einstellung gespeichert."
   },
   "events": {
     "cronjobExecution": "Cronjob-Ausführung: {{statusText}}",
@@ -315,7 +321,13 @@
     "deleteAccountNote": "Möchten Sie Ihren Account wirklich löschen? Alle verbundenen Daten inklusive aller Cronjobs und Status-Seiten werden unwiderruflich gelöscht. Dieser Vorgang kann nicht rückgängig gemacht werden. Wenn Sie sicher sind, geben Sie zur Bestätigung die E-Mail-Adresse Ihres Accounts ein.",
     "deleteAccountTypeEmailAddress": "Bestätigen durch Eingabe der Account-E-Mail-Adresse",
     "failedToDeleteAccount": "Ihr Account konnte nicht gelöscht werden. Bitte versuchen Sie es erneut. Bei Fragen wenden Sie sich bitte an unser Support-Team.",
-    "accountDeleted": "Ihr Account wurde erfolgreich gelöscht."
+    "accountDeleted": "Ihr Account wurde erfolgreich gelöscht.",
+    "newsletterSubscribe": {
+      "title": "Newsletter-Abo",
+      "yes": "Abonnieren",
+      "no": "Nicht abonnieren",
+      "undefined": "k.A."
+    }
   },
   "statistics": {
     "requestFailed": "Die Statistiken konnten nicht geladen werden. Bitte versuchen Sie es später erneut.",

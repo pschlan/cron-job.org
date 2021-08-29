@@ -266,3 +266,9 @@ export function deleteAccount(emailAddress) {
     emailAddress
   });
 }
+
+export function updateUserNewsletterSubscribe(subscribe) {
+  return performRequest('UpdateUserNewsletterSubscribe', {
+    subscribe
+  });
+}

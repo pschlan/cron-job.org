@@ -59,6 +59,7 @@ export default function Settings() {
   const [ lastName, setLastName ] = useState('');
   const [ timezone, setTimezone ] = useState('');
   const [ email, setEmail ] = useState('');
+  const [ newsletterSubscribe, setNewsletterSubscribe ] = useState('undefined');
   const [ signupDate, setSignupDate ] = useState(0);
 
   useEffect(() => {
@@ -67,6 +68,7 @@ export default function Settings() {
       setLastName(userProfile.lastName);
       setTimezone(userProfile.timezone);
       setEmail(userProfile.email);
+      setNewsletterSubscribe(userProfile.newsletterSubscribe);
       setSignupDate(userProfile.signupDate);
       setIsLoading(false);
     }
@@ -79,7 +81,8 @@ export default function Settings() {
       ...userProfile,
       firstName,
       lastName,
-      timezone
+      timezone,
+      newsletterSubscribe
     };
 
     updateUserProfile(newProfile)
@@ -130,7 +133,18 @@ export default function Settings() {
               fullWidth
               />
           </Grid>
-          <Grid item sm={6} xs={12}>
+          <Grid item sm={3} xs={12}>
+            <InputLabel id='newsletter-subscribe-label' shrink={true}>{t('settings.newsletterSubscribe.title')}</InputLabel>
+            <Select
+              value={newsletterSubscribe}
+              onChange={({target}) => setNewsletterSubscribe(target.value)}
+              labelId='newsletter-subscribe-label'>
+                <MenuItem value='yes' key='yes'>{t('settings.newsletterSubscribe.yes')}</MenuItem>
+                <MenuItem value='no' key='no'>{t('settings.newsletterSubscribe.no')}</MenuItem>
+                <MenuItem value='undefined' key='undefined'>{t('settings.newsletterSubscribe.undefined')}</MenuItem>
+            </Select>
+          </Grid>
+          <Grid item sm={3} xs={12}>
             <Typography variant='caption' component='div'>{t('settings.memberSince')}</Typography>
             <Typography component='div' className={classes.signupDate}>{moment(signupDate*1000).calendar()}</Typography>
           </Grid>

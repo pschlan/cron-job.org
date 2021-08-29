@@ -30,7 +30,7 @@ const useStyles = makeStyles(themes => ({
 export default function Authenticator({ children }) {
   const auth = useSelector(state => state.auth);
   const classes = useStyles();
-  
+
   return <>
     {auth && auth.session ? <><SessionKeepalive />{children}</> : <>
       <Container component="main" maxWidth="xs">

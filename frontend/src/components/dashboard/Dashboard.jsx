@@ -3,11 +3,11 @@ import { Paper, makeStyles, Typography, Button, TableContainer, Grid, Box } from
 import { useTranslation } from 'react-i18next';
 import Title from '../misc/Title';
 import Table from '../misc/Table';
-import { getDashboard } from '../../utils/API';
+import { getDashboard, updateUserNewsletterSubscribe } from '../../utils/API';
 import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useState } from 'react';
-import { setDashboardData } from '../../redux/actions';
+import { useState, useCallback } from 'react';
+import { setDashboardData, setUserProfile } from '../../redux/actions';
 import Breadcrumbs from '../misc/Breadcrumbs';
 import Heading from '../misc/Heading';
 import moment from 'moment';
@@ -15,12 +15,15 @@ import { JobStatus, jobStatusText, notificationTypeText } from '../../utils/Cons
 import JobIcon from '../jobs/JobIcon';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import IconAvatar from '../misc/IconAvatar';
+import YesIcon from '@material-ui/icons/Check';
+import NoIcon from '@material-ui/icons/Close';
 import DetailsIcon from '@material-ui/icons/MoreVert';
 import { useHistory } from 'react-router-dom';
 import NumberPanel from '../misc/NumberPanel';
 import AddIcon from '@material-ui/icons/AlarmAdd';
 import { Config } from '../../utils/Config';
 import useLanguageCode from '../../hooks/useLanguageCode';
+import { useSnackbar } from 'notistack';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -85,20 +88,33 @@ export default function Dashboard() {
   const [ isLoading, setIsLoading ] = useState(true);
   const dispatch = useDispatch();
   const history = useHistory();
+  const [ savingNewsletter, setSavingNewsletter ] = useState(false);
   const languageCode = useLanguageCode();
+  const { enqueueSnackbar } = useSnackbar();
+
+  const doRefresh = useCallback(async () => {
+    return getDashboard()
+      .then(result => dispatch(setDashboardData(result)))
+      .finally(() => setIsLoading(false));
+  }, [dispatch]);
+
+  function subscribeNewsletter(subscribe) {
+    setSavingNewsletter(true);
+    updateUserNewsletterSubscribe(subscribe)
+      .then(() => dispatch(setUserProfile(profile => Object.keys(profile).length ? {...profile, newsletterSubscribe: subscribe} : {})))
+      .then(doRefresh)
+      .then(() => {
+        enqueueSnackbar(t('dashboard.newsletterSaved'), { variant: 'success' });
+      })
+      .catch(() => enqueueSnackbar(t('dashboard.failedToSaveNewsletter'), { variant: 'error' }))
+      .finally(() => setSavingNewsletter(false));
+  }
 
   useEffect(() => {
-    const doRefresh = async () => {
-      getDashboard()
-        .then(result => dispatch(setDashboardData(result)))
-        .finally(() => setIsLoading(false));
-    };
-
     doRefresh();
-
     const handle = window.setInterval(doRefresh, REFRESH_INTERVAL);
     return () => window.clearInterval(handle);
-  }, [dispatch, t]);
+  }, [dispatch, t, doRefresh]);
 
   const LAST_EVENTS_COLUMNS = [
     {
@@ -155,6 +171,39 @@ export default function Dashboard() {
       <Grid item xs={6} sm={3}>
         {dashboardData && <NumberPanel number={dashboardData.failedJobs} error={dashboardData.failedJobs>0} label={t('dashboard.failedJobs')} />}
       </Grid>
+      {dashboardData && dashboardData.newsletterSubscribe === 'undefined' && <Grid item xs={12}>
+          <Paper>
+            <Title>{t('dashboard.newsletterTitle', { serviceName: Config.productName })}</Title>
+            <Box pl={2} pr={2} pt={1} pb={2}>
+              <p>{t('dashboard.newsletterText', { serviceName: Config.productName })}</p>
+              <Grid container direction='row' justify='flex-end' spacing={2}>
+                <Grid item>
+                </Grid>
+                <Grid item>
+                  <Button
+                    variant='contained'
+                    size='small'
+                    startIcon={<NoIcon />}
+                    onClick={() => subscribeNewsletter('no')}
+                    disabled={savingNewsletter}>
+                    {t('dashboard.noThanks')}
+                  </Button>
+                </Grid>
+                <Grid item>
+                  <Button
+                    variant='contained'
+                    size='small'
+                    color='primary'
+                    startIcon={<YesIcon />}
+                    onClick={() => subscribeNewsletter('yes')}
+                    disabled={savingNewsletter}>
+                    {t('dashboard.subscribe')}
+                  </Button>
+                </Grid>
+              </Grid>
+            </Box>
+          </Paper>
+        </Grid>}
       {Config.donationBox.enable && dashboardData && dashboardData.successfulJobs >= Config.donationBox.successfulJobsThreshold && <Grid item xs={12}>
           <Paper>
             <Title>{t('dashboard.likeService', { serviceName: Config.productName })}</Title>

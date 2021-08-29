@@ -97,7 +97,13 @@
     "successfulJobs": "successful cronjobs",
     "failedJobs": "failed cronjobs",
     "likeService": "Do you find {{serviceName}} useful?",
-    "donateText": "Your donation helps us to keep {{serviceName}} free of charge and free of advertisements. {{serviceName}} is a non-profit project and all donations will be used for development and server expenses. Thank you for your support!"
+    "donateText": "Your donation helps us to keep {{serviceName}} free of charge and free of advertisements. {{serviceName}} is a non-profit project and all donations will be used for development and server expenses. Thank you for your support!",
+    "newsletterTitle": "{{serviceName}} Newsletter",
+    "newsletterText": "Don't miss out on the latest news and announcements from {{serviceName}}! Just subscribe for our free newsletter. The newsletter will be used exlusively for news and announcements regarding {{serviceName}}.",
+    "noThanks": "No, thanks",
+    "subscribe": "Subscribe",
+    "failedToSaveNewsletter": "Sorry, we couldn't save your decision at this time. Please try again later.",
+    "newsletterSaved": "Thanks, your newsletter preference has been saved."
   },
   "events": {
     "cronjobExecution": "Cronjob execution: {{statusText}}",
@@ -315,7 +321,13 @@
     "deleteAccountNote": "Are you sure you want to delete your account? All associated data including all cronjobs will be deleted permanently. This cannot be undone. In case you want to delete, please confirm by entering your account's email address.",
     "deleteAccountTypeEmailAddress": "Confirm by entering your account's email address",
     "failedToDeleteAccount": "Your account could not be deleted. Please try again. If in doubt, please contact our support team.",
-    "accountDeleted": "Your account has been deleted successfully."
+    "accountDeleted": "Your account has been deleted successfully.",
+    "newsletterSubscribe": {
+      "title": "Newsletter subscription",
+      "yes": "Subscribe",
+      "no": "Don't subscribe",
+      "undefined": "n/a"
+    }
   },
   "statistics": {
     "requestFailed": "Failed to load statistics. Please try again later.",

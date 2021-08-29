@@ -51,7 +51,7 @@ export default function Jobs() {
         <JobIcon status={job.lastStatus} enabled={job.enabled} />
         <div>
           <div>{job.title}</div>
-          <div><Typography variant="caption"><Link href={job.url} target="_blank" rel="noopener nofollow">{job.url}</Link></Typography></div>
+          <div style={{maxWidth: 300, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis'}}><Typography variant="caption" noWrap={true}><Link href={job.url} target="_blank" rel="noopener nofollow">{job.url}</Link></Typography></div>
         </div>
       </div>
     },

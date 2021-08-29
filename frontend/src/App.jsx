@@ -161,6 +161,7 @@ function App() {
             <Route path="/statistics" exact component={Statistics} />
             <Route path="/confirmEmailChange/:token" exact component={ConfirmEmailChange} />
             <Redirect from="/login" exact to="/dashboard" />
+            <Redirect from="/signup" exact to="/dashboard" />
             <Redirect from="/" exact to="/dashboard" />
             <NotFound />
           </Switch>
