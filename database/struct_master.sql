@@ -82,3 +82,13 @@ CREATE TABLE `phrases`(
     `value` TEXT NOT NULL,
     PRIMARY KEY(`lang`,`key`)
 ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `userdeletelog` (
+    `userid` int(11) NOT NULL DEFAULT '0',
+    `date` int(14) NOT NULL DEFAULT '0',
+    `source` enum('api','ops','unknown') NOT NULL DEFAULT 'unknown',
+    `date_finished` int(14) NOT NULL DEFAULT '0',
+    `email` varchar(40) NOT NULL DEFAULT '',
+    `email_salt` varchar(16) NOT NULL DEFAULT '',
+    PRIMARY KEY (`userid`)
+) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
