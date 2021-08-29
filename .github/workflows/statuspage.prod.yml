@@ -35,7 +35,7 @@ jobs:
         touch ~/.ssh/id_rsa_statuspage
         chmod 0600 ~/.ssh/id_rsa_statuspage
         echo "$STATUSPAGE_SSH_KEY" > ~/.ssh/id_rsa_statuspage
-        rsync -avz -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_rsa_statuspage" ./build/ $STATUSPAGE_DEST
+        rsync -avz -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_rsa_statuspage" --exclude "*.map" ./build/ $STATUSPAGE_DEST
         rm ~/.ssh/id_rsa_statuspage
       env:
         STATUSPAGE_SSH_KEY: ${{secrets.STATUSPAGE_SSH_KEY}}
