@@ -19,20 +19,9 @@
 #include <thread>
 #include <unordered_set>
 
-#include <curl/curl.h>
-#include <ev.h>
-
 namespace Chronos
 {
-	struct SockInfo
-	{
-		curl_socket_t sockfd;
-		CURL *easy;
-		int action;
-		long timeout;
-		struct ev_io ev;
-		int evset;
-	};
+	class CurlWorker;
 
 	class WorkerThread : public std::enable_shared_from_this<WorkerThread>
 	{
@@ -54,34 +43,18 @@ namespace Chronos
 		void threadMain();
 		void jobDone(HTTPRequest *req);
 
-		int timerFunction(CURLM *multi, long timeout_ms);
-		int socketFunction(CURL *e, curl_socket_t s, int what, SockInfo *sockInfo);
-		void removeSocket(SockInfo *sockInfo);
-		void addSocket(CURL *e, curl_socket_t s, int what);
-		void setSocket(SockInfo *sockInfo, CURL *e, curl_socket_t s, int what);
-
-		void evTimerFunction(struct ev_timer *w, int revents);
-		void evEventFunction(struct ev_io *w, int revents);
-
-		void checkResults();
-
 	private:
 		void runJobs();
 		void addStat();
 
-	public:
-		CURLM *curlHandle = nullptr;
-
 	private:
-		struct ev_loop *evLoop = nullptr;
-		struct ev_timer timerEvent;
 		std::shared_ptr<WorkerThread> keepAlive;
+		std::unique_ptr<CurlWorker> curlWorker;
 		std::queue<HTTPRequest *> requestQueue;
 		std::size_t runningJobs = 0;
 		std::thread workerThread;
 		std::size_t parallelJobs;
 		std::size_t deferMs;
-		int curlStillRunning = 0;
 		double jitterSum = 0;
 		int jitterMax = 0;
 		int jitterMin = std::numeric_limits<int>::max();

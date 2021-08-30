@@ -19,6 +19,7 @@
 #include <netinet/in.h>
 
 #include "WorkerThread.h"
+#include "CurlWorker.h"
 #include "JobResult.h"
 #include "Utils.h"
 #include "App.h"
@@ -97,10 +98,10 @@ HTTPRequest::~HTTPRequest()
 {
 	if(easy != nullptr)
 	{
-		if(addedToMulti)
+		if(addedToWorker)
 		{
-			curl_multi_remove_handle(multiHandle, easy);
-			addedToMulti = false;
+			worker->remove(easy);
+			addedToWorker = false;
 		}
 		curl_easy_cleanup(easy);
 		easy = nullptr;
@@ -291,7 +292,7 @@ void HTTPRequest::setupEasyHandle()
 	}
 
 	easy = curl_easy_init();
-	addedToMulti = false;
+	addedToWorker = false;
 
 	curl_easy_setopt(easy, CURLOPT_DNS_CACHE_TIMEOUT,	0);
 	curl_easy_setopt(easy, CURLOPT_FORBID_REUSE,		1);
@@ -316,9 +317,9 @@ void HTTPRequest::setupEasyHandle()
 	curl_easy_setopt(easy, CURLOPT_IPRESOLVE,			CURL_IPRESOLVE_V4);
 }
 
-void HTTPRequest::submit(CURLM *curlMultiHandle)
+void HTTPRequest::submit(CurlWorker *worker)
 {
-	multiHandle 			= curlMultiHandle;
+	this->worker 			= worker;
 
 	result->dateStarted 	= Utils::getTimestampMS();
 	result->jitter 			= result->dateStarted - result->datePlanned;
@@ -409,15 +410,13 @@ void HTTPRequest::submit(CURLM *curlMultiHandle)
 		curl_easy_setopt(easy, CURLOPT_PASSWORD,		authPassword.c_str());
 	}
 
-	CURLMcode res = curl_multi_add_handle(multiHandle, easy);
-	if(res != CURLM_OK)
+	if(!worker->add(easy))
 	{
-		sprintf(curlError, "Failed to add handle! (%d)", res);
+		sprintf(curlError, "Failed to add handle to worker!");
 		done(CURLE_OBSOLETE);
-		return;
 	}
 	else
-		addedToMulti = true;
+		addedToWorker = true;
 }
 
 HTTPRequest *HTTPRequest::fromURL(const std::string &url, int userID)

@@ -14,6 +14,7 @@ set(SOURCES
 	NodeService.cpp
 	MasterService.cpp
 	NotificationThread.cpp
+	CurlWorker.cpp
 )
 
 set(CCTZ_SOURCES

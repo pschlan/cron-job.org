@@ -23,6 +23,7 @@ namespace Chronos
 {
 	class WorkerThread;
 	class JobResult;
+	class CurlWorker;
 
 	enum class RequestMethod : int
 	{
@@ -53,7 +54,7 @@ namespace Chronos
 	public:
 		static HTTPRequest *fromURL(const std::string &url, int userID);
 
-		void submit(CURLM *curlMultiHandle);
+		void submit(CurlWorker *worker);
 		void done(CURLcode res);
 
 		bool processData(const std::string &headers);
@@ -78,8 +79,8 @@ namespace Chronos
 
 	private:
 		CURL *easy = nullptr;
-		CURLM *multiHandle = nullptr;
-		bool addedToMulti = false;
+		CurlWorker *worker = nullptr;
+		bool addedToWorker = false;
 		struct curl_slist *headerList = nullptr;
 		bool isValid = false;
 		char curlError[CURL_ERROR_SIZE];
