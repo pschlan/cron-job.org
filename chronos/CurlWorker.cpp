@@ -24,7 +24,7 @@ struct CurlWorker::PrivateData
 {
     CURLM *curlHandle = nullptr;
     struct ev_loop *evLoop = nullptr;
-	struct ev_timer timerEvent;
+    struct ev_timer timerEvent;
 };
 
 struct CurlWorker::SockInfo
@@ -193,7 +193,7 @@ void CurlWorker::run()
 
 void CurlWorker::stop()
 {
-	ev_break(privateData->evLoop, EVBREAK_ALL);
+    ev_break(privateData->evLoop, EVBREAK_ALL);
 }
 
 void CurlWorker::checkResults()
@@ -216,12 +216,12 @@ void CurlWorker::checkResults()
 
 bool CurlWorker::add(CURL *handle)
 {
-	CURLMcode res = curl_multi_add_handle(privateData->curlHandle, handle);
-	if(res != CURLM_OK)
-	{
+    CURLMcode res = curl_multi_add_handle(privateData->curlHandle, handle);
+    if(res != CURLM_OK)
+    {
         std::cerr << "Failed to add handle! " << res << std::endl;
         return false;
-	}
+    }
     return true;
 }
 
