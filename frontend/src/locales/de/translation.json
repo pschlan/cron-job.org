@@ -180,6 +180,8 @@
       "every": "Alle",
       "every2": "Jeden",
       "everydayat": "Jeden Tag um",
+      "everyyearon": "Jedes Jahr am",
+      "at": "um",
       "ofthemonthat": "des Monats um",
       "custom": "Benutzerdefiniert",
       "noExecutionsWarning": "Es konnten keine Ausführungen bestimmt werden. Bitte stellen Sie sicher, dass Sie mindestens einen Eintrag pro Feld ausgewählt haben."

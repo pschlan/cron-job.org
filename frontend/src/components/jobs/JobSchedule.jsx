@@ -38,10 +38,10 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex'
   },
   firstColumn: {
-    flexBasis: '75%'
+    flexBasis: '70%'
   },
   secondColumn: {
-    flexBasis: '25%'
+    flexBasis: '30%'
   },
   helper: {
     borderLeft: `2px solid ${theme.palette.divider}`,
@@ -217,9 +217,9 @@ function parseMonthTimeSchedule({ hours, minutes, wdays, mdays, months }) {
       && (mdays.length   === 1    && !isWildcard(mdays))
       && (months.length  === 12   ||  isWildcard(months))) {
     return {
-      hour:   hours.shift(),
-      minute: minutes.shift(),
-      mday:   mdays.shift()
+      hour:   [...hours].shift(),
+      minute: [...minutes].shift(),
+      mday:   [...mdays].shift()
     };
   }
   return false;
@@ -291,6 +291,87 @@ const DAYS_OF_WEEK = [...seqArray(1, 6), 0];
 const MONTHS = seqArray(1, 12);
 const HOURS = seqArray(0, 23);
 const MINUTES = seqArray(0, 59);
+
+function parseOnceAYearTimeSchedule({ hours, minutes, wdays, mdays, months }) {
+  if (   (hours.length   === 1    && !isWildcard(hours))
+      && (minutes.length === 1    && !isWildcard(minutes))
+      && (wdays.length   === 7    ||  isWildcard(wdays))
+      && (mdays.length   === 1    && !isWildcard(mdays))
+      && (months.length  === 1    && !isWildcard(months))) {
+    return {
+      hour:   [...hours].shift(),
+      minute: [...minutes].shift(),
+      mday:   [...mdays].shift(),
+      month:  [...months].shift()
+    };
+  }
+  return false;
+}
+
+function OnceAYearTimeSchedule({ initialSchedule, onChange = () => null }) {
+  const DEFAULT_HOUR = 0;
+  const DEFAULT_MINUTE = 0;
+  const DEFAULT_MDAY = 1;
+  const DEFAULT_MONTH = 1;
+
+  const { t } = useTranslation();
+  const classes = useStyles();
+
+  const onChangeHook = useRef(onChange, []);
+
+  const [ hour, setHour ] = useState(DEFAULT_HOUR);
+  const [ minute, setMinute ] = useState(DEFAULT_MINUTE);
+  const [ mday, setMday ] = useState(DEFAULT_MDAY);
+  const [ month, setMonth ] = useState(DEFAULT_MONTH);
+
+  useEffect(() => {
+    if (initialSchedule) {
+      const parsedSchedule = parseOnceAYearTimeSchedule(initialSchedule);
+      if (parsedSchedule) {
+        setHour(parsedSchedule.hour);
+        setMinute(parsedSchedule.minute);
+        setMday(parsedSchedule.mday);
+        setMonth(parsedSchedule.month);
+      }
+    }
+  }, [initialSchedule]);
+
+  useEffect(() => {
+    onChangeHook.current({
+      mdays:    [mday],
+      wdays:    [-1],
+      months:   [month],
+      hours:    [hour],
+      minutes:  [minute]
+    });
+  }, [hour, minute, mday, month, onChangeHook]);
+
+  return <span className={classes.schedule}>
+    <FormControl>
+      <span>{t('jobs.schedule.everyyearon')}</span>
+      <Select value={mday} onChange={({target}) => setMday(parseInt(target.value))}>
+        {[...Array(31).keys()].map(md => <MenuItem value={md+1} key={md}>{md+1}.</MenuItem>)}
+      </Select>
+    </FormControl>
+    <FormControl>
+      <Select value={month} onChange={({target}) => setMonth(parseInt(target.value))}>
+        {MONTHS.map(m => <MenuItem value={m} key={m}>{t(`common.months.${m-1}`)}</MenuItem>)}
+      </Select>
+    </FormControl>
+    <FormControl>
+      <span>{t('jobs.schedule.at')}</span>
+      <Select value={hour} onChange={({target}) => setHour(parseInt(target.value))}>
+        {[...Array(24).keys()].map(h => <MenuItem value={h} key={h}>{h}</MenuItem>)}
+      </Select>
+    </FormControl>
+    <FormControl>
+      <span>:</span>
+      <Select value={minute} onChange={({target}) => setMinute(parseInt(target.value))}>
+        {[...Array(60).keys()].map(m => <MenuItem value={m} key={m}>{('0'+m).slice(-2)}</MenuItem>)}
+      </Select>
+    </FormControl>
+  </span>;
+}
 
 function CustomSchedule({ initialSchedule, onChange = () => null }) {
   const { t } = useTranslation();
@@ -385,7 +466,8 @@ function CustomSchedule({ initialSchedule, onChange = () => null }) {
 const SCHEDULE_TYPES = {
   'minutes': parseMinutesSchedule,
   'dayTime': parseDayTimeSchedule,
-  'monthTime': parseMonthTimeSchedule
+  'monthTime': parseMonthTimeSchedule,
+  'onceAYearTime': parseOnceAYearTimeSchedule
 };
 
 function SchedulePreview({ schedule, scheduleType }) {
@@ -470,6 +552,14 @@ export default function JobSchedule({ initialSchedule, onChange = () => null }) 
               label={<MonthTimeSchedule
                 initialSchedule={scheduleArgs}
                 onChange={monthTime => setSchedules(schedules => ({...schedules, monthTime}))}
+                />}
+              />
+            <FormControlLabel
+              value='onceAYearTime'
+              control={<Radio />}
+              label={<OnceAYearTimeSchedule
+                initialSchedule={scheduleArgs}
+                onChange={onceAYearTime => setSchedules(schedules => ({...schedules, onceAYearTime}))}
                 />}
               />
             <FormControlLabel
