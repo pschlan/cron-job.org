@@ -278,3 +278,23 @@ export function updateUserNewsletterSubscribe(subscribe) {
     subscribe
   });
 }
+
+export function submitJobTestRun(token, jobId, job) {
+  return performRequest('SubmitJobTestRun', {
+    jobId,
+    job,
+    token
+  });
+}
+
+export function getJobTestRunStatus(handle) {
+  return performRequest('GetJobTestRunStatus', {
+    handle
+  });
+}
+
+export function deleteJobTestRun(handle) {
+  return performRequest('DeleteJobTestRun', {
+    handle
+  });
+}

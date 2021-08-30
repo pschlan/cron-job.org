@@ -38,9 +38,11 @@ import ExpandIcon from '@material-ui/icons/ExpandMore';
 import ActionsIcon from '@material-ui/icons/MoreVert';
 import HistoryIcon from '@material-ui/icons/History';
 import CloneIcon from '@material-ui/icons/FileCopy';
+import TestIcon from '@material-ui/icons/PlayCircleOutline';
 import ValidatingTextField from '../misc/ValidatingTextField';
 import clsx from 'clsx';
 import useUserProfile from '../../hooks/useUserProfile';
+import JobTestRun from './JobTestRun';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -119,6 +121,8 @@ export default function JobEditor({ match }) {
   const [ tabValue, setTabValue ] = useState('common');
   const [ saving, setSaving ] = useState(false);
   const [ showDeleteJob, setShowDeleteJob ] = useState(false);
+  const [ showTestRun, setShowTestRun ] = useState(false);
+  const [ updatedJob, setUpdatedJob ] = useState({});
 
   const createMode = (jobId === -1);
 
@@ -184,14 +188,8 @@ export default function JobEditor({ match }) {
     }
   }, [job]);
 
-  function saveJob() {
-    if (!jobURL.match(RegexPatterns.url)) {
-      enqueueSnackbar(t('jobs.invalidUrl'), { variant: 'error' });
-      jobURLRef.current && jobURLRef.current.focus();
-      return;
-    }
-
-    const job = {
+  useEffect(() => {
+    setUpdatedJob({
       title: jobTitle,
       url: jobURL,
       enabled: jobEnabled,
@@ -211,12 +209,20 @@ export default function JobEditor({ match }) {
         ...schedule,
         timezone
       }
-    };
+    });
+  }, [jobTitle, jobURL, jobEnabled, saveResponses, authEnable, authUser, authPassword, notification, requestMethod, requestBody, jobHeaders, schedule, timezone]);
+
+  function saveJob() {
+    if (!jobURL.match(RegexPatterns.url)) {
+      enqueueSnackbar(t('jobs.invalidUrl'), { variant: 'error' });
+      jobURLRef.current && jobURLRef.current.focus();
+      return;
+    }
 
     setSaving(true);
 
     if (createMode) {
-      createJob(job)
+      createJob(updatedJob)
         .then(() => {
           enqueueSnackbar(t('jobs.created'), { variant: 'success' });
           history.push('/jobs');
@@ -224,7 +230,7 @@ export default function JobEditor({ match }) {
         .catch(() => enqueueSnackbar(t('jobs.failedToCreate'), { variant: 'error' }))
         .finally(() => setSaving(false));
     } else {
-      updateJob(jobId, job)
+      updateJob(jobId, updatedJob)
         .then(() => getJobDetails(jobId))
         .then(result => {
           setJob(result.jobDetails);
@@ -535,7 +541,14 @@ export default function JobEditor({ match }) {
       </Paper>
     </div>
 
-    <Grid container direction='row' justify='flex-end'>
+    <Grid container direction='row' justify='flex-end' spacing={1}>
+      <Grid item>
+        <Button
+          startIcon={<TestIcon />}
+          onClick={() => setShowTestRun(true)}>
+          {t('jobs.testRun.testRun')}
+        </Button>
+      </Grid>
       <Grid item>
         <Button
           variant='contained'
@@ -547,6 +560,8 @@ export default function JobEditor({ match }) {
         </Button>
       </Grid>
     </Grid>
+
+    {showTestRun && <JobTestRun onClose={() => setShowTestRun(false)} jobId={jobId} job={updatedJob} />}
 
     {showDeleteJob && <Dialog open={true} onClose={() => setShowDeleteJob(false)}>
       <DialogTitle>

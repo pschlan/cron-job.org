@@ -181,7 +181,6 @@ export default function Dashboard() {
                 </Grid>
                 <Grid item>
                   <Button
-                    variant='contained'
                     size='small'
                     startIcon={<NoIcon />}
                     onClick={() => subscribeNewsletter('no')}

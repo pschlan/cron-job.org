@@ -222,7 +222,31 @@
     "invalidUrl": "Diese URL scheint nicht gültig zu sein.",
     "failedToCreate": "Der Cronjob konnte nicht erstellt werden. Bitte versuchen Sie es später erneut.",
     "created": "Der Cronjob wurde erfolgreich erstellt.",
-    "cantDeleteMonitorJob": "Dieser Job wird für einen oder mehrere Status-Monitore verwendet und kann daher nicht gelöscht werden. Bitte entfernen Sie zuerst den zugehörigen Status-Monitor."
+    "cantDeleteMonitorJob": "Dieser Job wird für einen oder mehrere Status-Monitore verwendet und kann daher nicht gelöscht werden. Bitte entfernen Sie zuerst den zugehörigen Status-Monitor.",
+    "testRun": {
+      "testRun": "Testlauf",
+      "performTestRun": "Testlauf durchführen: {{jobTitle}}",
+      "startQuestion": "Möchten Sie wirklich einen Testlauf mit den aktuellen Job-Einstellungen inklusive aller ungespeicherter Änderungen durchführen? Der Testlauf wird umgehend ausgeführt und die Ergebnisse angezeigt.",
+      "ipNote": "Beim Ausführen des Testlaufs werden wir Ihre IP-Adresse im X-Forwarded-For-Header an den Zielserver weiterleiten.",
+      "start": "Testlauf starten",
+      "recaptchaError": "Entschuldigung, aber wir konnten Ihre Testlauf-Anfrage nicht verifizieren.  Wenn Sie dies für einen Fehler halten, kontaktieren Sie bitte unser Support-Team.",
+      "storeError": "Entschuldigung, aber wir konnten Ihre Testlauf-Anfrage nicht absenden. Bitte versuchen Sie es später erneut.",
+      "pollError": "Entschuldigung, aber wir konnten Ihre Testlauf-Anfrage derzeit nicht verarbeiten. Bitte versuchen Sie es später erneut.",
+      "status": "Testlauf-Status",
+      "states": {
+        "0": "Vorbereiten",
+        "1": "Verbinden",
+        "2": "Header senden",
+        "3": "Daten senden",
+        "4": "Auf Antwort warten",
+        "5": "Antwort empfangen",
+        "6": "Fertig"
+      },
+      "response": "Antwort",
+      "rawRequest": "Anfrage-Rohdaten",
+      "rawResponse": "Antwort-Rohdaten",
+      "peer": "Gegenstelle"
+    }
   },
   "statuspages": {
     "title": "Titel",
@@ -297,7 +321,7 @@
     "firstName": "Vorname",
     "lastName": "Nachname",
     "defaultTimezone": "Standard-Zeitzone",
-    "timezoneNote": "Die Standard-Zeitzone wirkt sich nur auf neu erstellte Cronjobs aus. Die Zeitzone bestehender Jobs kann individuall im Job-Editor eingestellt werden.",
+    "timezoneNote": "Die Standard-Zeitzone wirkt sich nur auf neu erstellte Cronjobs aus. Die Zeitzone bestehender Jobs kann individuell im Job-Editor eingestellt werden.",
     "saveFailed": "Die Einstellungen konnten nicht gespeichert werden. Bitte versuchen Sie es später erneut.",
     "saved": "Die Einstellungen wurden erfolgreich gespeichert.",
     "account": "Account",

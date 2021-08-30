@@ -222,7 +222,31 @@
     "invalidUrl": "This URL does not look to be valid.",
     "failedToCreate": "Failed to create cronjob. Please try again later.",
     "created": "The cronjob has been created successfully.",
-    "cantDeleteMonitorJob": "This job is used for a status monitor and therefore cannot be deleted. Please remove the associated status monitor(s) first and try again."
+    "cantDeleteMonitorJob": "This job is used for a status monitor and therefore cannot be deleted. Please remove the associated status monitor(s) first and try again.",
+    "testRun": {
+      "testRun": "Test run",
+      "performTestRun": "Perform test run: {{jobTitle}}",
+      "startQuestion": "Do you want to start a test run for your current job settings, including any unsaved changes? We will execute your request immediately and display the results.",
+      "ipNote": "When executing the test run, we will forward your IP address to the destination server in the X-Forwarded-For HTTP header.",
+      "start": "Start test run",
+      "recaptchaError": "Sorry, we couldn't verify your test run request. If you think this is an error, please contact our support team.",
+      "storeError": "Sorry, we couldn't submit your test run request. Please try again later.",
+      "pollError": "Sorry, we couldn't process your test run request at this time. Please try again later.",
+      "status": "Test run status",
+      "states": {
+        "0": "Preparing",
+        "1": "Connecting",
+        "2": "Sending headers",
+        "3": "Sending data",
+        "4": "Waiting for response",
+        "5": "Receiving response",
+        "6": "Done"
+      },
+      "response": "Response",
+      "rawRequest": "Raw request",
+      "rawResponse": "Raw response",
+      "peer": "Peer"
+    }
   },
   "statuspages": {
     "title": "Title",
