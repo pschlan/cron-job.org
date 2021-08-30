@@ -103,7 +103,7 @@ int WorkerThread::timerFunction(CURLM *multi, long timeout_ms)
 	// Set timer
 	if(timeout_ms >= 0)
 	{
-		double t = static_cast<double>(timeout_ms) / 1000.d;
+		double t = static_cast<double>(timeout_ms) / 1000.;
 		ev_timer_set(&timerEvent, t, 0);
 		ev_timer_start(evLoop, &timerEvent);
 	}
