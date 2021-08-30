@@ -1,39 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Button, makeStyles, Dialog, DialogTitle, DialogContent, DialogActions, Typography, Box, LinearProgress } from '@material-ui/core';
+import { Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography, LinearProgress } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
-import { JobStatus, jobStatusText, ChartColors, TimingFields } from '../../utils/Constants';
+import { JobStatus, jobStatusText } from '../../utils/Constants';
 import { getJobHistoryDetails } from '../../utils/API';
 import moment from 'moment';
-import { BarChart, Bar, ResponsiveContainer, Legend, XAxis, YAxis, Tooltip } from 'recharts';
-import { formatMs } from '../../utils/Units';
-
-const useStyles = makeStyles((theme) => ({
-  actionButton: {
-    margin: theme.spacing(1)
-  },
-  code: {
-    marginBottom: theme.spacing(1),
-    padding: theme.spacing(1),
-    height: theme.spacing(20),
-    overflowY: 'scroll',
-    fontFamily: '"Roboto Mono", courier',
-    whiteSpace: 'pre-wrap'
-  }
-}));
-
-function Code({ children }) {
-  const classes = useStyles();
-  return <Box className={classes.code} border={1} borderColor="grey.500">
-    {children}
-  </Box>;
-}
+import Timing from './Timing';
+import Code from '../misc/Code';
+import Headers from '../misc/Headers';
 
 export default function HistoryDetails({ log, open, onClose }) {
   const { t } = useTranslation();
   const [ isLoading, setIsLoading ] = useState(true);
   const onCloseHook = useRef(onClose, []);
   const [ details, setDetails ] = useState({});
-  const [ timingData, setTimingData ] = useState(null);
 
   useEffect(() => {
     getJobHistoryDetails(log.identifier)
@@ -41,34 +20,6 @@ export default function HistoryDetails({ log, open, onClose }) {
       .catch(error => console.log(error))
       .finally(() => setIsLoading(false));
   }, [log]);
-
-  useEffect(() => {
-    if (Math.max(...Object.values(details.stats || {})) === 0) {
-      setTimingData(null);
-      return;
-    }
-
-    setTimingData(details.stats ? [
-      TimingFields.reduce((prev, cur) => ({
-        fields: {
-          ...prev.fields,
-          [cur]: Math.round(Math.max(0, ((details.stats || {})[cur] - prev.lastValue)) / 10) / 100
-        },
-        lastValue: Math.max(prev.lastValue, (details.stats || {})[cur])
-      }), { fields: {}, lastValue: 0 }).fields,
-    ] : null);
-  }, [details]);
-
-  function formatLegend(value) {
-    return t(`jobs.timingItem.${value}`);
-  }
-
-  function formatTooltip(value, name, props) {
-    return [
-      formatMs(value, t),
-      t(`jobs.timingItem.${name}`)
-    ];
-  }
 
   return <>
     <Dialog open={open} onClose={onCloseHook.current} fullWidth maxWidth='md'>
@@ -86,38 +37,14 @@ export default function HistoryDetails({ log, open, onClose }) {
             </div> : <div>{t('jobs.statuses.' + jobStatusText(log.status))}</div>}
         </Typography>
 
-        {timingData && <>
-          <Typography variant='overline'>{t('jobs.timing')}</Typography>
-          <div>
-            <ResponsiveContainer width='100%' height={100}>
-              <BarChart data={timingData} layout='vertical'>
-                <XAxis
-                  type='number'
-                  domain={[0, timingData[0].total]}
-                  tickCount={10}
-                  tickFormatter={x => formatMs(x, t)} />
-                <YAxis
-                  dataKey='name'
-                  type='category'
-                  hide={true}
-                  />
-
-                <Legend formatter={formatLegend} />
-                <Tooltip formatter={formatTooltip} />
-
-                {TimingFields.map((item, index) =>
-                  <Bar dataKey={item} key={item} stackId='timing' fill={ChartColors[index]} />)}
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </>}
+        <Timing stats={details && details.stats} header={<Typography variant='overline'>{t('jobs.timing')}</Typography>} />
 
         {isLoading ?
           <LinearProgress /> :
           <>
             {details.headers && <>
               <Typography variant='overline'>{t('jobs.responseHeaders')}</Typography>
-              <Code>{details.headers}</Code>
+              <Code><Headers data={details.headers} /></Code>
             </>}
 
             {details.body && <>

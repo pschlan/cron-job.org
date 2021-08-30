@@ -23,6 +23,16 @@ export const RequestMethod = {
   PATCH: 8
 };
 
+export const JobTestRunState = {
+  PREPARING: 0,
+  CONNECTING: 1,
+  SENDING_HEADERS: 2,
+  SENDING_DATA: 3,
+  RECEIVING_HEADERS: 4,
+  RECEIVING_DATA: 5,
+  DONE: 6
+};
+
 export const RequestMethodsSupportingCustomBody = [
   RequestMethod.POST,
   RequestMethod.PUT,
