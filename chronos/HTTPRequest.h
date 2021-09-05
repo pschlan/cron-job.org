@@ -40,7 +40,6 @@ namespace Chronos
 
 	class HTTPRequest
 	{
-	private:
 		HTTPRequest();
 
 		HTTPRequest(const HTTPRequest &other) = delete;
@@ -49,6 +48,14 @@ namespace Chronos
 		HTTPRequest &operator=(HTTPRequest &&other) = delete;
 
 	public:
+		enum class VerboseDataType
+		{
+			HEADER_IN,
+			HEADER_OUT,
+			DATA_IN,
+			DATA_OUT
+		};
+
 		~HTTPRequest();
 
 	public:
@@ -70,9 +77,12 @@ namespace Chronos
 		RequestMethod requestMethod = RequestMethod::GET;
 		std::vector<std::pair<std::string, std::string>> requestHeaders;
 		std::string requestBody;
+		std::string xForwardedFor;
 		std::unique_ptr<JobResult> result;
+		bool verbose = false;
 
 		std::function<void()> onDone;
+		std::function<void(VerboseDataType, const std::string &)> onVerboseData;
 
 	private:
 		void setupEasyHandle();

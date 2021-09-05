@@ -23,6 +23,9 @@
 #include "App.h"
 #include "Utils.h"
 #include "SQLite.h"
+#include "HTTPRequest.h"
+#include "JobResult.h"
+#include "TestRunThread.h"
 
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
@@ -55,13 +58,11 @@ public:
 
     void getJobsForUser(std::vector<Job> &_return, const int64_t userId) override
     {
-        using namespace Chronos;
-
         std::cout << "ChronosNodeHandler::getJobsForUser(" << userId << ")" << std::endl;
 
         try
         {
-            std::unique_ptr<MySQL_DB> db(App::getInstance()->createMySQLConnection());
+            std::unique_ptr<Chronos::MySQL_DB> db(Chronos::App::getInstance()->createMySQLConnection());
 
 	        MYSQL_ROW row;
             auto res = db->query("SELECT `jobid`,`userid`,`enabled`,`title`,`save_responses`,`last_status`,`last_fetch`,`last_duration`,`fail_counter`,`url`,`request_method`,`timezone`,`type` FROM `job` WHERE `userid`=%v",
@@ -111,13 +112,11 @@ public:
 
     void getJobDetails(Job &_return, const JobIdentifier &identifier) override
     {
-        using namespace Chronos;
-
         std::cout << "ChronosNodeHandler::getJobDetails(" << identifier.jobId << ", " << identifier.userId << ")" << std::endl;
 
         try
         {
-            std::unique_ptr<MySQL_DB> db(App::getInstance()->createMySQLConnection());
+            std::unique_ptr<Chronos::MySQL_DB> db(Chronos::App::getInstance()->createMySQLConnection());
 
 	        MYSQL_ROW row;
             auto res = db->query("SELECT `jobid`,`userid`,`enabled`,`title`,`save_responses`,`last_status`,`last_fetch`,"
@@ -597,6 +596,130 @@ public:
             std::cout << "ChronosNodeHandler::disableJobsForUser(): Exception: "  << ex.what() << std::endl;
             throw InternalError();
         }
+    }
+
+    std::unique_ptr<Chronos::HTTPRequest> httpRequestFromJob(const Job &job)
+    {
+        if(!job.__isset.data)
+        {
+            std::cout << "ChronosNodeHandler::httpRequestFromJob(): data not set on job!" << std::endl;
+            return nullptr;
+        }
+
+        std::unique_ptr<Chronos::HTTPRequest> req(Chronos::HTTPRequest::fromURL(job.data.url, job.identifier.userId));
+        req->result->jobID          = job.identifier.jobId;
+        req->result->datePlanned    = Chronos::Utils::getTimestampMS();
+        req->result->notifyFailure 	= false;
+        req->result->notifySuccess 	= false;
+        req->result->notifyDisable 	= false;
+        req->result->oldFailCounter	= 0;
+        req->result->saveResponses	= true;
+
+        if(job.__isset.authentication)
+        {
+            req->useAuth            = job.authentication.enable;
+            req->authUsername       = job.authentication.user;
+            req->authPassword       = job.authentication.password;
+        }
+
+        //! @todo Proper conversion
+        req->requestMethod          = static_cast<Chronos::RequestMethod>(job.data.requestMethod);
+
+        if(job.__isset.extendedData)
+        {
+            for(const auto &item : job.extendedData.headers)
+            {
+                req->requestHeaders.push_back({ item.first, item.second });
+            }
+
+            req->requestBody = job.extendedData.body;
+        }
+
+        //! @todo X-Forwarded-For, User-Agent for test run
+
+        if(job.__isset.metaData)
+        {
+            req->result->title      = job.metaData.title;
+
+            //! @todo Proper conversion
+            req->result->jobType    = static_cast<Chronos::JobType_t>(job.metaData.type);
+        }
+
+        return req;
+    }
+
+    void submitJobTestRun(TestRunHandle &_return, const Job &job, const std::string &xForwardedFor)
+    {
+        std::cout << "ChronosNodeHandler::submitJobTestRun()" << std::endl;
+
+        Chronos::TestRunThread *testRunThread = Chronos::TestRunThread::getInstance();
+        if(testRunThread == nullptr)
+            throw FeatureNotAvailable();
+
+        std::unique_ptr<Chronos::HTTPRequest> request = httpRequestFromJob(job);
+        if(request == nullptr)
+            throw InvalidArguments();
+
+        request->xForwardedFor = xForwardedFor;
+
+        _return = testRunThread->submit(std::move(request));
+    }
+
+    void getJobTestRunStatus(TestRunStatus &_return, const TestRunHandle &handle)
+    {
+        std::cout << "ChronosNodeHandler::getJobTestRunStatus(" << handle << ")" << std::endl;
+
+        Chronos::TestRunThread *testRunThread = Chronos::TestRunThread::getInstance();
+        if(testRunThread == nullptr)
+            throw FeatureNotAvailable();
+
+        Chronos::TestRun::Status status = testRunThread->getStatus(handle);
+        if(!status)
+            throw InvalidArguments();
+
+        using trs = Chronos::TestRun::Status::State;
+        switch(status.state)
+        {
+        case trs::Initializing:         _return.state = TestRunState::PREPARING;            break;
+        case trs::Connecting:           _return.state = TestRunState::CONNECTING;           break;
+        case trs::SendingHeaders:       _return.state = TestRunState::SENDING_HEADERS;      break;
+        case trs::SendingData:          _return.state = TestRunState::SENDING_DATA;         break;
+        case trs::ReceivingHeaders:     _return.state = TestRunState::RECEIVING_HEADERS;    break;
+        case trs::ReceivingData:        _return.state = TestRunState::RECEIVING_DATA;       break;
+        case trs::Done:                 _return.state = TestRunState::DONE;                 break;
+        default:                                                                            break;
+        }
+
+        _return.headersOut          = std::move(status.headersOut);
+        _return.dataOut             = std::move(status.dataOut);
+        _return.headersIn           = std::move(status.headersIn);
+        _return.dataIn              = std::move(status.dataIn);
+
+        _return.result              = static_cast<JobStatus::type>(status.result); //!< @todo Nicer conversion
+        _return.duration            = status.duration;
+        _return.statusText          = status.statusText;
+        _return.httpStatus          = status.httpStatus;
+        _return.peerAddress         = status.peerAddress;
+        _return.peerPort            = status.peerPort;
+        _return.headers             = status.headers;
+        _return.body                = status.body;
+        _return.stats.nameLookup    = status.timeNameLookup;
+        _return.stats.connect       = status.timeConnect;
+        _return.stats.appConnect    = status.timeAppConnect;
+        _return.stats.preTransfer   = status.timePreTransfer;
+        _return.stats.startTransfer = status.timeStartTransfer;
+        _return.stats.total         = status.timeTotal;
+    }
+
+    void deleteJobTestRun(const TestRunHandle &handle)
+    {
+        std::cout << "ChronosNodeHandler::deleteJobTestRun(" << handle << ")" << std::endl;
+
+        Chronos::TestRunThread *testRunThread = Chronos::TestRunThread::getInstance();
+        if(testRunThread == nullptr)
+            throw FeatureNotAvailable();
+
+        testRunThread->remove(handle);
     }
 
 private:

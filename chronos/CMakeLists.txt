@@ -15,6 +15,7 @@ set(SOURCES
 	MasterService.cpp
 	NotificationThread.cpp
 	CurlWorker.cpp
+	TestRunThread.cpp
 )
 
 set(CCTZ_SOURCES
