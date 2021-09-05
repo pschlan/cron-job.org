@@ -2,6 +2,7 @@
 require_once('lib/APIMethod.php');
 require_once('resources/History.php');
 require_once('resources/Job.php');
+require_once('resources/User.php');
 
 class GetDashboard extends AbstractAPIMethod {
   static function name() {
@@ -36,12 +37,15 @@ class GetDashboard extends AbstractAPIMethod {
       throw new InternalErrorAPIException();
     }
 
+    $userProfile = (new UserManager($sessionToken))->getProfile();
+
     $result = (object)[
-      'events'          => $events,
-      'enabledJobs'     => count(array_filter($jobs->jobs, function($item) { return $item->enabled; })),
-      'disabledJobs'    => count(array_filter($jobs->jobs, function($item) { return !$item->enabled; })),
-      'successfulJobs'  => count(array_filter($jobs->jobs, function($item) { return $item->lastStatus == 1;})),
-      'failedJobs'      => count(array_filter($jobs->jobs, function($item) { return $item->lastStatus > 1; })),
+      'events'              => $events,
+      'enabledJobs'         => count(array_filter($jobs->jobs, function($item) { return $item->enabled; })),
+      'disabledJobs'        => count(array_filter($jobs->jobs, function($item) { return !$item->enabled; })),
+      'successfulJobs'      => count(array_filter($jobs->jobs, function($item) { return $item->lastStatus == 1;})),
+      'failedJobs'          => count(array_filter($jobs->jobs, function($item) { return $item->lastStatus > 1; })),
+      'newsletterSubscribe' => $userProfile->newsletterSubscribe
     ];
 
     return $result;
