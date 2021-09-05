@@ -1,14 +1,13 @@
 <?php
+require_once('lib/Exceptions.php');
 require_once('lib/Database.php');
 require_once('resources/Job.php');
 require_once('resources/User.php');
 
-class InvalidArgumentsException extends Exception {}
 class StatusPageMonitorNotFoundException extends Exception {}
 class InternalJobUpdateFailed extends Exception {}
 class StatusPageJobNotFoundException extends Exception {}
 class StatusPageNotFoundException extends Exception {}
-class QuotaExceededException extends Exception {}
 class DomainNotFoundException extends Exception {}
 class DomainAlreadyExistsException extends Exception {}
 class StatusPagePublishedException extends Exception {}

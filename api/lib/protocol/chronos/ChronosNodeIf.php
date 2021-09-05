@@ -90,4 +90,25 @@ interface ChronosNodeIf
      * @throws \chronos\InternalError
      */
     public function disableJobsForUser($userId);
+    /**
+     * @param \chronos\Job $job
+     * @param string $xForwardedFor
+     * @return string
+     * @throws \chronos\InternalError
+     * @throws \chronos\InvalidArguments
+     * @throws \chronos\FeatureNotAvailable
+     */
+    public function submitJobTestRun(\chronos\Job $job, $xForwardedFor);
+    /**
+     * @param string $handle
+     * @return \chronos\TestRunStatus
+     * @throws \chronos\InvalidArguments
+     * @throws \chronos\FeatureNotAvailable
+     */
+    public function getJobTestRunStatus($handle);
+    /**
+     * @param string $handle
+     * @throws \chronos\FeatureNotAvailable
+     */
+    public function deleteJobTestRun($handle);
 }

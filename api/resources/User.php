@@ -8,13 +8,13 @@ require_once('lib/SessionToken.php');
 require_once('lib/JWT.php');
 require_once('lib/Mail.php');
 require_once('lib/Language.php');
+require_once('lib/Exceptions.php');
 
 class WrongPasswordException extends Exception {}
 class UserNotActivatedException extends Exception {}
 class UserBannedException extends Exception {}
 class AccountNotFoundException extends Exception {}
 class EmailAddresInUseException extends Exception {}
-class TokenExpiredException extends Exception {}
 class FailedToDeleteAccountException extends Exception {}
 class InvalidEmailAddressException extends Exception {}
 

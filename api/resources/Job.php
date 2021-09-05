@@ -2,6 +2,8 @@
 require_once('lib/Database.php');
 require_once('lib/ChronosClient.php');
 require_once('lib/ExecutionPredictor.php');
+require_once('lib/RedisConnection.php');
+require_once('lib/Exceptions.php');
 require_once('Node.php');
 
 class CannotDeleteMonitorJobException extends Exception {}
@@ -298,6 +300,91 @@ class JobManager {
     }
 
     return $result;
+  }
+
+  public function submitJobTestRun($jobId, $job, $xForwardedFor) {
+    global $config;
+
+    $node = null;
+
+    if ($jobId === -1) {
+      $node = (new NodeManager($this->authToken))->getNodeForNewJob();
+    } else {
+      $node = (new NodeManager($this->authToken))->getJobNode($jobId);
+    }
+
+    if ($node === null) {
+      throw new InternalErrorException();
+    }
+
+    $redis = RedisConnection::get();
+    if ($redis === null) {
+      throw new InternalErrorException();
+    }
+
+    try {
+      $client = $node->connect();
+
+      $handle = $client->submitJobTestRun($job->toThriftJob($this->authToken->userId), $xForwardedFor);
+      if ($handle) {
+        $redis->set(implode(':', ['testRun', $handle, 'nodeId']), $node->nodeId, $config['testRunLifetime']);
+        return $handle;
+      } else {
+        throw new InternalErrorException();
+      }
+    } catch (Exception $ex) {
+      throw new InternalErrorException($ex);
+    }
+  }
+
+  public function getJobTestRunStatus($handle) {
+    $redis = RedisConnection::get();
+    if ($redis === null) {
+      throw new InternalErrorException();
+    }
+
+    $nodeId = $redis->get(implode(':', ['testRun', $handle, 'nodeId']));
+    if ($nodeId === false) {
+      throw new InvalidArgumentsException();
+    }
+
+    $node = (new NodeManager($this->authToken))->getNode(intval($nodeId));
+    if (!$node) {
+      throw new InternalErrorException();
+    }
+
+    try {
+      $client = $node->connect();
+
+      return $client->getJobTestRunStatus($handle);
+    } catch (Exception $ex) {
+      throw new InternalErrorException($ex);
+    }
+  }
+
+  public function deleteJobTestRun($handle) {
+    $redis = RedisConnection::get();
+    if ($redis === null) {
+      throw new InternalErrorException();
+    }
+
+    $nodeId = $redis->get(implode(':', ['testRun', $handle, 'nodeId']));
+    if ($nodeId === false) {
+      throw new InvalidArgumentsException();
+    }
+
+    $node = (new NodeManager($this->authToken))->getNode(intval($nodeId));
+    if (!$node) {
+      throw new InternalErrorException();
+    }
+
+    try {
+      $client = $node->connect();
+
+      return $client->deleteJobTestRun($handle);
+    } catch (Exception $ex) {
+      throw new InternalErrorException($ex);
+    }
   }
 
   //! @todo Check job URL for >/dev/null, blacklist etc

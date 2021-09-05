@@ -675,4 +675,197 @@ class ChronosNodeClient implements \chronos\ChronosNodeIf
         }
         return;
     }
+
+    public function submitJobTestRun(\chronos\Job $job, $xForwardedFor)
+    {
+        $this->send_submitJobTestRun($job, $xForwardedFor);
+        return $this->recv_submitJobTestRun();
+    }
+
+    public function send_submitJobTestRun(\chronos\Job $job, $xForwardedFor)
+    {
+        $args = new \chronos\ChronosNode_submitJobTestRun_args();
+        $args->job = $job;
+        $args->xForwardedFor = $xForwardedFor;
+        $bin_accel = ($this->output_ instanceof TBinaryProtocolAccelerated) && function_exists('thrift_protocol_write_binary');
+        if ($bin_accel) {
+            thrift_protocol_write_binary(
+                $this->output_,
+                'submitJobTestRun',
+                TMessageType::CALL,
+                $args,
+                $this->seqid_,
+                $this->output_->isStrictWrite()
+            );
+        } else {
+            $this->output_->writeMessageBegin('submitJobTestRun', TMessageType::CALL, $this->seqid_);
+            $args->write($this->output_);
+            $this->output_->writeMessageEnd();
+            $this->output_->getTransport()->flush();
+        }
+    }
+
+    public function recv_submitJobTestRun()
+    {
+        $bin_accel = ($this->input_ instanceof TBinaryProtocolAccelerated) && function_exists('thrift_protocol_read_binary');
+        if ($bin_accel) {
+            $result = thrift_protocol_read_binary(
+                $this->input_,
+                '\chronos\ChronosNode_submitJobTestRun_result',
+                $this->input_->isStrictRead()
+            );
+        } else {
+            $rseqid = 0;
+            $fname = null;
+            $mtype = 0;
+
+            $this->input_->readMessageBegin($fname, $mtype, $rseqid);
+            if ($mtype == TMessageType::EXCEPTION) {
+                $x = new TApplicationException();
+                $x->read($this->input_);
+                $this->input_->readMessageEnd();
+                throw $x;
+            }
+            $result = new \chronos\ChronosNode_submitJobTestRun_result();
+            $result->read($this->input_);
+            $this->input_->readMessageEnd();
+        }
+        if ($result->success !== null) {
+            return $result->success;
+        }
+        if ($result->ie !== null) {
+            throw $result->ie;
+        }
+        if ($result->ia !== null) {
+            throw $result->ia;
+        }
+        if ($result->na !== null) {
+            throw $result->na;
+        }
+        throw new \Exception("submitJobTestRun failed: unknown result");
+    }
+
+    public function getJobTestRunStatus($handle)
+    {
+        $this->send_getJobTestRunStatus($handle);
+        return $this->recv_getJobTestRunStatus();
+    }
+
+    public function send_getJobTestRunStatus($handle)
+    {
+        $args = new \chronos\ChronosNode_getJobTestRunStatus_args();
+        $args->handle = $handle;
+        $bin_accel = ($this->output_ instanceof TBinaryProtocolAccelerated) && function_exists('thrift_protocol_write_binary');
+        if ($bin_accel) {
+            thrift_protocol_write_binary(
+                $this->output_,
+                'getJobTestRunStatus',
+                TMessageType::CALL,
+                $args,
+                $this->seqid_,
+                $this->output_->isStrictWrite()
+            );
+        } else {
+            $this->output_->writeMessageBegin('getJobTestRunStatus', TMessageType::CALL, $this->seqid_);
+            $args->write($this->output_);
+            $this->output_->writeMessageEnd();
+            $this->output_->getTransport()->flush();
+        }
+    }
+
+    public function recv_getJobTestRunStatus()
+    {
+        $bin_accel = ($this->input_ instanceof TBinaryProtocolAccelerated) && function_exists('thrift_protocol_read_binary');
+        if ($bin_accel) {
+            $result = thrift_protocol_read_binary(
+                $this->input_,
+                '\chronos\ChronosNode_getJobTestRunStatus_result',
+                $this->input_->isStrictRead()
+            );
+        } else {
+            $rseqid = 0;
+            $fname = null;
+            $mtype = 0;
+
+            $this->input_->readMessageBegin($fname, $mtype, $rseqid);
+            if ($mtype == TMessageType::EXCEPTION) {
+                $x = new TApplicationException();
+                $x->read($this->input_);
+                $this->input_->readMessageEnd();
+                throw $x;
+            }
+            $result = new \chronos\ChronosNode_getJobTestRunStatus_result();
+            $result->read($this->input_);
+            $this->input_->readMessageEnd();
+        }
+        if ($result->success !== null) {
+            return $result->success;
+        }
+        if ($result->ia !== null) {
+            throw $result->ia;
+        }
+        if ($result->na !== null) {
+            throw $result->na;
+        }
+        throw new \Exception("getJobTestRunStatus failed: unknown result");
+    }
+
+    public function deleteJobTestRun($handle)
+    {
+        $this->send_deleteJobTestRun($handle);
+        $this->recv_deleteJobTestRun();
+    }
+
+    public function send_deleteJobTestRun($handle)
+    {
+        $args = new \chronos\ChronosNode_deleteJobTestRun_args();
+        $args->handle = $handle;
+        $bin_accel = ($this->output_ instanceof TBinaryProtocolAccelerated) && function_exists('thrift_protocol_write_binary');
+        if ($bin_accel) {
+            thrift_protocol_write_binary(
+                $this->output_,
+                'deleteJobTestRun',
+                TMessageType::CALL,
+                $args,
+                $this->seqid_,
+                $this->output_->isStrictWrite()
+            );
+        } else {
+            $this->output_->writeMessageBegin('deleteJobTestRun', TMessageType::CALL, $this->seqid_);
+            $args->write($this->output_);
+            $this->output_->writeMessageEnd();
+            $this->output_->getTransport()->flush();
+        }
+    }
+
+    public function recv_deleteJobTestRun()
+    {
+        $bin_accel = ($this->input_ instanceof TBinaryProtocolAccelerated) && function_exists('thrift_protocol_read_binary');
+        if ($bin_accel) {
+            $result = thrift_protocol_read_binary(
+                $this->input_,
+                '\chronos\ChronosNode_deleteJobTestRun_result',
+                $this->input_->isStrictRead()
+            );
+        } else {
+            $rseqid = 0;
+            $fname = null;
+            $mtype = 0;
+
+            $this->input_->readMessageBegin($fname, $mtype, $rseqid);
+            if ($mtype == TMessageType::EXCEPTION) {
+                $x = new TApplicationException();
+                $x->read($this->input_);
+                $this->input_->readMessageEnd();
+                throw $x;
+            }
+            $result = new \chronos\ChronosNode_deleteJobTestRun_result();
+            $result->read($this->input_);
+            $this->input_->readMessageEnd();
+        }
+        if ($result->na !== null) {
+            throw $result->na;
+        }
+        return;
+    }
 }
