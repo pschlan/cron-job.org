@@ -32,6 +32,7 @@
 #include "NotificationThread.h"
 #include "WorkerThread.h"
 #include "NodeService.h"
+#include "TestRunThread.h"
 #include "MasterService.h"
 #include "Config.h"
 
@@ -360,6 +361,7 @@ int App::run()
 		db = createMySQLConnection();
 		startNotificationThread();
 		startUpdateThread();
+		startTestRunThread();
 
 		struct tm lastTime = { 0 };
 		while(!stop)
@@ -387,6 +389,7 @@ int App::run()
 			}
 		}
 
+		stopTestRunThread();
 		stopUpdateThread();
 		stopNotificationThread();
 	}
@@ -464,6 +467,21 @@ void App::nodeServiceThreadMain()
 	std::cout << "App::nodeServiceThreadMain(): Finished" << std::endl;
 }
 
+void App::testRunThreadMain()
+{
+	try
+	{
+		testRunThreadObj = std::make_unique<TestRunThread>();
+		testRunThreadObj->run();
+		testRunThreadObj.reset();
+	}
+	catch(const std::runtime_error &ex)
+	{
+		std::cout << "Test run thread runtime error: " << ex.what() << std::endl;
+		stop = true;
+	}
+}
+
 void App::masterServiceThreadMain()
 {
 	std::cout << "App::masterServiceThreadMain(): Entered" << std::endl;
@@ -492,6 +510,17 @@ void App::stopUpdateThread()
 {
 	updateThreadObj->stopThread();
 	updateThread.join();
+}
+
+void App::startTestRunThread()
+{
+	testRunThread = std::thread(std::bind(&App::testRunThreadMain, this));
+}
+
+void App::stopTestRunThread()
+{
+	testRunThreadObj->stopThread();
+	testRunThread.join();
 }
 
 void App::startNotificationThread()

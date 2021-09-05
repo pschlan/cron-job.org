@@ -191,10 +191,45 @@ struct TimeSeriesData
     2: list<TimeSeriesDataEntry> last12Months;
 }
 
-exception ResourceNotFound  {}
-exception Forbidden         {}
-exception InvalidArguments  {}
-exception InternalError     {}
+typedef string TestRunHandle
+
+enum TestRunState
+{
+    PREPARING           = 0,
+    CONNECTING          = 1,
+    SENDING_HEADERS     = 2,
+    SENDING_DATA        = 3,
+    RECEIVING_HEADERS   = 4,
+    RECEIVING_DATA      = 5,
+    DONE                = 6
+}
+
+struct TestRunStatus
+{
+    1: TestRunState state;
+    2: JobStatus result;
+
+    3: string headers;
+    4: string body;
+
+    5: string headersOut;
+    6: string headersIn;
+    7: string dataOut;
+    8: string dataIn;
+
+    9: i32 duration;
+    10: string statusText;
+    11: i16 httpStatus;
+    12: string peerAddress;
+    13: i16 peerPort;
+    14: JobLogStatsEntry stats;
+}
+
+exception ResourceNotFound          {}
+exception Forbidden                 {}
+exception InvalidArguments          {}
+exception InternalError             {}
+exception FeatureNotAvailable       {}
 
 service ChronosNode
 {
@@ -215,6 +250,10 @@ service ChronosNode
     void deleteJob(1: JobIdentifier identifier) throws(1: ResourceNotFound rnf, 2: InternalError ie);
 
     void disableJobsForUser(1: i64 userId) throws(1: InternalError ie);
+
+    TestRunHandle submitJobTestRun(1: Job job, 2: string xForwardedFor) throws(1: InternalError ie, 2: InvalidArguments ia, 3: FeatureNotAvailable na);
+    TestRunStatus getJobTestRunStatus(1: TestRunHandle handle) throws(1: InvalidArguments ia, 2: FeatureNotAvailable na);
+    void deleteJobTestRun(1: TestRunHandle handle) throws(1: FeatureNotAvailable na);
 }
 
 service ChronosMaster

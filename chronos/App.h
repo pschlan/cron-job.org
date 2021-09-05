@@ -29,6 +29,7 @@ namespace Chronos
 	class NotificationThread;
 	class WorkerThread;
 	class NodeService;
+	class TestRunThread;
 	class MasterService;
 
 	class App
@@ -49,6 +50,7 @@ namespace Chronos
 		void updateThreadMain();
 		void notificationThreadMain();
 		void nodeServiceThreadMain();
+		void testRunThreadMain();
 		void masterServiceThreadMain();
 		int run();
 		std::unique_ptr<MySQL_DB> createMySQLConnection();
@@ -61,6 +63,8 @@ namespace Chronos
 		void stopNotificationThread();
 		void startNodeServiceThread();
 		void stopNodeServiceThread();
+		void startTestRunThread();
+		void stopTestRunThread();
 		void startMasterServiceThread();
 		void stopMasterServiceThread();
 		void processJobs(time_t forTime, time_t plannedTime);
@@ -79,11 +83,13 @@ namespace Chronos
 		std::thread updateThread;
 		std::thread notificationThread;
 		std::thread nodeServiceThread;
+		std::thread testRunThread;
 		std::thread masterServiceThread;
 		std::unique_ptr<MySQL_DB> db;
 		std::unique_ptr<UpdateThread> updateThreadObj;
 		std::unique_ptr<NotificationThread> notificationThreadObj;
 		std::unique_ptr<NodeService> nodeServiceObj;
+		std::unique_ptr<TestRunThread> testRunThreadObj;
 		std::unique_ptr<MasterService> masterServiceObj;
 		std::vector<Utils::Subnet> blockedSubnets;
 	};
