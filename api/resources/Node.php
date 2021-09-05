@@ -41,6 +41,15 @@ class NodeManager {
     return $nodes;
   }
 
+  public function getNode($nodeId) {
+    $stmt = Database::get()->prepare('SELECT `node`.`nodeid` AS `nodeId`, `node`.`ip` AS `ip`, `node`.`port` AS `port` FROM `node` '
+                                      . 'INNER JOIN `usergroupnode` ON `node`.`nodeid`=`usergroupnode`.`nodeid` '
+                                      . 'WHERE `usergroupnode`.`usergroupid`=:userGroupId AND `node`.`enabled`=1 AND `node`.`nodeid`=:nodeId');
+    $stmt->setFetchMode(PDO::FETCH_CLASS, Node::class);
+    $stmt->execute(array(':userGroupId' => $this->authToken->userGroupId, ':nodeId' => $nodeId));
+    return $stmt->fetch();
+  }
+
   public function getJobNode($jobId) {
     $stmt = Database::get()->prepare('SELECT `nodeid` AS `nodeId`, `ip`, `port` FROM `node` WHERE `nodeid`=(SELECT `nodeid` FROM `job` WHERE `jobid`=:jobId AND `userid`=:userId)');
     $stmt->setFetchMode(PDO::FETCH_CLASS, Node::class);
