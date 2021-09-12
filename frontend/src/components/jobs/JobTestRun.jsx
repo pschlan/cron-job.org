@@ -153,7 +153,7 @@ export default function JobTestRun({ job, jobId, onClose }) {
           </div>}
         </Typography>
 
-        {status.state === JobTestRunState.DONE && <>
+        {status.state === JobTestRunState.DONE && status.result === JobStatus.OK && <>
           <Grid container>
             <Grid item xs={6}>
               <Typography variant='overline'>{t('jobs.duration')}</Typography>
