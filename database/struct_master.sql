@@ -46,6 +46,12 @@ CREATE TABLE `user_pwreset` (
 CREATE TABLE `usergroup`(
     `usergroupid` int(11) NOT NULL AUTO_INCREMENT,
     `title` varchar(128) NOT NULL DEFAULT '',
+    `max_status_pages` int(11) NOT NULL DEFAULT '5',
+    `max_status_page_monitors` int(11) NOT NULL DEFAULT '10',
+    `max_status_page_domains` int(11) NOT NULL DEFAULT '2',
+    `request_timeout` int(11) NOT NULL DEFAULT '30',
+    `request_max_size` int(11) NOT NULL DEFAULT '8192',
+    `max_failures` int(11) NOT NULL DEFAULT 15,
     PRIMARY KEY(`usergroupid`)
 ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 INSERT INTO `usergroup`(`usergroupid`, `title`) VALUES(1, 'Default');

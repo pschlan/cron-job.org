@@ -123,6 +123,36 @@ public:
             throw InternalError();
         }
     }
+
+    void getUserGroups(std::vector<UserGroup> &_return) override
+    {
+        using namespace Chronos;
+
+        std::cout << "ChronosMasterHandler::getUserGroups()" << std::endl;
+
+        try
+        {
+            std::unique_ptr<MySQL_DB> db(App::getInstance()->createMasterMySQLConnection());
+
+            MYSQL_ROW row;
+            auto res = db->query("SELECT `usergroupid`,`title`,`request_timeout`,`request_max_size`,`max_failures` FROM `usergroup`");
+            while((row = res->fetchRow()))
+            {
+                UserGroup ug;
+                ug.userGroupId      = std::stoll(row[0]);
+                ug.title            = row[1];
+                ug.requestTimeout   = std::stol(row[2]);
+                ug.requestMaxSize   = std::stol(row[3]);
+                ug.maxFailures      = std::stol(row[4]);
+                _return.push_back(ug);
+            }
+        }
+        catch(const std::exception &ex)
+        {
+            std::cout << "ChronosMasterHandler::getUserGroups(): Exception: "  << ex.what() << std::endl;
+            throw InternalError();
+        }
+    }
 };
 
 }
