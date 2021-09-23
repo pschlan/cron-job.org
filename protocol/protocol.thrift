@@ -43,6 +43,7 @@ struct JobMetadata
     2: string title;
     3: bool saveResponses;
     4: JobType type;
+    5: optional i64 userGroupId;
 }
 
 struct JobExecutionInfo
@@ -148,6 +149,15 @@ struct UserDetails
     3: string firstName;
     4: string lastName;
     5: string language;
+}
+
+struct UserGroup
+{
+    1: i64 userGroupId;
+    2: string title;
+    3: i32 requestTimeout;
+    4: i32 requestMaxSize;
+    5: i32 maxFailures;
 }
 
 struct Phrases
@@ -263,4 +273,6 @@ service ChronosMaster
     void reportNodeStats(1: i32 nodeId, 2: NodeStatsEntry stats);
     UserDetails getUserDetails(1: i64 userId) throws(1: ResourceNotFound rnf, 2: InternalError ie);
     Phrases getPhrases() throws(1: InternalError ie);
+
+    list<UserGroup> getUserGroups();
 }

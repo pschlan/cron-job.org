@@ -153,10 +153,16 @@ std::string sanitizeHttpHeaderValue(std::string value)
 
 }
 
-HTTPRequest::HTTPRequest()
+HTTPRequest::HTTPRequest(size_t maxSize, int requestTimeout)
 	: result{std::make_unique<JobResult>()}
+	, maxSize{maxSize}
+	, requestTimeout{requestTimeout}
 {
-	maxSize = App::getInstance()->config->getInt("request_max_size");
+	if(maxSize == 0 || requestTimeout <= 0)
+	{
+		throw std::runtime_error("Invalid max size / request timeout!");
+	}
+
 	memset(curlError, 0, sizeof(curlError));
 
 	setupEasyHandle();
@@ -376,7 +382,7 @@ void HTTPRequest::setupEasyHandle()
 	curl_easy_setopt(easy, CURLOPT_HEADERDATA,			this);
 	curl_easy_setopt(easy, CURLOPT_OPENSOCKETFUNCTION, 	curlOpenSocketFunction);
 	curl_easy_setopt(easy, CURLOPT_OPENSOCKETDATA,		this);
-	curl_easy_setopt(easy, CURLOPT_TIMEOUT,				App::getInstance()->config->getInt("request_timeout"));
+	curl_easy_setopt(easy, CURLOPT_TIMEOUT,				requestTimeout);
 	curl_easy_setopt(easy, CURLOPT_MAXFILESIZE,			maxSize);
 	curl_easy_setopt(easy, CURLOPT_USERAGENT,			App::getInstance()->config->get("user_agent").c_str());
 	curl_easy_setopt(easy, CURLOPT_SSL_VERIFYPEER,		0);
@@ -502,9 +508,9 @@ void HTTPRequest::submit(CurlWorker *worker)
 		addedToWorker = true;
 }
 
-HTTPRequest *HTTPRequest::fromURL(const std::string &url, int userID)
+HTTPRequest *HTTPRequest::fromURL(const std::string &url, int userID, size_t maxSize, int requestTimeout)
 {
-	HTTPRequest *req = new HTTPRequest();
+	HTTPRequest *req = new HTTPRequest(maxSize, requestTimeout);
 	req->result->userID = userID;
 	req->result->url = url;
 	req->url = url;

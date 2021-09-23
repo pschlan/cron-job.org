@@ -40,7 +40,7 @@ namespace Chronos
 
 	class HTTPRequest
 	{
-		HTTPRequest();
+		HTTPRequest(size_t maxSize, int requestTimeout);
 
 		HTTPRequest(const HTTPRequest &other) = delete;
 		HTTPRequest(HTTPRequest &&other) = delete;
@@ -59,7 +59,7 @@ namespace Chronos
 		~HTTPRequest();
 
 	public:
-		static HTTPRequest *fromURL(const std::string &url, int userID);
+		static HTTPRequest *fromURL(const std::string &url, int userID, size_t maxSize, int requestTimeout);
 
 		void submit(CurlWorker *worker);
 		void done(CURLcode res);
@@ -80,7 +80,6 @@ namespace Chronos
 		std::string xForwardedFor;
 		std::unique_ptr<JobResult> result;
 		bool verbose = false;
-
 		std::function<void()> onDone;
 		std::function<void(VerboseDataType, const std::string &)> onVerboseData;
 
@@ -95,6 +94,7 @@ namespace Chronos
 		bool isValid = false;
 		char curlError[CURL_ERROR_SIZE];
 		size_t maxSize;
+		int requestTimeout;
 	};
 };
 

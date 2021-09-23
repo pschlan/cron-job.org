@@ -34,6 +34,8 @@ namespace Chronos
 
 	class App
 	{
+		struct Private;
+
 	public:
 		App(int argc, char *argv[]);
 		~App();
@@ -72,6 +74,7 @@ namespace Chronos
 						const std::vector<std::shared_ptr<WorkerThread>> &workerThreads, std::size_t &i, std::size_t numThreads,
 						std::size_t numMonitoringThreads);
 		void cleanUpNotifications();
+		void syncUserGroups();
 
 	public:
 		std::shared_ptr<Config> config;
@@ -80,6 +83,7 @@ namespace Chronos
 	private:
 		bool stop = false;
 		static App *instance;
+		std::unique_ptr<Private> priv;
 		std::thread updateThread;
 		std::thread notificationThread;
 		std::thread nodeServiceThread;

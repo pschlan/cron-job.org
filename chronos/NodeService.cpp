@@ -230,6 +230,13 @@ public:
                     job.metaData.saveResponses ? 1 : 0,
                     job.metaData.type,
                     job.identifier.jobId);
+
+                if(job.metaData.__isset.userGroupId)
+                {
+                    db->query("UPDATE `job` SET `usergroupid`=%d WHERE `jobid`=%v",
+                        job.metaData.userGroupId,
+                        job.identifier.jobId);
+                }
             }
 
             if(job.__isset.authentication)
@@ -606,7 +613,13 @@ public:
             return nullptr;
         }
 
-        std::unique_ptr<Chronos::HTTPRequest> req(Chronos::HTTPRequest::fromURL(job.data.url, job.identifier.userId));
+        std::unique_ptr<Chronos::HTTPRequest> req(Chronos::HTTPRequest::fromURL(
+            job.data.url,
+            job.identifier.userId,
+            //! @todo Apply group settings here
+            Chronos::App::getInstance()->config->getInt("request_max_size"),
+            Chronos::App::getInstance()->config->getInt("request_timeout")
+        ));
         req->result->jobID          = job.identifier.jobId;
         req->result->datePlanned    = Chronos::Utils::getTimestampMS();
         req->result->notifyFailure 	= false;

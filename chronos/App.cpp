@@ -36,6 +36,13 @@
 #include "MasterService.h"
 #include "Config.h"
 
+#include <thrift/protocol/TBinaryProtocol.h>
+#include <thrift/transport/TSocket.h>
+#include <thrift/transport/TBufferTransports.h>
+#include <thrift/transport/TTransportUtils.h>
+
+#include "ChronosMaster.h"
+
 namespace
 {
 
@@ -103,7 +110,13 @@ using namespace Chronos;
 
 App *App::instance = nullptr;
 
+struct App::Private
+{
+	std::unordered_map<int64_t, UserGroup> userGroups;
+};
+
 App::App(int argc, char *argv[])
+	: priv{std::make_unique<Private>()}
 {
 	if(App::instance != nullptr)
 		throw std::runtime_error("App instance already exists");
@@ -247,7 +260,10 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 				<< "timeZone = " << timeZone
 				<< std::endl;
 
-	auto res = db->query("SELECT TRIM(`url`),`job`.`jobid`,`auth_enable`,`auth_user`,`auth_pass`,`notify_failure`,`notify_success`,`notify_disable`,`fail_counter`,`save_responses`,`job`.`userid`,`request_method`,COUNT(`job_header`.`jobheaderid`),`job_body`.`body`,`title`,`job`.`type` FROM `job` "
+	const size_t defaultMaxSize = App::getInstance()->config->getInt("request_max_size");
+	const int defaultRequestTimeout = App::getInstance()->config->getInt("request_timeout");
+
+	auto res = db->query("SELECT TRIM(`url`),`job`.`jobid`,`auth_enable`,`auth_user`,`auth_pass`,`notify_failure`,`notify_success`,`notify_disable`,`fail_counter`,`save_responses`,`job`.`userid`,`request_method`,COUNT(`job_header`.`jobheaderid`),`job_body`.`body`,`title`,`job`.`type`,`usergroupid` FROM `job` "
 									"INNER JOIN `job_hours` ON `job_hours`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_mdays` ON `job_mdays`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_wdays` ON `job_wdays`.`jobid`=`job`.`jobid` "
@@ -274,7 +290,19 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 		MYSQL_ROW row;
 		while((row = res->fetchRow()) != nullptr)
 		{
-			HTTPRequest *req = HTTPRequest::fromURL(row[0], atoi(row[10]));
+			size_t maxSize = defaultMaxSize;
+			int requestTimeout = defaultRequestTimeout;
+
+			// Apply user group settings
+			int64_t userGroupId = std::stoll(row[16]);
+			auto userGroupIt = priv->userGroups.find(userGroupId);
+			if(userGroupIt != priv->userGroups.end())
+			{
+				maxSize 		= userGroupIt->second.requestMaxSize;
+				requestTimeout 	= userGroupIt->second.requestTimeout;
+			}
+
+			HTTPRequest *req = HTTPRequest::fromURL(row[0], atoi(row[10]), maxSize, requestTimeout);
 			req->result->jobID 			= atoi(row[1]);
 			req->result->datePlanned	= (uint64_t)timestamp * 1000;
 			req->result->notifyFailure 	= strcmp(row[5], "1") == 0;
@@ -318,6 +346,44 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 	res.reset();
 
 	std::cout << "App::processJobsForTimeZone(): Finished" << std::endl;
+}
+
+void App::syncUserGroups()
+{
+	std::shared_ptr<apache::thrift::transport::TTransport> masterSocket
+		= std::make_shared<apache::thrift::transport::TSocket>(
+			config->get("master_service_address"),
+			config->getInt("master_service_port"));
+	std::shared_ptr<apache::thrift::transport::TTransport> masterTransport
+		= std::make_shared<apache::thrift::transport::TBufferedTransport>(masterSocket);
+	std::shared_ptr<apache::thrift::protocol::TProtocol> masterProtocol
+		= std::make_shared<apache::thrift::protocol::TBinaryProtocol>(masterTransport);
+	std::shared_ptr<ChronosMasterClient> masterClient
+		= std::make_shared<ChronosMasterClient>(masterProtocol);
+
+	try
+	{
+		masterTransport->open();
+
+		std::vector<UserGroup> userGroups;
+		masterClient->getUserGroups(userGroups);
+
+		std::unordered_map<int64_t, UserGroup> userGroupsById;
+		for(const auto &group : userGroups)
+		{
+			userGroupsById.emplace(group.userGroupId, group);
+		}
+
+		priv->userGroups.swap(userGroupsById);
+
+		masterTransport->close();
+
+		std::cout << "App::syncUserGroups(): User groups synced" << std::endl;
+	}
+	catch(const apache::thrift::TException &ex)
+	{
+		std::cerr << "App::syncUserGroups(): Failed to sync user groups: " << ex.what() << std::endl;
+	}
 }
 
 void App::cleanUpNotifications()
@@ -380,6 +446,7 @@ int App::run()
 				// update last time
 				memcpy(&lastTime, &t, sizeof(struct tm));
 
+				syncUserGroups();
 				processJobs(currentTime + 60, currentTime + 60 - t.tm_sec);
 				cleanUpNotifications();
 			}
