@@ -135,15 +135,16 @@ public:
             std::unique_ptr<MySQL_DB> db(App::getInstance()->createMasterMySQLConnection());
 
             MYSQL_ROW row;
-            auto res = db->query("SELECT `usergroupid`,`title`,`request_timeout`,`request_max_size`,`max_failures` FROM `usergroup`");
+            auto res = db->query("SELECT `usergroupid`,`title`,`request_timeout`,`request_max_size`,`max_failures`,`execution_priority` FROM `usergroup`");
             while((row = res->fetchRow()))
             {
                 UserGroup ug;
-                ug.userGroupId      = std::stoll(row[0]);
-                ug.title            = row[1];
-                ug.requestTimeout   = std::stol(row[2]);
-                ug.requestMaxSize   = std::stol(row[3]);
-                ug.maxFailures      = std::stol(row[4]);
+                ug.userGroupId          = std::stoll(row[0]);
+                ug.title                = row[1];
+                ug.requestTimeout       = std::stol(row[2]);
+                ug.requestMaxSize       = std::stol(row[3]);
+                ug.maxFailures          = std::stol(row[4]);
+                ug.executionPriority    = std::stoi(row[5]);
                 _return.push_back(ug);
             }
         }
