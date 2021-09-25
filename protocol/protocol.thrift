@@ -158,6 +158,7 @@ struct UserGroup
     3: i32 requestTimeout;
     4: i32 requestMaxSize;
     5: i32 maxFailures;
+    6: i8 executionPriority;
 }
 
 struct Phrases

@@ -262,6 +262,9 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 
 	const size_t defaultMaxSize = App::getInstance()->config->getInt("request_max_size");
 	const int defaultRequestTimeout = App::getInstance()->config->getInt("request_timeout");
+	const int8_t defaultExecutionPriority = 0;
+
+	std::map<uint8_t, std::vector<HTTPRequest *>> requestsByPriority;
 
 	auto res = db->query("SELECT TRIM(`url`),`job`.`jobid`,`auth_enable`,`auth_user`,`auth_pass`,`notify_failure`,`notify_success`,`notify_disable`,`fail_counter`,`save_responses`,`job`.`userid`,`request_method`,COUNT(`job_header`.`jobheaderid`),`job_body`.`body`,`title`,`job`.`type`,`usergroupid` FROM `job` "
 									"INNER JOIN `job_hours` ON `job_hours`.`jobid`=`job`.`jobid` "
@@ -292,14 +295,16 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 		{
 			size_t maxSize = defaultMaxSize;
 			int requestTimeout = defaultRequestTimeout;
+			int8_t executionPriority = defaultExecutionPriority;
 
 			// Apply user group settings
 			int64_t userGroupId = std::stoll(row[16]);
 			auto userGroupIt = priv->userGroups.find(userGroupId);
 			if(userGroupIt != priv->userGroups.end())
 			{
-				maxSize 		= userGroupIt->second.requestMaxSize;
-				requestTimeout 	= userGroupIt->second.requestTimeout;
+				maxSize 			= userGroupIt->second.requestMaxSize;
+				requestTimeout 		= userGroupIt->second.requestTimeout;
+				executionPriority 	= userGroupIt->second.executionPriority;
 			}
 
 			HTTPRequest *req = HTTPRequest::fromURL(row[0], atoi(row[10]), maxSize, requestTimeout);
@@ -336,14 +341,22 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 			req->result->title		= row[14];
 			req->result->jobType  	= static_cast<JobType_t>(atoi(row[15]));
 
-			const auto &wt = workerThreads[req->result->jobType == JobType_t::MONITORING ? ((i % numMonitoringThreads) + numThreads) : (i % numThreads)];
-			wt->addJob(req);
-
-			++i;
+			requestsByPriority[executionPriority].push_back(req);
 		}
 	}
 
 	res.reset();
+
+	for(auto prioSlotIt = requestsByPriority.rbegin(); prioSlotIt != requestsByPriority.rend(); ++prioSlotIt)
+	{
+		std::cout << "App::processJobsForTimeZone(): " << prioSlotIt->second.size() << " jobs with priority " << static_cast<int>(prioSlotIt->first) << std::endl;
+		for(auto req : prioSlotIt->second)
+		{
+			const auto &wt = workerThreads[req->result->jobType == JobType_t::MONITORING ? ((i % numMonitoringThreads) + numThreads) : (i % numThreads)];
+			wt->addJob(req);
+			++i;
+		}
+	}
 
 	std::cout << "App::processJobsForTimeZone(): Finished" << std::endl;
 }

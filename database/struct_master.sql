@@ -52,6 +52,7 @@ CREATE TABLE `usergroup`(
     `request_timeout` int(11) NOT NULL DEFAULT '30',
     `request_max_size` int(11) NOT NULL DEFAULT '8192',
     `max_failures` int(11) NOT NULL DEFAULT 15,
+    `execution_priority` tinyint(4) NOT NULL DEFAULT 0,
     PRIMARY KEY(`usergroupid`)
 ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 INSERT INTO `usergroup`(`usergroupid`, `title`) VALUES(1, 'Default');
