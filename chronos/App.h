@@ -31,6 +31,7 @@ namespace Chronos
 	class NodeService;
 	class TestRunThread;
 	class MasterService;
+	class HTTPRequest;
 
 	class App
 	{
@@ -71,8 +72,7 @@ namespace Chronos
 		void stopMasterServiceThread();
 		void processJobs(time_t forTime, time_t plannedTime);
 		void processJobsForTimeZone(int hour, int minute, int month, int mday, int wday, int year, time_t timestamp, const std::string &timeZone,
-						const std::vector<std::shared_ptr<WorkerThread>> &workerThreads, std::size_t &i, std::size_t numThreads,
-						std::size_t numMonitoringThreads);
+									std::map<uint8_t, std::vector<HTTPRequest *>> &requestsByPriority);
 		void cleanUpNotifications();
 		void syncUserGroups();
 
