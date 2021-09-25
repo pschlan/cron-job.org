@@ -185,7 +185,7 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 			i >= numThreads ? deferMonitorJobsMs : 0));
 	}
 
-	std::size_t i = 0;
+	std::map<uint8_t, std::vector<HTTPRequest *>> requestsByPriority;
 	MYSQL_ROW row;
 	auto res = db->query("SELECT DISTINCT(`timezone`) FROM `job` WHERE `enabled`=1");
 	while((row = res->fetchRow()) != nullptr)
@@ -215,8 +215,22 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 		}
 
 		processJobsForTimeZone(civilTime.hour(), civilTime.minute(), civilTime.month(), civilTime.day(), wday, civilTime.year(),
-			plannedTime, timeZone, workerThreads, i, numThreads, numMonitoringThreads);
+			plannedTime, timeZone, requestsByPriority);
 	}
+
+	// Add jobs to worker threads
+	std::size_t i = 0;
+	for(auto prioSlotIt = requestsByPriority.rbegin(); prioSlotIt != requestsByPriority.rend(); ++prioSlotIt)
+	{
+		std::cout << "App::processJobs(): " << prioSlotIt->second.size() << " jobs with priority " << static_cast<int>(prioSlotIt->first) << std::endl;
+		for(auto req : prioSlotIt->second)
+		{
+			const auto &wt = workerThreads[req->result->jobType == JobType_t::MONITORING ? ((i % numMonitoringThreads) + numThreads) : (i % numThreads)];
+			wt->addJob(req);
+			++i;
+		}
+	}
+	requestsByPriority.clear();
 
 	std::cout << "App::processJobs(): Waiting for plannedTime = " << plannedTime << ", curTime = " << time(nullptr) << "..." << std::endl;
 	while(time(nullptr) < plannedTime && !stop)
@@ -248,7 +262,7 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 }
 
 void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int wday, int year, time_t timestamp, const std::string &timeZone,
-	const std::vector<std::shared_ptr<WorkerThread>> &workerThreads, std::size_t &i, std::size_t numThreads, std::size_t numMonitoringThreads)
+	std::map<uint8_t, std::vector<HTTPRequest *>> &requestsByPriority)
 {
 	std::cout 	<< "App::processJobsForTimeZone(): Called for "
 				<< "hour = " << hour << ", "
@@ -263,8 +277,6 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 	const size_t defaultMaxSize = App::getInstance()->config->getInt("request_max_size");
 	const int defaultRequestTimeout = App::getInstance()->config->getInt("request_timeout");
 	const int8_t defaultExecutionPriority = 0;
-
-	std::map<uint8_t, std::vector<HTTPRequest *>> requestsByPriority;
 
 	auto res = db->query("SELECT TRIM(`url`),`job`.`jobid`,`auth_enable`,`auth_user`,`auth_pass`,`notify_failure`,`notify_success`,`notify_disable`,`fail_counter`,`save_responses`,`job`.`userid`,`request_method`,COUNT(`job_header`.`jobheaderid`),`job_body`.`body`,`title`,`job`.`type`,`usergroupid` FROM `job` "
 									"INNER JOIN `job_hours` ON `job_hours`.`jobid`=`job`.`jobid` "
@@ -346,17 +358,6 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 	}
 
 	res.reset();
-
-	for(auto prioSlotIt = requestsByPriority.rbegin(); prioSlotIt != requestsByPriority.rend(); ++prioSlotIt)
-	{
-		std::cout << "App::processJobsForTimeZone(): " << prioSlotIt->second.size() << " jobs with priority " << static_cast<int>(prioSlotIt->first) << std::endl;
-		for(auto req : prioSlotIt->second)
-		{
-			const auto &wt = workerThreads[req->result->jobType == JobType_t::MONITORING ? ((i % numMonitoringThreads) + numThreads) : (i % numThreads)];
-			wt->addJob(req);
-			++i;
-		}
-	}
 
 	std::cout << "App::processJobsForTimeZone(): Finished" << std::endl;
 }
