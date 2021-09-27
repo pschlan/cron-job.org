@@ -509,7 +509,7 @@ class UserManager {
   private static function generateToken($length) {
     $result = '';
     for ($i = 0; $i < $length; ++$i) {
-      $result .= self::PASSWORD_SALT_CHARS[ mt_rand(0, strlen(self::PASSWORD_SALT_CHARS)-1) ];
+      $result .= self::PASSWORD_SALT_CHARS[ random_int(0, strlen(self::PASSWORD_SALT_CHARS)-1) ];
     }
     return $result;
   }

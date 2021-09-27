@@ -528,7 +528,7 @@ class StatusPageManager {
 
     $result = '';
     for ($i = 0; $i < $config['statusPageUniqueIdLength']; ++$i) {
-      $result .= self::UNIQUE_ID_CHARS[ mt_rand(0, strlen(self::UNIQUE_ID_CHARS)-1) ];
+      $result .= self::UNIQUE_ID_CHARS[ random_int(0, strlen(self::UNIQUE_ID_CHARS)-1) ];
     }
     return $result;
   }
