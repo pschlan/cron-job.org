@@ -237,6 +237,13 @@ public:
                         job.metaData.userGroupId,
                         job.identifier.jobId);
                 }
+
+                if(job.metaData.__isset.requestTimeout)
+                {
+                    db->query("UPDATE `job` SET `request_timeout`=%d WHERE `jobid`=%v",
+                        job.metaData.requestTimeout,
+                        job.identifier.jobId);
+                }
             }
 
             if(job.__isset.authentication)

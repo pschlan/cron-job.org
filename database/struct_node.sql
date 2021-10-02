@@ -19,6 +19,7 @@ CREATE TABLE `job` (
   `request_method` tinyint(4) NOT NULL DEFAULT '0',
   `timezone` varchar(32) NOT NULL DEFAULT 'Europe/Berlin',
   `usergroupid` int(11) NOT NULL DEFAULT '1',
+  `request_timeout` int(11) NOT NULL DEFAULT '-1',
   PRIMARY KEY (`jobid`),
   KEY `userid` (`userid`),
   KEY `timezone` (`timezone`)
