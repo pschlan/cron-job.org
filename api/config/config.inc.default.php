@@ -56,6 +56,9 @@ $config = array(
   'accountConfirmationTokenLifetime'=> 3 * 86400,
   'refreshTokenValiditySeconds'     => 365 * 86400,
 
+  //! @note Minimum session token refresh interval
+  'sessionTokenRefreshInterval'     => 5 * 60,
+
   //! @note The minimum password length can be configured here, and should match
   //!       the value in the frontend config.
   'minPasswordLength'               => 8,

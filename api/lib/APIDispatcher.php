@@ -69,6 +69,18 @@ class APIDispatcher {
     return false;
   }
 
+  private function mayRefreshSessionToken($sessionToken) {
+    if (!$this->refreshTokenHandler) {
+      return false;
+    }
+
+    if ($this->refreshTokenHandler->mayRefreshSessionToken(intval($sessionToken->userId))) {
+      return true;
+    }
+
+    return false;
+  }
+
   public function dispatch() {
     global $config;
 
@@ -148,7 +160,9 @@ class APIDispatcher {
         throw new BadRequestAPIException();
       }
 
-      if ($sessionToken !== false) {
+      if ($sessionToken !== false
+          && ($sessionToken->expires - $config['sessionTokenLifetime']) <= time() - $config['sessionTokenRefreshInterval']
+          && $this->mayRefreshSessionToken($sessionToken)) {
         $sessionToken->refresh();
         header('X-Refreshed-Token: ' . $sessionToken->toJwt());
       }

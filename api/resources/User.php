@@ -50,12 +50,33 @@ class RefreshTokenHandler {
       return false;
     }
 
-    $stmt = Database::get()->prepare('SELECT `refreshtoken`.`userid` AS `userId`, `refreshtoken`.`expires` AS `expires`, `user`.`usergroupid` AS `userGroupId` FROM `refreshtoken` '
+    $stmt = Database::get()->prepare('SELECT `refreshtoken`.`userid` AS `userId`, `refreshtoken`.`expires` AS `expires`, `user`.`usergroupid` AS `userGroupId`, `user`.`status` AS `userStatus` FROM `refreshtoken` '
       . 'INNER JOIN `user` ON `user`.`userid`=`refreshtoken`.`userid` WHERE `refreshtoken`.`token`=:token');
     $stmt->execute([':token' => $refreshToken]);
 
     if ($tokenRow = $stmt->fetch(PDO::FETCH_OBJ)) {
-      if (intval($tokenRow->userId) === intval($userId) && intval($tokenRow->userGroupId) === intval($userGroupId) && $tokenRow->expires > time()) {
+      if (intval($tokenRow->userId) === intval($userId)
+          && intval($tokenRow->userGroupId) === intval($userGroupId)
+          && $tokenRow->expires > time()
+          && $tokenRow->userStatus == UserProfile::STATUS_VERIFIED) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  public function mayRefreshSessionToken($userId) {
+    if ($userId <= 0) {
+      return false;
+    }
+
+    $stmt = Database::get()->prepare('SELECT `status` AS `userStatus` FROM `user` '
+      . 'WHERE `user`.`userid`=:userId');
+    $stmt->execute([':userId' => $userId]);
+
+    if ($row = $stmt->fetch(PDO::FETCH_OBJ)) {
+      if ($row->userStatus == UserProfile::STATUS_VERIFIED) {
         return true;
       }
     }
