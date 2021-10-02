@@ -278,7 +278,7 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 	const int defaultRequestTimeout = App::getInstance()->config->getInt("request_timeout");
 	const int8_t defaultExecutionPriority = 0;
 
-	auto res = db->query("SELECT TRIM(`url`),`job`.`jobid`,`auth_enable`,`auth_user`,`auth_pass`,`notify_failure`,`notify_success`,`notify_disable`,`fail_counter`,`save_responses`,`job`.`userid`,`request_method`,COUNT(`job_header`.`jobheaderid`),`job_body`.`body`,`title`,`job`.`type`,`usergroupid` FROM `job` "
+	auto res = db->query("SELECT TRIM(`url`),`job`.`jobid`,`auth_enable`,`auth_user`,`auth_pass`,`notify_failure`,`notify_success`,`notify_disable`,`fail_counter`,`save_responses`,`job`.`userid`,`request_method`,COUNT(`job_header`.`jobheaderid`),`job_body`.`body`,`title`,`job`.`type`,`usergroupid`,`request_timeout` FROM `job` "
 									"INNER JOIN `job_hours` ON `job_hours`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_mdays` ON `job_mdays`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_wdays` ON `job_wdays`.`jobid`=`job`.`jobid` "
@@ -306,7 +306,7 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 		while((row = res->fetchRow()) != nullptr)
 		{
 			size_t maxSize = defaultMaxSize;
-			int requestTimeout = defaultRequestTimeout;
+			int groupRequestTimeout = defaultRequestTimeout;
 			int8_t executionPriority = defaultExecutionPriority;
 
 			// Apply user group settings
@@ -315,8 +315,14 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 			if(userGroupIt != priv->userGroups.end())
 			{
 				maxSize 			= userGroupIt->second.requestMaxSize;
-				requestTimeout 		= userGroupIt->second.requestTimeout;
+				groupRequestTimeout	= userGroupIt->second.requestTimeout;
 				executionPriority 	= userGroupIt->second.executionPriority;
+			}
+
+			int requestTimeout = atoi(row[17]);
+			if(requestTimeout <= 0 || requestTimeout > groupRequestTimeout)
+			{
+				requestTimeout = groupRequestTimeout;
 			}
 
 			HTTPRequest *req = HTTPRequest::fromURL(row[0], atoi(row[10]), maxSize, requestTimeout);

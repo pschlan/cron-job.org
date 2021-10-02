@@ -44,6 +44,7 @@ struct JobMetadata
     3: bool saveResponses;
     4: JobType type;
     5: optional i64 userGroupId;
+    6: optional i32 requestTimeout;
 }
 
 struct JobExecutionInfo
