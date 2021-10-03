@@ -9,7 +9,7 @@ export default function useUserProfile() {
 
   useEffect(() => {
     if (Object.keys(userProfile).length === 0) {
-      getUserProfile().then(response => dispatch(setUserProfile(response.userProfile)));
+      getUserProfile().then(response => dispatch(setUserProfile(response)));
     }
   }, [userProfile, dispatch]);
 

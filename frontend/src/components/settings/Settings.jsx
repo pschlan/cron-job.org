@@ -63,13 +63,13 @@ export default function Settings() {
   const [ signupDate, setSignupDate ] = useState(0);
 
   useEffect(() => {
-    if (userProfile && Object.keys(userProfile).length > 0) {
-      setFirstName(userProfile.firstName);
-      setLastName(userProfile.lastName);
-      setTimezone(userProfile.timezone);
-      setEmail(userProfile.email);
-      setNewsletterSubscribe(userProfile.newsletterSubscribe);
-      setSignupDate(userProfile.signupDate);
+    if (userProfile && userProfile.userProfile && Object.keys(userProfile.userProfile).length > 0) {
+      setFirstName(userProfile.userProfile.firstName);
+      setLastName(userProfile.userProfile.lastName);
+      setTimezone(userProfile.userProfile.timezone);
+      setEmail(userProfile.userProfile.email);
+      setNewsletterSubscribe(userProfile.userProfile.newsletterSubscribe);
+      setSignupDate(userProfile.userProfile.signupDate);
       setIsLoading(false);
     }
   }, [userProfile]);
@@ -79,13 +79,16 @@ export default function Settings() {
 
     const newProfile = {
       ...userProfile,
-      firstName,
-      lastName,
-      timezone,
-      newsletterSubscribe
+      userProfile: {
+        ...userProfile.userProfile,
+        firstName,
+        lastName,
+        timezone,
+        newsletterSubscribe
+      }
     };
 
-    updateUserProfile(newProfile)
+    updateUserProfile(newProfile.userProfile)
       .then(() => {
         dispatch(setUserProfile(newProfile));
         enqueueSnackbar(t('settings.saved'), { variant: 'success' });

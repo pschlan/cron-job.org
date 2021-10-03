@@ -6,7 +6,7 @@ import {
   LinearProgress, Paper, makeStyles, TextField, Switch, FormControl, FormLabel,
   FormGroup, FormControlLabel, Select, MenuItem, InputLabel, TableContainer, Button,
   IconButton, Tabs, Tab, Grid, CircularProgress, Dialog, DialogTitle, DialogContent,
-  DialogContentText, DialogActions
+  DialogContentText, DialogActions, InputAdornment
 } from '@material-ui/core';
 import { grey } from '@material-ui/core/colors';
 import { useSnackbar } from 'notistack';
@@ -39,6 +39,7 @@ import ActionsIcon from '@material-ui/icons/MoreVert';
 import HistoryIcon from '@material-ui/icons/History';
 import CloneIcon from '@material-ui/icons/FileCopy';
 import TestIcon from '@material-ui/icons/PlayCircleOutline';
+import TimerIcon from '@material-ui/icons/Timer';
 import ValidatingTextField from '../misc/ValidatingTextField';
 import clsx from 'clsx';
 import useUserProfile from '../../hooks/useUserProfile';
@@ -109,6 +110,7 @@ export default function JobEditor({ match }) {
   const jobURLRef = useRef();
   const [ jobEnabled, setJobEnabled ] = useState(false);
   const [ saveResponses, setSaveResponses ] = useState(false);
+  const [ requestTimeout, setRequestTimeout ] = useState(-1);
   const [ authEnable, setAuthEnable ] = useState(false);
   const [ authUser, setAuthUser ] = useState('');
   const [ authPassword, setAuthPassword ] = useState('');
@@ -131,20 +133,21 @@ export default function JobEditor({ match }) {
 
   useEffect(() => {
     if (createMode) {
-      if (!userProfile || !userProfile.timezone) {
+      if (!userProfile || !userProfile.userProfile || !userProfile.userProfile.timezone) {
         return;
       }
       setJob({
         url: 'http://',
         enabled: true,
         saveResponses: false,
+        requestTimeout: Math.min(30, userProfile.userGroup.requestTimeout),
         auth: {
           enable: false,
           user: '',
           password: ''
         },
         schedule: {
-          timezone: userProfile.timezone,
+          timezone: userProfile.userProfile.timezone,
           mdays: [-1 ],
           wdays: [-1],
           months: [-1],
@@ -170,11 +173,12 @@ export default function JobEditor({ match }) {
   }, [jobId, createMode, userProfile]);
 
   useEffect(() => {
-    if (job) {
+    if (job && userProfile && userProfile.userGroup) {
       setJobTitle(job.title);
       setJobURL(job.url);
       setJobEnabled(!!job.enabled);
       setSaveResponses(!!job.saveResponses);
+      setRequestTimeout(job.requestTimeout > 0 ? job.requestTimeout : userProfile.userGroup.requestTimeout);
       setAuthEnable(!!job.auth.enable);
       setAuthUser(job.auth.user);
       setAuthPassword(job.auth.password);
@@ -186,14 +190,16 @@ export default function JobEditor({ match }) {
         [...prev, { key: cur, value: job.extendedData.headers[cur] }], []));
       setIsLoading(false);
     }
-  }, [job]);
+  }, [job, userProfile]);
 
   useEffect(() => {
+    console.log('RTO ' +  requestTimeout);
     setUpdatedJob({
       title: jobTitle,
       url: jobURL,
       enabled: jobEnabled,
       saveResponses,
+      requestTimeout,
       auth: {
         enable: authEnable,
         user: authUser,
@@ -210,7 +216,7 @@ export default function JobEditor({ match }) {
         timezone
       }
     });
-  }, [jobTitle, jobURL, jobEnabled, saveResponses, authEnable, authUser, authPassword, notification, requestMethod, requestBody, jobHeaders, schedule, timezone]);
+  }, [jobTitle, jobURL, jobEnabled, saveResponses, requestTimeout, authEnable, authUser, authPassword, notification, requestMethod, requestBody, jobHeaders, schedule, timezone]);
 
   function saveJob() {
     if (!jobURL.match(RegexPatterns.url)) {
@@ -534,6 +540,20 @@ export default function JobEditor({ match }) {
                 rowsMax={8}
                 InputLabelProps={{shrink: true}}
                 fullWidth
+                />
+            </FormControl>
+            <FormControl className={classes.formControl}>
+              <TextField
+                label={t('jobs.requestTimeout')}
+                defaultValue={requestTimeout}
+                onBlur={({target}) => setRequestTimeout(parseInt(target.value))}
+                onClick={({target}) => setRequestTimeout(parseInt(target.value))}
+                InputLabelProps={{shrink: true}}
+                InputProps={{
+                  startAdornment: <InputAdornment position='start'><TimerIcon /></InputAdornment>,
+                  endAdornment: <InputAdornment position='end'>{t('units.long.s')}</InputAdornment>
+                }}
+                inputProps={{min: 1, max: (userProfile && userProfile.userGroup && userProfile.userGroup.requestTimeout) || 30, type: 'number'}}
                 />
             </FormControl>
           </FormGroup>
