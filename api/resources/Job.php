@@ -50,6 +50,7 @@ class Job {
   public $extendedData;
 
   public $type;
+  public $requestTimeout;
 
   private $node;
 
@@ -68,6 +69,7 @@ class Job {
     $result->title            = $job->metaData->title;
     $result->saveResponses    = $job->metaData->saveResponses;
     $result->type             = $job->metaData->type;
+    $result->requestTimeout   = $job->metaData->requestTimeout;
     $result->url              = $job->data->url;
     $result->requestMethod    = $job->data->requestMethod;
 
@@ -126,7 +128,7 @@ class Job {
     return $result;
   }
 
-  public function toThriftJob($userId) {
+  public function toThriftJob($userId, $userGroupId) {
     $job = new \chronos\Job;
 
     $job->identifier                = self::createIdentifier($this->jobId, $userId);
@@ -136,6 +138,8 @@ class Job {
     $job->metaData->title           = $this->title;
     $job->metaData->saveResponses   = $this->saveResponses;
     $job->metaData->type            = $this->type;
+    $job->metaData->userGroupId     = $userGroupId;
+    $job->metaData->requestTimeout  = $this->requestTimeout;
 
     $job->data                      = new \chronos\JobData;
     $job->data->url                 = $this->url;
@@ -170,6 +174,10 @@ class Job {
     $this->enabled                    = !!$request->job->enabled;
     $this->title                      = empty($request->job->title) ? '' : trim($request->job->title);
     $this->saveResponses              = !!$request->job->saveResponses;
+
+    if(isset($request->job->requestTimeout)) {
+      $this->requestTimeout           = intval($request->job->requestTimeout);
+    }
 
     $this->auth->enable               = !!$request->job->auth->enable;
     $this->auth->user                 = (string)$request->job->auth->user;
@@ -325,7 +333,7 @@ class JobManager {
     try {
       $client = $node->connect();
 
-      $handle = $client->submitJobTestRun($job->toThriftJob($this->authToken->userId), $xForwardedFor);
+      $handle = $client->submitJobTestRun($job->toThriftJob($this->authToken->userId, $this->authToken->userGroupId), $xForwardedFor);
       if ($handle) {
         $redis->set(implode(':', ['testRun', $handle, 'nodeId']), $node->nodeId, $config['testRunLifetime']);
         return $handle;
@@ -397,7 +405,7 @@ class JobManager {
     try {
       $client = $node->connect();
 
-      $client->createOrUpdateJob($job->toThriftJob($this->authToken->userId));
+      $client->createOrUpdateJob($job->toThriftJob($this->authToken->userId, $this->authToken->userGroupId));
 
       return true;
     } catch (Exception $ex) {
@@ -425,7 +433,7 @@ class JobManager {
         ->execute(array('userId' => $this->authToken->userId, 'nodeId' => $node->nodeId));
 
       $job->jobId = Database::get()->insertId();
-      $client->createOrUpdateJob($job->toThriftJob($this->authToken->userId));
+      $client->createOrUpdateJob($job->toThriftJob($this->authToken->userId, $this->authToken->userGroupId));
 
       Database::get()->commitTransaction();
       $transactionActive = false;

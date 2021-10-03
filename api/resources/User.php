@@ -27,6 +27,12 @@ class UserProfile {
   public $lastName;
   public $email;
   public $signupDate;
+  public $userGroupId;
+
+  function __construct() {
+    $this->signupDate = intval($this->signupDate);
+    $this->userGroupId = intval($this->userGroupId);
+  }
 }
 
 class UserGroup {
@@ -35,12 +41,18 @@ class UserGroup {
   public $maxStatusPages;
   public $maxStatusPageMonitors;
   public $maxStatusPageDomains;
+  public $requestTimeout;
+  public $requestMaxSize;
+  public $maxFailures;
 
   function __construct() {
     $this->userGroupId = intval($this->userGroupId);
     $this->maxStatusPages = intval($this->maxStatusPages);
     $this->maxStatusPageMonitors = intval($this->maxStatusPageMonitors);
     $this->maxStatusPageDomains = intval($this->maxStatusPageDomains);
+    $this->requestTimeout = intval($this->requestTimeout);
+    $this->requestMaxSize = intval($this->requestMaxSize);
+    $this->maxFailures = intval($this->maxFailures);
   }
 }
 
@@ -66,17 +78,18 @@ class RefreshTokenHandler {
     return false;
   }
 
-  public function mayRefreshSessionToken($userId) {
+  public function mayRefreshSessionToken($userId, $userGroupId) {
     if ($userId <= 0) {
       return false;
     }
 
-    $stmt = Database::get()->prepare('SELECT `status` AS `userStatus` FROM `user` '
+    $stmt = Database::get()->prepare('SELECT `status` AS `userStatus`, `usergroupid` AS `userGroupId` FROM `user` '
       . 'WHERE `user`.`userid`=:userId');
     $stmt->execute([':userId' => $userId]);
 
     if ($row = $stmt->fetch(PDO::FETCH_OBJ)) {
-      if ($row->userStatus == UserProfile::STATUS_VERIFIED) {
+      if ($row->userStatus == UserProfile::STATUS_VERIFIED
+          && intval($row->userGroupId) === intval($userGroupId)) {
         return true;
       }
     }
@@ -99,7 +112,7 @@ class UserManager {
   }
 
   public function getProfile() {
-    $stmt = Database::get()->prepare('SELECT `firstname` AS `firstName`, `lastname` AS `lastName`, `timezone`, `email`, `signup_date` AS `signupDate`, `newsletter_subscribe` AS `newsletterSubscribe` FROM `user` WHERE `userid`=:userId');
+    $stmt = Database::get()->prepare('SELECT `firstname` AS `firstName`, `lastname` AS `lastName`, `timezone`, `email`, `signup_date` AS `signupDate`, `newsletter_subscribe` AS `newsletterSubscribe`,`usergroupid` AS `userGroupId` FROM `user` WHERE `userid`=:userId');
     $stmt->setFetchMode(PDO::FETCH_CLASS, UserProfile::class);
     $stmt->execute(array(':userId' => $this->authToken->userId));
     return $stmt->fetch();
@@ -121,11 +134,10 @@ class UserManager {
   }
 
   public function getGroup() {
-    $stmt = Database::get()->prepare('SELECT `user`.`usergroupid` AS `userGroupId`, `title`, `max_status_pages` AS `maxStatusPages`, `max_status_page_monitors` AS `maxStatusPageMonitors`, `max_status_page_domains` AS `maxStatusPageDomains` '
+    $stmt = Database::get()->prepare('SELECT `usergroupid` AS `userGroupId`, `title`, `max_status_pages` AS `maxStatusPages`, `max_status_page_monitors` AS `maxStatusPageMonitors`, `max_status_page_domains` AS `maxStatusPageDomains`, `request_timeout` AS `requestTimeout`, `request_max_size` AS `requestMaxSize`, `max_failures` AS `maxFailures` '
       . 'FROM `usergroup` '
-      . 'INNER JOIN `user` ON `usergroup`.`usergroupid`=`user`.`usergroupid` '
-      . 'WHERE `user`.`userid`=:userId');
-    $stmt->execute(array(':userId' => $this->authToken->userId));
+      . 'WHERE `usergroup`.`usergroupid`=:userGroupId');
+    $stmt->execute(array(':userGroupId' => $this->authToken->userGroupId));
     $stmt->setFetchMode(PDO::FETCH_CLASS, UserGroup::class);
     return $stmt->fetch();
   }

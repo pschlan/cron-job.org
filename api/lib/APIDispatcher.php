@@ -74,7 +74,7 @@ class APIDispatcher {
       return false;
     }
 
-    if ($this->refreshTokenHandler->mayRefreshSessionToken(intval($sessionToken->userId))) {
+    if ($this->refreshTokenHandler->mayRefreshSessionToken(intval($sessionToken->userId), intval($sessionToken->userGroupId))) {
       return true;
     }
 
