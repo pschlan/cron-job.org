@@ -70,6 +70,7 @@ namespace Chronos
 		int timeTotal = 0;			// in us
 
 		JobType_t jobType = JobType_t::DEFAULT;
+		int maxFailures = 0;
 	};
 };
 
