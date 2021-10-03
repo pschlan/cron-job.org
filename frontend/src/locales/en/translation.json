@@ -118,6 +118,9 @@
     "short": {
       "ms": "ms",
       "s": "s"
+    },
+    "long": {
+      "s": "seconds"
     }
   },
   "jobs": {
@@ -246,7 +249,8 @@
       "rawRequest": "Raw request",
       "rawResponse": "Raw response",
       "peer": "Peer"
-    }
+    },
+    "requestTimeout": "Timeout"
   },
   "statuspages": {
     "title": "Title",
