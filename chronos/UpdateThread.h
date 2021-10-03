@@ -52,7 +52,6 @@ namespace Chronos
 		std::mutex queueMutex;
 		std::condition_variable queueSignal;
 		std::queue<std::unique_ptr<JobResult>> queue;
-		int maxFailures = 0;
 		std::string userDbFilePathScheme;
 		std::string userDbFileNameScheme;
 		std::string userTimeDbFileNameScheme;

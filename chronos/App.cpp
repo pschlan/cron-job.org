@@ -112,7 +112,37 @@ App *App::instance = nullptr;
 
 struct App::Private
 {
-	std::unordered_map<int64_t, UserGroup> userGroups;
+public:
+	using UserGroupMap = std::unordered_map<int64_t, UserGroup>;
+
+	void swapUserGroups(UserGroupMap &userGroups)
+	{
+		std::unique_lock<std::mutex> lock(userGroupsMutex);
+		this->userGroups.swap(userGroups);
+	}
+
+	UserGroupMap getUserGroups()
+	{
+		std::unique_lock<std::mutex> lock(userGroupsMutex);
+		return this->userGroups;
+	}
+
+	UserGroup getUserGroupById(uint64_t userGroupId)
+	{
+		std::unique_lock<std::mutex> lock(userGroupsMutex);
+
+		auto it = this->userGroups.find(userGroupId);
+		if(it != this->userGroups.end())
+		{
+			return it->second;
+		}
+
+		return UserGroup();
+	}
+
+private:
+	UserGroupMap userGroups;
+	std::mutex userGroupsMutex;
 };
 
 App::App(int argc, char *argv[])
@@ -274,8 +304,10 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 				<< "timeZone = " << timeZone
 				<< std::endl;
 
+	auto userGroups = priv->getUserGroups();
 	const size_t defaultMaxSize = App::getInstance()->config->getInt("request_max_size");
 	const int defaultRequestTimeout = App::getInstance()->config->getInt("request_timeout");
+	const int defaultMaxFailures = App::getInstance()->config->getInt("max_failures");
 	const int8_t defaultExecutionPriority = 0;
 
 	auto res = db->query("SELECT TRIM(`url`),`job`.`jobid`,`auth_enable`,`auth_user`,`auth_pass`,`notify_failure`,`notify_success`,`notify_disable`,`fail_counter`,`save_responses`,`job`.`userid`,`request_method`,COUNT(`job_header`.`jobheaderid`),`job_body`.`body`,`title`,`job`.`type`,`usergroupid`,`request_timeout` FROM `job` "
@@ -307,15 +339,17 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 		{
 			size_t maxSize = defaultMaxSize;
 			int groupRequestTimeout = defaultRequestTimeout;
+			int maxFailures = defaultMaxFailures;
 			int8_t executionPriority = defaultExecutionPriority;
 
 			// Apply user group settings
 			int64_t userGroupId = std::stoll(row[16]);
-			auto userGroupIt = priv->userGroups.find(userGroupId);
-			if(userGroupIt != priv->userGroups.end())
+			auto userGroupIt = userGroups.find(userGroupId);
+			if(userGroupIt != userGroups.end())
 			{
 				maxSize 			= userGroupIt->second.requestMaxSize;
 				groupRequestTimeout	= userGroupIt->second.requestTimeout;
+				maxFailures 		= userGroupIt->second.maxFailures;
 				executionPriority 	= userGroupIt->second.executionPriority;
 			}
 
@@ -326,6 +360,7 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 			}
 
 			HTTPRequest *req = HTTPRequest::fromURL(row[0], atoi(row[10]), maxSize, requestTimeout);
+			req->result->maxFailures 	= maxFailures;
 			req->result->jobID 			= atoi(row[1]);
 			req->result->datePlanned	= (uint64_t)timestamp * 1000;
 			req->result->notifyFailure 	= strcmp(row[5], "1") == 0;
@@ -368,6 +403,11 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 	std::cout << "App::processJobsForTimeZone(): Finished" << std::endl;
 }
 
+UserGroup App::getUserGroupById(uint64_t userGroupId)
+{
+	return priv->getUserGroupById(userGroupId);
+}
+
 void App::syncUserGroups()
 {
 	std::shared_ptr<apache::thrift::transport::TTransport> masterSocket
@@ -394,7 +434,7 @@ void App::syncUserGroups()
 			userGroupsById.emplace(group.userGroupId, group);
 		}
 
-		priv->userGroups.swap(userGroupsById);
+		priv->swapUserGroups(userGroupsById);
 
 		masterTransport->close();
 

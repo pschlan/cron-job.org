@@ -65,7 +65,7 @@ public:
             std::unique_ptr<Chronos::MySQL_DB> db(Chronos::App::getInstance()->createMySQLConnection());
 
 	        MYSQL_ROW row;
-            auto res = db->query("SELECT `jobid`,`userid`,`enabled`,`title`,`save_responses`,`last_status`,`last_fetch`,`last_duration`,`fail_counter`,`url`,`request_method`,`timezone`,`type` FROM `job` WHERE `userid`=%v",
+            auto res = db->query("SELECT `jobid`,`userid`,`enabled`,`title`,`save_responses`,`last_status`,`last_fetch`,`last_duration`,`fail_counter`,`url`,`request_method`,`timezone`,`type`,`usergroupid`,`request_timeout` FROM `job` WHERE `userid`=%v",
                 userId);
             _return.reserve(res->numRows());
             while((row = res->fetchRow()))
@@ -79,6 +79,10 @@ public:
                 job.metaData.title = row[3];
                 job.metaData.saveResponses = std::strcmp(row[4], "1") == 0;
                 job.metaData.type = static_cast<JobType::type>(std::stoi(row[12])); //!< @todo Nicer conversion
+                job.metaData.userGroupId = std::stoll(row[13]);
+                job.metaData.requestTimeout = std::stoi(row[14]);
+                job.metaData.__isset.userGroupId = true;
+                job.metaData.__isset.requestTimeout = true;
                 job.__isset.metaData = true;
 
                 job.executionInfo.lastStatus = static_cast<JobStatus::type>(std::stoi(row[5])); //!< @todo Nicer conversion
@@ -121,7 +125,7 @@ public:
 	        MYSQL_ROW row;
             auto res = db->query("SELECT `jobid`,`userid`,`enabled`,`title`,`save_responses`,`last_status`,`last_fetch`,"
                     "`last_duration`,`fail_counter`,`url`,`request_method`,`auth_enable`,`auth_user`,`auth_pass`,"
-                    "`notify_failure`,`notify_success`,`notify_disable`,`timezone`,`type` "
+                    "`notify_failure`,`notify_success`,`notify_disable`,`timezone`,`type`,`usergroupid`,`request_timeout` "
                     "FROM `job` WHERE `jobid`=%v AND `userid`=%v",
                 identifier.jobId,
                 identifier.userId);
@@ -136,6 +140,10 @@ public:
                 _return.metaData.title = row[3];
                 _return.metaData.saveResponses = std::strcmp(row[4], "1") == 0;
                 _return.metaData.type = static_cast<JobType::type>(std::stoi(row[18])); //!< @todo Nicer conversion
+                _return.metaData.userGroupId = std::stoll(row[19]);
+                _return.metaData.requestTimeout = std::stoi(row[20]);
+                _return.metaData.__isset.userGroupId = true;
+                _return.metaData.__isset.requestTimeout = true;
                 _return.__isset.metaData = true;
 
                 _return.executionInfo.lastStatus = static_cast<JobStatus::type>(std::stoi(row[5])); //!< @todo Nicer conversion
@@ -620,12 +628,29 @@ public:
             return nullptr;
         }
 
+        int maxSize = Chronos::App::getInstance()->config->getInt("request_max_size");
+        int requestTimeout = Chronos::App::getInstance()->config->getInt("request_timeout");
+
+        if(job.__isset.metaData && job.metaData.__isset.userGroupId)
+        {
+            auto userGroup = Chronos::App::getInstance()->getUserGroupById(job.metaData.userGroupId);
+            if(userGroup.userGroupId == job.metaData.userGroupId)
+            {
+                maxSize = userGroup.requestMaxSize;
+                requestTimeout = userGroup.requestTimeout;
+            }
+
+            if(job.metaData.__isset.requestTimeout)
+            {
+                requestTimeout = std::max(1, std::min(requestTimeout, job.metaData.requestTimeout));
+            }
+        }
+
         std::unique_ptr<Chronos::HTTPRequest> req(Chronos::HTTPRequest::fromURL(
             job.data.url,
             job.identifier.userId,
-            //! @todo Apply group settings here
-            Chronos::App::getInstance()->config->getInt("request_max_size"),
-            Chronos::App::getInstance()->config->getInt("request_timeout")
+            maxSize,
+            requestTimeout
         ));
         req->result->jobID          = job.identifier.jobId;
         req->result->datePlanned    = Chronos::Utils::getTimestampMS();

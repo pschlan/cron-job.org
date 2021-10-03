@@ -22,6 +22,8 @@
 #include "Config.h"
 #include "Utils.h"
 
+class UserGroup;
+
 namespace Chronos
 {
 	class MySQL_DB;
@@ -58,6 +60,7 @@ namespace Chronos
 		int run();
 		std::unique_ptr<MySQL_DB> createMySQLConnection();
 		std::unique_ptr<MySQL_DB> createMasterMySQLConnection();
+		UserGroup getUserGroupById(uint64_t userGroupId);
 
 	private:
 		void startUpdateThread();

@@ -35,7 +35,6 @@ UpdateThread::UpdateThread()
 
 	UpdateThread::instance 	= this;
 
-	maxFailures 				= App::getInstance()->config->getInt("max_failures");
 	userDbFilePathScheme 		= App::getInstance()->config->get("user_db_file_path_scheme");
 	userDbFileNameScheme 		= App::getInstance()->config->get("user_db_file_name_scheme");
 	userTimeDbFileNameScheme 	= App::getInstance()->config->get("user_time_db_file_name_scheme");
@@ -217,7 +216,7 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 	NotificationType_t notificationType;
 
 	// disable job?
-	if(failCounter > maxFailures && result->jobType != JobType_t::MONITORING)
+	if(failCounter > result->maxFailures && result->jobType != JobType_t::MONITORING)
 	{
 		// disable
 		db->query("UPDATE `job` SET `enabled`=0,`fail_counter`=0 WHERE `jobid`=%d",
