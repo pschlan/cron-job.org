@@ -22,10 +22,11 @@ class GetUserProfile extends AbstractAPIMethod {
   }
 
   public function execute($request, $sessionToken, $language) {
-    $profile = (new UserManager($sessionToken))->getProfile();
+    $userManager = new UserManager($sessionToken);
 
     return (object)[
-      'userProfile' => $profile
+      'userProfile' => $userManager->getProfile(),
+      'userGroup' => $userManager->getGroup()
     ];
   }
 }
