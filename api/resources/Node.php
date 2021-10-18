@@ -29,11 +29,15 @@ class NodeManager {
   }
 
   public function getUserJobNodes() {
+    return NodeManager::getUserJobNodesWithUserId($this->authToken->userId);
+  }
+
+  public static function getUserJobNodesWithUserId($userId) {
     $nodes = [];
 
     $stmt = Database::get()->prepare('SELECT `nodeid` AS `nodeId`, `ip`, `port` FROM `node` WHERE `nodeid` IN(SELECT DISTINCT(`nodeid`) FROM `job` WHERE `userid`=:userId)');
     $stmt->setFetchMode(PDO::FETCH_CLASS, Node::class);
-    $stmt->execute(array(':userId' => $this->authToken->userId));
+    $stmt->execute(array(':userId' => $userId));
     while ($node = $stmt->fetch()) {
       $nodes[intval($node->nodeId)] = $node;
     }
