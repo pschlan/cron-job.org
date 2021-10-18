@@ -600,6 +600,27 @@ public:
         return static_cast<T>(static_cast<double>(value1) + static_cast<double>((value2 - value1)) * frac);
     }
 
+    void updateUserGroupId(const int64_t userId, const int64_t userGroupId) override
+    {
+        using namespace Chronos;
+
+        std::cout << "ChronosNodeHandler::updateUserGroupId(" << userId << ", " << userGroupId << ")" << std::endl;
+
+        try
+        {
+            std::unique_ptr<MySQL_DB> db(App::getInstance()->createMySQLConnection());
+
+            db->query("UPDATE `job` SET `usergroupid`=%v WHERE `userid`=%v",
+                userGroupId,
+                userId);
+        }
+        catch(const std::exception &ex)
+        {
+            std::cout << "ChronosNodeHandler::updateUserGroupId(): Exception: "  << ex.what() << std::endl;
+            throw InternalError();
+        }
+    }
+
     void disableJobsForUser(const int64_t userId) override
     {
         using namespace Chronos;

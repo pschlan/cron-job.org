@@ -262,6 +262,7 @@ service ChronosNode
     void deleteJob(1: JobIdentifier identifier) throws(1: ResourceNotFound rnf, 2: InternalError ie);
 
     void disableJobsForUser(1: i64 userId) throws(1: InternalError ie);
+    void updateUserGroupId(1: i64 userId, 2: i64 userGroupId) throws(1: InternalError ie);
 
     TestRunHandle submitJobTestRun(1: Job job, 2: string xForwardedFor) throws(1: InternalError ie, 2: InvalidArguments ia, 3: FeatureNotAvailable na);
     TestRunStatus getJobTestRunStatus(1: TestRunHandle handle) throws(1: InvalidArguments ia, 2: FeatureNotAvailable na);
