@@ -41,6 +41,16 @@ class JobMetadata
             'isRequired' => false,
             'type' => TType::I32,
         ),
+        5 => array(
+            'var' => 'userGroupId',
+            'isRequired' => false,
+            'type' => TType::I64,
+        ),
+        6 => array(
+            'var' => 'requestTimeout',
+            'isRequired' => false,
+            'type' => TType::I32,
+        ),
     );
 
     /**
@@ -59,6 +69,14 @@ class JobMetadata
      * @var int
      */
     public $type = null;
+    /**
+     * @var int
+     */
+    public $userGroupId = null;
+    /**
+     * @var int
+     */
+    public $requestTimeout = null;
 
     public function __construct($vals = null)
     {
@@ -74,6 +92,12 @@ class JobMetadata
             }
             if (isset($vals['type'])) {
                 $this->type = $vals['type'];
+            }
+            if (isset($vals['userGroupId'])) {
+                $this->userGroupId = $vals['userGroupId'];
+            }
+            if (isset($vals['requestTimeout'])) {
+                $this->requestTimeout = $vals['requestTimeout'];
             }
         }
     }
@@ -125,6 +149,20 @@ class JobMetadata
                         $xfer += $input->skip($ftype);
                     }
                     break;
+                case 5:
+                    if ($ftype == TType::I64) {
+                        $xfer += $input->readI64($this->userGroupId);
+                    } else {
+                        $xfer += $input->skip($ftype);
+                    }
+                    break;
+                case 6:
+                    if ($ftype == TType::I32) {
+                        $xfer += $input->readI32($this->requestTimeout);
+                    } else {
+                        $xfer += $input->skip($ftype);
+                    }
+                    break;
                 default:
                     $xfer += $input->skip($ftype);
                     break;
@@ -157,6 +195,16 @@ class JobMetadata
         if ($this->type !== null) {
             $xfer += $output->writeFieldBegin('type', TType::I32, 4);
             $xfer += $output->writeI32($this->type);
+            $xfer += $output->writeFieldEnd();
+        }
+        if ($this->userGroupId !== null) {
+            $xfer += $output->writeFieldBegin('userGroupId', TType::I64, 5);
+            $xfer += $output->writeI64($this->userGroupId);
+            $xfer += $output->writeFieldEnd();
+        }
+        if ($this->requestTimeout !== null) {
+            $xfer += $output->writeFieldBegin('requestTimeout', TType::I32, 6);
+            $xfer += $output->writeI32($this->requestTimeout);
             $xfer += $output->writeFieldEnd();
         }
         $xfer += $output->writeFieldStop();

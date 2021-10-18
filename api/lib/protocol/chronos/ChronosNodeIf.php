@@ -91,6 +91,12 @@ interface ChronosNodeIf
      */
     public function disableJobsForUser($userId);
     /**
+     * @param int $userId
+     * @param int $userGroupId
+     * @throws \chronos\InternalError
+     */
+    public function updateUserGroupId($userId, $userGroupId);
+    /**
      * @param \chronos\Job $job
      * @param string $xForwardedFor
      * @return string

@@ -39,4 +39,8 @@ interface ChronosMasterIf
      * @throws \chronos\InternalError
      */
     public function getPhrases();
+    /**
+     * @return \chronos\UserGroup[]
+     */
+    public function getUserGroups();
 }
