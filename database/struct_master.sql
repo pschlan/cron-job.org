@@ -107,3 +107,25 @@ CREATE TABLE `refreshtoken`(
     `expires` int(11) NOT NULL DEFAULT 0,
     PRIMARY KEY(`token`)
 ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `usergroupchange`(
+    `usergroupchangeid` int(11) NOT NULL AUTO_INCREMENT,
+    `userid` int(11) NOT NULL DEFAULT 0,
+    `oldusergroupid` int(11) NOT NULL DEFAULT 0,
+    `newusergroupid` int(11) NOT NULL DEFAULT 0,
+    `created` int(11) NOT NULL DEFAULT 0,
+    `processed` int(11) NOT NULL DEFAULT 0,
+    PRIMARY KEY(`usergroupchangeid`),
+    KEY(`processed`)
+) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DELIMITER $$
+CREATE TRIGGER `track_usergroupchange`
+AFTER UPDATE ON `user` FOR EACH ROW
+BEGIN
+    IF NEW.`usergroupid` <> OLD.`usergroupid` THEN
+        INSERT INTO `usergroupchange`(`userid`,`oldusergroupid`,`newusergroupid`,`created`) VALUES(NEW.`userid`,OLD.`usergroupid`,NEW.`usergroupid`,UNIX_TIMESTAMP());
+    END IF;
+END;
+$$
+DELIMITER ;
