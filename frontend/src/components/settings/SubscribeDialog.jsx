@@ -1,9 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { CircularProgress, Paper, Checkbox, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Link, makeStyles, TableCell, TableHead, Table, TableRow, MenuItem, TableBody, Select, Box, Grid, FormControlLabel } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
-import { createCheckoutSession, deleteAccount } from '../../utils/API';
+import { createCheckoutSession } from '../../utils/API';
 import { useSnackbar } from 'notistack';
-import { useDispatch } from 'react-redux';
 import { Config } from '../../utils/Config';
 import YesIcon from '@material-ui/icons/Check';
 import NoIcon from '@material-ui/icons/Close';
