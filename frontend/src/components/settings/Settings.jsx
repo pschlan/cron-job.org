@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Button, ButtonGroup, CircularProgress, Grid, InputLabel, LinearProgress, makeStyles, MenuItem, Paper, Select, Typography } from '@material-ui/core';
 import { grey } from '@material-ui/core/colors';
 import { useTranslation } from 'react-i18next';
-import { createBillingPortalSession, updateUserProfile } from '../../utils/API';
+import { createBillingPortalSession, getUserProfile, updateUserProfile } from '../../utils/API';
 import useTimezones from '../../hooks/useTimezones';
 import useUserProfile from '../../hooks/useUserProfile';
 import Breadcrumbs from '../misc/Breadcrumbs';
@@ -47,6 +47,8 @@ const useStyles = makeStyles(theme => ({
     paddingTop: theme.spacing(0.5)
   }
 }));
+
+const REFRESH_INTERVAL = 5000;
 
 export default function Settings() {
   const classes = useStyles();
@@ -119,6 +121,17 @@ export default function Settings() {
 
   const isCancelledSubscription = userProfile && userProfile.userSubscription && userProfile.userSubscription.status === SubscriptionStatus.CANCELLED;
   const isPaymentReturn = window && window.location && window.location.search === '?checkoutSuccess=true';
+
+  useEffect(() => {
+    function doRefreshProfile() {
+      getUserProfile().then(response => dispatch(setUserProfile(response)));
+    }
+
+    if (isPaymentReturn && userProfile && (!userProfile.userSubscription || userProfile.userSubscription.status !== SubscriptionStatus.ACTIVE)) {
+      const handle = window.setInterval(doRefreshProfile, REFRESH_INTERVAL);
+      return () => window.clearInterval(handle);
+    }
+  }, [isPaymentReturn, userProfile]);
 
   return <div>
     <Breadcrumbs items={[
