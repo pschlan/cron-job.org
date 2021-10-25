@@ -131,7 +131,7 @@ export default function Settings() {
       const handle = window.setInterval(doRefreshProfile, REFRESH_INTERVAL);
       return () => window.clearInterval(handle);
     }
-  }, [isPaymentReturn, userProfile]);
+  }, [isPaymentReturn, userProfile, dispatch]);
 
   return <div>
     <Breadcrumbs items={[
