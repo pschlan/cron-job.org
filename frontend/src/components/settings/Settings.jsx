@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Button, ButtonGroup, CircularProgress, Grid, InputLabel, LinearProgress, makeStyles, MenuItem, Paper, Select, Typography } from '@material-ui/core';
+import { Box, Button, ButtonGroup, CircularProgress, Grid, InputLabel, LinearProgress, makeStyles, MenuItem, Paper, Select, Typography } from '@material-ui/core';
 import { grey } from '@material-ui/core/colors';
 import { useTranslation } from 'react-i18next';
-import { updateUserProfile } from '../../utils/API';
+import { createBillingPortalSession, updateUserProfile } from '../../utils/API';
 import useTimezones from '../../hooks/useTimezones';
 import useUserProfile from '../../hooks/useUserProfile';
 import Breadcrumbs from '../misc/Breadcrumbs';
@@ -19,8 +19,15 @@ import PasswordIcon from '@material-ui/icons/LockOpen';
 import moment from 'moment';
 import ChangePasswordDialog from './ChangePasswordDialog';
 import ChangeEmailAddressDialog from './ChangeEmailAddressDialog';
-import { RegexPatterns } from '../../utils/Constants';
+import { RegexPatterns, SubscriptionStatus } from '../../utils/Constants';
 import DeleteAccountDialog from './DeleteAccountDialog';
+import ManageSubscriptionIcon from '@material-ui/icons/CreditCard';
+import SubscriptionActiveIcon from '@material-ui/icons/FavoriteBorder';
+import SubscriptionInactiveIcon from '@material-ui/icons/PauseCircleOutline';
+import LearnMoreIcon from '@material-ui/icons/Loyalty';
+import IconAvatar from '../misc/IconAvatar';
+import { Config } from '../../utils/Config';
+import SubscribeDialog from './SubscribeDialog';
 
 const useStyles = makeStyles(theme => ({
   grid: {
@@ -51,9 +58,12 @@ export default function Settings() {
 
   const [ isLoading, setIsLoading ] = useState(true);
   const [ saving, setSaving ] = useState(false);
+  const [ isLoadingManageSubscription, setIsLoadingManageSubscription ] = useState(false);
+
   const [ showChangePassword, setShowChangePassword ] = useState(false);
   const [ showChangeEmail, setShowChangeEmail ] = useState(false);
   const [ showDeleteAccount, setShowDeleteAccount ] = useState(false);
+  const [ showSubscribeDialog, setShowSubscribeDialog ] = useState(false);
 
   const [ firstName, setFirstName ] = useState('');
   const [ lastName, setLastName ] = useState('');
@@ -96,6 +106,19 @@ export default function Settings() {
       .catch(() => enqueueSnackbar(t('settings.saveFailed'), { variant: 'error' }))
       .finally(() => setSaving(false));
   }
+
+  function manageSubscription() {
+    setIsLoadingManageSubscription(true);
+    createBillingPortalSession()
+      .then(respone => window.location.href = respone.url)
+      .catch(() => {
+        enqueueSnackbar(t('settings.manageSubscriptionFailed'), { variant: 'error' });
+        setIsLoadingManageSubscription(false);
+      });
+  }
+
+  const isCancelledSubscription = userProfile && userProfile.userSubscription && userProfile.userSubscription.status === SubscriptionStatus.CANCELLED;
+  const isPaymentReturn = window && window.location && window.location.search === '?checkoutSuccess=true';
 
   return <div>
     <Breadcrumbs items={[
@@ -153,6 +176,69 @@ export default function Settings() {
           </Grid>
         </Grid>
       </Paper>
+
+      {Config.sustainingMembership.enable && <Paper className={classes.paper}>
+        <Title>{t('settings.sustainingMembership')}</Title>
+
+        {userProfile && <>
+          <Grid container className={classes.grid} alignItems='center' justifyContent='center'>
+            <Grid item sm={8} xs={12}>
+              <Box display='flex' alignItems='center'>
+                {((userProfile.userSubscription && userProfile.userSubscription.status !== SubscriptionStatus.INACTIVE) || isPaymentReturn) ? <>
+                  {(userProfile.userSubscription.status === SubscriptionStatus.PENDING || (isPaymentReturn && !userProfile.userSubscription)) && <>
+                      <IconAvatar icon={SubscriptionActiveIcon} color='orange' />
+                      <div>
+                        {t('settings.subscriptionPending', { serviceName: Config.productName })}
+                      </div>
+                  </>}
+                  {userProfile.userSubscription && userProfile.userSubscription.status === SubscriptionStatus.ACTIVE && <>
+                      <IconAvatar icon={SubscriptionActiveIcon} color='green' />
+                      <div>
+                        {t('settings.subscriptionActive', { serviceName: Config.productName })}
+                      </div>
+                    </>}
+                  {userProfile.userSubscription && userProfile.userSubscription.status === SubscriptionStatus.EXPIRING && <>
+                      <IconAvatar icon={SubscriptionInactiveIcon} color='orange' />
+                      <div>
+                        {t('settings.subscriptionExpiring', { serviceName: Config.productName, expiresAt: moment(userProfile.userSubscription.cancelAt * 1000).calendar() })}
+                      </div>
+                    </>}
+                  {userProfile.userSubscription && userProfile.userSubscription.status === SubscriptionStatus.CANCELLED && <>
+                      <IconAvatar icon={SubscriptionInactiveIcon} />
+                      <div>
+                        {t('settings.subscriptionInactive', { serviceName: Config.productName })}
+                      </div>
+                    </>}
+                </> : <>
+                  {t('settings.sustainingMemberTeaser', { serviceName: Config.productName })}
+                </>}
+              </Box>
+            </Grid>
+            <Grid item sm={4} xs={12} align='right'>
+              {userProfile.userSubscription && userProfile.userSubscription.status !== SubscriptionStatus.CANCELLED ?
+                <Button
+                  size='small'
+                  variant='contained'
+                  startIcon={isLoadingManageSubscription ? <CircularProgress size='small' /> : <ManageSubscriptionIcon />}
+                  onClick={manageSubscription}
+                  disabled={isLoadingManageSubscription}
+                  float='right'
+                  >
+                  {t('settings.manageSubscription')}
+                </Button> : !(isPaymentReturn && !userProfile.userSubscription) &&
+                <Button
+                  size='small'
+                  variant='contained'
+                  startIcon={<LearnMoreIcon />}
+                  onClick={() => setShowSubscribeDialog(true)}
+                  float='right'
+                  >
+                  {t(isCancelledSubscription ? 'settings.becomeASustainingMember' : 'settings.learnMore')}
+                </Button>}
+            </Grid>
+          </Grid>
+        </>}
+      </Paper>}
 
       <Paper className={classes.paper}>
         <Title>{t('settings.profile')}</Title>
@@ -222,6 +308,7 @@ export default function Settings() {
     {showChangePassword && <ChangePasswordDialog onClose={() => setShowChangePassword(false)} />}
     {showChangeEmail && <ChangeEmailAddressDialog currentEmailAddress={email} onClose={() => setShowChangeEmail(false)} />}
     {showDeleteAccount && <DeleteAccountDialog currentEmailAddress={email} onClose={() => setShowDeleteAccount(false)} />}
+    {showSubscribeDialog && <SubscribeDialog onClose={() => setShowSubscribeDialog(false)} />}
 
   </div>;
 }

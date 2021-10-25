@@ -6,6 +6,7 @@ export const Config = {
   'githubURL': 'https://github.com/pschlan/cron-job.org',
   'privacyPolicyURL': 'https://example.com/privacy/',
   'termsOfServiceURL': 'https://example.com/tos/',
+  'returnPolicyURL': 'https://example.com/returnpolicy/',
 
   //! @note The URL of the API webserver (/api/ folder in this repo)
   'apiURL': 'https://api.example.com/',
@@ -36,6 +37,12 @@ export const Config = {
     'enable': false,
     'successfulJobsThreshold': 1,
     'hostedButtonId': 'PLACE_PAYPAL_HOSTED_BUTTON_ID_HERE'
+  },
+
+  //! @note If you want to offer a membership, define the amounts here.
+  'sustainingMembership': {
+    'enable': false,
+    'amounts': [5, 10, 20]
   },
 
   //! @note Status pages support can be optionally enabled here.

@@ -20,6 +20,7 @@
     "back": "Back",
     "details": "Details",
     "close": "Close",
+    "abort": "Abort",
     "delete": "Delete",
     "add": "Add",
     "save": "Save",
@@ -53,7 +54,8 @@
     "enable": "Enable",
     "disable": "Disable",
     "massActionSucceeded": "The action has been executed successfully.",
-    "massActionFailed": "Failed to execute the action. Please try again later."
+    "massActionFailed": "Failed to execute the action. Please try again later.",
+    "sustainingMemberThanks": "You're a Sustaining Member - thanks so much for supporting us and keeping this project alive!"
   },
   "login": {
     "emailAddress": "Email address",
@@ -120,7 +122,8 @@
       "s": "s"
     },
     "long": {
-      "s": "seconds"
+      "s": "seconds",
+      "min": "minutes"
     }
   },
   "jobs": {
@@ -348,6 +351,7 @@
     "emailAddressInUse": "The new email address you have entered is already in use.",
     "emailChanged": "We've sent a confirmation email to your new email address. Please follow the instructions to confirm your new email address.",
     "deleteAccount": "Delete account",
+    "deleteAccountActiveSubscription": "You have an active subscription. Please cancel your subscription before deleting your account.",
     "deleteAccountNote": "Are you sure you want to delete your account? All associated data including all cronjobs will be deleted permanently. This cannot be undone. In case you want to delete, please confirm by entering your account's email address.",
     "deleteAccountTypeEmailAddress": "Confirm by entering your account's email address",
     "failedToDeleteAccount": "Your account could not be deleted. Please try again. If in doubt, please contact our support team.",
@@ -357,7 +361,40 @@
       "yes": "Subscribe",
       "no": "Don't subscribe",
       "undefined": "n/a"
-    }
+    },
+    "sustainingMembership": "Sustaining Membership",
+    "subscriptionActive": "You're an active sustaining member - thanks so much for supporting {{serviceName}}!",
+    "subscriptionPending": "We're currently processing your order - please check back soon!",
+    "subscriptionInactive": "You're not currently an active sustaining member.",
+    "subscriptionExpiring": "Your sutaining membership is expiring at {{expiresAt}}.",
+    "becomeASustainingMember": "Become a sustaining member",
+    "learnMore": "Learn more",
+    "sustainingMemberTeaser": "Do you find {{serviceName}} useful and want to support us and at the same time benefit from exclusive membership rewards? Become a Sutaining Member now!",
+    "manageSubscriptionFailed": "Failed to load subscription management portal. Please try again later or contact our support team.",
+    "subscribeDialog": {
+      "text1": "By becoming a Sustaining Member of {{serviceName}}, you're helping us to fund ongoing operation and improvement of our service.",
+      "text2": "As a thank-you, we can provide exclusive benefits to users holding Sustaining Member status.",
+      "text3": "You can chose yourself between three different available monthly fees, depending on the amount you want to support us with. Memberships can be cancelled on a monthly basis.",
+      "defaultMembership": "Default Membership",
+      "sustainingMembership": "Sustaining Membership",
+      "supportService": "Support and sustain our service",
+      "maxJobTimeout": "Max job timeout",
+      "maxRequestSize": "Max response size",
+      "maxFailures": "Max failures before disabling a job",
+      "maxStatusPages": "Max status pages / monitors",
+      "price": "Price",
+      "free": "free",
+      "subscriptionPrices": "5, 10 or 20 EUR a month, at your choice",
+      "vatNote": "All prices include statutory VAT, if applicable (depending on your location). More details will be shown during the checkout process before placing the order.",
+      "ready": "Ready?",
+      "amountAMonth": "{{amount}} EUR / month",
+      "subscribeNow": "Subscribe now",
+      "orderNow": "Proceed to checkout",
+      "orderText": "Thanks for supporting us! You can now chose the amount you would like to pay per month and proceed to checkout.",
+      "acceptRefundPolicy": "I agree to the Refund Policy"
+    },
+    "orderFailed": "Failed to load checkout portal. Please try again later or contact our support team.",
+    "manageSubscription": "Manage subscription"
   },
   "statistics": {
     "requestFailed": "Failed to load statistics. Please try again later.",

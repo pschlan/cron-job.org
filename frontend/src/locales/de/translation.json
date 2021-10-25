@@ -20,6 +20,7 @@
     "back": "Zurück",
     "details": "Details",
     "close": "Schließen",
+    "abort": "Abbrechen",
     "delete": "Löschen",
     "add": "Hinzufügen",
     "save": "Speichern",
@@ -53,7 +54,8 @@
     "enable": "Aktivieren",
     "disable": "Deaktivieren",
     "massActionSucceeded": "Die Aktion wurde erfolgreich ausgeführt.",
-    "massActionFailed": "Die Aktion konnte nicht ausgeführt werden. Bitte versuchen Sie es später erneut."
+    "massActionFailed": "Die Aktion konnte nicht ausgeführt werden. Bitte versuchen Sie es später erneut.",
+    "sustainingMemberThanks": "Sie sind ein aktives Fördermitglied - vielen Dank, dass Sie uns unterstützen und diesen Dienst am Leben erhalten!"
   },
   "login": {
     "emailAddress": "E-Mail-Adresse",
@@ -120,7 +122,8 @@
       "s": "s"
     },
     "long": {
-      "s": "Sekunden"
+      "s": "Sekunden",
+      "min": "Minuten"
     }
   },
   "jobs": {
@@ -348,6 +351,7 @@
     "emailAddressInUse": "Die angegebene neue E-Mail-Adresse ist bereits in Verwendung.",
     "emailChanged": "Wir haben Ihnen eine E-Mail an die neue E-Mail-Adresse gesendet. Bitte folgen Sie den enthaltenen Anweisungen, um die neue E-Mail-Adresse zu bestätigen.",
     "deleteAccount": "Account löschen",
+    "deleteAccountActiveSubscription": "Sie haben ein aktives Abonnement. Bitte kündigen Sie Ihr Abonnement, bevor Sie Ihren Account löschen.",
     "deleteAccountNote": "Möchten Sie Ihren Account wirklich löschen? Alle verbundenen Daten inklusive aller Cronjobs und Status-Seiten werden unwiderruflich gelöscht. Dieser Vorgang kann nicht rückgängig gemacht werden. Wenn Sie sicher sind, geben Sie zur Bestätigung die E-Mail-Adresse Ihres Accounts ein.",
     "deleteAccountTypeEmailAddress": "Bestätigen durch Eingabe der Account-E-Mail-Adresse",
     "failedToDeleteAccount": "Ihr Account konnte nicht gelöscht werden. Bitte versuchen Sie es erneut. Bei Fragen wenden Sie sich bitte an unser Support-Team.",
@@ -357,6 +361,39 @@
       "yes": "Abonnieren",
       "no": "Nicht abonnieren",
       "undefined": "k.A."
+    },
+    "sustainingMembership": "Fördermitgliedschaft",
+    "subscriptionActive": "Sie sind aktives Fördermitglied - vielen Dank, dass Sie {{serviceName}} unterstützen!",
+    "subscriptionPending": "Wir bearbeiten gerade Ihre Bestellung - bitte schauen Sie in Kürze noch einmal vorbei.",
+    "subscriptionInactive": "Sie sind derzeit kein aktives Fördermitglied.",
+    "subscriptionExpiring": "Ihre Fördermitgliedschaft endet am {{expiresAt}}.",
+    "becomeASustainingMember": "Fördermitglied werden",
+    "learnMore": "Mehr erfahren",
+    "sustainingMemberTeaser": "Finden Sie {{serviceName}} nützlich und möchten uns unterstützen und gleichzeitig von exklusiven Vorteilen profitieren? Werden Sie ein Fördermitglied!",
+    "manageSubscriptionFailed": "Fehler beim Laden des Abo-Verwaltungs-Portals. Bitte versuchen Sie es später erneut oder kontaktieren Sie unser Support-Team.",
+    "orderFailed": "Fehler beim Laden des Kaufabwicklungs-Portals. Bitte versuchen Sie es später erneut oder kontaktieren Sie unser Support-Team.",
+    "manageSubscription": "Abo verwalten",
+    "subscribeDialog": {
+      "text1": "Durch eine Fördermitgliedschaft bei {{serviceName}} unterstützen Sie uns beim Betrieb und bei der Weiterentwicklung unseres Dienstes.",
+      "text2": "Als Dankeschön für Ihre Unterstützung können wir Fördermitgliedern exklusive Vorteile anbieten.",
+      "text3": "Den Betrag, mit dem Sie uns monatlich unterstützen möchten, können Sie selbst aus drei verschiedenen Möglichkeiten auswählen. Fördermitgliedschaften können monatlich gekündigt werden.",
+      "defaultMembership": "Standard-Mitgliedschaft",
+      "sustainingMembership": "Fördermitgliedschaft",
+      "supportService": "Unterstützung und Erhaltung unseres Dienstes",
+      "maxJobTimeout": "Max. Job-Timeout",
+      "maxRequestSize": "Max. Antwort-Größe",
+      "maxFailures": "Max. Fehlschläge vor Job-Deaktivierung",
+      "maxStatusPages": "Max. Anzahl Status-Seiten/-Monitore",
+      "price": "Preis",
+      "free": "kostenlos",
+      "subscriptionPrices": "5, 10 oder 20 EUR pro Monat (frei wählbar)",
+      "vatNote": "Alle Preise enthalten die gesetzliche Mehrwertsteuer, sofern anwendbar (abhängig vom Land des Käufers). Alle Details werden während des Bestellvorgangs vor Abschluss angezeigt.",
+      "ready": "Bereit?",
+      "amountAMonth": "{{amount}} EUR / Monat",
+      "subscribeNow": "Jetzt Fördermitglied werden",
+      "orderNow": "Zahlungspflichtig bestellen",
+      "orderText": "Vielen Dank für Ihre Unterstützung! Sie können nun Ihren Unterstützungsbeitrag wählen und die Buchung abschließen.",
+      "acceptRefundPolicy": "Ich akzeptiere die Widerrufsbelehrung"
     }
   },
   "statistics": {

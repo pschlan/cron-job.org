@@ -298,3 +298,13 @@ export function deleteJobTestRun(handle) {
     handle
   });
 }
+
+export function createCheckoutSession(product) {
+  return performRequest('CreateCheckoutSession', {
+    product
+  });
+}
+
+export function createBillingPortalSession() {
+  return performRequest('CreateBillingPortalSession', {});
+}

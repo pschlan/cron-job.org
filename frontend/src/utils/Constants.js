@@ -1,3 +1,11 @@
+export const SubscriptionStatus = {
+  INACTIVE: 0,
+  PENDING: 1,
+  ACTIVE: 2,
+  EXPIRING: 3,
+  CANCELLED: 4
+};
+
 export const JobStatus = {
   UNKNOWN: 0,
   OK: 1,
