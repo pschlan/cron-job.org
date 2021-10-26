@@ -105,7 +105,8 @@
     "noThanks": "No, thanks",
     "subscribe": "Subscribe",
     "failedToSaveNewsletter": "Sorry, we couldn't save your decision at this time. Please try again later.",
-    "newsletterSaved": "Thanks, your newsletter preference has been saved."
+    "newsletterSaved": "Thanks, your newsletter preference has been saved.",
+    "sustainingMembershipText": "Do you find {{serviceName}} useful and want to support us and at the same time benefit from exclusive membership rewards? Become a Sutaining Member now! Your Sustaining Membership helps us to cover infrastructure costs and ensures our service can operate and scale reliably, stay ad-free and is constantly improved."
   },
   "events": {
     "cronjobExecution": "Cronjob execution: {{statusText}}",

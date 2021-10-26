@@ -11,7 +11,7 @@ import { setDashboardData, setUserProfile } from '../../redux/actions';
 import Breadcrumbs from '../misc/Breadcrumbs';
 import Heading from '../misc/Heading';
 import moment from 'moment';
-import { JobStatus, jobStatusText, notificationTypeText } from '../../utils/Constants';
+import { JobStatus, jobStatusText, notificationTypeText, SubscriptionStatus } from '../../utils/Constants';
 import JobIcon from '../jobs/JobIcon';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import IconAvatar from '../misc/IconAvatar';
@@ -24,6 +24,9 @@ import AddIcon from '@material-ui/icons/AlarmAdd';
 import { Config } from '../../utils/Config';
 import useLanguageCode from '../../hooks/useLanguageCode';
 import { useSnackbar } from 'notistack';
+import useUserProfile from '../../hooks/useUserProfile';
+import LearnMoreIcon from '@material-ui/icons/Loyalty';
+import SubscribeDialog from '../settings/SubscribeDialog';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -91,6 +94,8 @@ export default function Dashboard() {
   const [ savingNewsletter, setSavingNewsletter ] = useState(false);
   const languageCode = useLanguageCode();
   const { enqueueSnackbar } = useSnackbar();
+  const userProfile = useUserProfile();
+  const [ showSubscribeDialog, setShowSubscribeDialog ] = useState(false);
 
   const doRefresh = useCallback(async () => {
     return getDashboard()
@@ -203,6 +208,23 @@ export default function Dashboard() {
             </Box>
           </Paper>
         </Grid>}
+      {Config.sustainingMembership.box.enable && userProfile && (!userProfile.userSubscription || userProfile.userSubscription.status===SubscriptionStatus.INACTIVE) && (dashboardData.successfulJobs >= Config.sustainingMembership.box.successfulJobsThreshold) && <Grid item xs={12}>
+          <Paper>
+            <Title>{t('dashboard.likeService', { serviceName: Config.productName })}</Title>
+            <Box pl={2} pr={2} pt={1} pb={2}>
+              <p>{t('dashboard.sustainingMembershipText', { serviceName: Config.productName })}</p>
+              <Button
+                size='small'
+                variant='contained'
+                startIcon={<LearnMoreIcon />}
+                onClick={() => setShowSubscribeDialog(true)}
+                float='right'
+                >
+                {t('settings.learnMore')}
+              </Button>
+            </Box>
+          </Paper>
+        </Grid>}
       {Config.donationBox.enable && dashboardData && dashboardData.successfulJobs >= Config.donationBox.successfulJobsThreshold && <Grid item xs={12}>
           <Paper>
             <Title>{t('dashboard.likeService', { serviceName: Config.productName })}</Title>
@@ -244,5 +266,6 @@ export default function Dashboard() {
         </Paper>
       </Grid>
     </Grid>
+    {showSubscribeDialog && <SubscribeDialog onClose={() => setShowSubscribeDialog(false)} />}
   </>;
 }
