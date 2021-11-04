@@ -13,6 +13,7 @@ import useLanguageCode from './hooks/useLanguageCode';
 
 import translationEN from './locales/en/translation.json';
 import translationDE from './locales/de/translation.json';
+import translationIT from './locales/it/translation.json';
 
 import 'moment/locale/de';
 import moment from 'moment';
@@ -24,6 +25,9 @@ const LANGUAGE_RESOURCES = {
   },
   de: {
     translation: translationDE
+  },
+  it: {
+    translation: translationIT
   }
 };
 
