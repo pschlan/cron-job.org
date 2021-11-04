@@ -1,0 +1,35 @@
+{
+  "common": {
+    "poweredBy": "offerto da",
+    "refresh": "Ricarica"
+  },
+  "timespan": {
+    "1year": "1 anno",
+    "6months": "6 mesi",
+    "1month": "1 mese",
+    "1week": "1 settimana",
+    "1day": "1 giorno"
+  },
+  "status": {
+    "availability": "Disponibilità",
+    "availabilityWarning": "Avviso di disponibilità",
+    "availabilityError": "Errore di disponibilità",
+    "lowAvailabilityText": "Negli ultimi 30 minuti, stiamo riscontrando una disponibilità ridotta al {{percent}} %.",
+    "latency": "Latenza",
+    "latencyWarning": "Avviso di latenza",
+    "latencyError": "Errore di latenza",
+    "highLatencyText": "Negli ultimi 30 minuti, stiamo riscontrando una latenza insolitamente elevata di {{ms}} ms.",
+    "healthy": "Operativo",
+    "allSystemsRunAsExpected": "Attualmente, tutti i sistemi funzionano come previsto."
+  },
+  "error": {
+    "404": {
+      "title": "Pagina non trovata",
+      "text": "La pagina di stato richiesta non è stata trovata. Assicurati che il link sia corretto e riprova."
+    },
+    "other": {
+      "title": "Errore durante il recupero della pagina di stato",
+      "text": "Ci dispiace, ma non riusciamo a recuperare la pagina di stato in questo momento. Riprova più tardi."
+    }
+  }
+}

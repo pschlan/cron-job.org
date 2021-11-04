@@ -22,7 +22,8 @@ export const Config = {
   //!       to add the new language code here.
   'languages': {
     'en': 'English',
-    'de': 'Deutsch'
+    'de': 'Deutsch',
+    'it': 'Italiano'
   },
 
   //! @note Fallback language to use when the user's auto-determined language is not supported.
