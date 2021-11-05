@@ -20,7 +20,8 @@
     "latencyError": "Latenz-Problem",
     "highLatencyText": "Wir verzeichnen derzeit eine ungewöhnlich hohe Latenz von {{ms}} ms in den letzten 30 Minuten.",
     "healthy": "OK",
-    "allSystemsRunAsExpected": "Alle Systeme funktionieren derzeit wie erwartet."
+    "allSystemsRunAsExpected": "Alle Systeme funktionieren derzeit wie erwartet.",
+    "disabled": "Deaktiviert"
   },
   "error": {
     "404": {

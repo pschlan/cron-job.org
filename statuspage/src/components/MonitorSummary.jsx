@@ -4,6 +4,7 @@ import { calculateAverage, calculatePercentile } from '../utils/Stats';
 import WarningIcon from '@material-ui/icons/WarningRounded';
 import ErrorIcon from '@material-ui/icons/Error';
 import HealthyIcon from '@material-ui/icons/CheckCircleOutline';
+import DisabledIcon from '@material-ui/icons/RemoveCircleOutline';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { useTranslation } from 'react-i18next';
 
@@ -68,6 +69,10 @@ const useStyles = makeStyles(theme => ({
     color: 'darkgreen',
     display: 'flex'
   },
+  disabled: {
+    color: 'grey',
+    display: 'flex'
+  },
   accordionSummary: {
     fontSize: '1.25rem'
   }
@@ -75,6 +80,7 @@ const useStyles = makeStyles(theme => ({
 
 function HealthIndicator({ health, okText, warningText, errorText }) {
   const classes = useStyles();
+  const { t } = useTranslation();
 
   return <div className={classes.healthIndicator}>
     {health === 'OK' && <span className={classes.ok}>
@@ -88,6 +94,10 @@ function HealthIndicator({ health, okText, warningText, errorText }) {
     {health === 'ERROR' && <span className={classes.error}>
       <Icon component={ErrorIcon} fontSize='small' />
       {errorText}
+    </span>}
+    {health === 'DISABLED' && <span className={classes.disabled}>
+      <Icon component={DisabledIcon} fontSize='small' />
+      {t('status.disabled')}
     </span>}
   </div>;
 }
@@ -103,30 +113,34 @@ export default function MonitorSummary({ monitor, timespan }) {
   }, [monitor, timespan]);
 
   return !health ? <LinearProgress /> : <Accordion>
-    <AccordionSummary className={classes.accordionSummary} expandIcon={<ExpandMoreIcon />}>
+    <AccordionSummary className={classes.accordionSummary} expandIcon={monitor.enabled && <ExpandMoreIcon />}>
       <Box display='flex' flexGrow={1}>
         <Box flexGrow={1}>
           {monitor.title}
         </Box>
         <Box className={classes.health}>
-          {health.uptime === 'OK' && health.latency === 'OK' ?
-            <>
-              <HealthIndicator health='OK' okText={t('status.healthy')} />
-            </> :
-            <>
-              {health.latency !== 'OK' && <HealthIndicator health={health.latency}
-                warningText={t('status.latencyWarning')}
-                errorText={t('status.latencyError')}
-                />}
-              {health.uptime !== 'OK' && <HealthIndicator health={health.uptime}
-                warningText={t('status.availabilityWarning')}
-                errorText={t('status.availabilityError')}
-                />}
+          {monitor.enabled ? <>
+            {health.uptime === 'OK' && health.latency === 'OK' ?
+              <>
+                <HealthIndicator health='OK' okText={t('status.healthy')} />
+              </> :
+              <>
+                {health.latency !== 'OK' && <HealthIndicator health={health.latency}
+                  warningText={t('status.latencyWarning')}
+                  errorText={t('status.latencyError')}
+                  />}
+                {health.uptime !== 'OK' && <HealthIndicator health={health.uptime}
+                  warningText={t('status.availabilityWarning')}
+                  errorText={t('status.availabilityError')}
+                  />}
+              </>}
+            </> : <>
+              <HealthIndicator health='DISABLED' />
             </>}
         </Box>
       </Box>
     </AccordionSummary>
-    <AccordionDetails>
+    {monitor.enabled && <AccordionDetails>
       {health.uptime === 'OK' && health.latency === 'OK' && <>
         {t('status.allSystemsRunAsExpected')}
       </>}
@@ -136,6 +150,6 @@ export default function MonitorSummary({ monitor, timespan }) {
       {health.uptime !== 'OK' && <>
         {t('status.lowAvailabilityText', { percent: (health.currentUptime * 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 }) })}
       </>}
-    </AccordionDetails>
+    </AccordionDetails>}
   </Accordion>;
 }

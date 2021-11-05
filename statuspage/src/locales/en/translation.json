@@ -20,7 +20,8 @@
     "latencyError": "Latency error",
     "highLatencyText": "We're currently experiencing unusually high latency of {{ms}} ms in the last 30 minutes.",
     "healthy": "Healthy",
-    "allSystemsRunAsExpected": "All systems currently run as expected."
+    "allSystemsRunAsExpected": "All systems currently run as expected.",
+    "disabled": "Disabled"
   },
   "error": {
     "404": {

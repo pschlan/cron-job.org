@@ -20,7 +20,8 @@
     "latencyError": "Errore di latenza",
     "highLatencyText": "Negli ultimi 30 minuti, stiamo riscontrando una latenza insolitamente elevata di {{ms}} ms.",
     "healthy": "Operativo",
-    "allSystemsRunAsExpected": "Attualmente, tutti i sistemi funzionano come previsto."
+    "allSystemsRunAsExpected": "Attualmente, tutti i sistemi funzionano come previsto.",
+    "disabled": "Disattivato"
   },
   "error": {
     "404": {
