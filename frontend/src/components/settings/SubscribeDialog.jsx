@@ -89,7 +89,7 @@ export default function SubscribeDialog({ onClose }) {
                 <TableRow>
                   <TableCell>{t('settings.subscribeDialog.maxStatusPages')}</TableCell>
                   <TableCell>5 / 10</TableCell>
-                  <TableCell>15 / 10</TableCell>
+                  <TableCell>15 / 20</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>{t('settings.subscribeDialog.price')}</TableCell>
