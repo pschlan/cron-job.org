@@ -35,7 +35,7 @@ CREATE TABLE `job_header` (
   `jobheaderid` int(11) NOT NULL AUTO_INCREMENT,
   `jobid` int(11) NOT NULL DEFAULT '0',
   `key` varchar(64) NOT NULL DEFAULT '',
-  `value` varchar(255) NOT NULL DEFAULT '',
+  `value` text NOT NULL DEFAULT '',
   PRIMARY KEY (`jobheaderid`),
   KEY `jobid` (`jobid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
