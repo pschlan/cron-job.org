@@ -47,7 +47,7 @@ export default function Authenticator({ children }) {
           </Switch>
         </div>
         <Box mt={8}>
-          <Footer />
+          <Footer narrow={true} />
         </Box>
       </Container>
     </>}

@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Typography, Link, makeStyles, Dialog, DialogTitle, DialogContent, FormControlLabel, Radio, RadioGroup, DialogActions, Button } from '@material-ui/core';
+import { Typography, Link, makeStyles, Dialog, DialogTitle, DialogContent, FormControlLabel, Radio, RadioGroup, DialogActions, Button, Box } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
 import { Config } from '../../utils/Config';
 import TwitterIcon from '@material-ui/icons/Twitter';
@@ -42,19 +42,23 @@ function LanguageSelectorDialog({ onClose }) {
   </Dialog>;
 }
 
-export default function Footer() {
+export default function Footer({ narrow = false }) {
   const classes = useStyles();
   const { t } = useTranslation();
   const [ showLanguageDialog, setShowLanguageDialog ] = useState(false);
   const languageCode = useLanguageCode();
 
+  const Copyright = () => <>&copy; {new Date().getFullYear()} <Link color="inherit" href={Config.baseURL} target="_blank" rel="noopener">{Config.productName}</Link></>;
+
   return <>
     {showLanguageDialog && <LanguageSelectorDialog onClose={() => setShowLanguageDialog(false)} />}
     <Typography variant="body2" color="textSecondary" align="center">
-      &copy; {new Date().getFullYear()} <Link color="inherit" href={Config.baseURL} target="_blank" rel="noopener">{Config.productName}</Link>
-      <> | <LanguageIcon className={classes.icon} /> <Link color="inherit" className={classes.link} onClick={() => setShowLanguageDialog(true)}>{Config.languages[languageCode]}</Link></>
+      {!narrow && <><Copyright /> | </>}
+      <><LanguageIcon className={classes.icon} /> <Link color="inherit" className={classes.link} onClick={() => setShowLanguageDialog(true)}>{Config.languages[languageCode]}</Link></>
+      {(Config.footerLinks || []).map(link => <React.Fragment key={link.title}> | <link.icon className={classes.icon} /> <Link color="inherit" href={link.href} target={link.target}>{t(link.title)}</Link></React.Fragment>)}
       {Config.twitterURL && <> | <TwitterIcon className={classes.icon} /> <Link color="inherit" href={Config.twitterURL} target="_blank" rel="noopener">{t('common.followontwitter')}</Link></>}
       {Config.githubURL && <> | <GitHubIcon className={classes.icon} /> <Link color="inherit" href={Config.githubURL} target="_blank" rel="noopener">{t('common.forkongithub')}</Link></>}
+      {narrow && <Box mt={2}><Copyright /></Box>}
     </Typography>
   </>;
 }
