@@ -193,7 +193,6 @@ export default function JobEditor({ match }) {
   }, [job, userProfile]);
 
   useEffect(() => {
-    console.log('RTO ' +  requestTimeout);
     setUpdatedJob({
       title: jobTitle,
       url: jobURL,
