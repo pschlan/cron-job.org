@@ -56,7 +56,8 @@
     "disable": "Disable",
     "massActionSucceeded": "The action has been executed successfully.",
     "massActionFailed": "Failed to execute the action. Please try again later.",
-    "sustainingMemberThanks": "You're a Sustaining Member - thanks so much for supporting us and keeping this project alive!"
+    "sustainingMemberThanks": "You're a Sustaining Member - thanks so much for supporting us and keeping this project alive!",
+    "export": "Export"
   },
   "login": {
     "emailAddress": "Email address",
@@ -255,7 +256,13 @@
       "rawResponse": "Raw response",
       "peer": "Peer"
     },
-    "requestTimeout": "Timeout"
+    "requestTimeout": "Timeout",
+    "exportJob": "Export cronjob: {{jobTitle}}",
+    "exportFormat": "Export format",
+    "format": {
+      "cronTabCurl": "Crontab + curl"
+    },
+    "exportData": "Export data"
   },
   "statuspages": {
     "title": "Title",

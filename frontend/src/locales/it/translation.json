@@ -56,7 +56,8 @@
     "disable": "Disattiva",
     "massActionSucceeded": "Azione eseguita con successo.",
     "massActionFailed": "Impossibile eseguire l'azione richiesta. Riprova più tardi.",
-    "sustainingMemberThanks": "Ora sei un utente sostenitore - grazie mille del tuo supporto, ci aiuti a mantenere questo progetto attivo!"
+    "sustainingMemberThanks": "Ora sei un utente sostenitore - grazie mille del tuo supporto, ci aiuti a mantenere questo progetto attivo!",
+    "export": "Esportare"
   },
   "login": {
     "emailAddress": "Indirizzo email",
@@ -255,7 +256,13 @@
       "rawResponse": "Dati risposta non elaborati",
       "peer": "Peer"
     },
-    "requestTimeout": "Timeout"
+    "requestTimeout": "Timeout",
+    "exportJob": "Esporta cronjob: {{jobTitle}}",
+    "exportFormat": "Formato di esportazione",
+    "format": {
+      "cronTabCurl": "Crontab + curl"
+    },
+    "exportData": "Esporta dati"
   },
   "statuspages": {
     "title": "Titolo",

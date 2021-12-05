@@ -40,10 +40,12 @@ import HistoryIcon from '@material-ui/icons/History';
 import CloneIcon from '@material-ui/icons/FileCopy';
 import TestIcon from '@material-ui/icons/PlayCircleOutline';
 import TimerIcon from '@material-ui/icons/Timer';
+import ExportIcon from '@material-ui/icons/ImportExport';
 import ValidatingTextField from '../misc/ValidatingTextField';
 import clsx from 'clsx';
 import useUserProfile from '../../hooks/useUserProfile';
 import JobTestRun from './JobTestRun';
+import JobExport from './JobExport';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -124,6 +126,7 @@ export default function JobEditor({ match }) {
   const [ saving, setSaving ] = useState(false);
   const [ showDeleteJob, setShowDeleteJob ] = useState(false);
   const [ showTestRun, setShowTestRun ] = useState(false);
+  const [ showExportJob, setShowExportJob ] = useState(false);
   const [ updatedJob, setUpdatedJob ] = useState({});
 
   const createMode = (jobId === -1);
@@ -348,6 +351,11 @@ export default function JobEditor({ match }) {
               icon: <CloneIcon fontSize='small' />,
               text: t('common.clone'),
               onClick: () => cloneJob()
+            },
+            {
+              icon: <ExportIcon fontSize='small' />,
+              text: t('common.export'),
+              onClick: () => setShowExportJob(true)
             },
             {
               icon: <DeleteIcon fontSize='small' />,
@@ -581,6 +589,8 @@ export default function JobEditor({ match }) {
     </Grid>
 
     {showTestRun && <JobTestRun onClose={() => setShowTestRun(false)} jobId={jobId} job={updatedJob} />}
+
+    {showExportJob && <JobExport onClose={() => setShowExportJob(false)} job={updatedJob} />}
 
     {showDeleteJob && <Dialog open={true} onClose={() => setShowDeleteJob(false)}>
       <DialogTitle>

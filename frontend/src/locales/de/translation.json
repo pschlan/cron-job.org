@@ -56,7 +56,8 @@
     "disable": "Deaktivieren",
     "massActionSucceeded": "Die Aktion wurde erfolgreich ausgeführt.",
     "massActionFailed": "Die Aktion konnte nicht ausgeführt werden. Bitte versuchen Sie es später erneut.",
-    "sustainingMemberThanks": "Sie sind ein aktives Fördermitglied - vielen Dank, dass Sie uns unterstützen und diesen Dienst am Leben erhalten!"
+    "sustainingMemberThanks": "Sie sind ein aktives Fördermitglied - vielen Dank, dass Sie uns unterstützen und diesen Dienst am Leben erhalten!",
+    "export": "Exportieren"
   },
   "login": {
     "emailAddress": "E-Mail-Adresse",
@@ -255,7 +256,13 @@
       "rawResponse": "Antwort-Rohdaten",
       "peer": "Gegenstelle"
     },
-    "requestTimeout": "Timeout"
+    "requestTimeout": "Timeout",
+    "exportJob": "Cronjob exportieren: {{jobTitle}}",
+    "exportFormat": "Export-Format",
+    "format": {
+      "cronTabCurl": "Crontab + curl"
+    },
+    "exportData": "Export-Daten"
   },
   "statuspages": {
     "title": "Titel",
