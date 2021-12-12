@@ -76,7 +76,10 @@
     "passwordResetDone": "Ihr Passwort wurde erfolgreich geändert. Sie können sich nun mit Ihrem neuen Passwort einloggen.",
     "passwordResetFailed": "Entschuldigung, aber wir konnten Ihr Passwort nicht ändern. Ein möglicher Grund ist ein ungültiger oder abgelaufener Link. Bitte versuchen Sie es erneut.",
     "forgotPasswordText": "Haben Sie Ihr Passwort vergessen? Kein Problem. Geben Sie einfach Ihre E-Mail-Adresse ein und wir senden Ihnene eine E-Mail mit weiteren Anweisungen, um Ihr Passwort zurückzusetzen.",
-    "resetPasswordText": "Bitte vergeben Sie ein neues Passwort für Ihren Account und bestätigen Sie es, dann klicken Sie \"Passwort zurücksetzen\"."
+    "resetPasswordText": "Bitte vergeben Sie ein neues Passwort für Ihren Account und bestätigen Sie es, dann klicken Sie \"Passwort zurücksetzen\".",
+    "mfaTitle": "Multi-Faktor-Authentifizierung",
+    "mfaText": "Bitte geben Sie einen MFA-Code eines Gerätes ein, das mit Ihrem Account verbunden ist.",
+    "mfaCode": "MFA-Code"
   },
   "signup": {
     "signup": "Registrieren",
@@ -403,6 +406,34 @@
       "orderNow": "Zahlungspflichtig bestellen",
       "orderText": "Vielen Dank für Ihre Unterstützung! Sie können nun Ihren Unterstützungsbeitrag wählen und die Buchung abschließen.",
       "acceptRefundPolicy": "Ich akzeptiere die Widerrufsbelehrung"
+    },
+    "mfa": {
+      "devices": "Geräte für Multi-Faktor-Authentifizierung",
+      "noDevices": "Keine Geräte gefunden. Fügen Sie nun ein Gerät hinzu, um Ihren Account abzusichern.",
+      "add": "Gerät hinzufügen",
+      "title": "Titel",
+      "selectType": "Bitte wählen Sie den Typ des Geräts, das Sie hinzufügen möchten, geben Sie einen Titel zur leichteren Zuordnung an und authentifizieren Sie sich mit Ihrem Account-Passwort, um fortzufahren.",
+      "totpDevice": {
+        "title": "Authenticator-App (TOTP)",
+        "description": "Verwenden Sie eine Authenticator-App wie Google Authenticator oder Microsoft Authenticator.",
+        "pairInstructions": "Bitte scannen Sie den QR-Code mit Ihrer Authenticator-App und geben Sie danach einen Authentifizierungs-Code aus der App ein, um die Kopplung abzuschließen.",
+        "enterCode": "MFA-Code eingeben"
+      },
+      "yubicoOtpDevice": {
+        "title": "YubiKey (Yubico OTP)",
+        "description": "Verwenden Sie ein Yubico-OTP-Gerät (YubiKey).",
+        "enterCode": "Generieren Sie ein OTP mit Ihrem YubiKey"
+      },
+      "next": "Weiter",
+      "accountPassword": "Account-Passwort",
+      "confirm": "Bestätigen",
+      "createError": "Das MFA-Gerät konnte nicht angelegt werden. Bitte versuchen Sie es später erneut.",
+      "confirmError": "Das MFA-Gerät konnte nicht bestätigt werden. Bitte prüfen Sie Ihre Eingaben und versuchen Sie es erneut..",
+      "created": "Das MFA-Gerät wurde erfolgreich hinzugefügt.",
+      "confirmDelete": "Möchten Sie dieses MFA-Gerät wirklich entfernen? Es kann dann nicht mehr zur Authentifizierung verwendet werden. Bitte beachten Sie, dass Multi-Faktor-Authentifizierung für Ihren Account deaktiviert wird, wenn Sie alle Geräte löschen. Wenn Sie fortfahren möchten, bestätigen Sie dies bitte mit Ihrem Account-Passwort.",
+      "deleteDevice": "MFA-Gerät löschen: {{title}}",
+      "deleted": "Das MFA-Gerät wurde erfolgreich gelöscht.",
+      "deleteError": "Entschuldigung, aber wir konnten Ihr MFA-Gerät nicht löschen. Bitte versuchen Sie es später erneut."
     }
   },
   "statistics": {

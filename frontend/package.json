@@ -17,6 +17,7 @@
     "moment": "^2.27.0",
     "moment-timezone": "^0.5.31",
     "notistack": "^0.9.17",
+    "qrcode.react": "^1.0.1",
     "react": "^16.13.1",
     "react-beautiful-dnd": "^13.0.0",
     "react-copy-to-clipboard": "^5.0.2",

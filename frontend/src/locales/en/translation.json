@@ -76,7 +76,10 @@
     "passwordResetDone": "Your password has been changed successfully. You can now log in with your new password.",
     "passwordResetFailed": "Sorry, we could not change your password. A possible reason is that your password reset link has expired. Please try again.",
     "forgotPasswordText": "Forgot your password? No problem. Just enter your email address and we will send you instructions on how to reset your password.",
-    "resetPasswordText": "Please specify a new password for your account and confirm it, then click \"Reset password\"."
+    "resetPasswordText": "Please specify a new password for your account and confirm it, then click \"Reset password\".",
+    "mfaTitle": "Multi-Factor Authentication",
+    "mfaText": "Please enter a current MFA code from a device linked to your account.",
+    "mfaCode": "MFA code"
   },
   "signup": {
     "signup": "Sign up",
@@ -403,7 +406,35 @@
       "acceptRefundPolicy": "I agree to the Refund Policy"
     },
     "orderFailed": "Failed to load checkout portal. Please try again later or contact our support team.",
-    "manageSubscription": "Manage subscription"
+    "manageSubscription": "Manage subscription",
+    "mfa": {
+      "devices": "Multi-Factor Authentication devices",
+      "noDevices": "No devices found. Add a MFA device now to secure your account.",
+      "add": "Add device",
+      "title": "Title",
+      "selectType": "Please select the type of device you want to add, specify a title for easier identification and authenticate using your account password to continue.",
+      "totpDevice": {
+        "title": "Authenticator app (TOTP)",
+        "description": "Use an authenticator app like Google Authenticator or Microsoft Authenticator.",
+        "pairInstructions": "Please use your authenticator app to scan the pairing QR code and enter an authentication code below to finish the pairing process.",
+        "enterCode": "Enter a MFA code"
+      },
+      "yubicoOtpDevice": {
+        "title": "YubiKey (Yubico OTP)",
+        "description": "Use a Yubico OTP device (YubiKey).",
+        "enterCode": "Generate an OTP using your YubiKey"
+      },
+      "next": "Next",
+      "accountPassword": "Account password",
+      "confirm": "Confirm",
+      "createError": "Failed to create the MFA device. Please try again later.",
+      "confirmError": "Failed to confirm your MFA device. Please double-check your input.",
+      "created": "The MFA device has been added successfully.",
+      "confirmDelete": "Do you really want to delete this MFA device? You won't be able to use it for authentication anymore. Please note that multi-factor authentication will be disabled for your account in case you delete all linked MFA devices. In case you want to proceed, please enter your account password.",
+      "deleteDevice": "Delete MFA device: {{title}}",
+      "deleted": "The MFA device has been deleted successfully.",
+      "deleteError": "Sorry, we could not delete the MFA device. Please try again later."
+    }
   },
   "statistics": {
     "requestFailed": "Failed to load statistics. Please try again later.",

@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { TextField, Button, Grid, Link, makeStyles, Typography, FormControlLabel, Checkbox } from '@material-ui/core';
+import React, { useRef, useState, useEffect } from 'react';
+import { TextField, Button, Grid, Link, makeStyles, Typography, FormControlLabel, Checkbox, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, DialogContentText } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 import { Link as RouterLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +20,49 @@ const useStyles = makeStyles(themes => ({
   }
 }));
 
+function MFADialog({ onCancel, onLogin }) {
+  const onCancelHook = useRef(onCancel, []);
+  const onLoginHook = useRef(onLogin, []);
+
+  const [mfaCode, setMFACode] = useState('');
+  const { t } = useTranslation();
+
+  function handleKeyPress(event) {
+    if (event.key === 'Enter') {
+      if (mfaCode.length >= 6) {
+        onLoginHook.current(mfaCode);
+      }
+    }
+  }
+
+  return <Dialog open={true} fullWidth maxWidth='sm' onClose={onCancelHook.current}>
+    <DialogTitle>{t('login.mfaTitle')}</DialogTitle>
+    <DialogContent>
+      <DialogContentText>
+        {t('login.mfaText')}
+      </DialogContentText>
+      <FormControl fullWidth>
+        <TextField
+          value={mfaCode}
+          onChange={({target}) => setMFACode(target.value)}
+          label={t('login.mfaCode')}
+          InputLabelProps={{ shrink: true }}
+          inputRef={input => input && input.focus()}
+          inputProps={{onKeyPress: handleKeyPress, autocomplete: 'one-time-code'}}
+          />
+      </FormControl>
+    </DialogContent>
+    <DialogActions>
+      <Button autoFocus onClick={onCancelHook.current}>
+        {t('common.cancel')}
+      </Button>
+      <Button color='primary' onClick={() => onLoginHook.current(mfaCode)} disabled={mfaCode.length<6}>
+        {t('login.login')}
+      </Button>
+    </DialogActions>
+  </Dialog>;
+}
+
 export default function Login() {
   const classes = useStyles();
   const { t } = useTranslation();
@@ -28,28 +71,45 @@ export default function Login() {
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState();
+  const [showMFADialog, setShowMFADialog] = useState(false);
   const passwordField = useRef();
   const dispatch = useDispatch();
 
-  function doLogin(event) {
-    event.preventDefault();
+  function doLogin(event, mfaCode = '') {
+    if (event) {
+      event.preventDefault();
+    }
 
     setIsLoading(true);
     setErrorMessage();
 
-    login(email, password, rememberMe)
+    login(email, password, rememberMe, mfaCode)
       .then(response => dispatch(setAuthToken(response.token)))
       .catch(error => {
-        if (error.response && error.response.status === 410) {
-          setErrorMessage(t('login.bannedError'));
-        } else if (error.response && error.response.status === 403) {
-          setErrorMessage(t('login.notActivatedError'));
+        if (error.response && error.response.status === 403) {
+          setShowMFADialog(true);
         } else {
-          setErrorMessage(t('login.loginFailed'));
+          if (error.response && error.response.status === 410) {
+            setErrorMessage(t('login.bannedError'));
+          } else if (error.response && error.response.status === 403) {
+            setErrorMessage(t('login.notActivatedError'));
+          } else {
+            setErrorMessage(t('login.loginFailed'));
+          }
+          setPassword('');
         }
-        setPassword('');
       })
       .finally(() => setIsLoading(false));
+  }
+
+  function mfaCancel() {
+    setPassword('');
+    setShowMFADialog(false);
+  }
+
+  function mfaConfirm(code) {
+    setShowMFADialog(false);
+    doLogin(null, code);
   }
 
   return <>
@@ -111,5 +171,9 @@ export default function Login() {
         </Grid>
       </Grid>
     </form>
+    {showMFADialog && <MFADialog
+      onCancel={() => mfaCancel()}
+      onLogin={mfaCode => mfaConfirm(mfaCode)}
+      />}
   </>;
 }

@@ -44,11 +44,16 @@ function performRequest(method, payload, authenticated = true, isLogoutRequest =
   });
 }
 
-export function login(email, password, rememberMe = false) {
+export function login(email, password, rememberMe = false, mfaCode = '') {
+  const additional = {};
+  if (mfaCode !== '') {
+    additional.mfaCode = mfaCode;
+  }
   return performRequest('Login', {
     email,
     password,
-    rememberMe
+    rememberMe,
+    ...additional
   }, false);
 }
 
@@ -307,4 +312,24 @@ export function createCheckoutSession(product) {
 
 export function createBillingPortalSession() {
   return performRequest('CreateBillingPortalSession', {});
+}
+
+export function getMFADevices() {
+  return performRequest('GetMFADevices', {});
+}
+
+export function createMFADevice(title, type, password, code) {
+  const additional = {};
+  if (code) {
+    additional.code = code;
+  }
+  return performRequest('CreateMFADevice', { title, type, password, ...additional });
+}
+
+export function confirmMFADevice(mfaDeviceId, code) {
+  return performRequest('ConfirmMFADevice', { mfaDeviceId, code });
+}
+
+export function deleteMFADevice(mfaDeviceId, password) {
+  return performRequest('DeleteMFADevice', { mfaDeviceId, password });
 }

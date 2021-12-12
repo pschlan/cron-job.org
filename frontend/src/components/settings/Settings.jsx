@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, ButtonGroup, CircularProgress, Grid, InputLabel, LinearProgress, makeStyles, MenuItem, Paper, Select, Typography } from '@material-ui/core';
+import { Box, Button, ButtonGroup, CircularProgress, Grid, InputLabel, LinearProgress, makeStyles, MenuItem, Paper, Select, TableContainer, Typography } from '@material-ui/core';
 import { grey } from '@material-ui/core/colors';
 import { useTranslation } from 'react-i18next';
-import { createBillingPortalSession, getUserProfile, updateUserProfile } from '../../utils/API';
+import { createBillingPortalSession, getMFADevices, getUserProfile, updateUserProfile } from '../../utils/API';
 import useTimezones from '../../hooks/useTimezones';
 import useUserProfile from '../../hooks/useUserProfile';
 import Breadcrumbs from '../misc/Breadcrumbs';
@@ -19,15 +19,22 @@ import PasswordIcon from '@material-ui/icons/LockOpen';
 import moment from 'moment';
 import ChangePasswordDialog from './ChangePasswordDialog';
 import ChangeEmailAddressDialog from './ChangeEmailAddressDialog';
+import CreateMFADeviceDialog from './CreateMFADeviceDialog';
+import DeleteMFADeviceDialog from './DeleteMFADeviceDialog';
 import { RegexPatterns, SubscriptionStatus } from '../../utils/Constants';
 import DeleteAccountDialog from './DeleteAccountDialog';
 import ManageSubscriptionIcon from '@material-ui/icons/CreditCard';
 import SubscriptionActiveIcon from '@material-ui/icons/FavoriteBorder';
 import SubscriptionInactiveIcon from '@material-ui/icons/PauseCircleOutline';
 import LearnMoreIcon from '@material-ui/icons/Loyalty';
+import TOTPDeviceIcon from '@material-ui/icons/PhoneIphone';
+import YubicoOTPDeviceIcon from '@material-ui/icons/VpnKey';
+import DeleteIcon from '@material-ui/icons/Delete';
+import AddIcon from '@material-ui/icons/Add';
 import IconAvatar from '../misc/IconAvatar';
 import { Config } from '../../utils/Config';
 import SubscribeDialog from './SubscribeDialog';
+import Table from '../misc/Table';
 
 const useStyles = makeStyles(theme => ({
   grid: {
@@ -62,10 +69,15 @@ export default function Settings() {
   const [ saving, setSaving ] = useState(false);
   const [ isLoadingManageSubscription, setIsLoadingManageSubscription ] = useState(false);
 
+  const [ isLoadingMFADevices, setIsLoadingMFADevices ] = useState(true);
+  const [ mfaDevices, setMFADevices] = useState([]);
+
   const [ showChangePassword, setShowChangePassword ] = useState(false);
   const [ showChangeEmail, setShowChangeEmail ] = useState(false);
   const [ showDeleteAccount, setShowDeleteAccount ] = useState(false);
   const [ showSubscribeDialog, setShowSubscribeDialog ] = useState(false);
+  const [ showCreateMFADevice, setShowCreateMFADevice ] = useState(false);
+  const [ deleteMFADevice, setDeleteMFADevice ] = useState(null);
 
   const [ firstName, setFirstName ] = useState('');
   const [ lastName, setLastName ] = useState('');
@@ -85,6 +97,17 @@ export default function Settings() {
       setIsLoading(false);
     }
   }, [userProfile]);
+
+  function refreshMFADevices() {
+    setIsLoadingMFADevices(true);
+    getMFADevices()
+      .then(response => setMFADevices(response.mfaDevices))
+      .finally(() => setIsLoadingMFADevices(false));
+  }
+
+  useEffect(() => {
+    refreshMFADevices();
+  }, []);
 
   function saveSettings() {
     setSaving(true);
@@ -132,6 +155,36 @@ export default function Settings() {
       return () => window.clearInterval(handle);
     }
   }, [isPaymentReturn, userProfile, dispatch]);
+
+  const MFA_COLUMNS = [
+    {
+      head: t('settings.mfa.title'),
+      cell: mfaDevice => <div style={{display: 'flex', alignItems: 'center'}}>
+          <IconAvatar icon={mfaDevice.type===0 ? <TOTPDeviceIcon /> : mfaDevice.type===1 ? <YubicoOTPDeviceIcon /> : <></>} color={mfaDevice.enabled ? 'green' : 'default'} />
+          <div>
+            <div>{mfaDevice.title}</div>
+            <div><Typography variant="caption">
+              {mfaDevice.type===0 && <>{t('settings.mfa.totpDevice.title')}</>}
+              {mfaDevice.type===1 && <>{t('settings.mfa.yubicoOtpDevice.title')}</>}
+            </Typography></div>
+          </div>
+        </div>
+    },
+    {
+      head: t('common.actions'),
+      cell: mfaDevice => <>
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<DeleteIcon />}
+          className={classes.actionButton}
+          onClick={() => setDeleteMFADevice(mfaDevice)}
+          >
+          {t('common.delete')}
+        </Button>
+      </>
+    }
+  ];
 
   return <div>
     <Breadcrumbs items={[
@@ -253,6 +306,26 @@ export default function Settings() {
         </>}
       </Paper>}
 
+      <TableContainer component={Paper} className={classes.paper}>
+        <Title actionButtons={<>
+          <Button
+            variant='contained'
+            size='small'
+            startIcon={<AddIcon />}
+            onClick={() => setShowCreateMFADevice(true)}
+            >{t('settings.mfa.add')}</Button>
+          </>}>
+          {t('settings.mfa.devices')}
+        </Title>
+        <Table
+          columns={MFA_COLUMNS}
+          items={mfaDevices}
+          empty={<em>{t('settings.mfa.noDevices')}</em>}
+          loading={isLoadingMFADevices}
+          rowIdentifier='mfaDeviceId'
+          />
+      </TableContainer>
+
       <Paper className={classes.paper}>
         <Title>{t('settings.profile')}</Title>
         <Grid container className={classes.grid}>
@@ -322,6 +395,8 @@ export default function Settings() {
     {showChangeEmail && <ChangeEmailAddressDialog currentEmailAddress={email} onClose={() => setShowChangeEmail(false)} />}
     {showDeleteAccount && <DeleteAccountDialog currentEmailAddress={email} onClose={() => setShowDeleteAccount(false)} />}
     {showSubscribeDialog && <SubscribeDialog onClose={() => setShowSubscribeDialog(false)} />}
+    {showCreateMFADevice && <CreateMFADeviceDialog onClose={() => setShowCreateMFADevice(false)} onRefreshMFADevices={() => refreshMFADevices()} username={email} />}
+    {deleteMFADevice!==null && <DeleteMFADeviceDialog mfaDevice={deleteMFADevice} onClose={() => setDeleteMFADevice(null)} onRefreshMFADevices={() => refreshMFADevices()} />}
 
   </div>;
 }
