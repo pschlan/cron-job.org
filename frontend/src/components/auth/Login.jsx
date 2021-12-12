@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { TextField, Button, Grid, Link, makeStyles, Typography, FormControlLabel, Checkbox, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, DialogContentText } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 import { Link as RouterLink } from 'react-router-dom';

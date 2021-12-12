@@ -39,7 +39,7 @@ export default function CreateMFADeviceDialog({ onClose, onRefreshMFADevices, us
         titleRef.current.focus();
       }
     }
-  }, [type, t]);
+  }, [type, t, title]);
 
   function createDevice() {
     createMFADevice(title, type, password, code)
