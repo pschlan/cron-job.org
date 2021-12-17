@@ -17,6 +17,7 @@ export const Config = {
   //!       to add the new language code here.
   'languages': {
     'en': 'English',
+    'es': 'Español',
     'de': 'Deutsch',
     'it': 'Italiano'
   },
