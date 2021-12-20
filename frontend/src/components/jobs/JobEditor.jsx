@@ -181,7 +181,7 @@ export default function JobEditor({ match }) {
       setJobURL(job.url);
       setJobEnabled(!!job.enabled);
       setSaveResponses(!!job.saveResponses);
-      setRequestTimeout(job.requestTimeout > 0 ? job.requestTimeout : userProfile.userGroup.requestTimeout);
+      setRequestTimeout(job.requestTimeout > 0 ? Math.min(job.requestTimeout, userProfile.userGroup.requestTimeout) : userProfile.userGroup.requestTimeout);
       setAuthEnable(!!job.auth.enable);
       setAuthUser(job.auth.user);
       setAuthPassword(job.auth.password);
@@ -291,6 +291,8 @@ export default function JobEditor({ match }) {
   function updateHeaderValue(rowNo, value) {
     setJobHeaders(headers => headers.map((x, index) => index === rowNo ? {...x, value} : x));
   }
+
+  const maxRequestTimeout = (userProfile && userProfile.userGroup && userProfile.userGroup.requestTimeout) || 30;
 
   const HEADERS_COLUMNS = [
     {
@@ -550,9 +552,10 @@ export default function JobEditor({ match }) {
                 />
             </FormControl>
             <FormControl className={classes.formControl}>
-              <TextField
+              <ValidatingTextField
+                validator={value => parseInt(value) <= maxRequestTimeout}
                 label={t('jobs.requestTimeout')}
-                defaultValue={requestTimeout}
+                defaultValue={Math.min(maxRequestTimeout, requestTimeout)}
                 onBlur={({target}) => setRequestTimeout(parseInt(target.value))}
                 onClick={({target}) => setRequestTimeout(parseInt(target.value))}
                 InputLabelProps={{shrink: true}}
@@ -560,7 +563,7 @@ export default function JobEditor({ match }) {
                   startAdornment: <InputAdornment position='start'><TimerIcon /></InputAdornment>,
                   endAdornment: <InputAdornment position='end'>{t('units.long.s')}</InputAdornment>
                 }}
-                inputProps={{min: 1, max: (userProfile && userProfile.userGroup && userProfile.userGroup.requestTimeout) || 30, type: 'number'}}
+                inputProps={{min: 1, max: maxRequestTimeout, type: 'number'}}
                 />
             </FormControl>
           </FormGroup>
