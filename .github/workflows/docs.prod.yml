@@ -1,0 +1,30 @@
+name: Build and deploy docs
+
+on:
+  push:
+    branches: [ prod ]
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    if: github.repository == 'pschlan/cron-job.org'
+    environment:
+      name: prod
+      url: https://docs.cron-job.org
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ammaraskar/sphinx-action@master
+      with:
+        pre-build-command: 'pip install sphinx_rtd_theme'
+        docs-folder: 'docs/'
+    - name: Deploy to S3/CloudFront
+      run: |
+        aws s3 sync ./build/html/ s3://$DOCS_S3_BUCKET
+        aws cloudfront create-invalidation --distribution-id $DOCS_CF_DISTRIBUTION_ID --paths "/*"
+      working-directory: ./docs
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: eu-west-1
+        DOCS_S3_BUCKET: ${{ secrets.DOCS_S3_BUCKET }}
+        DOCS_CF_DISTRIBUTION_ID: ${{ secrets.DOCS_CF_DISTRIBUTION_ID }}
