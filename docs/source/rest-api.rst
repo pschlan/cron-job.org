@@ -73,7 +73,7 @@ Example request via cURL:
     curl -X PATCH \
          -H 'Content-Type: application/json' \
          -H 'Authorization: Bearer zaX78aqKJuIH4l4RX6njoqADn77MQNJJ' \
-         -d '{"job":{"enabled": true}} \
+         -d '{"job":{"enabled": true}}' \
          https://api.cron-job.org/jobs/12345
 
 Example request via Python:
