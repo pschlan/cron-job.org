@@ -19,7 +19,7 @@ jobs:
         docs-folder: 'docs/'
     - name: Deploy to S3/CloudFront
       run: |
-        aws s3 sync ./_build/html/ s3://$DOCS_S3_BUCKET
+        aws s3 sync ./build/html/ s3://$DOCS_S3_BUCKET
         aws cloudfront create-invalidation --distribution-id $DOCS_CF_DISTRIBUTION_ID --paths "/*"
       working-directory: ./docs
       env:
