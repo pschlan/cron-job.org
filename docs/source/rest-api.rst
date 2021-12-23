@@ -73,7 +73,7 @@ Example request via cURL:
     curl -X PATCH \
          -H 'Content-Type: application/json' \
          -H 'Authorization: Bearer zaX78aqKJuIH4l4RX6njoqADn77MQNJJ' \
-         -d '{"job":{"enabled": true}}' \
+         -d '{"job":{"enabled":true}}' \
          https://api.cron-job.org/jobs/12345
 
 Example request via Python:
@@ -302,7 +302,7 @@ jobId               int                                     Identifier of the cr
     curl -X PUT \
          -H 'Content-Type: application/json' \
          -H 'Authorization: Bearer zaX78aqKJuIH4l4RX6njoqADn77MQNJJ' \
-         -d '{"job":{"url":"https://example.com"}}' \
+         -d '{"job":{"url":"https://example.com","enabled":"true","saveResponses":true,"schedule":{"timezone":"Europe/Berlin","hours":[-1],"mdays":[-1],"minutes":[-1],"months":[-1],"wdays":[-1]}}}' \
          https://api.cron-job.org/jobs
 
 **Response Example**
