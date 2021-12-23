@@ -333,3 +333,25 @@ export function confirmMFADevice(mfaDeviceId, code) {
 export function deleteMFADevice(mfaDeviceId, password) {
   return performRequest('DeleteMFADevice', { mfaDeviceId, password });
 }
+
+export function getAPIKeys() {
+  return performRequest('GetAPIKeys', {});
+}
+
+export function getAPIKeyToken(apiKeyId, password) {
+  return performRequest('GetAPIKeyToken', { apiKeyId, password });
+}
+
+export function deleteAPIKey(apiKeyId) {
+  return performRequest('DeleteAPIKey', { apiKeyId });
+}
+
+export function createAPIKey(title, ipAddresses) {
+  const limitIPs = ipAddresses.split(',').map(x => x.trim()).filter(x => x.indexOf('.') > 0);
+  return performRequest('CreateAPIKey', { title, limitIPs });
+}
+
+export function updateAPIKey(apiKeyId, title, ipAddresses) {
+  const limitIPs = ipAddresses.split(',').map(x => x.trim()).filter(x => x.indexOf('.') > 0);
+  return performRequest('UpdateAPIKey', { apiKeyId, title, limitIPs });
+}

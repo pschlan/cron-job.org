@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Button, ButtonGroup, CircularProgress, Grid, InputLabel, LinearProgress, makeStyles, MenuItem, Paper, Select, TableContainer, Typography } from '@material-ui/core';
 import { grey } from '@material-ui/core/colors';
 import { useTranslation } from 'react-i18next';
-import { createBillingPortalSession, getMFADevices, getUserProfile, updateUserProfile } from '../../utils/API';
+import { createBillingPortalSession, getAPIKeys, getMFADevices, getUserProfile, updateUserProfile } from '../../utils/API';
 import useTimezones from '../../hooks/useTimezones';
 import useUserProfile from '../../hooks/useUserProfile';
 import Breadcrumbs from '../misc/Breadcrumbs';
@@ -29,12 +29,20 @@ import SubscriptionInactiveIcon from '@material-ui/icons/PauseCircleOutline';
 import LearnMoreIcon from '@material-ui/icons/Loyalty';
 import TOTPDeviceIcon from '@material-ui/icons/PhoneIphone';
 import YubicoOTPDeviceIcon from '@material-ui/icons/VpnKey';
+import ApiKeyIcon from '@material-ui/icons/VpnKey';
 import DeleteIcon from '@material-ui/icons/Delete';
+import ShowKeyIcon from '@material-ui/icons/Visibility';
 import AddIcon from '@material-ui/icons/Add';
+import DocsIcon from '@material-ui/icons/HelpOutline';
+import EditIcon from '@material-ui/icons/Edit';
 import IconAvatar from '../misc/IconAvatar';
 import { Config } from '../../utils/Config';
 import SubscribeDialog from './SubscribeDialog';
 import Table from '../misc/Table';
+import ShowAPIKeyDialog from './ShowAPIKeyDialog';
+import DeleteAPIKeyDialog from './DeleteAPIKeyDialog';
+import CreateAPIKeyDialog from './CreateAPIKeyDialog';
+import EditAPIKeyDialog from './EditAPIKeyDialog';
 
 const useStyles = makeStyles(theme => ({
   grid: {
@@ -52,6 +60,12 @@ const useStyles = makeStyles(theme => ({
   },
   signupDate: {
     paddingTop: theme.spacing(0.5)
+  },
+  quotaIndicator: {
+    marginRight: theme.spacing(2)
+  },
+  actionButton: {
+    margin: theme.spacing(0.5)
   }
 }));
 
@@ -69,15 +83,22 @@ export default function Settings() {
   const [ saving, setSaving ] = useState(false);
   const [ isLoadingManageSubscription, setIsLoadingManageSubscription ] = useState(false);
 
-  const [ isLoadingMFADevices, setIsLoadingMFADevices ] = useState(true);
-  const [ mfaDevices, setMFADevices] = useState([]);
-
   const [ showChangePassword, setShowChangePassword ] = useState(false);
   const [ showChangeEmail, setShowChangeEmail ] = useState(false);
   const [ showDeleteAccount, setShowDeleteAccount ] = useState(false);
   const [ showSubscribeDialog, setShowSubscribeDialog ] = useState(false);
+
+  const [ isLoadingMFADevices, setIsLoadingMFADevices ] = useState(true);
+  const [ mfaDevices, setMFADevices ] = useState([]);
   const [ showCreateMFADevice, setShowCreateMFADevice ] = useState(false);
   const [ deleteMFADevice, setDeleteMFADevice ] = useState(null);
+
+  const [ isLoadingApiKeys, setIsLoadingApiKeys ] = useState(true);
+  const [ apiKeys, setApiKeys ] = useState([]);
+  const [ showCreateApiKey, setShowCreateApiKey ] = useState(false);
+  const [ showApiKey, setShowApiKey ] = useState(null);
+  const [ deleteApiKey, setDeleteApiKey ] = useState(null);
+  const [ editApiKey, setEditApiKey ] = useState(null);
 
   const [ firstName, setFirstName ] = useState('');
   const [ lastName, setLastName ] = useState('');
@@ -105,8 +126,16 @@ export default function Settings() {
       .finally(() => setIsLoadingMFADevices(false));
   }
 
+  function refreshApiKeys() {
+    setIsLoadingApiKeys(true);
+    getAPIKeys()
+      .then(response => setApiKeys(response.apiKeys))
+      .finally(() => setIsLoadingApiKeys(false));
+  }
+
   useEffect(() => {
     refreshMFADevices();
+    refreshApiKeys();
   }, []);
 
   function saveSettings() {
@@ -179,6 +208,59 @@ export default function Settings() {
           startIcon={<DeleteIcon />}
           className={classes.actionButton}
           onClick={() => setDeleteMFADevice(mfaDevice)}
+          >
+          {t('common.delete')}
+        </Button>
+      </>
+    }
+  ];
+
+  const APIKEY_COLUMNS = [
+    {
+      head: t('settings.apiKeys.title'),
+      cell: apiKey => <div style={{display: 'flex', alignItems: 'center'}}>
+          <IconAvatar icon={<ApiKeyIcon />} color={apiKey.enabled ? 'green' : 'default'} />
+          <div>
+            {apiKey.title}
+          </div>
+        </div>
+    },
+    {
+      head: t('settings.apiKeys.ipLimit'),
+      cell: apiKey => <>
+        {apiKey.limitIPs.length > 0 ? <>
+          {apiKey.limitIPs.slice(0, 5).join(', ')}
+          {apiKey.limitIPs.length > 5 && <>...</>}
+        </> : <em>{t('settings.apiKeys.unrestricted')}</em>}
+      </>
+    },
+    {
+      head: t('common.actions'),
+      cell: apiKey => <>
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<ShowKeyIcon />}
+          className={classes.actionButton}
+          onClick={() => setShowApiKey(apiKey)}
+          >
+          {t('settings.apiKeys.showKey')}
+        </Button>
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<EditIcon />}
+          className={classes.actionButton}
+          onClick={() => setEditApiKey(apiKey)}
+          >
+          {t('common.edit')}
+        </Button>
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<DeleteIcon />}
+          className={classes.actionButton}
+          onClick={() => setDeleteApiKey(apiKey)}
           >
           {t('common.delete')}
         </Button>
@@ -326,6 +408,41 @@ export default function Settings() {
           />
       </TableContainer>
 
+      <TableContainer component={Paper} className={classes.paper}>
+        <Title actionButtons={<div style={{display: 'flex', alignItems: 'center'}}>
+            <Typography variant='caption' className={classes.quotaIndicator}>
+              {userProfile !== null && !isLoadingApiKeys && t('common.quotaIndicator', { cur: apiKeys.length, max: userProfile.userGroup.maxApiKeys})}
+            </Typography>
+            <ButtonGroup variant='contained' size='small'>
+              <Button
+                variant='contained'
+                size='small'
+                startIcon={<AddIcon />}
+                onClick={() => setShowCreateApiKey(true)}
+                disabled={userProfile === null || isLoadingApiKeys || apiKeys.length >= userProfile.userGroup.maxApiKeys}
+                >{t('settings.apiKeys.add')}
+              </Button>
+              <Button
+                variant='contained'
+                size='small'
+                startIcon={<DocsIcon />}
+                href={Config.apiDocsURL}
+                target='_blank'
+                >{t('settings.apiKeys.showDocs')}
+              </Button>
+            </ButtonGroup>
+          </div>}>
+          {t('settings.apiKeys.keys')}
+        </Title>
+        <Table
+          columns={APIKEY_COLUMNS}
+          items={apiKeys}
+          empty={<em>{t('settings.apiKeys.noKeys')}</em>}
+          loading={isLoadingApiKeys}
+          rowIdentifier='apiKeyId'
+          />
+      </TableContainer>
+
       <Paper className={classes.paper}>
         <Title>{t('settings.profile')}</Title>
         <Grid container className={classes.grid}>
@@ -397,6 +514,10 @@ export default function Settings() {
     {showSubscribeDialog && <SubscribeDialog onClose={() => setShowSubscribeDialog(false)} />}
     {showCreateMFADevice && <CreateMFADeviceDialog onClose={() => setShowCreateMFADevice(false)} onRefreshMFADevices={() => refreshMFADevices()} username={email} />}
     {deleteMFADevice!==null && <DeleteMFADeviceDialog mfaDevice={deleteMFADevice} onClose={() => setDeleteMFADevice(null)} onRefreshMFADevices={() => refreshMFADevices()} />}
+    {showApiKey!==null && <ShowAPIKeyDialog apiKey={showApiKey} onClose={() => setShowApiKey(null)} />}
+    {deleteApiKey!==null && <DeleteAPIKeyDialog apiKey={deleteApiKey} onClose={() => setDeleteApiKey(null)} onRefreshAPIKeys={() => refreshApiKeys()} />}
+    {showCreateApiKey && <CreateAPIKeyDialog onClose={() => setShowCreateApiKey(false)} onRefreshAPIKeys={() => refreshApiKeys()} />}
+    {editApiKey!==null && <EditAPIKeyDialog apiKey={editApiKey} onClose={() => setEditApiKey(null)} onRefreshAPIKeys={() => refreshApiKeys()} />}
 
   </div>;
 }

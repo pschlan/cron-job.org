@@ -7,7 +7,7 @@ import { useSnackbar } from 'notistack';
 import { useState } from 'react';
 
 const useStyles = makeStyles(theme => ({
-    deleteDialog: {
+  deleteDialog: {
     '& div:not(:last-of-type)': {
       marginBottom: theme.spacing(2)
     }
@@ -52,6 +52,7 @@ export default function DeleteMFADeviceDialog({ mfaDevice, onClose, onRefreshMFA
           onChange={({target}) => setPassword(target.value)}
           value={password}
           InputLabelProps={{ shrink: true }}
+          required
           fullWidth
           autoFocus
           />

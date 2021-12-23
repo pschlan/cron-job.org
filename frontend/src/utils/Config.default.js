@@ -7,6 +7,7 @@ export const Config = {
   'privacyPolicyURL': 'https://example.com/privacy/',
   'termsOfServiceURL': 'https://example.com/tos/',
   'returnPolicyURL': 'https://example.com/returnpolicy/',
+  'apiDocsURL': 'https://example.com/docs/rest-api.html',
 
   //! @note The URL of the API webserver (/api/ folder in this repo)
   'apiURL': 'https://api.example.com/',
