@@ -66,7 +66,7 @@ Status code         Description
 
 Examples
 ^^^^^^^^
-Example request via cURL:
+Example request via curl:
 
 .. code-block:: console
 
@@ -121,7 +121,7 @@ jobs                array of :ref:`Job`                     List of jobs present
 someFailed          boolean                                 ``true`` in case some jobs could not be retrieved because of internal errors and the list might be incomplete, otherwise ``false``
 =================== ======================================= ======================================
 
-**cURL Example**
+**curl Example**
 
 .. code-block:: console
 
@@ -199,7 +199,7 @@ Key                 Type                                    Description
 jobDetails          array of :ref:`DetailedJob`             Job details
 =================== ======================================= ======================================
 
-**cURL Example**
+**curl Example**
 
 .. code-block:: console
 
@@ -295,7 +295,7 @@ Key                 Type                                    Description
 jobId               int                                     Identifier of the created job
 =================== ======================================= ======================================
 
-**cURL Example**
+**curl Example**
 
 .. code-block:: console
 
@@ -337,7 +337,7 @@ job                 :ref:`DetailedJob`                      Job delta (only incl
 
 Empty object.
 
-**cURL Example**
+**curl Example**
 
 .. code-block:: console
 
@@ -374,7 +374,7 @@ None.
 
 Empty object.
 
-**cURL Example**
+**curl Example**
 
 .. code-block:: console
 
@@ -417,7 +417,7 @@ predictions         array of int                            Unix timestamps (in 
 Please note that the `headers` and `body` fields of the `HistoryItem` objects will not be populated.
 In order to retrieve headers and body, see :ref:`Retrieving Job Execution History Item Details`.
 
-**cURL Example**
+**curl Example**
 
 .. code-block:: console
 
@@ -487,7 +487,7 @@ Key                 Type                                    Description
 jobHistoryDetails   :ref:`HistoryItem`                      History item
 =================== ======================================= ======================================
 
-**cURL Example**
+**curl Example**
 
 .. code-block:: console
 
