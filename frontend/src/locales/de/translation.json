@@ -396,6 +396,7 @@
       "maxRequestSize": "Max. Antwort-Größe",
       "maxFailures": "Max. Fehlschläge vor Job-Deaktivierung",
       "maxStatusPages": "Max. Anzahl Status-Seiten/-Monitore",
+      "maxApiCallsPerDay": "Max. API-Calls pro Tag",
       "price": "Preis",
       "free": "kostenlos",
       "subscriptionPrices": "5, 10 oder 20 EUR pro Monat (frei wählbar)",

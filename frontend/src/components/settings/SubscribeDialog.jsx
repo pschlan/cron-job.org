@@ -92,6 +92,11 @@ export default function SubscribeDialog({ onClose }) {
                   <TableCell>15 / 20</TableCell>
                 </TableRow>
                 <TableRow>
+                  <TableCell>{t('settings.subscribeDialog.maxApiCallsPerDay')}</TableCell>
+                  <TableCell>100</TableCell>
+                  <TableCell>5000</TableCell>
+                </TableRow>
+                <TableRow>
                   <TableCell>{t('settings.subscribeDialog.price')}</TableCell>
                   <TableCell>{t('settings.subscribeDialog.free')}</TableCell>
                   <TableCell>{t('settings.subscribeDialog.subscriptionPrices')}</TableCell>
