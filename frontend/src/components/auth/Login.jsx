@@ -91,7 +91,7 @@ export default function Login() {
         } else {
           if (error.response && error.response.status === 410) {
             setErrorMessage(t('login.bannedError'));
-          } else if (error.response && error.response.status === 403) {
+          } else if (error.response && error.response.status === 423) {
             setErrorMessage(t('login.notActivatedError'));
           } else {
             setErrorMessage(t('login.loginFailed'));
