@@ -1,11 +1,13 @@
 import React, { useRef, useState } from 'react';
-import { TextField, Button, Grid, Link, makeStyles, Typography, FormControlLabel, Checkbox, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, DialogContentText } from '@material-ui/core';
+import { TextField, Button, Grid, Link, makeStyles, Typography, FormControlLabel, Checkbox, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, DialogContentText, Box } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 import { Link as RouterLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { login } from '../../utils/API';
+import { login, resendActivationEmail } from '../../utils/API';
 import { useDispatch } from 'react-redux';
 import { setAuthToken } from '../../redux/actions';
+import CheckIcon from '@material-ui/icons/Check';
+import ErrorIcon from '@material-ui/icons/Close';
 
 const useStyles = makeStyles(themes => ({
   form: {
@@ -63,6 +65,12 @@ function MFADialog({ onCancel, onLogin }) {
   </Dialog>;
 }
 
+const RESEND_HIDDEN = 0;
+const RESEND_SHOW = 1;
+const RESEND_PROCESSING = 2;
+const RESEND_SUCCESS = 3;
+const RESEND_FAILED = 4;
+
 export default function Login() {
   const classes = useStyles();
   const { t } = useTranslation();
@@ -71,6 +79,8 @@ export default function Login() {
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState();
+  const [resendState, setResendState] = useState(RESEND_HIDDEN);
+  const [resendTo, setResendTo] = useState();
   const [showMFADialog, setShowMFADialog] = useState(false);
   const passwordField = useRef();
   const dispatch = useDispatch();
@@ -82,6 +92,7 @@ export default function Login() {
 
     setIsLoading(true);
     setErrorMessage();
+    setResendState(RESEND_HIDDEN);
 
     login(email, password, rememberMe, mfaCode)
       .then(response => dispatch(setAuthToken(response.token)))
@@ -93,6 +104,8 @@ export default function Login() {
             setErrorMessage(t('login.bannedError'));
           } else if (error.response && error.response.status === 423) {
             setErrorMessage(t('login.notActivatedError'));
+            setResendTo(email);
+            setResendState(RESEND_SHOW);
           } else {
             setErrorMessage(t('login.loginFailed'));
           }
@@ -112,6 +125,17 @@ export default function Login() {
     doLogin(null, code);
   }
 
+  function doResendActivationMail() {
+    setResendState(RESEND_PROCESSING);
+    resendActivationEmail(resendTo)
+      .then(() => {
+        setResendState(RESEND_SUCCESS);
+      })
+      .catch(() => {
+        setResendState(RESEND_FAILED);
+      });
+  }
+
   return <>
     <Typography component="h1" variant="h5">
       {t('login.login')}
@@ -119,6 +143,26 @@ export default function Login() {
     <form noValidate className={classes.form} onSubmit={doLogin}>
       {errorMessage && <Alert severity="error" className={classes.error}>
         {errorMessage}
+        {[RESEND_SHOW, RESEND_PROCESSING, RESEND_SUCCESS, RESEND_FAILED].includes(resendState) && <Box mt={1}>
+          <Button
+            variant='outlined'
+            size='small'
+            onClick={() => doResendActivationMail()}
+            disabled={resendState !== RESEND_SHOW}
+            >
+            {resendState === RESEND_SUCCESS && <>
+              <CheckIcon />
+              {t('login.resendSuccess')}
+            </>}
+            {resendState === RESEND_FAILED && <>
+              <ErrorIcon />
+              {t('login.resendFailed')}
+            </>}
+            {[RESEND_SHOW, RESEND_PROCESSING].includes(resendState) && <>
+              {t('login.resendActivationMail')}
+            </>}
+          </Button>
+        </Box>}
       </Alert>}
       <TextField
         variant="outlined"

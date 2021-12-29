@@ -79,7 +79,10 @@
     "resetPasswordText": "Please specify a new password for your account and confirm it, then click \"Reset password\".",
     "mfaTitle": "Multi-Factor Authentication",
     "mfaText": "Please enter a current MFA code from a device linked to your account.",
-    "mfaCode": "MFA code"
+    "mfaCode": "MFA code",
+    "resendActivationMail": "Re-send activation mail",
+    "resendSuccess": "Done",
+    "resendFailed": "Error - try again later"
   },
   "signup": {
     "signup": "Sign up",
