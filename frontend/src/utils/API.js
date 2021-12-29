@@ -57,8 +57,8 @@ export function login(email, password, rememberMe = false, mfaCode = '') {
   }, false);
 }
 
-export function resendActivationEmail(email) {
-  return performRequest('ResendActivationEmail', { email }, false);
+export function resendActivationEmail(email, password) {
+  return performRequest('ResendActivationEmail', { email, password }, false);
 }
 
 export function logout() {

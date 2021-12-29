@@ -81,6 +81,7 @@ export default function Login() {
   const [errorMessage, setErrorMessage] = useState();
   const [resendState, setResendState] = useState(RESEND_HIDDEN);
   const [resendTo, setResendTo] = useState();
+  const [resendPassword, setResendPassword] = useState();
   const [showMFADialog, setShowMFADialog] = useState(false);
   const passwordField = useRef();
   const dispatch = useDispatch();
@@ -105,6 +106,7 @@ export default function Login() {
           } else if (error.response && error.response.status === 423) {
             setErrorMessage(t('login.notActivatedError'));
             setResendTo(email);
+            setResendPassword(password);
             setResendState(RESEND_SHOW);
           } else {
             setErrorMessage(t('login.loginFailed'));
@@ -127,7 +129,7 @@ export default function Login() {
 
   function doResendActivationMail() {
     setResendState(RESEND_PROCESSING);
-    resendActivationEmail(resendTo)
+    resendActivationEmail(resendTo, resendPassword)
       .then(() => {
         setResendState(RESEND_SUCCESS);
       })
