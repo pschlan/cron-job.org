@@ -444,8 +444,8 @@ In order to retrieve headers and body, see :ref:`Retrieving Job Execution Histor
                 "status": 1,
                 "statusText": "OK",
                 "httpStatus": 200,
-                "headers": false,
-                "body": false,
+                "headers": null,
+                "body": null,
                 "stats": {
                     "nameLookup": 1003,
                     "connect": 85516,
@@ -550,7 +550,7 @@ url                 string                                  Job URL
 lastStatus          :ref:`JobStatus`                        Last execution status
 lastDuration        int                                     Last execution duration in milliseconds
 lastExecution       int                                     Unix timestamp of last execution (in seconds)
-nextExecution       int                                     Unix timestamp of predicted next execution (in seconds)
+nextExecution       int                                     Unix timestamp of predicted next execution (in seconds), ``null`` if no prediction available
 type                :ref:`JobType`                          Job type
 requestTimeout      int                                     Job timeout in seconds
 schedule            :ref:`JobSchedule`                      Job schedule
@@ -679,8 +679,8 @@ duration            int                                     Actual job duration 
 status              :ref:`JobStatus`                        Status of execution
 statusText          string                                  Detailed job status Description
 httpStatus          int                                     HTTP status code returned by the host, if any
-headers             string or ``false``                     Raw response headers returned by the host (``false`` if unavailable)
-body                string or ``false``                     Raw response body returned by the host (``false`` if unavailable)
+headers             string or ``null``                      Raw response headers returned by the host (``null`` if unavailable)
+body                string or ``null``                      Raw response body returned by the host (``null`` if unavailable)
 stats               :ref:`HistoryItemStats`                 Additional timing information for this request
 =================== ======================================= ======================================
 
