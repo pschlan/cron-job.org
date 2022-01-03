@@ -44,7 +44,8 @@ export const Config = {
   //! @note If you want to offer a membership, define the amounts here.
   'sustainingMembership': {
     'enable': false,
-    'amounts': [5, 10, 20],
+    'amountsAMonth': [5, 10, 20],
+    'amountsAYear': [12, 24, 36],
     'box': {
       'enable': false,
       'successfulJobsThreshold': 1

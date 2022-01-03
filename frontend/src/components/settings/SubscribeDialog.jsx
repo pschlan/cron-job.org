@@ -99,7 +99,7 @@ export default function SubscribeDialog({ onClose }) {
                 <TableRow>
                   <TableCell>{t('settings.subscribeDialog.price')}</TableCell>
                   <TableCell>{t('settings.subscribeDialog.free')}</TableCell>
-                  <TableCell>{t('settings.subscribeDialog.subscriptionPrices')}</TableCell>
+                  <TableCell style={{whiteSpace: 'pre-line'}}>{t('settings.subscribeDialog.subscriptionPrices')}</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
@@ -153,8 +153,10 @@ export default function SubscribeDialog({ onClose }) {
                       value={productId}
                       onChange={({target}) => setProductId(target.value)}
                       labelID='product-id-label'>
-                      {Config.sustainingMembership.amounts.map(amount =>
+                      {Config.sustainingMembership.amountsAMonth.map(amount =>
                       <MenuItem value={'sustain'+amount} key={amount}>{t('settings.subscribeDialog.amountAMonth', { amount })}</MenuItem>)}
+                      {Config.sustainingMembership.amountsAYear.map(amount =>
+                      <MenuItem value={'sustainyear'+amount} key={amount}>{t('settings.subscribeDialog.amountAYear', { amount })}</MenuItem>)}
                     </Select>
                   </Box>
                   <Box>
