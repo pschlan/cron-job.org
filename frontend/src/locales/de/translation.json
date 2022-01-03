@@ -57,7 +57,11 @@
     "massActionSucceeded": "Die Aktion wurde erfolgreich ausgeführt.",
     "massActionFailed": "Die Aktion konnte nicht ausgeführt werden. Bitte versuchen Sie es später erneut.",
     "sustainingMemberThanks": "Sie sind ein aktives Fördermitglied - vielen Dank, dass Sie uns unterstützen und diesen Dienst am Leben erhalten!",
-    "export": "Exportieren"
+    "export": "Exportieren",
+    "confirmMassDeleteTitle": "Ausgewähltes Element löschen",
+    "confirmMassDeleteTitle_plural": "{{count}} ausgewählte Elemente löschen",
+    "confirmMassDeleteText": "Wollen Sie das ausgewählte Element wirklich löschen?",
+    "confirmMassDeleteText_plural": "Wollen Sie die {{count}} ausgewählten Elemente wirklich löschen?"
   },
   "login": {
     "emailAddress": "E-Mail-Adresse",

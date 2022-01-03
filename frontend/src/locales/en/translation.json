@@ -57,7 +57,11 @@
     "massActionSucceeded": "The action has been executed successfully.",
     "massActionFailed": "Failed to execute the action. Please try again later.",
     "sustainingMemberThanks": "You're a Sustaining Member - thanks so much for supporting us and keeping this project alive!",
-    "export": "Export"
+    "export": "Export",
+    "confirmMassDeleteTitle": "Delete selected item",
+    "confirmMassDeleteTitle_plural": "Delete {{count}} selected items",
+    "confirmMassDeleteText": "Do you really want to delete the selected item?",
+    "confirmMassDeleteText_plural": "Do you really want to delete the {{count}} selected items?"
   },
   "login": {
     "emailAddress": "Email address",

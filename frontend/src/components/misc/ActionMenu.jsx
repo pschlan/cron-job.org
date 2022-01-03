@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MenuItem, Menu, Button, ListItemIcon, ListItemText, makeStyles } from '@material-ui/core';
+import { Divider, MenuItem, Menu, Button, ListItemIcon, ListItemText, makeStyles } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
   icon: {
@@ -31,10 +31,11 @@ export default function ActionMenu({ items, variant, color, text, size, componen
       keepMounted
       >
       {items.map((item, index) =>
-        <MenuItem key={index} onClick={() => { onClickItem(item); setAnchorEl(null); }}>
-          {item.icon && <ListItemIcon className={classes.icon}>{item.icon}</ListItemIcon>}
-          <ListItemText>{item.text}</ListItemText>
-        </MenuItem>)}
+          item.divider ? <Divider key={index} /> :
+            <MenuItem key={index} onClick={() => { onClickItem(item); setAnchorEl(null); }}>
+              {item.icon && <ListItemIcon className={classes.icon}>{item.icon}</ListItemIcon>}
+              <ListItemText>{item.text}</ListItemText>
+            </MenuItem>)}
     </Menu>
   </>;
 }

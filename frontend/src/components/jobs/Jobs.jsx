@@ -1,5 +1,5 @@
-import React from 'react';
-import { Paper, makeStyles, TableContainer, Link, Typography, Button } from '@material-ui/core';
+import React, { useState } from 'react';
+import { Paper, makeStyles, TableContainer, Link, Typography, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
 import Table from '../misc/Table';
 import moment from 'moment';
@@ -9,6 +9,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import HistoryIcon from '@material-ui/icons/History';
 import EnableIcon from '@material-ui/icons/AlarmOnOutlined';
 import DisableIcon from '@material-ui/icons/AlarmOffOutlined';
+import DeleteIcon from '@material-ui/icons/Delete';
 import { useHistory } from 'react-router-dom';
 import Breadcrumbs from '../misc/Breadcrumbs';
 import useJobs from '../../hooks/useJobs';
@@ -32,6 +33,7 @@ export default function Jobs() {
   const { t } = useTranslation();
   const history = useHistory();
   const { enqueueSnackbar } = useSnackbar();
+  const [confirmJobMassAction, setConfirmJobMassAction] = useState(null);
 
   function jobMassAction(jobIds, action) {
     executeJobMassAction(jobIds, action)
@@ -108,6 +110,14 @@ export default function Jobs() {
       icon: <DisableIcon />,
       text: t('common.disable'),
       onExecute: rows => jobMassAction(rows, 'disable')
+    },
+    {
+      divider: true
+    },
+    {
+      icon: <DeleteIcon />,
+      text: t('common.delete'),
+      onExecute: rows => setConfirmJobMassAction({ rows, action: 'delete' })
     }
   ];
 
@@ -140,5 +150,25 @@ export default function Jobs() {
         multiActions={MULTI_ACTIONS}
         />
     </TableContainer>
+
+    {confirmJobMassAction !== null && <Dialog open={true} onClose={() => setConfirmJobMassAction(null)}>
+      <DialogTitle>{t('common.confirmMassDeleteTitle', { count: confirmJobMassAction.rows.length })}</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          {t('common.confirmMassDeleteText', { count: confirmJobMassAction.rows.length })}
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setConfirmJobMassAction(null)}>
+          {t('common.cancel')}
+        </Button>
+        <Button autoFocus color='primary' onClick={() => {
+          jobMassAction(confirmJobMassAction.rows, confirmJobMassAction.action);
+          setConfirmJobMassAction(null);
+        }}>
+          {t('common.delete')}
+        </Button>
+      </DialogActions>
+    </Dialog>}
   </>;
 }

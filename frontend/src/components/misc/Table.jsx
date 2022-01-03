@@ -140,6 +140,14 @@ export default function Table({ size, columns, items, empty, footer, loading=fal
     }
   }, [items, page, rowsPerPage]);
 
+  useEffect(() => {
+    const validRowIds = items.map((item, itemNo) => rowIdentifier ? item[rowIdentifier] : itemNo);
+    const filteredRows = selectedRows.filter(rowId => validRowIds.includes(rowId));
+    if (filteredRows.length < selectedRows.length) {
+      setSelectedRows(filteredRows);
+    }
+  }, [items, selectedRows, rowIdentifier]);
+
   return <MaterialTable size={size} className={clsx(className, classes.table)}>
     {!noHeader && <TableHead>
       <TableRow>
