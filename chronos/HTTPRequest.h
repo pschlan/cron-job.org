@@ -78,6 +78,7 @@ namespace Chronos
 		std::vector<std::pair<std::string, std::string>> requestHeaders;
 		std::string requestBody;
 		std::string xForwardedFor;
+		bool redirectSuccess = false;
 		std::unique_ptr<JobResult> result;
 		bool verbose = false;
 		std::function<void()> onDone;

@@ -310,7 +310,7 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 	const int defaultMaxFailures = App::getInstance()->config->getInt("max_failures");
 	const int8_t defaultExecutionPriority = 0;
 
-	auto res = db->query("SELECT TRIM(`url`),`job`.`jobid`,`auth_enable`,`auth_user`,`auth_pass`,`notify_failure`,`notify_success`,`notify_disable`,`fail_counter`,`save_responses`,`job`.`userid`,`request_method`,COUNT(`job_header`.`jobheaderid`),`job_body`.`body`,`title`,`job`.`type`,`usergroupid`,`request_timeout` FROM `job` "
+	auto res = db->query("SELECT TRIM(`url`),`job`.`jobid`,`auth_enable`,`auth_user`,`auth_pass`,`notify_failure`,`notify_success`,`notify_disable`,`fail_counter`,`save_responses`,`job`.`userid`,`request_method`,COUNT(`job_header`.`jobheaderid`),`job_body`.`body`,`title`,`job`.`type`,`usergroupid`,`request_timeout`,`redirect_success` FROM `job` "
 									"INNER JOIN `job_hours` ON `job_hours`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_mdays` ON `job_mdays`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_wdays` ON `job_wdays`.`jobid`=`job`.`jobid` "
@@ -374,6 +374,7 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 				req->authUsername 	= row[3];
 				req->authPassword 	= row[4];
 			}
+			req->redirectSuccess		= std::strcmp(row[18], "1") == 0;
 			req->requestMethod		= static_cast<RequestMethod>(atoi(row[11]));
 
 			if(row[12] != NULL && atoi(row[12]) > 0)

@@ -20,6 +20,7 @@ CREATE TABLE `job` (
   `timezone` varchar(32) NOT NULL DEFAULT 'Europe/Berlin',
   `usergroupid` int(11) NOT NULL DEFAULT '1',
   `request_timeout` int(11) NOT NULL DEFAULT '-1',
+  `redirect_success` tinyint(4) NOT NULL DEFAULT '0';
   PRIMARY KEY (`jobid`),
   KEY `userid` (`userid`),
   KEY `timezone` (`timezone`)

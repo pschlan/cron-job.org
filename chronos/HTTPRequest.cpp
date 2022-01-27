@@ -334,7 +334,8 @@ void HTTPRequest::done(CURLcode res)
 
 			result->httpStatus = httpCode;
 
-			if((httpCode >= 200) && (httpCode < 300))
+			if(((httpCode >= 200) && (httpCode < 300))
+				|| (redirectSuccess && (httpCode == 301 || httpCode == 302 || httpCode == 303 || httpCode == 307 || httpCode == 308)))
 			{
 				result->status 	= JOBSTATUS_OK;
 			}

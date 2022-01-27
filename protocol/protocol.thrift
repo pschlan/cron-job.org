@@ -45,6 +45,7 @@ struct JobMetadata
     4: JobType type;
     5: optional i64 userGroupId;
     6: optional i32 requestTimeout;
+    7: optional bool redirectSuccess;
 }
 
 struct JobExecutionInfo
