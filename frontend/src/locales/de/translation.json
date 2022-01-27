@@ -267,6 +267,7 @@
       "peer": "Gegenstelle"
     },
     "requestTimeout": "Timeout",
+    "redirectSuccess": "Weiterleitungen mit HTTP-3xx-Status-Code als erfolgreich einstufen",
     "exportJob": "Cronjob exportieren: {{jobTitle}}",
     "exportFormat": "Export-Format",
     "format": {

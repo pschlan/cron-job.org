@@ -113,6 +113,7 @@ export default function JobEditor({ match }) {
   const [ jobEnabled, setJobEnabled ] = useState(false);
   const [ saveResponses, setSaveResponses ] = useState(false);
   const [ requestTimeout, setRequestTimeout ] = useState(-1);
+  const [ redirectSuccess, setRedirectSuccess ] = useState(false);
   const [ authEnable, setAuthEnable ] = useState(false);
   const [ authUser, setAuthUser ] = useState('');
   const [ authPassword, setAuthPassword ] = useState('');
@@ -144,6 +145,7 @@ export default function JobEditor({ match }) {
         enabled: true,
         saveResponses: false,
         requestTimeout: Math.min(30, userProfile.userGroup.requestTimeout),
+        redirectSuccess: false,
         auth: {
           enable: false,
           user: '',
@@ -182,6 +184,7 @@ export default function JobEditor({ match }) {
       setJobEnabled(!!job.enabled);
       setSaveResponses(!!job.saveResponses);
       setRequestTimeout(job.requestTimeout > 0 ? Math.min(job.requestTimeout, userProfile.userGroup.requestTimeout) : userProfile.userGroup.requestTimeout);
+      setRedirectSuccess(job.redirectSuccess);
       setAuthEnable(!!job.auth.enable);
       setAuthUser(job.auth.user);
       setAuthPassword(job.auth.password);
@@ -202,6 +205,7 @@ export default function JobEditor({ match }) {
       enabled: jobEnabled,
       saveResponses,
       requestTimeout,
+      redirectSuccess,
       auth: {
         enable: authEnable,
         user: authUser,
@@ -218,7 +222,7 @@ export default function JobEditor({ match }) {
         timezone
       }
     });
-  }, [jobTitle, jobURL, jobEnabled, saveResponses, requestTimeout, authEnable, authUser, authPassword, notification, requestMethod, requestBody, jobHeaders, schedule, timezone]);
+  }, [jobTitle, jobURL, jobEnabled, saveResponses, requestTimeout, redirectSuccess, authEnable, authUser, authPassword, notification, requestMethod, requestBody, jobHeaders, schedule, timezone]);
 
   function saveJob() {
     if (!jobURL.match(RegexPatterns.url)) {
@@ -564,6 +568,15 @@ export default function JobEditor({ match }) {
                   endAdornment: <InputAdornment position='end'>{t('units.long.s')}</InputAdornment>
                 }}
                 inputProps={{min: 1, max: maxRequestTimeout, type: 'number'}}
+                />
+            </FormControl>
+            <FormControl className={classes.formControl}>
+              <FormControlLabel
+                control={<Switch
+                  checked={redirectSuccess}
+                  onChange={({target}) => setRedirectSuccess(target.checked)}
+                  />}
+                label={t('jobs.redirectSuccess')}
                 />
             </FormControl>
           </FormGroup>

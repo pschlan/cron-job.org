@@ -267,6 +267,7 @@
       "peer": "Peer"
     },
     "requestTimeout": "Timeout",
+    "redirectSuccess": "Treat redirects with HTTP 3xx status code as success",
     "exportJob": "Export cronjob: {{jobTitle}}",
     "exportFormat": "Export format",
     "format": {

@@ -148,6 +148,7 @@ someFailed          boolean                                 ``true`` in case som
                 "nextExecution": 1640187240,
                 "type": 0,
                 "requestTimeout": 300,
+                "redirectSuccess": false,
                 "schedule": {
                     "timezone": "Europe/Berlin",
                     "hours": [
@@ -241,6 +242,7 @@ jobDetails          array of :ref:`DetailedJob`             Job details
             },
             "type": 0,
             "requestTimeout": 300,
+            "redirectSuccess": false,
             "schedule": {
                 "timezone": "Europe/Berlin",
                 "hours": [
@@ -553,6 +555,7 @@ lastExecution       int                                     Unix timestamp of la
 nextExecution       int                                     Unix timestamp of predicted next execution (in seconds), ``null`` if no prediction available
 type                :ref:`JobType`                          Job type
 requestTimeout      int                                     Job timeout in seconds
+redirectSuccess     boolean                                 Whether to treat 3xx HTTP redirect status codes as success or not
 schedule            :ref:`JobSchedule`                      Job schedule
 requestMethod       :ref:`RequestMethod`                    HTTP request method
 =================== ======================================= ======================================
