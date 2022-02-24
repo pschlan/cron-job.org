@@ -18,7 +18,8 @@ export const Config = {
   'languages': {
     'en': 'English',
     'de': 'Deutsch',
-    'it': 'Italiano'
+    'it': 'Italiano',
+    'vi': 'Vietnamese'
   },
 
   //! @note Fallback language to use when the user's auto-determined language is not supported.

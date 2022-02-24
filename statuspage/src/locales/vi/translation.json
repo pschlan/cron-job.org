@@ -1,0 +1,36 @@
+{
+  "common": {
+    "poweredBy": "cung cấp bởi",
+    "refresh": "Làm cho khỏe lại"
+  },
+  "timespan": {
+    "1year": "1 năm",
+    "6months": "6 tháng",
+    "1month": "1 tháng",
+    "1week": "1 tuần",
+    "1day": "1 ngày"
+  },
+  "status": {
+    "availability": "khả dụng",
+    "availabilityWarning": "Cảnh báo về tính khả dụng",
+    "availabilityError": "Lỗi khả dụng",
+    "lowAvailabilityText": "Chúng tôi hiện đang gặp phải tình trạng giảm khả năng cung cấp xuống {{phần trăm}}% trong 30 phút qua.",
+    "latency": "Độ trễ",
+    "latencyWarning": "Cảnh báo độ trễ",
+    "latencyError": "Lỗi độ trễ",
+    "highLatencyText": "Chúng tôi hiện đang gặp phải độ trễ cao bất thường là {{ms}} mili giây trong 30 phút qua.",
+    "healthy": "Mạnh khỏe",
+    "allSystemsRunAsExpected": "Tất cả các hệ thống hiện đang chạy như mong đợi.",
+    "disabled": "Tàn tật"
+  },
+  "error": {
+    "404": {
+      "title": "Không tìm thấy trang",
+      "text": "Không thể tìm thấy trang trạng thái được yêu cầu. Vui lòng đảm bảo liên kết của bạn là chính xác và thử lại."
+    },
+    "other": {
+      "title": "Error Retrieving Status Page",
+      "text": "Sorry, we could not retrieve the status page at this time. Please try again later."
+    }
+  }
+}
