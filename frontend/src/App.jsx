@@ -15,6 +15,7 @@ import StatusPagesIcon from '@material-ui/icons/NetworkCheck';
 import translationEN from './locales/en/translation.json';
 import translationDE from './locales/de/translation.json';
 import translationIT from './locales/it/translation.json';
+import translationRU from './locales/ru/translation.json';
 
 import AppMenu from './components/AppMenu';
 import Dashboard from './components/dashboard/Dashboard';
@@ -51,6 +52,9 @@ const LANGUAGE_RESOURCES = {
   },
   it: {
     translation: translationIT
+  },
+  ru: {
+    translation: translationRU
   }
 };
 
