@@ -4,7 +4,6 @@ import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import DragHandleIcon from '@material-ui/icons/DragHandle';
-import { white } from 'material-ui/styles/colors';
 import ActionMenu from './ActionMenu';
 import ActionsIcon from '@material-ui/icons/MoreVert';
 import ExpandIcon from '@material-ui/icons/ExpandMore';
@@ -15,7 +14,7 @@ const useStyles = makeStyles(theme => ({
       fontWeight: 'bold'
     },
     '& tr': {
-      backgroundColor: white
+      backgroundColor: '#fff'
     }
   }
 }));
