@@ -42,11 +42,11 @@
     "weekDays": [ "Воскресение", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота" ],
     "months": [ "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь" ],
     "calendarFormat" : {
-      "lastDay" : "[Yesterday at] LTS",
-      "sameDay" : "[Today at] LTS",
-      "nextDay" : "[Tomorrow at] LTS",
-      "lastWeek" : "[last] dddd [at] LTS",
-      "nextWeek" : "dddd [at] LTS",
+      "lastDay" : "[Вчера в] LTS",
+      "sameDay" : "[Сегодня в] LTS",
+      "nextDay" : "[Завтра в] LTS",
+      "lastWeek" : "[последний раз] dddd [в] LTS",
+      "nextWeek" : "dddd [в] LTS",
       "sameElse" : "L"
     },
     "quotaIndicator": "Квота: {{cur}} / {{max}}",
