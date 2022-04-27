@@ -15,6 +15,8 @@ import translationEN from './locales/en/translation.json';
 import translationDE from './locales/de/translation.json';
 import translationIT from './locales/it/translation.json';
 
+import translationRU from './locales/ru/translation.json';
+
 import 'moment/locale/de';
 import moment from 'moment';
 import { Config } from './utils/Config';
@@ -28,6 +30,9 @@ const LANGUAGE_RESOURCES = {
   },
   it: {
     translation: translationIT
+  },
+  ru:{
+    translation: translationRU
   }
 };
 
