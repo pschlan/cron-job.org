@@ -51,6 +51,11 @@ class JobMetadata
             'isRequired' => false,
             'type' => TType::I32,
         ),
+        7 => array(
+            'var' => 'redirectSuccess',
+            'isRequired' => false,
+            'type' => TType::BOOL,
+        ),
     );
 
     /**
@@ -77,6 +82,10 @@ class JobMetadata
      * @var int
      */
     public $requestTimeout = null;
+    /**
+     * @var bool
+     */
+    public $redirectSuccess = null;
 
     public function __construct($vals = null)
     {
@@ -98,6 +107,9 @@ class JobMetadata
             }
             if (isset($vals['requestTimeout'])) {
                 $this->requestTimeout = $vals['requestTimeout'];
+            }
+            if (isset($vals['redirectSuccess'])) {
+                $this->redirectSuccess = $vals['redirectSuccess'];
             }
         }
     }
@@ -163,6 +175,13 @@ class JobMetadata
                         $xfer += $input->skip($ftype);
                     }
                     break;
+                case 7:
+                    if ($ftype == TType::BOOL) {
+                        $xfer += $input->readBool($this->redirectSuccess);
+                    } else {
+                        $xfer += $input->skip($ftype);
+                    }
+                    break;
                 default:
                     $xfer += $input->skip($ftype);
                     break;
@@ -205,6 +224,11 @@ class JobMetadata
         if ($this->requestTimeout !== null) {
             $xfer += $output->writeFieldBegin('requestTimeout', TType::I32, 6);
             $xfer += $output->writeI32($this->requestTimeout);
+            $xfer += $output->writeFieldEnd();
+        }
+        if ($this->redirectSuccess !== null) {
+            $xfer += $output->writeFieldBegin('redirectSuccess', TType::BOOL, 7);
+            $xfer += $output->writeBool($this->redirectSuccess);
             $xfer += $output->writeFieldEnd();
         }
         $xfer += $output->writeFieldStop();

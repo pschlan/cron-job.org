@@ -4,6 +4,7 @@ require_once('lib/ChronosClient.php');
 require_once('lib/ExecutionPredictor.php');
 require_once('lib/RedisConnection.php');
 require_once('lib/Exceptions.php');
+require_once('resources/User.php');
 require_once('Node.php');
 
 class CannotDeleteMonitorJobException extends Exception {}
@@ -51,6 +52,7 @@ class Job {
 
   public $type;
   public $requestTimeout;
+  public $redirectSuccess;
 
   private $node;
 
@@ -70,6 +72,7 @@ class Job {
     $result->saveResponses    = $job->metaData->saveResponses;
     $result->type             = $job->metaData->type;
     $result->requestTimeout   = $job->metaData->requestTimeout;
+    $result->redirectSuccess  = $job->metaData->redirectSuccess;
     $result->url              = $job->data->url;
     $result->requestMethod    = $job->data->requestMethod;
 
@@ -124,6 +127,9 @@ class Job {
       array_keys($job->schedule->minutes)
     );
     $result->nextExecution  = $predictor->predictNextExecution(time());
+    if ($result->nextExecution === false) {
+      $result->nextExecution = null;
+    }
 
     return $result;
   }
@@ -140,6 +146,7 @@ class Job {
     $job->metaData->type            = $this->type;
     $job->metaData->userGroupId     = $userGroupId;
     $job->metaData->requestTimeout  = $this->requestTimeout;
+    $job->metaData->redirectSuccess = $this->redirectSuccess;
 
     $job->data                      = new \chronos\JobData;
     $job->data->url                 = $this->url;
@@ -175,8 +182,12 @@ class Job {
     $this->title                      = empty($request->job->title) ? '' : trim($request->job->title);
     $this->saveResponses              = !!$request->job->saveResponses;
 
-    if(isset($request->job->requestTimeout)) {
+    if (isset($request->job->requestTimeout)) {
       $this->requestTimeout           = intval($request->job->requestTimeout);
+    }
+
+    if (isset($request->job->redirectSuccess)) {
+      $this->redirectSuccess          = boolval($request->job->redirectSuccess);
     }
 
     $this->auth->enable               = !!$request->job->auth->enable;
@@ -210,6 +221,97 @@ class Job {
     $this->schedule->minutes          = $request->job->schedule->minutes;
     $this->schedule->months           = $request->job->schedule->months;
     $this->schedule->wdays            = $request->job->schedule->wdays;
+  }
+
+  public function patchFromRequest($request) {
+    if (isset($request->job->enabled)) {
+      $this->enabled                    = !!$request->job->enabled;
+    }
+
+    if (isset($request->job->title)) {
+      $this->title                      = empty($request->job->title) ? '' : trim($request->job->title);
+    }
+
+    if (isset($request->job->saveResponses)) {
+      $this->saveResponses              = !!$request->job->saveResponses;
+    }
+
+    if (isset($request->job->requestTimeout)) {
+      $this->requestTimeout             = intval($request->job->requestTimeout);
+    }
+
+    if (isset($request->job->redirectSuccess)) {
+      $this->redirectSuccess            = intval($request->job->redirectSuccess);
+    }
+
+    if (isset($request->job->auth) && isset($request->job->auth->enable)) {
+      $this->auth->enable               = !!$request->job->auth->enable;
+    }
+
+    if (isset($request->job->auth) && isset($request->job->auth->user)) {
+      $this->auth->user                 = (string)$request->job->auth->user;
+    }
+
+    if (isset($request->job->auth) && isset($request->job->auth->password)) {
+      $this->auth->password             = (string)$request->job->auth->password;
+    }
+
+    if (isset($request->job->notification) && isset($request->notification->onFailure)) {
+      $this->notification->onFailure    = !!$request->job->notification->onFailure;
+    }
+
+    if (isset($request->job->notification) && isset($request->notification->onSuccess)) {
+      $this->notification->onSuccess    = !!$request->job->notification->onSuccess;
+    }
+
+    if (isset($request->job->notification) && isset($request->notification->onDisable)) {
+      $this->notification->onDisable    = !!$request->job->notification->onDisable;
+    }
+
+    if (isset($request->job->url)) {
+      $this->url                        = trim($request->job->url);
+    }
+
+    if (isset($request->job->requestMethod)) {
+      $this->requestMethod              = (int)$request->job->requestMethod;
+    }
+
+    if (isset($request->job->extendedData) && isset($request->extendedData->body)) {
+      $this->extendedData->body         = (string)$request->job->extendedData->body;
+    }
+
+    if (isset($request->job->extendedData) && isset($request->extendedData->headers)) {
+      $this->extendedData->headers      = array();
+      foreach ((array)$request->job->extendedData->headers as $key => $value) {
+        $key = trim(str_replace(array("\r", "\n"), '', $key));
+        if (empty($key)) {
+          continue;
+        }
+        $this->extendedData->headers[$key] = $value;
+      }
+    }
+
+    if (isset($request->job->schedule) && isset($request->job->schedule->timezone)) {
+      if (in_array($request->job->schedule->timezone, DateTimeZone::listIdentifiers())) {
+        $this->schedule->timezone       = $request->job->schedule->timezone;
+      }
+    }
+
+    if (isset($request->job->schedule) && isset($request->job->schedule->hours)) {
+      $this->schedule->hours            = $request->job->schedule->hours;
+    }
+    if (isset($request->job->schedule) && isset($request->job->schedule->mdays)) {
+      $this->schedule->mdays            = $request->job->schedule->mdays;
+    }
+    if (isset($request->job->schedule) && isset($request->job->schedule->minutes)) {
+      $this->schedule->minutes          = $request->job->schedule->minutes;
+    }
+    if (isset($request->job->schedule) && isset($request->job->schedule->months)) {
+      $this->schedule->months           = $request->job->schedule->months;
+    }
+    if (isset($request->job->schedule) && isset($request->job->schedule->wdays)) {
+      $this->schedule->wdays            = $request->job->schedule->wdays;
+    }
   }
 
   public static function createIdentifier($jobId, $userId) {
@@ -290,21 +392,33 @@ class JobManager {
     $result = true;
 
     foreach ($jobIds as $jobId) {
-      $job = $this->getJobDetails($jobId);
-      if (!$job) {
-        $result = false;
-        continue;
+      if ($action === 'delete') {
+        try {
+          if (!$this->deleteJob($jobId)) {
+            $result = false;
+          }
+        } catch (Exception $ex) {
+          $result = false;
+        }
+
+      } else {
+        $job = $this->getJobDetails($jobId);
+        if (!$job) {
+          $result = false;
+          continue;
+        }
+
+        if ($action === 'enable') {
+          $job->enabled = true;
+        } else if ($action === 'disable') {
+          $job->enabled = false;
+        }
+
+        if (!$this->updateJob($job)) {
+          $result = false;
+        }
       }
 
-      if ($action === 'enable') {
-        $job->enabled = true;
-      } else if ($action === 'disable') {
-        $job->enabled = false;
-      }
-
-      if (!$this->updateJob($job)) {
-        $result = false;
-      }
     }
 
     return $result;
@@ -330,10 +444,12 @@ class JobManager {
       throw new InternalErrorException();
     }
 
+    $userGroupId = (new UserManager($this->authToken))->getGroup()->userGroupId;
+
     try {
       $client = $node->connect();
 
-      $handle = $client->submitJobTestRun($job->toThriftJob($this->authToken->userId, $this->authToken->userGroupId), $xForwardedFor);
+      $handle = $client->submitJobTestRun($job->toThriftJob($this->authToken->userId, $userGroupId), $xForwardedFor);
       if ($handle) {
         $redis->set(implode(':', ['testRun', $handle, 'nodeId']), $node->nodeId, $config['testRunLifetime']);
         return $handle;
@@ -402,10 +518,12 @@ class JobManager {
       return false;
     }
 
+    $userGroupId = (new UserManager($this->authToken))->getGroup()->userGroupId;
+
     try {
       $client = $node->connect();
 
-      $client->createOrUpdateJob($job->toThriftJob($this->authToken->userId, $this->authToken->userGroupId));
+      $client->createOrUpdateJob($job->toThriftJob($this->authToken->userId, $userGroupId));
 
       return true;
     } catch (Exception $ex) {
@@ -420,6 +538,8 @@ class JobManager {
       return false;
     }
 
+    $userGroupId = (new UserManager($this->authToken))->getGroup()->userGroupId;
+
     $transactionActive = false;
 
     try {
@@ -433,7 +553,7 @@ class JobManager {
         ->execute(array('userId' => $this->authToken->userId, 'nodeId' => $node->nodeId));
 
       $job->jobId = Database::get()->insertId();
-      $client->createOrUpdateJob($job->toThriftJob($this->authToken->userId, $this->authToken->userGroupId));
+      $client->createOrUpdateJob($job->toThriftJob($this->authToken->userId, $userGroupId));
 
       Database::get()->commitTransaction();
       $transactionActive = false;

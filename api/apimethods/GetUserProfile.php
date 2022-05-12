@@ -24,9 +24,13 @@ class GetUserProfile extends AbstractAPIMethod {
   public function execute($request, $sessionToken, $language) {
     $userManager = new UserManager($sessionToken);
 
+    $userGroup = $userManager->getGroup();
+    $userSubscription = $userManager->getSubscription();
+
     return (object)[
       'userProfile' => $userManager->getProfile(),
-      'userGroup' => $userManager->getGroup()
+      'userGroup' => $userGroup,
+      'userSubscription' => $userSubscription
     ];
   }
 }

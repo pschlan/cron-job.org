@@ -76,16 +76,19 @@ class PublicStatusPageManager {
       try {
         $client = $node->connect();
 
+        $jobDetails = $client->getJobDetails(Job::createIdentifier($statusPageJob->jobId, $statusPageMeta->userId));
+
         $timeSeriesData = $client->getTimeSeriesData(Job::createIdentifier($statusPageJob->jobId, $statusPageMeta->userId), $statusPageJob->percentile);
         $timeSeriesData->last12Months = array_map($mapFunction, $timeSeriesData->last12Months);
         $timeSeriesData->last24Hours = array_map($mapFunction, $timeSeriesData->last24Hours);
-      } catch (Exception $ex) {
+    } catch (Exception $ex) {
         error_log('Exception while retrieving time series data: ' . (string)$ex);
         continue;
       }
 
       $statusPageMonitors[] = (object) [
         'title'             => $statusPageJob->title,
+        'enabled'           => boolval($jobDetails->metaData->enabled),
         'thresholds'        => (object) [
           'uptime'          => (object) [
             'error'         => (double)$statusPageJob->thresholdUptimeError,

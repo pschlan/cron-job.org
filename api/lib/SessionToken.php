@@ -4,13 +4,11 @@ require_once('lib/JWT.php');
 class SessionToken {
   public $expires;
   public $userId;
-  public $userGroupId;
-  
-  function __construct($userId, $userGroupId, $expires = 0) {
+
+  function __construct($userId, $expires = 0) {
     global $config;
     $this->expires = $expires ? $expires : time() + $config['sessionTokenLifetime'];
     $this->userId = $userId;
-    $this->userGroupId = $userGroupId;
   }
 
   public function isExpired() {
@@ -27,7 +25,6 @@ class SessionToken {
     return JWT::encode(array(
       'exp' => $this->expires,
       'sub' => $this->userId,
-      'gid' => $this->userGroupId,
       'scp' => 'session'
     ), $config['sessionTokenSecret']);
   }
@@ -38,6 +35,6 @@ class SessionToken {
     if (!isset($payload->scp) || $payload->scp !== 'session') {
       throw new InvalidJWTTokenException('Tag not suitable!');
     }
-    return new SessionToken($payload->sub, $payload->gid, $payload->exp);
+    return new SessionToken($payload->sub, $payload->exp);
   }
 }

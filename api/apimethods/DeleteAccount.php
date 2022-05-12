@@ -32,6 +32,8 @@ class DeleteAccount extends AbstractAPIMethod {
       }
     } catch (InvalidEmailAddressException $ex) {
       throw new ForbiddenAPIException();
+    } catch (ActiveSubscriptionException $ex) {
+      throw new ForbiddenAPIException();
     } catch (FailedToDeleteAccountException $ex) {
       throw new InternalErrorAPIException();
     }

@@ -13,7 +13,7 @@ class DeleteJob extends AbstractAPIMethod {
 
   public function rateLimits() {
     return [
-      new RateLimit(1, RateLimit::SECOND)
+      new RateLimit(5, RateLimit::SECOND)
     ];
   }
 

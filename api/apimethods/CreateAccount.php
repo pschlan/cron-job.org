@@ -45,7 +45,7 @@ class CreateAccount extends AbstractAPIMethod {
 
     try {
       if (!UserManager::createAccount(
-            $request->email,
+            trim($request->email),
             $request->firstName,
             $request->lastName,
             $request->password,

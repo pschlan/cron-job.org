@@ -46,11 +46,10 @@ class NodeManager {
   }
 
   public function getNode($nodeId) {
-    $stmt = Database::get()->prepare('SELECT `node`.`nodeid` AS `nodeId`, `node`.`ip` AS `ip`, `node`.`port` AS `port` FROM `node` '
-                                      . 'INNER JOIN `usergroupnode` ON `node`.`nodeid`=`usergroupnode`.`nodeid` '
-                                      . 'WHERE `usergroupnode`.`usergroupid`=:userGroupId AND `node`.`enabled`=1 AND `node`.`nodeid`=:nodeId');
+    $stmt = Database::get()->prepare('SELECT `nodeid` AS `nodeId`, `ip`, `port` FROM `node` '
+                                      . 'WHERE `enabled`=1 AND `nodeid`=:nodeId');
     $stmt->setFetchMode(PDO::FETCH_CLASS, Node::class);
-    $stmt->execute(array(':userGroupId' => $this->authToken->userGroupId, ':nodeId' => $nodeId));
+    $stmt->execute(array(':nodeId' => $nodeId));
     return $stmt->fetch();
   }
 
@@ -64,9 +63,10 @@ class NodeManager {
   public function getNodeForNewJob() {
     $stmt = Database::get()->prepare('SELECT `node`.`nodeid` AS `nodeId`, `node`.`ip` AS `ip`, `node`.`port` AS `port` FROM `node` '
                                       . 'INNER JOIN `usergroupnode` ON `node`.`nodeid`=`usergroupnode`.`nodeid` '
-                                      . 'WHERE `usergroupnode`.`usergroupid`=:userGroupId AND `usergroupnode`.`enabled`=1 AND `node`.`enabled`=1 ORDER BY RAND() LIMIT 1');
+                                      . 'INNER JOIN `user` ON `usergroupnode`.`usergroupid`=`user`.`usergroupid` '
+                                      . 'WHERE `user`.`userid`=:userId AND `usergroupnode`.`enabled`=1 AND `node`.`enabled`=1 ORDER BY `load_24h` ASC LIMIT 1');
     $stmt->setFetchMode(PDO::FETCH_CLASS, Node::class);
-    $stmt->execute(array(':userGroupId' => $this->authToken->userGroupId));
+    $stmt->execute(array(':userId' => $this->authToken->userId));
     return $stmt->fetch();
   }
 }

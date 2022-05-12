@@ -12,6 +12,7 @@ $config = array(
 
   //! @note If you want to use rate limiting, supply login to a redis
   //!       instance here.
+  //!       redis is also required to enable the test run feature.
   //'redis' => array(
   //  'host'      => 'localhost',
   //  'port'      => 6379,
@@ -44,6 +45,13 @@ $config = array(
 
   //! @note Put your reCAPTCHA secret key here.
   'recaptchaSecretKey'              => 'PLACE_RECAPTCHA_SECRET_KEY_HERE',
+
+  //! @note If you want to use Yubico OTP for Yubikey MFA devices, adjust this.
+  'yubicoOTP' => array(
+    'enable'      => false,
+    'clientId'    => 'PLACE_CLIENT_ID_HERE',
+    'secretKey'   => 'PLACE_SECRET_KEY_HERE'
+  ),
 
   /****************************************************************************************
    ******** The following settings might be kept as is. Customization is optional. ********
@@ -78,5 +86,8 @@ $config = array(
 
   //! @note List of supported languages. When adding new language file, be sure
   //!       to add the new language code here.
-  'languages'                       => ['en', 'de']
+  'languages'                       => ['en', 'de'],
+
+  //! @note Lifetime for test run meta data in redis cache.
+  'testRunLifetime'                 => 5 * 60
 );

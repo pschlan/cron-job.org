@@ -3,40 +3,10 @@ require_once('config/config.inc.php');
 require_once('APIMethod.php');
 require_once('RateLimiter.php');
 require_once('SessionToken.php');
+require_once('AbstractDispatcher.php');
 
-class APIDispatcher {
-  private $handlers = array();
+class APIDispatcher extends AbstractDispatcher {
   private $refreshTokenHandler = false;
-
-  public function register($class) {
-    $this->handlers[$class::name()] = function() use($class) {
-      return new $class;
-    };
-  }
-
-  public function registerDirectory($directory) {
-    if (substr($directory, 0, -1) != '/') {
-      $directory .= '/';
-    }
-
-    $d = dir($directory);
-    while (($entry = $d->read()) !== false) {
-      if (substr($entry, 0, 1) === '.' || substr($entry, -4) !== '.php') {
-        continue;
-      }
-
-      $fileName = $directory . $entry;
-      if (!is_file($fileName)) {
-        continue;
-      }
-
-      $apiName = substr($entry, 0, -4);
-      $this->handlers[$apiName] = function() use($apiName, $fileName) {
-        require_once($fileName);
-        return new $apiName;
-      };
-    }
-  }
 
   public function registerRefreshTokenHandler($handler) {
     $this->refreshTokenHandler = $handler;
@@ -62,7 +32,7 @@ class APIDispatcher {
     }
 
     $refreshToken = $_COOKIE['refreshToken'];
-    if ($this->refreshTokenHandler->validateRefreshToken($refreshToken, intval($sessionToken->userId), intval($sessionToken->userGroupId))) {
+    if ($this->refreshTokenHandler->validateRefreshToken($refreshToken, intval($sessionToken->userId))) {
       return true;
     }
 
@@ -74,7 +44,7 @@ class APIDispatcher {
       return false;
     }
 
-    if ($this->refreshTokenHandler->mayRefreshSessionToken(intval($sessionToken->userId), intval($sessionToken->userGroupId))) {
+    if ($this->refreshTokenHandler->mayRefreshSessionToken(intval($sessionToken->userId))) {
       return true;
     }
 
@@ -172,7 +142,7 @@ class APIDispatcher {
       header('HTTP/1.1 200 OK');
       header('Content-Type: application/json');
 
-      echo json_encode($result);
+      echo json_encode($result, JSON_INVALID_UTF8_SUBSTITUTE);
     } catch (APIException $e) {
       header('HTTP/1.1 ' . $e->httpStatus());
     } catch (Exception $e) {

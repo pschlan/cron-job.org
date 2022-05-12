@@ -2,9 +2,9 @@
 require_once('lib/APIMethod.php');
 require_once('resources/Job.php');
 
-class UpdateJob extends AbstractAPIMethod {
+class PatchJob extends AbstractAPIMethod {
   static function name() {
-    return 'UpdateJob';
+    return 'PatchJob';
   }
 
   public function requiresAuthentication() {
@@ -34,7 +34,7 @@ class UpdateJob extends AbstractAPIMethod {
       throw new NotFoundAPIException();
     }
 
-    $job->updateFromRequest($request);
+    $job->patchFromRequest($request);
 
     if (!$jobManager->updateJob($job)) {
       throw new InternalErrorAPIException();
