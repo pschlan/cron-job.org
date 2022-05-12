@@ -32,6 +32,8 @@ import AppLayout from './components/AppLayout';
 import { updateUserLanguage } from './utils/API';
 
 import 'moment/locale/de';
+import 'moment/locale/it';
+import 'moment/locale/ru';
 import moment from 'moment';
 import useLanguageCode, { getLanguageCode } from './hooks/useLanguageCode';
 import { Config } from './utils/Config';

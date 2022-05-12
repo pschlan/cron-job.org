@@ -14,10 +14,11 @@ import useLanguageCode from './hooks/useLanguageCode';
 import translationEN from './locales/en/translation.json';
 import translationDE from './locales/de/translation.json';
 import translationIT from './locales/it/translation.json';
-
 import translationRU from './locales/ru/translation.json';
 
 import 'moment/locale/de';
+import 'moment/locale/it';
+import 'moment/locale/ru';
 import moment from 'moment';
 import { Config } from './utils/Config';
 
