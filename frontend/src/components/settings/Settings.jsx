@@ -330,7 +330,7 @@ export default function Settings() {
 
         {userProfile && <>
           <Grid container className={classes.grid} alignItems='center' justifyContent='center'>
-            <Grid item sm={8} xs={12}>
+            <Grid item sm={6} xs={12}>
               <Box display='flex' alignItems='center'>
                 {((userProfile.userSubscription && userProfile.userSubscription.status !== SubscriptionStatus.INACTIVE) || isPaymentReturn) ? <>
                   {(userProfile.userSubscription.status === SubscriptionStatus.PENDING || (isPaymentReturn && !userProfile.userSubscription)) && <>
@@ -362,27 +362,30 @@ export default function Settings() {
                 </>}
               </Box>
             </Grid>
-            <Grid item sm={4} xs={12} align='right'>
-              {userProfile.userSubscription && userProfile.userSubscription.status !== SubscriptionStatus.CANCELLED ?
-                <Button
-                  size='small'
-                  variant='contained'
-                  startIcon={isLoadingManageSubscription ? <CircularProgress size='small' /> : <ManageSubscriptionIcon />}
-                  onClick={manageSubscription}
-                  disabled={isLoadingManageSubscription}
-                  float='right'
-                  >
-                  {t('settings.manageSubscription')}
-                </Button> : !(isPaymentReturn && !userProfile.userSubscription) &&
-                <Button
-                  size='small'
-                  variant='contained'
-                  startIcon={<LearnMoreIcon />}
-                  onClick={() => setShowSubscribeDialog(true)}
-                  float='right'
-                  >
-                  {t(isCancelledSubscription ? 'settings.becomeASustainingMember' : 'settings.learnMore')}
-                </Button>}
+            <Grid item sm={6} xs={12} align='right'>
+              <ButtonGroup variant='contained' size='small'>
+                {userProfile.userSubscription &&
+                  <Button
+                    size='small'
+                    variant='contained'
+                    startIcon={isLoadingManageSubscription ? <CircularProgress size='small' /> : <ManageSubscriptionIcon />}
+                    onClick={manageSubscription}
+                    disabled={isLoadingManageSubscription}
+                    float='right'
+                    >
+                    {t('settings.manageSubscription')}
+                  </Button>}
+                {!isPaymentReturn && ((!userProfile.userSubscription) || (userProfile.userSubscription.status === SubscriptionStatus.CANCELLED)) &&
+                  <Button
+                    size='small'
+                    variant='contained'
+                    startIcon={<LearnMoreIcon />}
+                    onClick={() => setShowSubscribeDialog(true)}
+                    float='right'
+                    >
+                    {t(isCancelledSubscription ? 'settings.becomeASustainingMember' : 'settings.learnMore')}
+                  </Button>}
+              </ButtonGroup>
             </Grid>
           </Grid>
         </>}
