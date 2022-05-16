@@ -129,3 +129,98 @@ BEGIN
 END;
 $$
 DELIMITER ;
+
+CREATE TABLE `apikey` (
+  `apikeyid` int(11) NOT NULL AUTO_INCREMENT,
+  `apikey` varchar(255) NOT NULL DEFAULT '',
+  `userid` int(11) NOT NULL DEFAULT '0',
+  `enabled` tinyint(4) NOT NULL DEFAULT '0',
+  `created` int(14) NOT NULL DEFAULT '0',
+  `title` varchar(255) NOT NULL DEFAULT '',
+  `limit_ips` text NOT NULL,
+  PRIMARY KEY (`apikeyid`),
+  UNIQUE KEY `apikey` (`apikey`),
+  KEY `userid` (`userid`)
+) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `apilog` (
+  `apilogid` int(11) NOT NULL AUTO_INCREMENT,
+  `apikeyid` int(11) NOT NULL DEFAULT '0',
+  `userid` int(11) NOT NULL DEFAULT '0',
+  `ip` varchar(128) NOT NULL DEFAULT '',
+  `method` varchar(128) NOT NULL DEFAULT '',
+  `date` int(14) NOT NULL,
+  PRIMARY KEY (`apilogid`),
+  KEY `apikeyid` (`apikeyid`)
+) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `mfadevice` (
+  `mfadeviceid` int(11) NOT NULL AUTO_INCREMENT,
+  `userid` int(11) NOT NULL DEFAULT '0',
+  `enabled` tinyint(4) NOT NULL DEFAULT '0',
+  `title` varchar(255) NOT NULL DEFAULT '',
+  `secret` varchar(255) NOT NULL DEFAULT '',
+  `type` tinyint(4) NOT NULL DEFAULT '0',
+  `created` int(14) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`mfadeviceid`),
+  KEY `userid` (`userid`)
+) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `statuspage` (
+  `statuspageid` int(11) NOT NULL AUTO_INCREMENT,
+  `userid` int(11) NOT NULL DEFAULT '0',
+  `title` varchar(255) NOT NULL DEFAULT '',
+  `enabled` tinyint(4) NOT NULL DEFAULT '1',
+  `uniqueid` varchar(8) NOT NULL DEFAULT '',
+  PRIMARY KEY (`statuspageid`),
+  UNIQUE KEY `uniqueid` (`uniqueid`),
+  KEY `userid` (`userid`)
+) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `statuspagedomain` (
+  `domain` varchar(255) NOT NULL DEFAULT '',
+  `statuspageid` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`domain`),
+  KEY `statuspageid` (`statuspageid`)
+) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `statuspagejob` (
+  `statuspagejobid` int(11) NOT NULL AUTO_INCREMENT,
+  `statuspageid` int(11) NOT NULL DEFAULT '0',
+  `position` tinyint(4) NOT NULL DEFAULT '0',
+  `jobid` int(11) NOT NULL DEFAULT '0',
+  `title` varchar(255) NOT NULL DEFAULT '',
+  `enabled` tinyint(4) NOT NULL DEFAULT '1',
+  `threshold_uptime_warning` double NOT NULL DEFAULT '0.9',
+  `threshold_uptime_error` double NOT NULL DEFAULT '0.5',
+  `threshold_latency_warning` int(11) NOT NULL DEFAULT '2000',
+  `threshold_latency_error` int(11) NOT NULL DEFAULT '20000',
+  `percentile` double NOT NULL DEFAULT '0.9',
+  PRIMARY KEY (`statuspagejobid`),
+  KEY `statuspageid` (`statuspageid`)
+) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `statuspagelogo` (
+  `statuspageid` int(11) NOT NULL DEFAULT '0',
+  `logo` mediumblob NOT NULL,
+  `mimetype` varchar(128) NOT NULL DEFAULT '',
+  PRIMARY KEY (`statuspageid`)
+) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `user_stripe_mapping` (
+  `userid` int(11) NOT NULL DEFAULT '0',
+  `stripe_customer_id` varchar(255) NOT NULL DEFAULT '',
+  PRIMARY KEY (`userid`),
+  UNIQUE KEY `stripe_customer_id` (`stripe_customer_id`)
+) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `user_subscription` (
+  `userid` int(11) NOT NULL DEFAULT '0',
+  `product_id` varchar(64) NOT NULL DEFAULT '',
+  `subscription_id` varchar(255) NOT NULL DEFAULT '',
+  `current_period_start` int(11) NOT NULL DEFAULT '0',
+  `current_period_end` int(11) NOT NULL DEFAULT '0',
+  `cancel_at` int(11) NOT NULL DEFAULT '0',
+  `status` tinyint(4) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`userid`)
+) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
