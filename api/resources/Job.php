@@ -276,11 +276,11 @@ class Job {
       $this->requestMethod              = (int)$request->job->requestMethod;
     }
 
-    if (isset($request->job->extendedData) && isset($request->extendedData->body)) {
+    if (isset($request->job->extendedData) && isset($request->job->extendedData->body)) {
       $this->extendedData->body         = (string)$request->job->extendedData->body;
     }
 
-    if (isset($request->job->extendedData) && isset($request->extendedData->headers)) {
+    if (isset($request->job->extendedData) && isset($request->job->extendedData->headers)) {
       $this->extendedData->headers      = array();
       foreach ((array)$request->job->extendedData->headers as $key => $value) {
         $key = trim(str_replace(array("\r", "\n"), '', $key));
