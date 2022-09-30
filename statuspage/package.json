@@ -17,7 +17,7 @@
     "react-i18next": "^11.8.4",
     "react-router-dom": "^5.2.0",
     "react-scripts": "^5.0.0",
-    "recharts": "^1.8.5"
+    "recharts": "^2.1.14"
   },
   "scripts": {
     "start": "react-scripts start",
