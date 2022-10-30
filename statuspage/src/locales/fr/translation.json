@@ -1,0 +1,36 @@
+{
+  "common": {
+    "poweredBy": "propulsé par",
+    "refresh": "Actualiser"
+  },
+  "timespan": {
+    "1year": "1 an",
+    "6months": "6 mois",
+    "1month": "1 mois",
+    "1week": "1 semaine",
+    "1day": "1 jour"
+  },
+  "status": {
+    "availability": "Disponibilité",
+    "availabilityWarning": "Avertissement disponibilité",
+    "availabilityError": "Erreur disponibilité",
+    "lowAvailabilityText": "Nous connaissons actuellement une disponibilité réduite de {{percent}} % dans les derniers 30 minutes.",
+    "latency": "Latence",
+    "latencyWarning": "Avertissement latence",
+    "latencyError": "Erreur latence",
+    "highLatencyText": "Nous connaissons actuellement une latence inhabituellement élevée de {{ms}} ms dans les derniers 30 minutes.",
+    "healthy": "Sain",
+    "allSystemsRunAsExpected": "Tous les systèmes fonctionnent comme prévu.",
+    "disabled": "Desactivé"
+  },
+  "error": {
+    "404": {
+      "title": "Page introuvable",
+      "text": "La page demandée est introuvable. Assurez-vous que votre lien est correct et réessayez."
+    },
+    "other": {
+      "title": "Erreur lors de la récupération de la page",
+      "text": "Désolé, nous n'avons pas pu récupérer la page pour le moment. Veuillez réessayer plus tard."
+    }
+  }
+}
