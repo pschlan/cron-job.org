@@ -184,7 +184,7 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 		return;
 	}
 
-	if(result->status == JOBSTATUS_OK || result->status == JOBSTATUS_FAILED_TIMEOUT)
+	if(result->status == JOBSTATUS_OK)
 	{
 		db->query("UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`fail_counter`=0 WHERE `jobid`=%d",
 			static_cast<int>(result->status),
