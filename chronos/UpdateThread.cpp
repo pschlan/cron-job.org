@@ -201,14 +201,16 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 			result->jobID);
 	}
 
-	// get (new) fail counter
+	// get (new) fail counter and latest enabled status
 	int failCounter = 0;
+	bool isEnabled = false;
 	MYSQL_ROW row;
-	auto res = db->query("SELECT `fail_counter` FROM `job` WHERE `jobid`=%d",
+	auto res = db->query("SELECT `fail_counter`, `enabled` FROM `job` WHERE `jobid`=%d",
 		result->jobID);
 	while((row = res->fetchRow()) != NULL)
 	{
 		failCounter = atoi(row[0]);
+		isEnabled = atoi(row[1]) != 0;
 	}
 	res.reset();
 
@@ -249,7 +251,7 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 		notificationType 			= NOTIFICATION_TYPE_SUCCESS;
 	}
 
-	if(createNotification)
+	if(createNotification && isEnabled)
 	{
 		Notification n;
 		n.userID = result->userID;
