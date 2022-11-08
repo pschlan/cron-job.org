@@ -184,22 +184,24 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 		return;
 	}
 
+	std::string query;
 	if(result->status == JOBSTATUS_OK)
 	{
-		db->query("UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`fail_counter`=0 WHERE `jobid`=%d",
-			static_cast<int>(result->status),
-			static_cast<int>(result->dateStarted / 1000),
-			static_cast<int>(result->duration),
-			result->jobID);
+		query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`fail_counter`=0 WHERE `jobid`=%d";
+	}
+	else if(result->status == JOBSTATUS_FAILED_TIMEOUT)
+	{
+		query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`fail_counter`=MAX(`fail_counter`,1) WHERE `jobid`=%d";
 	}
 	else
 	{
-		db->query("UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`fail_counter`=`fail_counter`+1 WHERE `jobid`=%d",
-			static_cast<int>(result->status),
-			static_cast<int>(result->dateStarted / 1000),
-			static_cast<int>(result->duration),
-			result->jobID);
+		query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`fail_counter`=`fail_counter`+1 WHERE `jobid`=%d";
 	}
+	db->query(query.c_str(),
+		static_cast<int>(result->status),
+		static_cast<int>(result->dateStarted / 1000),
+		static_cast<int>(result->duration),
+		result->jobID);
 
 	// get (new) fail counter and latest enabled status
 	int failCounter = 0;
@@ -235,6 +237,7 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 	// send failure notification?
 	if(result->notifyFailure
 		&& result->status != JOBSTATUS_OK
+		&& result->oldFailCounter == 0
 		&& failCounter == 1)
 	{
 		createNotification 			= true;
