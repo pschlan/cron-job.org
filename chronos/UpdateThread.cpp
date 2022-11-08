@@ -184,6 +184,20 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 		return;
 	}
 
+	// refresh the old fail counter, if needed (since we pre-fetch jobs, it might be outdated by now)
+	int oldFailCounter = result->oldFailCounter;
+	if(result->status != JOBSTATUS_OK)
+	{
+		MYSQL_ROW row;
+		auto res = db->query("SELECT `fail_counter` FROM `job` WHERE `jobid`=%d",
+			result->jobID);
+		while((row = res->fetchRow()) != NULL)
+		{
+			oldFailCounter = atoi(row[0]);
+		}
+		res.reset();
+	}
+
 	std::string query;
 	if(result->status == JOBSTATUS_OK)
 	{
@@ -237,7 +251,7 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 	// send failure notification?
 	if(result->notifyFailure
 		&& result->status != JOBSTATUS_OK
-		&& result->oldFailCounter == 0
+		&& oldFailCounter == 0
 		&& failCounter == 1)
 	{
 		createNotification 			= true;
@@ -247,7 +261,7 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 	// send success notification?
 	if(result->notifySuccess
 		&& result->status == JOBSTATUS_OK
-		&& result->oldFailCounter > 0
+		&& oldFailCounter > 0
 		&& failCounter == 0)
 	{
 		createNotification 			= true;
