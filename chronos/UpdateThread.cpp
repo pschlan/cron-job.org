@@ -191,7 +191,7 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 	}
 	else if(result->status == JOBSTATUS_FAILED_TIMEOUT)
 	{
-		query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`fail_counter`=MAX(`fail_counter`,1) WHERE `jobid`=%d";
+		query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`fail_counter`=GREATEST(`fail_counter`,1) WHERE `jobid`=%d";
 	}
 	else
 	{
