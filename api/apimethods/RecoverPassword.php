@@ -25,7 +25,7 @@ class RecoverPassword extends AbstractAPIMethod {
 
   public function execute($request, $sessionToken, $language) {
     try {
-      if (!UserManager::recoverPassword($request->email, $language)) {
+      if (!UserManager::recoverPassword(trim($request->email), $language)) {
         throw new InternalErrorAPIException();
       }
     } catch (EmailAddresInUseException $ex) {

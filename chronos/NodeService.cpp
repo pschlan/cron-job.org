@@ -330,6 +330,9 @@ public:
                 }
             }
 
+            db->query("UPDATE `job` SET `fail_counter`=0 WHERE `jobid`=%v",
+                job.identifier.jobId);
+
             db->query("COMMIT");
         }
         catch(const std::exception &ex)

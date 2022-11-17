@@ -184,31 +184,49 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 		return;
 	}
 
-	if(result->status == JOBSTATUS_OK || result->status == JOBSTATUS_FAILED_TIMEOUT)
+	// refresh the old fail counter, if needed (since we pre-fetch jobs, it might be outdated by now)
+	int oldFailCounter = result->oldFailCounter;
+	if(result->status != JOBSTATUS_OK)
 	{
-		db->query("UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`fail_counter`=0 WHERE `jobid`=%d",
-			static_cast<int>(result->status),
-			static_cast<int>(result->dateStarted / 1000),
-			static_cast<int>(result->duration),
+		MYSQL_ROW row;
+		auto res = db->query("SELECT `fail_counter` FROM `job` WHERE `jobid`=%d",
 			result->jobID);
+		while((row = res->fetchRow()) != NULL)
+		{
+			oldFailCounter = atoi(row[0]);
+		}
+		res.reset();
+	}
+
+	std::string query;
+	if(result->status == JOBSTATUS_OK)
+	{
+		query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`fail_counter`=0 WHERE `jobid`=%d";
+	}
+	else if(result->status == JOBSTATUS_FAILED_TIMEOUT)
+	{
+		query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`fail_counter`=GREATEST(`fail_counter`,1) WHERE `jobid`=%d";
 	}
 	else
 	{
-		db->query("UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`fail_counter`=`fail_counter`+1 WHERE `jobid`=%d",
-			static_cast<int>(result->status),
-			static_cast<int>(result->dateStarted / 1000),
-			static_cast<int>(result->duration),
-			result->jobID);
+		query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`fail_counter`=`fail_counter`+1 WHERE `jobid`=%d";
 	}
+	db->query(query.c_str(),
+		static_cast<int>(result->status),
+		static_cast<int>(result->dateStarted / 1000),
+		static_cast<int>(result->duration),
+		result->jobID);
 
-	// get (new) fail counter
+	// get (new) fail counter and latest enabled status
 	int failCounter = 0;
+	bool isEnabled = false;
 	MYSQL_ROW row;
-	auto res = db->query("SELECT `fail_counter` FROM `job` WHERE `jobid`=%d",
+	auto res = db->query("SELECT `fail_counter`, `enabled` FROM `job` WHERE `jobid`=%d",
 		result->jobID);
 	while((row = res->fetchRow()) != NULL)
 	{
 		failCounter = atoi(row[0]);
+		isEnabled = atoi(row[1]) != 0;
 	}
 	res.reset();
 
@@ -233,6 +251,7 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 	// send failure notification?
 	if(result->notifyFailure
 		&& result->status != JOBSTATUS_OK
+		&& oldFailCounter == 0
 		&& failCounter == 1)
 	{
 		createNotification 			= true;
@@ -242,14 +261,14 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 	// send success notification?
 	if(result->notifySuccess
 		&& result->status == JOBSTATUS_OK
-		&& result->oldFailCounter > 0
+		&& oldFailCounter > 0
 		&& failCounter == 0)
 	{
 		createNotification 			= true;
 		notificationType 			= NOTIFICATION_TYPE_SUCCESS;
 	}
 
-	if(createNotification)
+	if(createNotification && isEnabled)
 	{
 		Notification n;
 		n.userID = result->userID;

@@ -9,6 +9,7 @@ require_once('lib/JWT.php');
 require_once('lib/Mail.php');
 require_once('lib/Language.php');
 require_once('lib/Exceptions.php');
+require_once('resources/MFADevice.php');
 
 class WrongPasswordException extends Exception {}
 class UserNotActivatedException extends Exception {}
@@ -17,6 +18,8 @@ class AccountNotFoundException extends Exception {}
 class EmailAddresInUseException extends Exception {}
 class FailedToDeleteAccountException extends Exception {}
 class InvalidEmailAddressException extends Exception {}
+class ActiveSubscriptionException extends Exception {}
+class RequiresMFAException extends Exception {}
 
 class UserProfile {
   public const STATUS_CREATED = 0;
@@ -37,13 +40,16 @@ class UserProfile {
 
 class UserGroup {
   public $userGroupId;
-  public $title;
   public $maxStatusPages;
   public $maxStatusPageMonitors;
   public $maxStatusPageDomains;
   public $requestTimeout;
   public $requestMaxSize;
   public $maxFailures;
+  public $apiRequestsPerDay;
+  public $maxApiKeys;
+
+  private $title;
 
   function __construct() {
     $this->userGroupId = intval($this->userGroupId);
@@ -53,22 +59,54 @@ class UserGroup {
     $this->requestTimeout = intval($this->requestTimeout);
     $this->requestMaxSize = intval($this->requestMaxSize);
     $this->maxFailures = intval($this->maxFailures);
+    $this->apiRequestsPerDay = intval($this->apiRequestsPerDay);
+    $this->maxApiKeys = intval($this->maxApiKeys);
+  }
+
+  function getTitle() {
+    return $this->title;
+  }
+}
+
+class UserSubscription {
+  public const STATUS_INACTIVE = 0;
+  public const STATUS_PENDING = 1;
+  public const STATUS_ACTIVE = 2;
+  public const STATUS_EXPIRING = 3;
+  public const STATUS_CANCELLED = 4;
+
+  public $productId;
+  public $status;
+  public $currentPeriodStart;
+  public $currentPeriodEnd;
+  public $cancelAt;
+
+  private $subscriptionId;
+
+  function __construct() {
+    $this->status = intval($this->status);
+    $this->currentPeriodStart = intval($this->currentPeriodStart);
+    $this->currentPeriodEnd = intval($this->currentPeriodEnd);
+    $this->cancelAt = intval($this->cancelAt);
+  }
+
+  function getSubscriptionId() {
+    return $this->subscriptionId;
   }
 }
 
 class RefreshTokenHandler {
-  public function validateRefreshToken($refreshToken, $userId, $userGroupId) {
+  public function validateRefreshToken($refreshToken, $userId) {
     if (empty($refreshToken) || $userId <= 0) {
       return false;
     }
 
-    $stmt = Database::get()->prepare('SELECT `refreshtoken`.`userid` AS `userId`, `refreshtoken`.`expires` AS `expires`, `user`.`usergroupid` AS `userGroupId`, `user`.`status` AS `userStatus` FROM `refreshtoken` '
+    $stmt = Database::get()->prepare('SELECT `refreshtoken`.`userid` AS `userId`, `refreshtoken`.`expires` AS `expires`, `user`.`status` AS `userStatus` FROM `refreshtoken` '
       . 'INNER JOIN `user` ON `user`.`userid`=`refreshtoken`.`userid` WHERE `refreshtoken`.`token`=:token');
     $stmt->execute([':token' => $refreshToken]);
 
     if ($tokenRow = $stmt->fetch(PDO::FETCH_OBJ)) {
       if (intval($tokenRow->userId) === intval($userId)
-          && intval($tokenRow->userGroupId) === intval($userGroupId)
           && $tokenRow->expires > time()
           && $tokenRow->userStatus == UserProfile::STATUS_VERIFIED) {
         return true;
@@ -78,18 +116,17 @@ class RefreshTokenHandler {
     return false;
   }
 
-  public function mayRefreshSessionToken($userId, $userGroupId) {
+  public function mayRefreshSessionToken($userId) {
     if ($userId <= 0) {
       return false;
     }
 
-    $stmt = Database::get()->prepare('SELECT `status` AS `userStatus`, `usergroupid` AS `userGroupId` FROM `user` '
+    $stmt = Database::get()->prepare('SELECT `status` AS `userStatus` FROM `user` '
       . 'WHERE `user`.`userid`=:userId');
     $stmt->execute([':userId' => $userId]);
 
     if ($row = $stmt->fetch(PDO::FETCH_OBJ)) {
-      if ($row->userStatus == UserProfile::STATUS_VERIFIED
-          && intval($row->userGroupId) === intval($userGroupId)) {
+      if ($row->userStatus == UserProfile::STATUS_VERIFIED) {
         return true;
       }
     }
@@ -118,6 +155,23 @@ class UserManager {
     return $stmt->fetch();
   }
 
+  public function getSubscription() {
+    $stmt = Database::get()->prepare('SELECT `product_id` AS `productId`, `status`, `current_period_start` AS `currentPeriodStart`, `current_period_end` AS `currentPeriodEnd`, `cancel_at` AS `cancelAt`, `subscription_id` AS `subscriptionId` FROM `user_subscription` WHERE `userid`=:userId');
+    $stmt->setFetchMode(PDO::FETCH_CLASS, UserSubscription::class);
+    $stmt->execute(array(':userId' => $this->authToken->userId));
+    return $stmt->fetch();
+  }
+
+  public function getStripeCustomerId() {
+    $stmt = Database::get()->prepare('SELECT `stripe_customer_id` AS `stripeCustomerId` FROM `user_stripe_mapping` WHERE `userid`=:userId');
+    $stmt->execute([':userId' => $this->authToken->userId]);
+    $row = $stmt->fetch(PDO::FETCH_OBJ);
+    if ($row) {
+      return $row->stripeCustomerId;
+    }
+    return null;
+  }
+
   public function updateProfile($profile) {
     Database::get()
       ->prepare('UPDATE `user` SET `firstname`=:firstName, `lastname`=:lastName, `timezone`=:timezone WHERE `userid`=:userId')
@@ -134,21 +188,42 @@ class UserManager {
   }
 
   public function getGroup() {
-    $stmt = Database::get()->prepare('SELECT `usergroupid` AS `userGroupId`, `title`, `max_status_pages` AS `maxStatusPages`, `max_status_page_monitors` AS `maxStatusPageMonitors`, `max_status_page_domains` AS `maxStatusPageDomains`, `request_timeout` AS `requestTimeout`, `request_max_size` AS `requestMaxSize`, `max_failures` AS `maxFailures` '
+    $stmt = Database::get()->prepare('SELECT `usergroup`.`usergroupid` AS `userGroupId`, `usergroup`.`title`, `usergroup`.`max_status_pages` AS `maxStatusPages`, `usergroup`.`max_status_page_monitors` AS `maxStatusPageMonitors`, `usergroup`.`max_status_page_domains` AS `maxStatusPageDomains`, `usergroup`.`request_timeout` AS `requestTimeout`, `usergroup`.`request_max_size` AS `requestMaxSize`, `usergroup`.`max_failures` AS `maxFailures`, `usergroup`.`api_requests_per_day` AS `apiRequestsPerDay`, `usergroup`.`max_api_keys` AS `maxApiKeys` '
       . 'FROM `usergroup` '
-      . 'WHERE `usergroup`.`usergroupid`=:userGroupId');
-    $stmt->execute(array(':userGroupId' => $this->authToken->userGroupId));
+      . 'INNER JOIN `user` ON `usergroup`.`usergroupid`=`user`.`usergroupid` '
+      . 'WHERE `user`.`userid`=:userId');
+    $stmt->execute(array(':userId' => $this->authToken->userId));
     $stmt->setFetchMode(PDO::FETCH_CLASS, UserGroup::class);
     return $stmt->fetch();
   }
 
-  public static function login($email, $password, $rememberMe, $language) {
+  private static function requiresMFA($userId) {
+    $stmt = Database::get()->prepare('SELECT COUNT(*) AS `count` FROM `mfadevice` WHERE `userid`=:userId AND `enabled`=:enabled');
+    $stmt->execute([
+      ':userId'   => $userId,
+      ':enabled'  => 1
+    ]);
+    $row = $stmt->fetch(PDO::FETCH_OBJ);
+    return $row->count > 0;
+  }
+
+  public static function login($email, $password, $rememberMe, $language, $mfaCode = false) {
     $stmt = Database::get()->prepare('SELECT '
       . '`userid` AS `userId`, `password`, `password_salt` AS `passwordSalt`, `status`, `usergroupid` AS `userGroupId` '
       . 'FROM `user` WHERE `email`=:email');
     $stmt->execute(array(':email' => $email));
 
     if ($userRow = $stmt->fetch(PDO::FETCH_OBJ)) {
+      if (self::requiresMFA($userRow->userId)) {
+        if ($mfaCode === false) {
+          throw new RequiresMFAException();
+        }
+
+        if (!MFADeviceManager::verifyMFACode($userRow->userId, $mfaCode)) {
+          return false;
+        }
+      }
+
       if (self::checkPassword($userRow, $password)) {
         if ($userRow->status == UserProfile::STATUS_VERIFIED) {
           Database::get()
@@ -165,7 +240,7 @@ class UserManager {
           }
 
           return (object) [
-            'token' => (new SessionToken($userRow->userId, $userRow->userGroupId))->toJwt()
+            'token' => (new SessionToken($userRow->userId))->toJwt()
           ];
         } else if ($userRow->status == UserProfile::STATUS_LOCKED) {
           throw new UserBannedException();
@@ -316,6 +391,7 @@ class UserManager {
 
     $userId = self::getUserIdByEmail($email);
     if ($userId === false || $userId < 1) {
+      error_log('Unknown user: <' . $email . '>');
       throw new AccountNotFoundException();
     }
 
@@ -395,6 +471,30 @@ class UserManager {
     $userId = Database::get()->insertId();
 
     $confirmationToken = new AccountConfirmationToken($userId);
+    return self::sendActivationEmail($email, $language, $confirmationToken);
+  }
+
+  public static function resendActivationEmail($email, $password) {
+    $stmt = Database::get()->prepare('SELECT `userid` AS `userId`, `email`, `lastlogin_lang` AS `language`, `password`, `password_salt` AS `passwordSalt` FROM `user` WHERE `email`=:email AND `status`=:status');
+    $stmt->execute([
+      ':email'    => $email,
+      ':status'   => UserProfile::STATUS_CREATED
+    ]);
+    $row = $stmt->fetch(PDO::FETCH_OBJ);
+
+    if (!$row) {
+      throw new AccountNotFoundException();
+    }
+
+    if (!self::checkPassword($row, $password)) {
+      throw new WrongPasswordException();
+    }
+
+    return self::sendActivationEmail($row->email, $row->language, new AccountConfirmationToken($row->userId));
+  }
+
+  private static function sendActivationEmail($email, $language, $confirmationToken) {
+    global $config;
 
     $mail = new Mail();
     $mail->setSender($config['emailSender']);
@@ -431,6 +531,18 @@ class UserManager {
     ]);
 
     return $stmt->rowCount() === 1;
+  }
+
+  public function verifyPassword($password) {
+    $stmt = Database::get()->prepare('SELECT '
+      . '`password`, `password_salt` AS `passwordSalt` '
+      . 'FROM `user` WHERE `userid`=:userId');
+    $stmt->execute([':userId' => $this->authToken->userId]);
+    $userRow = $stmt->fetch(PDO::FETCH_OBJ);
+
+    if (!$this->checkPassword($userRow, $password)) {
+      throw new WrongPasswordException();
+    }
   }
 
   public function changePassword($oldPassword, $newPassword) {
@@ -477,6 +589,11 @@ class UserManager {
     require_once('StatusPage.php');
     require_once('Job.php');
 
+    $subscription = $this->getSubscription();
+    if ($subscription && ($subscription->status === UserSubscription::STATUS_ACTIVE || $subscription->status === UserSubscription::STATUS_PENDING)) {
+      throw new ActiveSubscriptionException();
+    }
+
     $profile = $this->getProfile();
     if (strtolower($profile->email) !== strtolower($emailAddress)) {
       throw new InvalidEmailAddressException();
@@ -507,6 +624,16 @@ class UserManager {
     }
 
     $stmt = Database::get()->prepare('DELETE FROM `job` WHERE `userid`=:userId');
+    $stmt->execute([
+      ':userId'             => $this->authToken->userId
+    ]);
+
+    $stmt = Database::get()->prepare('DELETE FROM `apikey` WHERE `userid`=:userId');
+    $stmt->execute([
+      ':userId'             => $this->authToken->userId
+    ]);
+
+    $stmt = Database::get()->prepare('DELETE FROM `mfadevice` WHERE `userid`=:userId');
     $stmt->execute([
       ':userId'             => $this->authToken->userId
     ]);

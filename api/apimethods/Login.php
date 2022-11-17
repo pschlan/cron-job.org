@@ -15,7 +15,7 @@ class Login extends AbstractAPIMethod {
 
   public function rateLimits() {
     return [
-      new RateLimit(1, 2 * RateLimit::SECOND),
+      new RateLimit(1, 1 * RateLimit::SECOND),
       new RateLimit(10, 2 * RateLimit::MINUTE)
     ];
   }
@@ -29,15 +29,21 @@ class Login extends AbstractAPIMethod {
 
   public function execute($request, $sessionToken, $language) {
     try {
-      $result = UserManager::login($request->email, $request->password, isset($request->rememberMe) && $request->rememberMe, $language);
+      $result = UserManager::login(trim($request->email),
+        $request->password,
+        isset($request->rememberMe) && $request->rememberMe,
+        $language,
+        isset($request->mfaCode) ? $request->mfaCode : false);
       if ($result) {
         return $result;
       }
       throw new UnauthorizedAPIException();
     } catch (UserNotActivatedException $ex) {
-      throw new ForbiddenAPIException();
+      throw new LockedAPIException();
     } catch (UserBannedException $ex) {
       throw new GoneAPIException();
+    } catch (RequiresMFAException $ex) {
+      throw new ForbiddenAPIException();
     }
   }
 }

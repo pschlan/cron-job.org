@@ -118,7 +118,7 @@
     "subscribe": "Subscribe",
     "failedToSaveNewsletter": "Sorry, we couldn't save your decision at this time. Please try again later.",
     "newsletterSaved": "Thanks, your newsletter preference has been saved.",
-    "sustainingMembershipText": "Do you find {{serviceName}} useful and want to support us and at the same time benefit from exclusive membership rewards? Become a Sutaining Member now! Your Sustaining Membership helps us to cover infrastructure costs and ensures our service can operate and scale reliably, stay ad-free and is constantly improved."
+    "sustainingMembershipText": "Do you find {{serviceName}} useful and want to support us and at the same time benefit from exclusive membership rewards? Become a Sustaining Member now! Your Sustaining Membership helps us to cover infrastructure costs and ensures our service can operate and scale reliably, stay ad-free and is constantly improved."
   },
   "events": {
     "cronjobExecution": "Cronjob execution: {{statusText}}",
@@ -386,10 +386,10 @@
     "subscriptionActive": "You're an active sustaining member - thanks so much for supporting {{serviceName}}!",
     "subscriptionPending": "We're currently processing your order - please check back soon!",
     "subscriptionInactive": "You're not currently an active sustaining member.",
-    "subscriptionExpiring": "Your sutaining membership is expiring at {{expiresAt}}.",
+    "subscriptionExpiring": "Your sustaining membership is expiring at {{expiresAt}}.",
     "becomeASustainingMember": "Become a sustaining member",
     "learnMore": "Learn more",
-    "sustainingMemberTeaser": "Do you find {{serviceName}} useful and want to support us and at the same time benefit from exclusive membership rewards? Become a Sutaining Member now!",
+    "sustainingMemberTeaser": "Do you find {{serviceName}} useful and want to support us and at the same time benefit from exclusive membership rewards? Become a Sustaining Member now!",
     "manageSubscriptionFailed": "Failed to load subscription management portal. Please try again later or contact our support team.",
     "subscribeDialog": {
       "text1": "By becoming a Sustaining Member of {{serviceName}}, you're helping us to fund ongoing operation and improvement of our service.",

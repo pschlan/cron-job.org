@@ -25,6 +25,7 @@ export const Config = {
     'en': 'English',
     'de': 'Deutsch',
     'it': 'Italiano',
+    'fr': 'Français',
     'vi': 'Vietnamese'
   },
 

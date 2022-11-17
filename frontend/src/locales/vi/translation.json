@@ -13,7 +13,7 @@
     "settings": "Cài đặt",
     "description": "Sự miêu tả",
     "date": "Ngày tháng",
-    "event": "Biến cố",
+    "event": "Sự kiện",
     "actions": "Hành động",
     "edit": "Biên tập",
     "notfound": "Không tìm thấy",
@@ -290,7 +290,7 @@
     "requestTimeout": "Hết giờ",
     "redirectSuccess": "Coi chuyển hướng có mã trạng thái HTTP 3xx là thành công",
     "exportJob": "Xuất cronjob: {{jobTitle}}",
-    "exportFormat": "Định dạng xuất khẩu",
+    "exportFormat": "Định dạng xuất file",
     "format": {
       "cronTabCurl": "Crontab curl"
     },

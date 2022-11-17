@@ -39,6 +39,12 @@ class GoneAPIException extends APIException {
   }
 }
 
+class LockedAPIException extends APIException {
+  public function httpStatus() {
+    return '423 Locked';
+  }
+}
+
 class QuotaExceededAPIException extends APIException {
   public function httpStatus() {
     return '429 Quota Limit Exceeded';

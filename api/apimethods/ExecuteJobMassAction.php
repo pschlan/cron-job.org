@@ -22,13 +22,13 @@ class ExecuteJobMassAction extends AbstractAPIMethod {
          isset($request->jobIds)
       && is_array($request->jobIds)
       && isset($request->action)
-      && in_array($request->action, ['enable', 'disable'])
+      && in_array($request->action, ['enable', 'disable', 'delete'])
     );
   }
 
   public function execute($request, $sessionToken, $language) {
     if (!(new JobManager($sessionToken))->executeMassAction($request->jobIds, $request->action)) {
-      throw InternalErrorAPIException();
+      throw new InternalErrorAPIException();
     }
     return true;
   }

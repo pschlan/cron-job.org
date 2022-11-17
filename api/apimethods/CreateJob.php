@@ -32,7 +32,7 @@ class CreateJob extends AbstractAPIMethod {
 
     $jobId = (new JobManager($sessionToken))
       ->createJob($job);
-    
+
     if ($jobId === false) {
       throw new InternalErrorAPIException();
     }
