@@ -15,6 +15,7 @@ import translationEN from './locales/en/translation.json';
 import translationDE from './locales/de/translation.json';
 import translationIT from './locales/it/translation.json';
 import translationRU from './locales/ru/translation.json';
+import translationVI from './locales/vi/translation.json';
 
 import 'moment/locale/de';
 import 'moment/locale/it';
@@ -34,6 +35,9 @@ const LANGUAGE_RESOURCES = {
   },
   ru:{
     translation: translationRU
+  },
+  vi:{
+    translation: translationVI
   }
 };
 
