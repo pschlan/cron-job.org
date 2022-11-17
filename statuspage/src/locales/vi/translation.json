@@ -1,7 +1,7 @@
 {
   "common": {
     "poweredBy": "cung cấp bởi",
-    "refresh": " làm mới",
+    "refresh": " làm mới"
   },
   "timespan": {
     "1year": "1 năm",
@@ -29,8 +29,8 @@
       "text": "Không thể tìm thấy trang trạng thái được yêu cầu. Vui lòng đảm bảo liên kết của bạn là chính xác và thử lại."
     },
     "other": {
-      "title": "Error Retrieving Status Page",
-      "text": "Sorry, we could not retrieve the status page at this time. Please try again later."
+      "title": "Đã xảy ra lỗi",
+      "text": "Chúng tôi không thể tải trang trạng thái. Vui lòng thử lại."
     }
   }
 }

@@ -19,6 +19,8 @@ export const Config = {
     'en': 'English',
     'de': 'Deutsch',
     'it': 'Italiano',
+    'ja': 'Japanese',
+    'ko': 'Korean',
     'vi': 'Vietnamese'
   },
 

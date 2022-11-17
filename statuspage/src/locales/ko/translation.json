@@ -1,0 +1,36 @@
+{
+  "common": {
+    "poweredBy": "에 의해 구동",
+    "refresh": "새로 고치다"
+  },
+  "timespan": {
+    "1year": "일년",
+    "6months": "6 개월",
+    "1month": "1 개월",
+    "1week": "일주",
+    "1day": "1 일"
+  },
+  "status": {
+    "availability": "유효성",
+    "availabilityWarning": "가용성 경고",
+    "availabilityError": "가용성 오류",
+    "lowAvailabilityText": "현재 지난 30분 동안 가용성이 {{percent}}% 감소했습니다.",
+    "latency": "지연 시간",
+    "latencyWarning": "대기 시간 경고",
+    "latencyError": "대기 시간 오류",
+    "highLatencyText": "현재 지난 30분 동안 {{ms}}ms의 비정상적으로 긴 지연 시간이 발생했습니다.",
+    "healthy": "건강한",
+    "allSystemsRunAsExpected": "현재 모든 시스템이 예상대로 실행됩니다.",
+    "disabled": "장애가 있는"
+  },
+  "error": {
+    "404": {
+      "title": "404 - 찾을 수 없음",
+      "text": "죄송합니다. 요청하신 페이지를 찾을 수 없습니다."
+    },
+    "other": {
+      "title": "페이지를 찾을 수 없음",
+      "text": "요청한 상태 페이지를 찾을 수 없습니다. 링크가 올바른지 확인하고 다시 시도하십시오."
+    }
+  }
+}
