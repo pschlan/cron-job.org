@@ -110,6 +110,7 @@ export default function JobEditor({ match }) {
   const [ jobTitle, setJobTitle ] = useState('');
   const [ jobURL, setJobURL ] = useState('');
   const jobURLRef = useRef();
+  const requestTimeoutRef = useRef();
   const [ jobEnabled, setJobEnabled ] = useState(false);
   const [ saveResponses, setSaveResponses ] = useState(false);
   const [ requestTimeout, setRequestTimeout ] = useState(-1);
@@ -224,10 +225,18 @@ export default function JobEditor({ match }) {
     });
   }, [jobTitle, jobURL, jobEnabled, saveResponses, requestTimeout, redirectSuccess, authEnable, authUser, authPassword, notification, requestMethod, requestBody, jobHeaders, schedule, timezone]);
 
+  const maxRequestTimeout = (userProfile && userProfile.userGroup && userProfile.userGroup.requestTimeout) || 30;
+
   function saveJob() {
     if (!jobURL.match(RegexPatterns.url)) {
       enqueueSnackbar(t('jobs.invalidUrl'), { variant: 'error' });
       jobURLRef.current && jobURLRef.current.focus();
+      return;
+    }
+
+    if (updatedJob.requestTimeout > maxRequestTimeout) {
+      enqueueSnackbar(t('jobs.invalidTimeout', { maxRequestTimeout }), { variant: 'error' });
+      requestTimeoutRef.current && requestTimeoutRef.current.focus();
       return;
     }
 
@@ -295,8 +304,6 @@ export default function JobEditor({ match }) {
   function updateHeaderValue(rowNo, value) {
     setJobHeaders(headers => headers.map((x, index) => index === rowNo ? {...x, value} : x));
   }
-
-  const maxRequestTimeout = (userProfile && userProfile.userGroup && userProfile.userGroup.requestTimeout) || 30;
 
   const HEADERS_COLUMNS = [
     {
@@ -568,6 +575,8 @@ export default function JobEditor({ match }) {
                   endAdornment: <InputAdornment position='end'>{t('units.long.s')}</InputAdornment>
                 }}
                 inputProps={{min: 1, max: maxRequestTimeout, type: 'number'}}
+                patternErrorText={t('jobs.invalidTimeout', {maxRequestTimeout})}
+                inputRef={requestTimeoutRef}
                 />
             </FormControl>
             <FormControl className={classes.formControl}>

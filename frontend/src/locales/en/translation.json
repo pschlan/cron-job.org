@@ -239,6 +239,7 @@
     "failedToClone": "Failed to clone the cronjob. Please try again later.",
     "cloned": "The cronjob has been cloned successfully. Please enable the job to start executions.",
     "invalidUrl": "This URL does not look to be valid.",
+    "invalidTimeout": "The timeout value is invalid. The maximum timeout is {{maxRequestTimeout}} seconds.",
     "failedToCreate": "Failed to create cronjob. Please try again later.",
     "created": "The cronjob has been created successfully.",
     "cantDeleteMonitorJob": "This job is used for a status monitor and therefore cannot be deleted. Please remove the associated status monitor(s) first and try again.",

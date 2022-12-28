@@ -239,6 +239,7 @@
     "failedToClone": "Cronjob konnte nicht geklont werden. Bitte versuchen Sie es später erneut.",
     "cloned": "Der Cronjob wurde erfolgreich geklont. Bitte aktivieren Sie den Job, sobald er ausgeführt werden soll.",
     "invalidUrl": "Diese URL scheint nicht gültig zu sein.",
+    "invalidTimeout": "Der Timeout-Wert ist ungültig. Der maximale Timeout-Wert beträgt {{maxRequestTimeout}} Sekunden.",
     "failedToCreate": "Der Cronjob konnte nicht erstellt werden. Bitte versuchen Sie es später erneut.",
     "created": "Der Cronjob wurde erfolgreich erstellt.",
     "cantDeleteMonitorJob": "Dieser Job wird für einen oder mehrere Status-Monitore verwendet und kann daher nicht gelöscht werden. Bitte entfernen Sie zuerst den zugehörigen Status-Monitor.",
