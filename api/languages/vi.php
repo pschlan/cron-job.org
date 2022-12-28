@@ -4,54 +4,54 @@ $lang = [
   'changeEmail.subject' => '$projectName: Xác nhận thay đổi địa chỉ email  ',
   'changeEmail.body' =>
       'Xin chào,' . "\n\n"
-    . 'bạn đã yêu cầu thay đổi địa chỉ email của $projectName account to $newEmail.' . "\n\n"
-    . 'Please click the following link to confirm the change of your email address.' . "\n\n"
+    . 'bạn đã yêu cầu thay đổi địa chỉ email của tài khoản $projectName sang $newEmail.' . "\n\n"
+    . 'Vui lòng click vào đường dẫn bên dưới để xác nhận thay đổi địa chỉ email của bạn.' . "\n\n"
     . '{link|$confirmationLink|Confirm email address}' . "\n\n"
-    . 'In case you did not request this change, please DO NOT click the confirmation link and instead ignore and delete this email.' . "\n\n"
+    . 'Trong trường hợp bạn không yêu cầu thay đổi, vui lòng bỏ qua và xóa email này ' . "\n\n"
     . 'Trân trọng,' . "\n\n"
     . '$projectName',
-  'lostPasswordEmail.footer' => 'You are receiving this email because someone tried to reset the password of your account. In case you did not request this, please ignore and delete this email.',
-  'lostPasswordEmail.subject' => '$projectName: Reset password',
+  'lostPasswordEmail.footer' => 'Bạn nhận được email này vì ai đó đã cố đặt lại mật khẩu tài khoản của bạn. Trong trường hợp bạn không yêu cầu, vui lòng bỏ qua và xóa email này.',
+  'lostPasswordEmail.subject' => '$projectName: Đặt lại mật khẩu',
   'lostPasswordEmail.body' =>
-      'Hi,' . "\n\n"
-    . 'you have requested to reset the password of your $projectName account.' . "\n\n"
-    . 'Please click the following link to reset your password.' . "\n\n"
+      'Xin chào,' . "\n\n"
+    . 'ai đó đã yêu cầu đặt lại mật khẩu cho tài khoản $projectName.' . "\n\n"
+    . 'Vui lòng click vào đường dẫn bên dưới để cấp lại mật khẩu cho tài khoản của bạn.' . "\n\n"
     . '{link|$confirmationLink|Reset password}' . "\n\n"
-    . 'In case you did not request this change, please DO NOT click the link and instead ignore and delete this email.' . "\n\n"
-    . 'Best regards,' . "\n\n"
+    . 'Trong trường hợp bạn không yêu cầu thay đổi, vui lòng bỏ qua và xóa email này.' . "\n\n"
+    . 'Trân trọng,' . "\n\n"
     . '$projectName',
-  'signupEmail.footer' => 'You are receiving this email because someone signed up with your email address. In case you did not request this, please ignore and delete this email.',
-  'signupEmail.subject' => '$projectName: Activate account',
+  'signupEmail.footer' => 'Bạn nhận được email này vì ai đó đã đăng ký bằng địa chỉ email của bạn. Trong trường hợp bạn không yêu cầu, vui lòng bỏ qua và xóa email này.',
+  'signupEmail.subject' => '$projectName: Kích hoạt tài khoản',
   'signupEmail.body' =>
-      'Hi,' . "\n\n"
-    . 'thanks for signing up at $projectName!' . "\n\n"
-    . 'Please click the following link to activate your account.' . "\n\n"
-    . '{link|$confirmationLink|Activate account}' . "\n\n"
-    . 'In case you did not sign up, please DO NOT click the link and instead ignore and delete this email.' . "\n\n"
-    . 'Best regards,' . "\n\n"
+      'Xin chào,' . "\n\n"
+    . 'cảm ơn vì đã đăng ký tại $projectName!' . "\n\n"
+    . 'Vui lòng nhấp vào liên kết sau để kích hoạt tài khoản của bạn' . "\n\n"
+    . '{link|$confirmationLink|Kích hoạt tài khoản}' . "\n\n"
+    . 'Trong trường hợp bạn không yêu cầu thay đổi, vui lòng bỏ qua và xóa email này.' . "\n\n"
+    . 'Trân trọng,' . "\n\n"
     . '$projectName',
-  'subscriptionEmail.footer' => 'You are receiving this email because your subscription status changed. In case of questions, do not hesitate to get in touch with our support team.',
-  'subscriptionActivatedEmail.subject' => '$projectName: Subscription activated',
+  'subscriptionEmail.footer' => 'Bạn nhận được email này vì trạng thái đăng ký của bạn đã thay đổi. Trong trường hợp có thắc mắc, đừng ngần ngại liên hệ với nhóm hỗ trợ của chúng tôi.',
+  'subscriptionActivatedEmail.subject' => '$projectName: Đăng ký đã được kích hoạt',
   'subscriptionActivatedEmail.body' =>
-      'Hi,' . "\n\n"
-    . 'thanks so much for supporting $projectName and making our service possible!' . "\n\n"
-    . 'Your subscription has been activated successfully. In rare cases, the subscription status might not show up in your account yet. In that case, please just re-login.' . "\n\n"
-    . 'By the way: You can find your receipts and invoices in your account at Settings -> Manage Subscription.' . "\n\n"
-    . 'Best regards,' . "\n\n"
+      'Xin chào,' . "\n\n"
+    . 'cảm ơn rất nhiều vì đã hỗ trợ dự án $projectName và làm cho dịch vụ của chúng tôi trở nên khả thi!' . "\n\n"
+    . 'Đăng ký của bạn đã được kích hoạt thành công. Trong một số ít trường hợp, trạng thái đăng ký có thể chưa hiển thị trong tài khoản của bạn. Trong trường hợp đó, vui lòng đăng nhập lại.' . "\n\n"
+    . 'Nhân tiện: Bạn có thể tìm thấy biên lai và hóa đơn trong tài khoản của mình tại Cài đặt -> Quản lý đăng ký.' . "\n\n"
+    . 'Trân trọng,' . "\n\n"
     . '$projectName',
-  'subscriptionCancelledEmail.subject' => '$projectName: Subscription terminated',
+  'subscriptionCancelledEmail.subject' => '$projectName:  Đăng ký đã bị hủy',
   'subscriptionCancelledEmail.body' =>
-      'Hi,' . "\n\n"
-    . 'your subscription at $projectName has been terminated now.' . "\n\n"
-    . 'Thanks a lot for having supported $projectName!' . "\n\n"
-    . 'Best regards,' . "\n\n"
+      'Xin chào,' . "\n\n"
+    . 'đăng ký của bạn tại dự án $projectName hiện đã bị chấm dứt.' . "\n\n"
+    . 'Cảm ơn rất nhiều vì đã hỗ trợ $projectName!' . "\n\n"
+    . 'Trân trọng,' . "\n\n"
     . '$projectName',
-  'subscriptionExpiringEmail.subject' => '$projectName: Subscription is being terminated',
+  'subscriptionExpiringEmail.subject' => '$projectName: Đăng ký sắp hết hạn',
   'subscriptionExpiringEmail.body' =>
-      'Hi,' . "\n\n"
-    . 'as requested, we are terminating your subscription at $projectName effective at $cancelAt.' . "\n\n"
-    . 'Thanks a lot for having supported $projectName!' . "\n\n"
-    . 'Best regards,' . "\n\n"
+      'Xin chào,' . "\n\n"
+    . 'theo yêu cầu, chúng tôi sẽ chấm dứt đăng ký của bạn tại $projectName hiệu quả tại $cancelAt.' . "\n\n"
+    . 'Cảm ơn rất nhiều vì đã hỗ trợ dự án $projectName!' . "\n\n"
+    . 'Trân trọng,' . "\n\n"
     . '$projectName',
   'dateFormat' => 'Y/m/d'
 ];
