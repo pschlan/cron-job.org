@@ -25,7 +25,10 @@ export const Config = {
     'en': 'English',
     'de': 'Deutsch',
     'it': 'Italiano',
-    'fr': 'Français'
+    'fr': 'Français',
+    'ja': 'Japanese',
+    'ko': 'Korean',
+    'vi': 'Vietnamese'
   },
 
   //! @note Fallback language to use when the user's auto-determined language is not supported.

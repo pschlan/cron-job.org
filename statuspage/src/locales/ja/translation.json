@@ -1,0 +1,36 @@
+{
+  "common": {
+    "poweredBy": "搭載",
+    "refresh": "リフレッシュ"
+  },
+  "timespan": {
+    "1year": "1年",
+    "6months": "6ヵ月",
+    "1month": "1ヶ月",
+    "1week": "1週間",
+    "1day": "1日"
+  },
+  "status": {
+    "availability": "可用性",
+    "availabilityWarning": "在庫警告",
+    "availabilityError": "可用性エラー",
+    "lowAvailabilityText": "現在、過去 30 分間で {{percent}} % の可用性の低下が発生しています。",
+    "latency": "レイテンシー",
+    "latencyWarning": "レイテンシ警告",
+    "latencyError": "レイテンシ エラー",
+    "highLatencyText": "現在、過去 30 分間で {{ms}} ミリ秒という異常に高いレイテンシが発生しています。",
+    "healthy": "健康",
+    "allSystemsRunAsExpected": "現在、すべてのシステムは期待どおりに稼働しています。",
+    "disabled": "無効"
+  },
+  "error": {
+    "404": {
+      "title": " ページが見つかりません。",
+      "text": "要求されたステータス ページが見つかりませんでした。リンクが正しいことを確認してから、もう一度お試しください。"
+    },
+    "other": {
+      "title": "ページが見つかりません",
+      "text": "リクエストされたステータス ページが見つかりませんでした。リンクが正しいことを確認してから、もう一度お試しください。"
+    }
+  }
+}
