@@ -1,0 +1,36 @@
+{
+  "common": {
+    "poweredBy": "powered by",
+    "refresh": "Refresh"
+  },
+  "timespan": {
+    "1year": "1 year",
+    "6months": "6 months",
+    "1month": "1 month",
+    "1week": "1 week",
+    "1day": "1 day"
+  },
+  "status": {
+    "availability": "Availability",
+    "availabilityWarning": "Availability warning",
+    "availabilityError": "Availability error",
+    "lowAvailabilityText": "We're currently experiencing reduced availability of {{percent}} % in the last 30 minutes.",
+    "latency": "Latency",
+    "latencyWarning": "Latency warning",
+    "latencyError": "Latency error",
+    "highLatencyText": "We're currently experiencing unusually high latency of {{ms}} ms in the last 30 minutes.",
+    "healthy": "Healthy",
+    "allSystemsRunAsExpected": "All systems currently run as expected.",
+    "disabled": "Disabled"
+  },
+  "error": {
+    "404": {
+      "title": "Page Not Found",
+      "text": "The requested status page could not be found. Please ensure your link is correct and try again."
+    },
+    "other": {
+      "title": "Error Retrieving Status Page",
+      "text": "Sorry, we could not retrieve the status page at this time. Please try again later."
+    }
+  }
+}
