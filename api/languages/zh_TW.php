@@ -1,57 +1,57 @@
 <?php
 $lang = [
-  'changeEmail.footer' => 'You are receiving this email because someone tried to connect an account to your email address. In case you did not request this, please ignore and delete this email.',
-  'changeEmail.subject' => '$projectName: Confirm changed email address',
+  'changeEmail.footer' => '你收到這封郵件是因為有人試圖將一個帳戶連接到你的電子郵件地址。如果您沒有要求這樣做，請忽略並刪除這封電子郵件。',
+  'changeEmail.subject' => '$projectName: 確認更改的電子郵件地址',
   'changeEmail.body' =>
-      'Hi,' . "\n\n"
-    . 'you have requested to change the email address of your $projectName account to $newEmail.' . "\n\n"
-    . 'Please click the following link to confirm the change of your email address.' . "\n\n"
-    . '{link|$confirmationLink|Confirm email address}' . "\n\n"
-    . 'In case you did not request this change, please DO NOT click the confirmation link and instead ignore and delete this email.' . "\n\n"
-    . 'Best regards,' . "\n\n"
+      '嗨，' . "\n\n"
+    . '您已請求將您的 $projectName 帳戶的電子郵件地址更改為 $newEmail。' . "\n\n"
+    . '請點擊以下連結以確認您電子郵件地址的更改。' . "\n\n"
+    . '{link|$confirmationLink|確認電郵地址}' . "\n\n"
+    . '如果您沒有請求此更改，「不要」點擊確認連結，請忽略並刪除這封電子郵件。' . "\n\n"
+    . '感謝您，' . "\n\n"
     . '$projectName',
-  'lostPasswordEmail.footer' => 'You are receiving this email because someone tried to reset the password of your account. In case you did not request this, please ignore and delete this email.',
-  'lostPasswordEmail.subject' => '$projectName: Reset password',
+  'lostPasswordEmail.footer' => '您收到此電子郵件是因為有人試圖重設您帳戶的密碼，如果您沒有提出要求，請忽略並刪除這封電子郵件。',
+  'lostPasswordEmail.subject' => '$projectName: 重設密碼',
   'lostPasswordEmail.body' =>
-      'Hi,' . "\n\n"
-    . 'you have requested to reset the password of your $projectName account.' . "\n\n"
-    . 'Please click the following link to reset your password.' . "\n\n"
-    . '{link|$confirmationLink|Reset password}' . "\n\n"
-    . 'In case you did not request this change, please DO NOT click the link and instead ignore and delete this email.' . "\n\n"
-    . 'Best regards,' . "\n\n"
+      '嗨，' . "\n\n"
+    . '您已請求重設您 $projectName 帳戶的密碼。' . "\n\n"
+    . '請點擊以下連結重設您的密碼。' . "\n\n"
+    . '{link|$confirmationLink|重設密碼}' . "\n\n"
+    . '如果您沒有請求此更改，「不要」點擊該連結，請忽略並刪除這封電子郵件。' . "\n\n"
+    . '感謝您，' . "\n\n"
     . '$projectName',
-  'signupEmail.footer' => 'You are receiving this email because someone signed up with your email address. In case you did not request this, please ignore and delete this email.',
-  'signupEmail.subject' => '$projectName: Activate account',
+  'signupEmail.footer' => '您收到此電子郵件是因為有人使用您的電子郵件地址進行了註冊，如果您沒有提出要求，請忽略並刪除這封電子郵件。',
+  'signupEmail.subject' => '$projectName: 啟動帳戶',
   'signupEmail.body' =>
-      'Hi,' . "\n\n"
-    . 'thanks for signing up at $projectName!' . "\n\n"
-    . 'Please click the following link to activate your account.' . "\n\n"
-    . '{link|$confirmationLink|Activate account}' . "\n\n"
-    . 'In case you did not sign up, please DO NOT click the link and instead ignore and delete this email.' . "\n\n"
-    . 'Best regards,' . "\n\n"
+      '嗨，' . "\n\n"
+    . '感謝您在 $projectName 註冊！' . "\n\n"
+    . '請點擊以下連結啟動您的帳戶。' . "\n\n"
+    . '{link|$confirmationLink|啟動帳戶}' . "\n\n"
+    . '如果您沒有註冊，「不要」點擊該連結，請忽略並刪除這封電子郵件。' . "\n\n"
+    . '感謝您，' . "\n\n"
     . '$projectName',
-  'subscriptionEmail.footer' => 'You are receiving this email because your subscription status changed. In case of questions, do not hesitate to get in touch with our support team.',
-  'subscriptionActivatedEmail.subject' => '$projectName: Subscription activated',
+  'subscriptionEmail.footer' => '您收到這封電子郵件是因為您的訂閱狀態發生了變化，如有疑問，請隨時與我們的支援團隊聯繫。',
+  'subscriptionActivatedEmail.subject' => '$projectName: 訂閱已啟動',
   'subscriptionActivatedEmail.body' =>
-      'Hi,' . "\n\n"
-    . 'thanks so much for supporting $projectName and making our service possible!' . "\n\n"
-    . 'Your subscription has been activated successfully. In rare cases, the subscription status might not show up in your account yet. In that case, please just re-login.' . "\n\n"
-    . 'By the way: You can find your receipts and invoices in your account at Settings -> Manage Subscription.' . "\n\n"
-    . 'Best regards,' . "\n\n"
+      '嗨，' . "\n\n"
+    . '非常感謝您支持 $projectName 並使我們的服務成為可能！' . "\n\n"
+    . '您的訂閱已成功啟動，在極少數情況下，訂閱狀態可能尚未顯示在您的帳戶中，在這種情況下，請重新登入。' . "\n\n"
+    . '順道一提：您可以在您的帳戶中的「設定」->「管理訂閱」中找到您的收據和發票。' . "\n\n"
+    . '感謝您，' . "\n\n"
     . '$projectName',
-  'subscriptionCancelledEmail.subject' => '$projectName: Subscription terminated',
+  'subscriptionCancelledEmail.subject' => '$projectName: 訂閱已終止',
   'subscriptionCancelledEmail.body' =>
-      'Hi,' . "\n\n"
-    . 'your subscription at $projectName has been terminated now.' . "\n\n"
-    . 'Thanks a lot for having supported $projectName!' . "\n\n"
-    . 'Best regards,' . "\n\n"
+      '嗨，' . "\n\n"
+    . '您在 $projectName 的訂閱現已終止。' . "\n\n"
+    . '非常感謝您支持 $projectName！' . "\n\n"
+    . '感謝您，' . "\n\n"
     . '$projectName',
-  'subscriptionExpiringEmail.subject' => '$projectName: Subscription is being terminated',
+  'subscriptionExpiringEmail.subject' => '$projectName: 訂閱正在終止',
   'subscriptionExpiringEmail.body' =>
-      'Hi,' . "\n\n"
-    . 'as requested, we are terminating your subscription at $projectName effective at $cancelAt.' . "\n\n"
-    . 'Thanks a lot for having supported $projectName!' . "\n\n"
-    . 'Best regards,' . "\n\n"
+      '嗨，' . "\n\n"
+    . '根據要求，我們將終止您在 $projectName 的訂閱，從 $cancelAt 開始生效。' . "\n\n"
+    . '非常感謝您支持 $projectName！' . "\n\n"
+    . '感謝您，' . "\n\n"
     . '$projectName',
   'dateFormat' => 'Y/m/d'
 ];
