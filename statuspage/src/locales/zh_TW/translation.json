@@ -1,36 +1,36 @@
 {
   "common": {
     "poweredBy": "powered by",
-    "refresh": "Refresh"
+    "refresh": "重新整理"
   },
   "timespan": {
-    "1year": "1 year",
-    "6months": "6 months",
-    "1month": "1 month",
-    "1week": "1 week",
-    "1day": "1 day"
+    "1year": "1年",
+    "6months": "6個月",
+    "1month": "1個月",
+    "1week": "1週",
+    "1day": "1天"
   },
   "status": {
-    "availability": "Availability",
-    "availabilityWarning": "Availability warning",
-    "availabilityError": "Availability error",
-    "lowAvailabilityText": "We're currently experiencing reduced availability of {{percent}} % in the last 30 minutes.",
-    "latency": "Latency",
-    "latencyWarning": "Latency warning",
-    "latencyError": "Latency error",
-    "highLatencyText": "We're currently experiencing unusually high latency of {{ms}} ms in the last 30 minutes.",
-    "healthy": "Healthy",
-    "allSystemsRunAsExpected": "All systems currently run as expected.",
-    "disabled": "Disabled"
+    "availability": "可用性",
+    "availabilityWarning": "可用性警告",
+    "availabilityError": "可用性錯誤",
+    "lowAvailabilityText": "我們在過去30分鐘內遇到了百分之 {{percent}} 的可用性降低。",
+    "latency": "延遲",
+    "latencyWarning": "延遲警告",
+    "latencyError": "延遲錯誤",
+    "highLatencyText": "我們在過去30分鐘內遇到高達 {{ms}} 毫秒的不正常延遲。",
+    "healthy": "健康",
+    "allSystemsRunAsExpected": "所有系統均運作正常。",
+    "disabled": "已停用"
   },
   "error": {
     "404": {
-      "title": "Page Not Found",
-      "text": "The requested status page could not be found. Please ensure your link is correct and try again."
+      "title": "找不到頁面",
+      "text": "找不到請求的狀態頁面。請確認您的連結是正確的，然後重試。"
     },
     "other": {
-      "title": "Error Retrieving Status Page",
-      "text": "Sorry, we could not retrieve the status page at this time. Please try again later."
+      "title": "讀取狀態頁面時發生錯誤",
+      "text": "很抱歉，我們暫時無法讀取狀態頁面，請稍後再試。"
     }
   }
 }
