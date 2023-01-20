@@ -1,4 +1,4 @@
-set(NAME protocol)
+set(NAME chronos-protocol)
 
 find_package(ThriftCompiler REQUIRED)
 find_package(LibThrift REQUIRED)
@@ -29,3 +29,5 @@ target_link_libraries(${NAME}
     PUBLIC
         ${LIBTHRIFT_LDFLAGS}
 )
+
+install(TARGETS ${NAME} DESTINATION lib)

@@ -1,5 +1,7 @@
 set(NAME chronos)
 
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
 set(SOURCES
 	main.cpp
 	App.cpp
@@ -54,10 +56,9 @@ target_link_libraries(${NAME}
 	${SQLITE_LIBRARIES}
 	${CMAKE_THREAD_LIBS_INIT}
 	${OPENSSL_CRYPTO_LIBRARY}
-	protocol
+	chronos-protocol
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 install(TARGETS ${NAME} DESTINATION bin)
-
