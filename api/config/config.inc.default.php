@@ -86,7 +86,7 @@ $config = array(
 
   //! @note List of supported languages. When adding new language file, be sure
   //!       to add the new language code here.
-  'languages'                       => ['en', 'de', 'fr'],
+  'languages'                       => ['en', 'de', 'fr', 'zh_TW'],
 
   //! @note Lifetime for test run meta data in redis cache.
   'testRunLifetime'                 => 5 * 60
