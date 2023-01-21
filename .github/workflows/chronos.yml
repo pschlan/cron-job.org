@@ -22,7 +22,7 @@ jobs:
         pushd curl-7.78.0 && ./configure --prefix=/usr/local --with-openssl && make && sudo make install && popd
         wget https://archive.apache.org/dist/thrift/0.13.0/thrift-0.13.0.tar.gz
         tar -xzf thrift-0.13.0.tar.gz
-        pushd thrift-0.13.0 && ./configure --prefix=/usr --with-csharp=no --with-php=no --with-haskell=no --with-erlang=no --with-go=no --with-java=no --with-python=no --with-py3=no --with-ruby=no --with-nodejs=no --with-c_glib=no --with-cpp=yes && make && sudo make install && popd
+        pushd thrift-0.13.0 && ./configure --prefix=/usr --with-rs=no --with-swift=no --with-dotnetcore=no --with-d=no --with-csharp=no --with-php=no --with-haskell=no --with-erlang=no --with-go=no --with-java=no --with-python=no --with-py3=no --with-ruby=no --with-nodejs=no --with-c_glib=no --with-cpp=yes && make && sudo make install && popd
         cd ..
     - name: Build chronos
       run: |
