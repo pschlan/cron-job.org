@@ -1,7 +1,7 @@
 cron-job.org
 ============
 
-![Build Status](https://github.com/pschlan/cron-job.org/actions/workflows/chronos.yml/badge.svg)
+![Build Status](https://github.com/pschlan/cron-job.org/actions/workflows/chronos.yml/badge.svg) ![Build Status](https://github.com/pschlan/cron-job.org/actions/workflows/docs.prod.yml/badge.svg) ![Build Status](https://github.com/pschlan/cron-job.org/actions/workflows/frontend.prod.yml/badge.svg)  ![Build Status](https://github.com/pschlan/cron-job.org/actions/workflows/statuspage.prod.yml/badge.svg)
 
 Structure
 ---------
