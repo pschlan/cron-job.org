@@ -1,7 +1,7 @@
 cron-job.org
 ============
 
-[![Build Status](https://app.travis-ci.com/pschlan/cron-job.org.svg?branch=master)](https://app.travis-ci.com/pschlan/cron-job.org)
+![Build Status](https://github.com/pschlan/cron-job.org/actions/workflows/chronos.yml/badge.svg)
 
 Structure
 ---------

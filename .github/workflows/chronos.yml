@@ -1,0 +1,33 @@
+name: Build chronos
+
+on:
+  push:
+    branches: '*'
+
+jobs:
+  build-chronos:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+    - name: Install dependencies
+      run: |
+        sudo apt-get install -y build-essential libev-dev libsqlite-dev libmysqlclient-dev \
+          libboost-all-dev libssl-dev flex bison pkg-config
+    - name: Build dependencies
+      run: |
+        mkdir deps
+        cd deps
+        wget https://curl.haxx.se/download/curl-7.78.0.tar.gz
+        tar -xzf curl-7.78.0.tar.gz
+        pushd curl-7.78.0 && ./configure --prefix=/usr/local --with-openssl && make && sudo make install && popd
+        wget https://archive.apache.org/dist/thrift/0.13.0/thrift-0.13.0.tar.gz
+        tar -xzf thrift-0.13.0.tar.gz
+        pushd thrift-0.13.0 && ./configure --prefix=/usr --enable-tests=no --enable-tutorial=no --with-rs=no --with-swift=no --with-dotnetcore=no --with-d=no --with-csharp=no --with-php=no --with-haskell=no --with-erlang=no --with-go=no --with-java=no --with-python=no --with-py3=no --with-ruby=no --with-nodejs=no --with-c_glib=no --with-cpp=yes && make && sudo make install && popd
+        cd ..
+    - name: Build chronos
+      run: |
+        mkdir build
+        cd build
+        cmake -DCMAKE_INSTALL_PREFIX=/usr/local .. && make
