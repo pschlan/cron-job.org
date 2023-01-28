@@ -45,3 +45,4 @@ if ($_SERVER['REQUEST_URI'] === '/') {
 
 $dispatcher->registerDirectory('./apimethods/');
 $dispatcher->dispatch();
+?>
