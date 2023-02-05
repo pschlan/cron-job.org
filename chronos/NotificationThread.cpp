@@ -353,6 +353,14 @@ void NotificationThread::processNotification(const Notification &notification)
 		std::cerr << "NotificationThread::processNotification(): Failed to retrieve user details: " << ex.what() << std::endl;
 	}
 
+	// Remove query part of URL (might contain sensitive data)
+	std::string url = notification.url;
+	std::size_t qmPos = url.find('?');
+	if(qmPos != std::string::npos)
+	{
+		url = url.substr(0, qmPos + 1) + "...";
+	}
+	
 	Mail mail;
 	mail.setMailFrom(mailFrom);
 	mail.setRcptTo(userDetails.email);
@@ -364,8 +372,8 @@ void NotificationThread::processNotification(const Notification &notification)
 
 	mail.assign("$firstname", userDetails.firstName);
 	mail.assign("$lastname", userDetails.lastName);
-	mail.assign("$title", !notification.title.empty() ? notification.title : notification.url);
-	mail.assign("$url", notification.url);
+	mail.assign("$title", !notification.title.empty() ? notification.title : url);
+	mail.assign("$url", url);
 	mail.assign("$executed", formatDate(userDetails.language, notification.dateStarted));
 	mail.assign("$scheduled", formatDate(userDetails.language, notification.datePlanned));
 	mail.assign("$attempts", std::to_string(notification.failCounter));
