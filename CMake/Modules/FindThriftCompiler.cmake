@@ -1,7 +1,7 @@
 find_program(THRIFT_COMPILER NAMES thrift)
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(thrift DEFAULT_MSG THRIFT_COMPILER)
+find_package_handle_standard_args(ThriftCompiler DEFAULT_MSG THRIFT_COMPILER)
 mark_as_advanced(THRIFT_COMPILER)
 
 macro(thrift_compile FILENAME GENERATOR OUTPUTDIR)
