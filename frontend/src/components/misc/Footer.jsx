@@ -54,10 +54,10 @@ export default function Footer({ narrow = false }) {
     {showLanguageDialog && <LanguageSelectorDialog onClose={() => setShowLanguageDialog(false)} />}
     <Typography variant="body2" color="textSecondary" align="center">
       {!narrow && <><Copyright /> | </>}
-      <><LanguageIcon className={classes.icon} /> <Link color="inherit" className={classes.link} onClick={() => setShowLanguageDialog(true)}>{Config.languages[languageCode]}</Link></>
-      {(Config.footerLinks || []).map(link => <React.Fragment key={link.title}> | <link.icon className={classes.icon} /> <Link color="inherit" href={link.href} target={link.target}>{t(link.title)}</Link></React.Fragment>)}
-      {Config.twitterURL && <> | <TwitterIcon className={classes.icon} /> <Link color="inherit" href={Config.twitterURL} target="_blank" rel="noopener">{t('common.followontwitter')}</Link></>}
-      {Config.githubURL && <> | <GitHubIcon className={classes.icon} /> <Link color="inherit" href={Config.githubURL} target="_blank" rel="noopener">{t('common.forkongithub')}</Link></>}
+      <><LanguageIcon className={classes.icon} /><Link color="inherit" className={classes.link} onClick={() => setShowLanguageDialog(true)}>{Config.languages[languageCode]}</Link></>
+      {(Config.footerLinks || []).map(link => <React.Fragment key={link.title}> | <link.icon className={classes.icon} /><Link color="inherit" href={link.href} target={link.target}>{t(link.title)}</Link></React.Fragment>)}
+      {Config.twitterURL && <> | <TwitterIcon className={classes.icon} /><Link color="inherit" href={Config.twitterURL} target="_blank" rel="noopener">{t('common.followontwitter')}</Link></>}
+      {Config.githubURL && <> | <GitHubIcon className={classes.icon} /><Link color="inherit" href={Config.githubURL} target="_blank" rel="noopener">{t('common.forkongithub')}</Link></>}
       {narrow && <Box mt={2}><Copyright /></Box>}
     </Typography>
   </>;
