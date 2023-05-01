@@ -368,7 +368,7 @@ class StatusPageManager {
     }
 
     foreach ($statusPage->monitors as $monitor) {
-      $this->deleteStatusPAgeMonitor($monitor->monitorId);
+      $this->deleteStatusPageMonitor($monitor->monitorId);
     }
 
     Database::get()->beginTransaction();
