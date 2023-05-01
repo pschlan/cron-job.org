@@ -13,7 +13,7 @@ class Login extends AbstractAPIMethod {
     return false;
   }
 
-  public function rateLimits() {
+  public function rateLimits($sessionToken) {
     return [
       new RateLimit(1, 1 * RateLimit::SECOND),
       new RateLimit(10, 2 * RateLimit::MINUTE)

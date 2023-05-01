@@ -13,7 +13,7 @@ class CreateAccount extends AbstractAPIMethod {
     return false;
   }
 
-  public function rateLimits() {
+  public function rateLimits($sessionToken) {
     return [
       new RateLimit(1, 2 * RateLimit::SECOND)
     ];

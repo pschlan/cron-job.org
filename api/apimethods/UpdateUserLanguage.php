@@ -11,7 +11,7 @@ class UpdateUserLanguage extends AbstractAPIMethod {
     return true;
   }
 
-  public function rateLimits() {
+  public function rateLimits($sessionToken) {
     return [
       new RateLimit(2, RateLimit::SECOND)
     ];

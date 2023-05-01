@@ -11,7 +11,7 @@ class MayRequestStatusPageCertificate extends AbstractAPIMethod {
     return false;
   }
 
-  public function rateLimits() {
+  public function rateLimits($sessionToken) {
     return [];
   }
 

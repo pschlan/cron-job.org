@@ -13,7 +13,7 @@ class CreateBillingPortalSession extends AbstractAPIMethod {
     return true;
   }
 
-  public function rateLimits() {
+  public function rateLimits($sessionToken) {
     return [
       new RateLimit(1, RateLimit::SECOND)
     ];

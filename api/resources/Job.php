@@ -212,8 +212,9 @@ class Job {
       $this->extendedData->headers[$key] = $value;
     }
 
-    if (in_array($request->job->schedule->timezone, DateTimeZone::listIdentifiers())) {
-      $this->schedule->timezone       = $request->job->schedule->timezone;
+    $timezone = trim($request->job->schedule->timezone);
+    if (in_array($timezone, DateTimeZone::listIdentifiers())) {
+      $this->schedule->timezone       = $timezone;
     }
 
     $this->schedule->hours            = $request->job->schedule->hours;
@@ -292,8 +293,10 @@ class Job {
     }
 
     if (isset($request->job->schedule) && isset($request->job->schedule->timezone)) {
-      if (in_array($request->job->schedule->timezone, DateTimeZone::listIdentifiers())) {
-        $this->schedule->timezone       = $request->job->schedule->timezone;
+      $timezone = trim($request->job->schedule->timezone);
+
+      if (in_array($timezone, DateTimeZone::listIdentifiers())) {
+        $this->schedule->timezone       = $timezone;
       }
     }
 

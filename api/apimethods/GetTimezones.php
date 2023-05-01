@@ -10,7 +10,7 @@ class GetTimezones extends AbstractAPIMethod {
     return false;
   }
 
-  public function rateLimits() {
+  public function rateLimits($sessionToken) {
     return [
       new RateLimit(5, RateLimit::SECOND)
     ];

@@ -101,7 +101,7 @@ interface APIMethod {
   public function validateRequest($request);
   public function execute($request, $sessionToken, $language);
   public function rateLimitKey($request, $sessionToken);
-  public function rateLimits();
+  public function rateLimits($sessionToken);
 }
 
 abstract class AbstractAPIMethod implements APIMethod {
@@ -113,7 +113,7 @@ abstract class AbstractAPIMethod implements APIMethod {
     }
   }
 
-  public function rateLimits() {
+  public function rateLimits($sessionToken) {
     return [];
   }
 }

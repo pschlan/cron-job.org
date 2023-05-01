@@ -54,7 +54,7 @@ class APIDispatcher extends AbstractDispatcher {
   public function dispatch() {
     global $config;
 
-    $origin = strtolower($_SERVER['HTTP_ORIGIN']);
+    $origin = strtolower(isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '');
 
     if (in_array($origin, $config['allowCredentialsOrigins'])) {
       header('Access-Control-Allow-Origin: ' . $origin);

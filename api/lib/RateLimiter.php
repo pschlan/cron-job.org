@@ -4,7 +4,7 @@ require_once('SessionToken.php');
 
 class RateLimiter {
   public static function check($apiMethod, $request, $sessionToken) {
-    foreach ($apiMethod->rateLimits() as $limit) {
+    foreach ($apiMethod->rateLimits($sessionToken) as $limit) {
       $key = join(':', [
         $limit->rateLimitKey(),
         $apiMethod->rateLimitKey($request, $sessionToken)

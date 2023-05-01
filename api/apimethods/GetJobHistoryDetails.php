@@ -11,7 +11,7 @@ class GetJobHistoryDetails extends AbstractAPIMethod {
     return true;
   }
 
-  public function rateLimits() {
+  public function rateLimits($sessionToken) {
     return [
       new RateLimit(5, RateLimit::SECOND)
     ];

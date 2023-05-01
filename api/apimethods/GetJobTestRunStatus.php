@@ -11,7 +11,7 @@ class GetJobTestRunStatus extends AbstractAPIMethod {
     return true;
   }
 
-  public function rateLimits() {
+  public function rateLimits($sessionToken) {
     return [
       new RateLimit(10, RateLimit::SECOND)
     ];

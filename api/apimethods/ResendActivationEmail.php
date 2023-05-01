@@ -13,7 +13,7 @@ class ResendActivationEmail extends AbstractAPIMethod {
     return false;
   }
 
-  public function rateLimits() {
+  public function rateLimits($sessionToken) {
     return [
       new RateLimit(1, 1 * RateLimit::MINUTE),
       new RateLimit(5, 1 * RateLimit::HOUR)
