@@ -15,6 +15,8 @@
 #include <memory>
 #include <stdexcept>
 
+#include <unistd.h>
+
 #include "CurlWorker.h"
 #include "UpdateThread.h"
 #include "App.h"
