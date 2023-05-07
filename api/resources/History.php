@@ -112,9 +112,10 @@ class HistoryManager {
           array_keys($jobDetails->schedule->mdays),
           array_keys($jobDetails->schedule->wdays),
           array_keys($jobDetails->schedule->hours),
-          array_keys($jobDetails->schedule->minutes)
+          array_keys($jobDetails->schedule->minutes),
+          $jobDetails->schedule->expiresAt
         );
-        $predictions = $predictor->predictNextExecutions(time(), $maxPredictions);
+        $predictions = $predictor->predictNextExecutions(null, $maxPredictions);
       }
     } catch (Exception $ex) {
       return false;
@@ -192,7 +193,7 @@ class HistoryManager {
   private function getNodeNotifications($client, $maxEntries) {
     try {
       $notifications = $client->getNotifications($this->authToken->userId, $maxEntries);
-      
+
       $result = [];
       foreach ($notifications as $notification) {
         $result[] = NotificationItem::fromThriftNotificationEntry($notification);

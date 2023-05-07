@@ -20,10 +20,12 @@ CREATE TABLE `job` (
   `timezone` varchar(32) NOT NULL DEFAULT 'Europe/Berlin',
   `usergroupid` int(11) NOT NULL DEFAULT '1',
   `request_timeout` int(11) NOT NULL DEFAULT '-1',
-  `redirect_success` tinyint(4) NOT NULL DEFAULT '0';
+  `redirect_success` tinyint(4) NOT NULL DEFAULT '0',
+  `expires_at` bigint(14) NOT NULL DEFAULT '0',
   PRIMARY KEY (`jobid`),
   KEY `userid` (`userid`),
-  KEY `timezone` (`timezone`)
+  KEY `timezone` (`timezone`),
+  KEY `expires_at` (`expires_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `job_body` (

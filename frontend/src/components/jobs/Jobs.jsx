@@ -50,7 +50,7 @@ export default function Jobs() {
     {
       head: t('jobs.titleurl'),
       cell: job => <div style={{display: 'flex', alignItems: 'center'}}>
-        <JobIcon status={job.lastStatus} enabled={job.enabled} />
+        <JobIcon status={job.lastStatus} enabled={job.enabled} hasNextExecution={!!job.nextExecution} />
         <div>
           <div>{job.title}</div>
           <div style={{maxWidth: 300, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis'}}><Typography variant="caption" noWrap={true}><Link href={job.url} target="_blank" rel="noopener nofollow">{job.url}</Link></Typography></div>

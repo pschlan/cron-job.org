@@ -16,6 +16,7 @@ class JobSchedule {
   public $minutes = [];
   public $months = [];
   public $wdays = [];
+  public $expiresAt;
 }
 
 class JobNotification {
@@ -105,6 +106,7 @@ class Job {
       $result->schedule->minutes    = array_keys($job->schedule->minutes);
       $result->schedule->months     = array_keys($job->schedule->months);
       $result->schedule->wdays      = array_keys($job->schedule->wdays);
+      $result->schedule->expiresAt  = $job->schedule->expiresAt;
     } else {
       unset($result->schedule);
     }
@@ -124,9 +126,10 @@ class Job {
       array_keys($job->schedule->mdays),
       array_keys($job->schedule->wdays),
       array_keys($job->schedule->hours),
-      array_keys($job->schedule->minutes)
+      array_keys($job->schedule->minutes),
+      $job->schedule->expiresAt
     );
-    $result->nextExecution  = $predictor->predictNextExecution(time());
+    $result->nextExecution  = $predictor->predictNextExecution(null);
     if ($result->nextExecution === false) {
       $result->nextExecution = null;
     }
@@ -169,6 +172,7 @@ class Job {
     $job->schedule->months          = $this->toThriftSet($this->schedule->months,   1,  12);
     $job->schedule->wdays           = $this->toThriftSet($this->schedule->wdays,    0,  6);
     $job->schedule->timezone        = $this->schedule->timezone;
+    $job->schedule->expiresAt       = $this->schedule->expiresAt;
 
     $job->extendedData              = new \chronos\JobExtendedData;
     $job->extendedData->headers     = $this->extendedData->headers;
@@ -217,6 +221,7 @@ class Job {
       $this->schedule->timezone       = $timezone;
     }
 
+    $this->schedule->expiresAt        = $request->job->schedule->expiresAt;
     $this->schedule->hours            = $request->job->schedule->hours;
     $this->schedule->mdays            = $request->job->schedule->mdays;
     $this->schedule->minutes          = $request->job->schedule->minutes;
@@ -300,6 +305,9 @@ class Job {
       }
     }
 
+    if (isset($request->job->schedule) && isset($request->job->schedule->expiresAt)) {
+      $this->schedule->expiresAt        = $request->job->schedule->expiresAt;
+    }
     if (isset($request->job->schedule) && isset($request->job->schedule->hours)) {
       $this->schedule->hours            = $request->job->schedule->hours;
     }

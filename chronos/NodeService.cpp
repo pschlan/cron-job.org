@@ -65,7 +65,7 @@ public:
             std::unique_ptr<Chronos::MySQL_DB> db(Chronos::App::getInstance()->createMySQLConnection());
 
 	        MYSQL_ROW row;
-            auto res = db->query("SELECT `jobid`,`userid`,`enabled`,`title`,`save_responses`,`last_status`,`last_fetch`,`last_duration`,`fail_counter`,`url`,`request_method`,`timezone`,`type`,`usergroupid`,`request_timeout`,`redirect_success` FROM `job` WHERE `userid`=%v",
+            auto res = db->query("SELECT `jobid`,`userid`,`enabled`,`title`,`save_responses`,`last_status`,`last_fetch`,`last_duration`,`fail_counter`,`url`,`request_method`,`timezone`,`type`,`usergroupid`,`request_timeout`,`redirect_success`,`expires_at` FROM `job` WHERE `userid`=%v",
                 userId);
             _return.reserve(res->numRows());
             while((row = res->fetchRow()))
@@ -100,6 +100,9 @@ public:
                 job.schedule.timezone = row[11];
                 job.__isset.schedule = true;
 
+                job.schedule.expiresAt = std::stoll(row[16]);
+                job.schedule.__isset.expiresAt = true;
+
                 getJobSchedule(db, job.identifier, "hour",      job.schedule.hours);
                 getJobSchedule(db, job.identifier, "mday",      job.schedule.mdays);
                 getJobSchedule(db, job.identifier, "minute",    job.schedule.minutes);
@@ -128,7 +131,7 @@ public:
             auto res = db->query("SELECT `jobid`,`userid`,`enabled`,`title`,`save_responses`,`last_status`,`last_fetch`,"
                     "`last_duration`,`fail_counter`,`url`,`request_method`,`auth_enable`,`auth_user`,`auth_pass`,"
                     "`notify_failure`,`notify_success`,`notify_disable`,`timezone`,`type`,`usergroupid`,`request_timeout`, "
-		    "`redirect_success` "
+                    "`redirect_success`,`expires_at` "
                     "FROM `job` WHERE `jobid`=%v AND `userid`=%v",
                 identifier.jobId,
                 identifier.userId);
@@ -173,6 +176,9 @@ public:
 
                 _return.schedule.timezone = row[17];
                 _return.__isset.schedule = true;
+
+                _return.schedule.expiresAt = std::stoll(row[22]);
+                _return.schedule.__isset.expiresAt = true;
             }
 
             getJobSchedule(db, identifier, "hour",      _return.schedule.hours);
@@ -295,6 +301,13 @@ public:
                 saveJobSchedule(db, job.identifier, "minute",    job.schedule.minutes);
                 saveJobSchedule(db, job.identifier, "month",     job.schedule.months);
                 saveJobSchedule(db, job.identifier, "wday",      job.schedule.wdays);
+
+                if(job.schedule.__isset.expiresAt)
+                {
+                    db->query("UPDATE `job` SET `expires_at`=%v WHERE `jobid`=%v",
+                        job.schedule.expiresAt,
+                        job.identifier.jobId);
+                }
             }
 
             if(job.__isset.data)
@@ -737,7 +750,7 @@ public:
         return req;
     }
 
-    void submitJobTestRun(TestRunHandle &_return, const Job &job, const std::string &xForwardedFor)
+    void submitJobTestRun(TestRunHandle &_return, const Job &job, const std::string &xForwardedFor) override
     {
         std::cout << "ChronosNodeHandler::submitJobTestRun()" << std::endl;
 
@@ -754,7 +767,7 @@ public:
         _return = testRunThread->submit(std::move(request));
     }
 
-    void getJobTestRunStatus(TestRunStatus &_return, const TestRunHandle &handle)
+    void getJobTestRunStatus(TestRunStatus &_return, const TestRunHandle &handle) override
     {
         std::cout << "ChronosNodeHandler::getJobTestRunStatus(" << handle << ")" << std::endl;
 
@@ -800,7 +813,7 @@ public:
         _return.stats.total         = status.timeTotal;
     }
 
-    void deleteJobTestRun(const TestRunHandle &handle)
+    void deleteJobTestRun(const TestRunHandle &handle) override
     {
         std::cout << "ChronosNodeHandler::deleteJobTestRun(" << handle << ")" << std::endl;
 
