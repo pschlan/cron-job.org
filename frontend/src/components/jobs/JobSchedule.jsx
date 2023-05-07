@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { RadioGroup, FormControlLabel, Radio, Select, MenuItem, makeStyles, FormControl, InputLabel, FormLabel, FormGroup, List, ListItem, ListItemText, TextField, InputAdornment, IconButton } from '@material-ui/core';
+import { RadioGroup, FormControlLabel, Radio, Select, MenuItem, makeStyles, FormControl, InputLabel, FormLabel, FormGroup, List, ListItem, ListItemText, TextField, InputAdornment, IconButton, Switch } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 import { predictNextExecutions, ExecutionDate } from '../../utils/ExecutionPredictor';
@@ -63,6 +63,12 @@ const useStyles = makeStyles((theme) => ({
       fontFamily: '"Roboto Mono", courier',
       textAlign: 'center'
     }
+  },
+  scheduleExpiry: {
+    marginTop: theme.spacing(2)
+  },
+  scheduleExpiryAt: {
+    marginLeft: theme.spacing(6)
   }
 }));
 
@@ -194,7 +200,7 @@ function DayTimeSchedule({ initialSchedule, onChange = () => null }) {
     });
   }, [hour, minute, onChangeHook]);
 
-  return <span  className={classes.schedule}>
+  return <span className={classes.schedule}>
     <FormControl>
       <span>{t('jobs.schedule.everydayat')}</span>
       <Select value={hour} onChange={({target}) => setHour(parseInt(target.value))}>
@@ -470,15 +476,15 @@ const SCHEDULE_TYPES = {
   'onceAYearTime': parseOnceAYearTimeSchedule
 };
 
-function SchedulePreview({ schedule, scheduleType }) {
+function SchedulePreview({ schedule, scheduleType, expiresAt }) {
   const { t } = useTranslation();
   const classes = useStyles();
 
   const [ nextExecutions, setNextExecutions ] = useState([]);
 
   useEffect(() => {
-    setNextExecutions(schedule ? predictNextExecutions(schedule, ExecutionDate.now(), 5) : null);
-  }, [schedule]);
+    setNextExecutions(schedule ? predictNextExecutions({ ...schedule, expiresAt }, ExecutionDate.now(), 5) : null);
+  }, [schedule, expiresAt]);
 
   return <>
     {(!nextExecutions || !nextExecutions.length) && scheduleType === 'custom' && <Alert severity="warning" className={classes.alert}>
@@ -499,6 +505,9 @@ export default function JobSchedule({ initialSchedule, onChange = () => null }) 
   const { t } = useTranslation();
   const [ scheduleType, setScheduleType ] = useState('');
   const [ scheduleArgs, setScheduleArgs ] = useState();
+  const [ scheduleDoesExpire, setScheduleDoesExpire ] = useState(false);
+  const [ scheduleExpiresAt, setScheduleExpiresAt ] = useState(null);
+  const [ expiresAt, setExpiresAt ] = useState(0);
   const [ schedules, setSchedules ] = useState({});
   const [ crontabExpression, setCrontabExpression ] = useState(null);
   const onChangeHook = useRef(onChange, []);
@@ -518,12 +527,53 @@ export default function JobSchedule({ initialSchedule, onChange = () => null }) 
     setScheduleType(Object.keys(SCHEDULE_TYPES).reduce((prev, cur) =>
       prev || (SCHEDULE_TYPES[cur](schedArgs) && cur),
       false) || 'custom');
+
+    if (initialSchedule.expiresAt && initialSchedule.expiresAt > 0) {
+      setScheduleDoesExpire(true);
+
+      const expiryStr = parseInt(initialSchedule.expiresAt).toString().padStart(14, '0');
+      setScheduleExpiresAt({
+        mday: parseInt(expiryStr.substring(6, 8)),
+        month: parseInt(expiryStr.substring(4, 6)),
+        year: parseInt(expiryStr.substring(0, 4)),
+        hour: parseInt(expiryStr.substring(8, 10)),
+        minute: parseInt(expiryStr.substring(10, 12))
+      });
+
+    } else {
+      setScheduleDoesExpire(false);
+
+      const date = new Date();
+      setScheduleExpiresAt({
+        mday: date.getDate(),
+        month: date.getMonth() + 1,
+        year: date.getFullYear() + 1,
+        hour: date.getHours(),
+        minute: date.getMinutes()
+      });
+    }
   }, [initialSchedule]);
 
   useEffect(() => {
     setCrontabExpression(scheduleToCrontabExpression(schedules[scheduleType]));
-    onChangeHook.current(schedules[scheduleType]);
-  }, [schedules, scheduleType, onChangeHook]);
+
+    onChangeHook.current({
+      ...schedules[scheduleType],
+      expiresAt
+    });
+  }, [schedules, scheduleType, expiresAt, onChangeHook]);
+
+  useEffect(() => {
+    let newValue = 0;
+    if (scheduleDoesExpire) {
+      newValue = scheduleExpiresAt.year * 10000000000
+        + scheduleExpiresAt.month * 100000000
+        + scheduleExpiresAt.mday * 1000000
+        + scheduleExpiresAt.hour * 10000
+        + scheduleExpiresAt.minute * 100;
+    }
+    setExpiresAt(newValue);
+  }, [scheduleDoesExpire, scheduleExpiresAt]);
 
   return <>
     <div className={!isMobile && classes.root}>
@@ -576,7 +626,7 @@ export default function JobSchedule({ initialSchedule, onChange = () => null }) 
       </div>
       <div className={clsx(classes.secondColumn, isMobile ? classes.helperMobile : classes.helper)}>
         <FormLabel component='legend'>{t('jobs.executionPreview')}</FormLabel>
-        <SchedulePreview schedule={schedules[scheduleType]} scheduleType={scheduleType} />
+        <SchedulePreview schedule={schedules[scheduleType]} scheduleType={scheduleType} expiresAt={expiresAt} />
       </div>
     </div>
 
@@ -599,6 +649,48 @@ export default function JobSchedule({ initialSchedule, onChange = () => null }) 
         }}
         fullWidth
         />
+    </div>
+
+    <div className={classes.scheduleExpiry}>
+      <FormGroup>
+        <FormControlLabel
+          control={<Switch
+            checked={scheduleDoesExpire}
+            onChange={({target}) => setScheduleDoesExpire(target.checked)}
+            />}
+          label={t('jobs.schedule.expires')}
+          />
+      </FormGroup>
+      {scheduleDoesExpire && <div className={clsx(classes.schedule, classes.scheduleExpiryAt)}>
+        <FormControl>
+          <span>{t('jobs.schedule.expiresAt')}</span>
+          <Select value={scheduleExpiresAt.mday} onChange={({target}) => setScheduleExpiresAt(sched => ({ ...sched, mday: parseInt(target.value) }))}>
+            {[...Array(31).keys()].map(md => <MenuItem value={md+1} key={md}>{md+1}.</MenuItem>)}
+          </Select>
+        </FormControl>
+        <FormControl>
+          <Select value={scheduleExpiresAt.month} onChange={({target}) => setScheduleExpiresAt(sched => ({ ...sched, month: parseInt(target.value) }))}>
+            {MONTHS.map(m => <MenuItem value={m} key={m}>{t(`common.months.${m-1}`)}</MenuItem>)}
+          </Select>
+        </FormControl>
+        <FormControl>
+          <Select value={scheduleExpiresAt.year} onChange={({target}) => setScheduleExpiresAt(sched => ({ ...sched, year: parseInt(target.value) }))}>
+            {[...Array(11).keys()].map(offset => (new Date().getFullYear()) + offset).map(y => <MenuItem value={y} key={y}>{y}</MenuItem>)}
+          </Select>
+        </FormControl>
+        <FormControl>
+          <span>{t('jobs.schedule.at')}</span>
+          <Select value={scheduleExpiresAt.hour} onChange={({target}) => setScheduleExpiresAt(sched => ({ ...sched, hour: parseInt(target.value) } ))}>
+            {[...Array(24).keys()].map(h => <MenuItem value={h} key={h}>{h}</MenuItem>)}
+          </Select>
+        </FormControl>
+        <FormControl>
+          <span>:</span>
+          <Select value={scheduleExpiresAt.minute} onChange={({target}) => setScheduleExpiresAt(sched => ({ ...sched, minute: parseInt(target.value) } ))}>
+            {[...Array(60).keys()].map(m => <MenuItem value={m} key={m}>{('0'+m).slice(-2)}</MenuItem>)}
+          </Select>
+        </FormControl>
+      </div>}
     </div>
   </>;
 }

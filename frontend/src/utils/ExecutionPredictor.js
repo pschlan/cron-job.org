@@ -37,6 +37,10 @@ export class ExecutionDate {
     this.time.add(n, 'M');
   }
 
+  year() {
+    return this.time.year();
+  }
+
   month() {
     return this.time.month() + 1;
   }
@@ -59,6 +63,16 @@ export class ExecutionDate {
 
   second() {
     return this.time.second();
+  }
+
+  expiryCompareVal() {
+    return (
+      this.year() * 10000000000
+      + this.month() * 100000000
+      + this.day() * 1000000
+      + this.hour() * 10000
+      + this.minute() * 100
+    );
   }
 
   setDay(d) {
@@ -164,6 +178,10 @@ export function predictNextExecution(schedule, now) {
     }
 
     break;
+  }
+
+  if (schedule.expiresAt && schedule.expiresAt > 0 && next.expiryCompareVal() > schedule.expiresAt) {
+    return null;
   }
 
   return next.clone();
