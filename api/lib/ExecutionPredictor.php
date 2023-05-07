@@ -81,7 +81,7 @@ class ExecutionDate {
 
 		$this->time = mktime($h, $i, $s, $m, $d, $y);
   }
-  
+
   public function timestamp() {
     return $this->time;
   }
@@ -94,14 +94,15 @@ class ExecutionPredictor {
   private $wdays;
   private $hours;
   private $minutes;
-  
-  function __construct($timezone, $months, $mdays, $wdays, $hours, $minutes) {
-    $this->timezone = $timezone;
-    $this->months   = $months;
-    $this->mdays    = $mdays;
-    $this->wdays    = $wdays;
-    $this->hours    = $hours;
-    $this->minutes  = $minutes;
+
+  function __construct($timezone, $months, $mdays, $wdays, $hours, $minutes, $expiresAt = 0) {
+    $this->timezone   = $timezone;
+    $this->months     = $months;
+    $this->mdays      = $mdays;
+    $this->wdays      = $wdays;
+    $this->hours      = $hours;
+    $this->minutes    = $minutes;
+    $this->expiresAt  = $expiresAt;
   }
 
   public function predictNextExecutions($now, $n = 3) {
@@ -109,8 +110,12 @@ class ExecutionPredictor {
 
     for ($i = 0; $i < $n; ++$i) {
       $now = $this->predictNextExecution($now);
-      if ($now === false)
+      if ($now === false) {
         break;
+      }
+      if ($this->expiresAt > 0 && $now > $expiresAt) {
+        break;
+      }
       $result[] = $now;
     }
 
@@ -121,10 +126,13 @@ class ExecutionPredictor {
     $oldTimezone = date_default_timezone_get();
     date_default_timezone_set($this->timezone);
 
+    if ($now === null) {
+      $now = time();
+    }
     $result = $this->_predictNextExecution($now);
 
     date_default_timezone_set($oldTimezone);
-    
+
     return $result;
   }
 
@@ -132,7 +140,7 @@ class ExecutionPredictor {
     $maxIterations = 2048;
 
     if (count($this->months) == 0
-        || count($this->mdays) == 0 
+        || count($this->mdays) == 0
         || count($this->wdays) == 0
         || count($this->hours) == 0
         || count($this->minutes) == 0) {

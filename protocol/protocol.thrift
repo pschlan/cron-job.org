@@ -76,6 +76,7 @@ struct JobSchedule
     4: set<i8> months;
     5: set<i8> wdays;
     6: string timezone;
+    7: optional i64 expiresAt;
 }
 
 struct JobAuthentication

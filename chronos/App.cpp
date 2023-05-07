@@ -310,6 +310,15 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 	const int defaultMaxFailures = App::getInstance()->config->getInt("max_failures");
 	const int8_t defaultExecutionPriority = 0;
 
+	struct tm timeInTimeZone = { 0 };
+	timeInTimeZone.tm_sec = 0;
+	timeInTimeZone.tm_min = minute;
+	timeInTimeZone.tm_hour = hour;
+	timeInTimeZone.tm_mday = mday;
+	timeInTimeZone.tm_mon = month - 1;
+	timeInTimeZone.tm_year = year - 1900;
+	time_t timeStampInTimeZone = timegm(&timeInTimeZone);
+
 	auto res = db->query("SELECT TRIM(`url`),`job`.`jobid`,`auth_enable`,`auth_user`,`auth_pass`,`notify_failure`,`notify_success`,`notify_disable`,`fail_counter`,`save_responses`,`job`.`userid`,`request_method`,COUNT(`job_header`.`jobheaderid`),`job_body`.`body`,`title`,`job`.`type`,`usergroupid`,`request_timeout`,`redirect_success` FROM `job` "
 									"INNER JOIN `job_hours` ON `job_hours`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_mdays` ON `job_mdays`.`jobid`=`job`.`jobid` "
@@ -324,10 +333,11 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 									"AND (`wday`=-1 OR `wday`=%d) "
 									"AND (`month`=-1 OR `month`=%d) "
 									"AND `job`.`timezone`='%q' "
+									"AND (`job`.`expires_at`=0 OR `job`.`expires_at`>=%u) "
 									"AND `enabled`=1 "
 									"GROUP BY `job`.`jobid` "
 									"ORDER BY `fail_counter` ASC, `job`.`jobid` ASC",
-									hour, minute, mday, wday, month, timeZone.c_str());
+									hour, minute, mday, wday, month, timeZone.c_str(), static_cast<long long>(timeStampInTimeZone));
 
 	int jobCount = res->numRows();
 	std::cout << "App::processJobs(): " << jobCount << " jobs found" << std::endl;
