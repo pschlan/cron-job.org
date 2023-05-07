@@ -28,6 +28,26 @@ if ($_SERVER['REQUEST_URI'] === '/') {
   $dispatcher = new APIDispatcher();
   $dispatcher->registerRefreshTokenHandler(UserManager::getRefreshTokenHandler());
 
+} else if ($_SERVER['REQUEST_URI'] === '/executor-nodes.json') {
+  $stmt = Database::get()->prepare('SELECT `public_ip` AS `publicIp` FROM `node` WHERE `enabled`=1 ORDER BY `nodeid` ASC');
+  $stmt->execute();
+
+  $ipAddresses = [];
+  while ($entry = $stmt->fetch(PDO::FETCH_OBJ)) {
+    if (!empty($entry->publicIp)) {
+      $ipAddresses[] = $entry->publicIp;
+    }
+  }
+
+  header('HTTP/1.1 200 OK');
+  header('Content-Type: application/json');
+
+  echo json_encode((object)[
+    'ipAddresses' => $ipAddresses
+  ]);
+
+  exit();
+
 } else {
   require_once('./lib/RESTDispatcher.php');
 

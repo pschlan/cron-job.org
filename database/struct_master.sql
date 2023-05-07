@@ -61,6 +61,7 @@ CREATE TABLE `node`(
     `nodeid` int(11) NOT NULL AUTO_INCREMENT,
     `name` varchar(128) NOT NULL DEFAULT '',
     `ip` varchar(32) NOT NULL DEFAULT '',
+    `public_ip` varchar(32) NOT NULL DEFAULT '',
     `port` int(11) NOT NULL DEFAULT 9090,
     `enabled` tinyint(4) NOT NULL DEFAULT '1',
     PRIMARY KEY(`nodeid`)
