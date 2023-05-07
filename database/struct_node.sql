@@ -3,11 +3,11 @@ CREATE TABLE `job` (
   `userid` int(11) NOT NULL DEFAULT '0',
   `type` tinyint(4) NOT NULL DEFAULT '0',
   `enabled` tinyint(4) NOT NULL DEFAULT '1',
-  `title` varchar(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `url` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `title` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `url` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
   `auth_enable` tinyint(1) NOT NULL DEFAULT '0',
-  `auth_user` varchar(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `auth_pass` varchar(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `auth_user` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `auth_pass` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
   `notify_failure` tinyint(1) NOT NULL DEFAULT '1',
   `notify_success` tinyint(1) NOT NULL DEFAULT '1',
   `notify_disable` tinyint(1) NOT NULL DEFAULT '1',
@@ -26,7 +26,7 @@ CREATE TABLE `job` (
   KEY `userid` (`userid`),
   KEY `timezone` (`timezone`),
   KEY `expires_at` (`expires_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `job_body` (
   `jobid` int(11) NOT NULL DEFAULT '0',
