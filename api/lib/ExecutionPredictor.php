@@ -85,6 +85,10 @@ class ExecutionDate {
   public function timestamp() {
     return $this->time;
   }
+
+  public function expiryCompareVal() {
+    return intval(date('YmdHis', $this->time));
+  }
 }
 
 class ExecutionPredictor {
@@ -113,9 +117,6 @@ class ExecutionPredictor {
       if ($now === false) {
         break;
       }
-      if ($this->expiresAt > 0 && $now > $expiresAt) {
-        break;
-      }
       $result[] = $now;
     }
 
@@ -125,12 +126,10 @@ class ExecutionPredictor {
   public function predictNextExecution($now) {
     $oldTimezone = date_default_timezone_get();
     date_default_timezone_set($this->timezone);
-
     if ($now === null) {
       $now = time();
     }
     $result = $this->_predictNextExecution($now);
-
     date_default_timezone_set($oldTimezone);
 
     return $result;
@@ -206,6 +205,10 @@ class ExecutionPredictor {
       }
 
       break;
+    }
+
+    if ($this->expiresAt > 0 && $next->expiryCompareVal() > $this->expiresAt) {
+      return false;
     }
 
     return $next->timestamp();

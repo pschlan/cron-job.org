@@ -644,7 +644,7 @@ The JobSchedule object represents the execution schedule of a job.
 Key                 Type                                    Description
 =================== ======================================= ======================================
 timezone            string                                  Schedule time zone (see `here <https://www.php.net/manual/timezones.php>`_ for a list of supported values)
-expiresAt           int                                     Unix time stamp (in job's time zone) after which the job expires (i.e. after which it is not scheduled anymore; `0` = does not expire)
+expiresAt           int                                     Date/time (in job's time zone) after which the job expires, i.e. after which it is not scheduled anymore (format: `YYYYMMDDhhmmss`, `0` = does not expire)
 hours               array of int                            Hours in which to execute the job (0-23; `[-1]` = every hour)
 mdays               array of int                            Days of month in which to execute the job (1-31; `[-1]` = every day of month)
 minutes             array of int                            Minutes in which to execute the job (0-59; `[-1]` = every minute)
