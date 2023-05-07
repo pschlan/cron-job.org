@@ -151,6 +151,7 @@ someFailed          boolean                                 ``true`` in case som
                 "redirectSuccess": false,
                 "schedule": {
                     "timezone": "Europe/Berlin",
+                    "expiresAt": 0,
                     "hours": [
                         -1
                     ],
@@ -245,6 +246,7 @@ jobDetails          array of :ref:`DetailedJob`             Job details
             "redirectSuccess": false,
             "schedule": {
                 "timezone": "Europe/Berlin",
+                "expiresAt": 0,
                 "hours": [
                     -1
                 ],
@@ -304,7 +306,7 @@ jobId               int                                     Identifier of the cr
     curl -X PUT \
          -H 'Content-Type: application/json' \
          -H 'Authorization: Bearer zaX78aqKJuIH4l4RX6njoqADn77MQNJJ' \
-         -d '{"job":{"url":"https://example.com","enabled":"true","saveResponses":true,"schedule":{"timezone":"Europe/Berlin","hours":[-1],"mdays":[-1],"minutes":[-1],"months":[-1],"wdays":[-1]}}}' \
+         -d '{"job":{"url":"https://example.com","enabled":"true","saveResponses":true,"schedule":{"timezone":"Europe/Berlin","expiresAt":0,"hours":[-1],"mdays":[-1],"minutes":[-1],"months":[-1],"wdays":[-1]}}}' \
          https://api.cron-job.org/jobs
 
 **Response Example**
@@ -642,6 +644,7 @@ The JobSchedule object represents the execution schedule of a job.
 Key                 Type                                    Description
 =================== ======================================= ======================================
 timezone            string                                  Schedule time zone (see `here <https://www.php.net/manual/timezones.php>`_ for a list of supported values)
+expiresAt           int                                     Unix time stamp (in job's time zone) after which the job expires (i.e. after which it is not scheduled anymore; `0` = does not expire)
 hours               array of int                            Hours in which to execute the job (0-23; `[-1]` = every hour)
 mdays               array of int                            Days of month in which to execute the job (1-31; `[-1]` = every day of month)
 minutes             array of int                            Minutes in which to execute the job (0-59; `[-1]` = every minute)
