@@ -51,3 +51,10 @@ export function setUiSetting(key, value) {
     value
   }
 }
+
+export function setFolders(folders) {
+  return {
+    type: ActionTypes.SET_FOLDERS,
+    folders
+  }
+}

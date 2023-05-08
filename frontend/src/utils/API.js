@@ -105,6 +105,10 @@ export function getStatusPage(statusPageId) {
   });
 }
 
+export function getFolders() {
+  return performRequest('GetFolders');
+}
+
 export function updateStatusPage(statusPageId, statusPage) {
   return performRequest('UpdateStatusPage', {
     statusPageId,

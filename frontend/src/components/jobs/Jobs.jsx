@@ -18,6 +18,7 @@ import { formatMs } from '../../utils/Units';
 import JobIcon from './JobIcon';
 import { executeJobMassAction } from '../../utils/API';
 import { useSnackbar } from 'notistack';
+import useFolders from '../../hooks/useFolders';
 
 const useStyles = makeStyles((theme) => ({
   actionButton: {
@@ -27,9 +28,21 @@ const useStyles = makeStyles((theme) => ({
 
 const REFRESH_INTERVAL = 60000;
 
-export default function Jobs() {
+export default function Jobs({ match }) {
+  const folderId = parseInt((match && match.params && match.params.folderId) || 0);
+  const jobSelector = jobs => jobs.filter(x => x.folderId === folderId);
+
+  const folders = useFolders();
+  const folderTitle = (folders && (folders.find(x => x.folderId === folderId) || {}).title) || null;
+  const folderBreadcrumb = folderTitle !== null ? [
+    {
+      href: '/jobs/folders/' + folderId,
+      text: folderTitle
+    }
+  ] : [];
+
   const classes = useStyles();
-  const { jobs, loading: isLoading, refresh: refreshJobs } = useJobs(REFRESH_INTERVAL);
+  const { jobs, loading: isLoading, refresh: refreshJobs } = useJobs(REFRESH_INTERVAL, jobSelector);
   const { t } = useTranslation();
   const history = useHistory();
   const { enqueueSnackbar } = useSnackbar();
@@ -126,7 +139,8 @@ export default function Jobs() {
         {
           href: '/jobs',
           text: t('common.cronjobs')
-        }
+        },
+        ...folderBreadcrumb
       ]} />
     <Heading actionButtons={<>
         <Button
@@ -137,7 +151,7 @@ export default function Jobs() {
           onClick={() => history.push('/jobs/create')}
           >{t('jobs.createJob')}</Button>
       </>}>
-      {t('common.cronjobs')}
+      {t('common.cronjobs')}{folderTitle && ': ' + folderTitle}
     </Heading>
     <TableContainer component={Paper}>
       <Table

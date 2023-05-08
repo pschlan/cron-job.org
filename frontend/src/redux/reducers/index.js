@@ -5,6 +5,7 @@ import jobs from './jobs';
 import timezones from './timezones';
 import userProfile from './userProfile';
 import ui from './ui';
+import folders from './folders';
 
 export default combineReducers({
   auth,
@@ -12,7 +13,8 @@ export default combineReducers({
   jobs,
   timezones,
   userProfile,
-  ui
+  ui,
+  folders
 });
 
-//! @tood Logout: Flush state
+//! @todo Logout: Flush state
