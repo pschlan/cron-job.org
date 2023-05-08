@@ -57,6 +57,11 @@ class JobMetadata
             'isRequired' => false,
             'type' => TType::BOOL,
         ),
+        8 => array(
+            'var' => 'folderId',
+            'isRequired' => false,
+            'type' => TType::I32,
+        ),
     );
 
     /**
@@ -87,6 +92,10 @@ class JobMetadata
      * @var bool
      */
     public $redirectSuccess = null;
+    /**
+     * @var int
+     */
+    public $folderId = null;
 
     public function __construct($vals = null)
     {
@@ -111,6 +120,9 @@ class JobMetadata
             }
             if (isset($vals['redirectSuccess'])) {
                 $this->redirectSuccess = $vals['redirectSuccess'];
+            }
+            if (isset($vals['folderId'])) {
+                $this->folderId = $vals['folderId'];
             }
         }
     }
@@ -183,6 +195,13 @@ class JobMetadata
                         $xfer += $input->skip($ftype);
                     }
                     break;
+                case 8:
+                    if ($ftype == TType::I32) {
+                        $xfer += $input->readI32($this->folderId);
+                    } else {
+                        $xfer += $input->skip($ftype);
+                    }
+                    break;
                 default:
                     $xfer += $input->skip($ftype);
                     break;
@@ -230,6 +249,11 @@ class JobMetadata
         if ($this->redirectSuccess !== null) {
             $xfer += $output->writeFieldBegin('redirectSuccess', TType::BOOL, 7);
             $xfer += $output->writeBool($this->redirectSuccess);
+            $xfer += $output->writeFieldEnd();
+        }
+        if ($this->folderId !== null) {
+            $xfer += $output->writeFieldBegin('folderId', TType::I32, 8);
+            $xfer += $output->writeI32($this->folderId);
             $xfer += $output->writeFieldEnd();
         }
         $xfer += $output->writeFieldStop();
