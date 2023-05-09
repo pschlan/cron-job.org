@@ -638,6 +638,11 @@ class UserManager {
       ':userId'             => $this->authToken->userId
     ]);
 
+    $stmt = Database::get()->prepare('DELETE FROM `refreshtoken` WHERE `userid`=:userId');
+    $stmt->execute([
+      ':userId'             => $this->authToken->userId
+    ]);
+
     $stmt = Database::get()->prepare('DELETE FROM `user` WHERE `userid`=:userId');
     $stmt->execute([
       ':userId'             => $this->authToken->userId
