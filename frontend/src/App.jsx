@@ -212,6 +212,9 @@ function App() {
             <Route path="/jobs/:jobId" exact component={JobEditor} />
             <Route path="/jobs" exact component={Jobs} />
             <Route path="/jobs/folders/:folderId" exact component={Jobs} />
+            <Route path="/jobs/folders/:folderId/:jobId/history" exact component={History} />
+            <Route path="/jobs/folders/:folderId/create" exact component={JobEditor} />
+            <Route path="/jobs/folders/:folderId/:jobId" exact component={JobEditor} />
             {Config.enableStatusPages && <Route path="/statuspages/:statusPageId" exact component={StatusPageEditor} />}
             {Config.enableStatusPages && <Route path="/statuspages" exact component={StatusPages} />}
             <Route path="/settings" exact component={Settings} />

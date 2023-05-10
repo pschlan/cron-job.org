@@ -18,7 +18,7 @@ import { formatMs } from '../../utils/Units';
 import JobIcon from './JobIcon';
 import { executeJobMassAction } from '../../utils/API';
 import { useSnackbar } from 'notistack';
-import useFolders from '../../hooks/useFolders';
+import useFolder from '../../hooks/useFolder';
 
 const useStyles = makeStyles((theme) => ({
   actionButton: {
@@ -29,17 +29,9 @@ const useStyles = makeStyles((theme) => ({
 const REFRESH_INTERVAL = 60000;
 
 export default function Jobs({ match }) {
-  const folderId = parseInt((match && match.params && match.params.folderId) || 0);
-  const jobSelector = jobs => jobs.filter(x => x.folderId === folderId);
+  const { folderId, folderTitle, folderBreadcrumb, urlPrefix } = useFolder(match);
 
-  const folders = useFolders();
-  const folderTitle = (folders && (folders.find(x => x.folderId === folderId) || {}).title) || null;
-  const folderBreadcrumb = folderTitle !== null ? [
-    {
-      href: '/jobs/folders/' + folderId,
-      text: folderTitle
-    }
-  ] : [];
+  const jobSelector = jobs => jobs.filter(x => x.folderId === folderId);
 
   const classes = useStyles();
   const { jobs, loading: isLoading, refresh: refreshJobs } = useJobs(REFRESH_INTERVAL, jobSelector);
@@ -96,7 +88,7 @@ export default function Jobs({ match }) {
           size="small"
           startIcon={<HistoryIcon />}
           className={classes.actionButton}
-          onClick={() => history.push('/jobs/' + job.jobId + '/history')}
+          onClick={() => history.push(urlPrefix + '/' + job.jobId + '/history')}
           >
           {t('jobs.history')}
         </Button>
@@ -105,7 +97,7 @@ export default function Jobs({ match }) {
           size="small"
           startIcon={<EditIcon />}
           className={classes.actionButton}
-          onClick={() => history.push('/jobs/' + job.jobId)}
+          onClick={() => history.push(urlPrefix + '/' + job.jobId)}
           >
           {t('common.edit')}
         </Button>
@@ -148,7 +140,7 @@ export default function Jobs({ match }) {
           size='small'
           startIcon={<AddIcon />}
           color='primary'
-          onClick={() => history.push('/jobs/create')}
+          onClick={() => history.push(urlPrefix + '/create')}
           >{t('jobs.createJob')}</Button>
       </>}>
       {t('common.cronjobs')}{folderTitle && ': ' + folderTitle}

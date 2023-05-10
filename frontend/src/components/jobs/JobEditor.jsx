@@ -46,6 +46,7 @@ import clsx from 'clsx';
 import useUserProfile from '../../hooks/useUserProfile';
 import JobTestRun from './JobTestRun';
 import JobExport from './JobExport';
+import useFolder from '../../hooks/useFolder';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -95,6 +96,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function JobEditor({ match }) {
   //! @todo Check URL for >/dev/null etc.
+  const { folderId, folderBreadcrumb, urlPrefix } = useFolder(match);
 
   const { t } = useTranslation();
   const classes = useStyles();
@@ -124,6 +126,7 @@ export default function JobEditor({ match }) {
   const [ jobHeaders, setJobHeaders ] = useState([]);
   const [ schedule, setSchedule ] = useState({});
   const [ timezone, setTimezone ] = useState();
+  const [ jobFolderId, setJobFolderId ] = useState();
   const [ tabValue, setTabValue ] = useState('common');
   const [ saving, setSaving ] = useState(false);
   const [ showDeleteJob, setShowDeleteJob ] = useState(false);
@@ -169,7 +172,8 @@ export default function JobEditor({ match }) {
           onDisable: true,
           onFailure: false
         },
-        requestMethod: RequestMethod.GET
+        requestMethod: RequestMethod.GET,
+        folderId
       });
     } else {
       getJobDetails(jobId)
@@ -196,6 +200,7 @@ export default function JobEditor({ match }) {
       setJobHeaders(Object.keys(job.extendedData.headers).reduce((prev, cur) =>
         [...prev, { key: cur, value: job.extendedData.headers[cur] }], []));
       setIsLoading(false);
+      setJobFolderId(job.folderId);
     }
   }, [job, userProfile]);
 
@@ -221,9 +226,10 @@ export default function JobEditor({ match }) {
       schedule: {
         ...schedule,
         timezone
-      }
+      },
+      folderId: jobFolderId
     });
-  }, [jobTitle, jobURL, jobEnabled, saveResponses, requestTimeout, redirectSuccess, authEnable, authUser, authPassword, notification, requestMethod, requestBody, jobHeaders, schedule, timezone]);
+  }, [jobTitle, jobURL, jobEnabled, saveResponses, requestTimeout, redirectSuccess, authEnable, authUser, authPassword, notification, requestMethod, requestBody, jobHeaders, schedule, timezone, jobFolderId]);
 
   const maxRequestTimeout = (userProfile && userProfile.userGroup && userProfile.userGroup.requestTimeout) || 30;
 
@@ -246,7 +252,7 @@ export default function JobEditor({ match }) {
       createJob(updatedJob)
         .then(() => {
           enqueueSnackbar(t('jobs.created'), { variant: 'success' });
-          history.push('/jobs');
+          history.push(urlPrefix);
         })
         .catch(() => enqueueSnackbar(t('jobs.failedToCreate'), { variant: 'error' }))
         .finally(() => setSaving(false));
@@ -266,7 +272,7 @@ export default function JobEditor({ match }) {
     apiDeleteJob(jobId)
       .then(() => {
         enqueueSnackbar(t('jobs.deleted'), { variant: 'success' });
-        history.push('/jobs');
+        history.push(urlPrefix);
       })
       .catch(() => enqueueSnackbar(t('jobs.failedToDelete'), { variant: 'error' }))
       .finally(() => setShowDeleteJob(false));
@@ -276,7 +282,7 @@ export default function JobEditor({ match }) {
     apiCloneJob(jobId, t('jobs.cloneSuffix'))
       .then(result => {
         enqueueSnackbar(t('jobs.cloned'), { variant: 'success' });
-        history.push('/jobs/' + result.jobId);
+        history.push(urlPrefix + '/' + result.jobId);
       })
       .catch(() => enqueueSnackbar(t('jobs.failedToClone'), { variant: 'error' }));
   }
@@ -341,11 +347,12 @@ export default function JobEditor({ match }) {
           href: '/jobs',
           text: t('common.cronjobs')
         },
+        ...folderBreadcrumb,
         createMode ? {
-          href: '/jobs/create',
+          href: urlPrefix + '/create',
           text: t('jobs.createJob')
         } : {
-          href: '/jobs/' + jobId,
+          href: urlPrefix + '/' + jobId,
           text: job.title || job.url
         }
       ]} />
@@ -358,7 +365,7 @@ export default function JobEditor({ match }) {
             {
               icon: <HistoryIcon fontSize='small' />,
               text: t('jobs.executionHistory'),
-              href: '/jobs/' + jobId + '/history'
+              href: urlPrefix + '/' + jobId + '/history'
             },
             {
               icon: <CloneIcon fontSize='small' />,

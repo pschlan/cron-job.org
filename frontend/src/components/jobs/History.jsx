@@ -21,10 +21,13 @@ import { useHistory } from 'react-router-dom';
 import { ResponsiveContainer, AreaChart, XAxis, Area, YAxis, Tooltip } from 'recharts';
 import { formatMs } from '../../utils/Units';
 import useViewport from '../../hooks/useViewport';
+import useFolder from '../../hooks/useFolder';
 
 const REFRESH_INTERVAL = 60000;
 
 export default function History({ match }) {
+  const { folderId, folderBreadcrumb, urlPrefix } = useFolder(match);
+
   const { t } = useTranslation();
   const jobId = parseInt(match.params.jobId);
   const { job, loading: pageLoading } = useJob(jobId);
@@ -130,12 +133,13 @@ export default function History({ match }) {
           href: '/jobs',
           text: t('common.cronjobs')
         },
+        ...folderBreadcrumb,
         {
-          href: '/jobs/' + jobId,
+          href: urlPrefix + '/' + jobId,
           text: job.title || job.url
         },
         {
-          href: '/jobs/' + jobId + '/history',
+          href: urlPrefix + '/' + jobId + '/history',
           text: t('jobs.history')
         }
       ]} />
@@ -144,7 +148,7 @@ export default function History({ match }) {
           variant='contained'
           size='small'
           startIcon={<EditIcon />}
-          onClick={() => routerHistory.push('/jobs/' + jobId)}
+          onClick={() => routerHistory.push(urlPrefix + '/' + jobId)}
           >{t('jobs.editJob')}</Button>
       </>}>
       {t('jobs.jobHistoryHeading', { jobTitle: job.title || job.url })}
