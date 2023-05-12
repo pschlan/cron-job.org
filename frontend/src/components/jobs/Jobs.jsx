@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Paper, makeStyles, TableContainer, Link, Typography, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@material-ui/core';
+import { Paper, makeStyles, TableContainer, Link, Typography, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, ButtonGroup } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
 import Table from '../misc/Table';
 import moment from 'moment';
@@ -10,6 +10,7 @@ import HistoryIcon from '@material-ui/icons/History';
 import EnableIcon from '@material-ui/icons/AlarmOnOutlined';
 import DisableIcon from '@material-ui/icons/AlarmOffOutlined';
 import DeleteIcon from '@material-ui/icons/Delete';
+import FolderIcon from '@material-ui/icons/FolderOutlined';
 import { useHistory } from 'react-router-dom';
 import Breadcrumbs from '../misc/Breadcrumbs';
 import useJobs from '../../hooks/useJobs';
@@ -135,13 +136,20 @@ export default function Jobs({ match }) {
         ...folderBreadcrumb
       ]} />
     <Heading actionButtons={<>
-        <Button
-          variant='contained'
-          size='small'
-          startIcon={<AddIcon />}
-          color='primary'
-          onClick={() => history.push(urlPrefix + '/create')}
-          >{t('jobs.createJob')}</Button>
+        <ButtonGroup variant='contained'>
+          <Button
+            variant='contained'
+            size='small'
+            startIcon={<FolderIcon />}
+            onClick={() => history.push('/jobs/folders')}
+            >{t('jobs.folders.manage')}</Button>
+          <Button
+            variant='contained'
+            size='small'
+            startIcon={<AddIcon />}
+            onClick={() => history.push(urlPrefix + '/create')}
+            >{t('jobs.createJob')}</Button>
+        </ButtonGroup>
       </>}>
       {t('common.cronjobs')}{folderTitle && ': ' + folderTitle}
     </Heading>

@@ -41,6 +41,7 @@ import CloneIcon from '@material-ui/icons/FileCopy';
 import TestIcon from '@material-ui/icons/PlayCircleOutline';
 import TimerIcon from '@material-ui/icons/Timer';
 import ExportIcon from '@material-ui/icons/ImportExport';
+import FolderIcon from '@material-ui/icons/FolderOutlined';
 import ValidatingTextField from '../misc/ValidatingTextField';
 import clsx from 'clsx';
 import useUserProfile from '../../hooks/useUserProfile';
@@ -96,7 +97,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function JobEditor({ match }) {
   //! @todo Check URL for >/dev/null etc.
-  const { folderId, folderBreadcrumb, urlPrefix } = useFolder(match);
+  const { folderId, folderBreadcrumb, urlPrefix, folders } = useFolder(match);
 
   const { t } = useTranslation();
   const classes = useStyles();
@@ -201,8 +202,16 @@ export default function JobEditor({ match }) {
         [...prev, { key: cur, value: job.extendedData.headers[cur] }], []));
       setIsLoading(false);
       setJobFolderId(job.folderId);
+
+      if (job.folderId !== folderId) {
+        if (job.folderId === 0) {
+          history.push('/jobs/' + job.jobId);
+        } else {
+          history.push('/jobs/folders/' + job.folderId + '/' + job.jobId)
+        }
+      }
     }
-  }, [job, userProfile]);
+  }, [job, userProfile, folderId, history]);
 
   useEffect(() => {
     setUpdatedJob({
@@ -420,6 +429,21 @@ export default function JobEditor({ match }) {
             fullWidth
             required
             />
+          <div>
+            <InputLabel shrink id='folder-label'>
+              {t('jobs.folder')}
+            </InputLabel>
+            <Select
+              value={folders ? jobFolderId : ''}
+              onChange={({target}) => setJobFolderId(target.value)}
+              labelId='folder-label'
+              startAdornment={<InputAdornment position='start'><FolderIcon /></InputAdornment>}
+              fullWidth>
+                <MenuItem value={0}>-</MenuItem>
+              {folders.map(folder =>
+                <MenuItem value={folder.folderId} key={folder.folderId}>{folder.title}</MenuItem>)}
+            </Select>
+          </div>
           <FormControlLabel
             control={<Switch
               checked={jobEnabled}

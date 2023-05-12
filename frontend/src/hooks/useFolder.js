@@ -14,6 +14,6 @@ export default function useFolder(match) {
   const urlPrefix = folderId > 0 ? '/jobs/folders/' + folderId : '/jobs';
 
   return {
-    folder, folderId, folderTitle, folderBreadcrumb, urlPrefix
+    folder, folderId, folderTitle, folderBreadcrumb, urlPrefix, folders
   };
 }

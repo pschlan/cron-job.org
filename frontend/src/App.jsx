@@ -48,6 +48,7 @@ import useViewport from './hooks/useViewport';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUiSetting } from './redux/actions';
 import useFolders from './hooks/useFolders';
+import Folders from './components/jobs/Folders';
 
 export let snackbarRef = null;
 
@@ -166,11 +167,12 @@ function ConsoleMenu({ selectedId, onListItemClick, indentSubItems = false }) {
 }
 
 function getSelectedId(loc) {
-  const item = loc.split('/')[1];
+  const locParts = loc.split('/');
+  const item = locParts[1];
 
   if (item === 'jobs') {
-    if (loc.split('/')[2] === 'folders') {
-      return 'folders/' + loc.split('/')[3];
+    if (locParts[2] === 'folders' && locParts.length > 3) {
+      return 'folders/' + locParts[3];
     }
   }
 
@@ -207,6 +209,7 @@ function App() {
           >
           <Switch>
             <Route path="/dashboard" exact component={Dashboard} />
+            <Route path="/jobs/folders" exact component={Folders} />
             <Route path="/jobs/:jobId/history" exact component={History} />
             <Route path="/jobs/create" exact component={JobEditor} />
             <Route path="/jobs/:jobId" exact component={JobEditor} />

@@ -26,7 +26,7 @@ import useFolder from '../../hooks/useFolder';
 const REFRESH_INTERVAL = 60000;
 
 export default function History({ match }) {
-  const { folderId, folderBreadcrumb, urlPrefix } = useFolder(match);
+  const { folderBreadcrumb, urlPrefix } = useFolder(match);
 
   const { t } = useTranslation();
   const jobId = parseInt(match.params.jobId);

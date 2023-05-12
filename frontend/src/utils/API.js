@@ -109,6 +109,25 @@ export function getFolders() {
   return performRequest('GetFolders');
 }
 
+export function createFolder(title) {
+  return performRequest('CreateFolder', {
+    title
+  });
+}
+
+export function updateFolder(folderId, title) {
+  return performRequest('UpdateFolder', {
+    folderId,
+    title
+  });
+}
+
+export function deleteFolder(folderId) {
+  return performRequest('DeleteFolder', {
+    folderId
+  });
+}
+
 export function updateStatusPage(statusPageId, statusPage) {
   return performRequest('UpdateStatusPage', {
     statusPageId,

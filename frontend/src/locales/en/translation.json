@@ -277,7 +277,23 @@
     "format": {
       "cronTabCurl": "Crontab + curl"
     },
-    "exportData": "Export data"
+    "exportData": "Export data",
+    "folder": "Folder",
+    "folders": {
+      "manage": "Manage folders",
+      "noFolders": "You do not currently have any folders.",
+      "title": "Title",
+      "create": "Create folder",
+      "createFailed": "Failed to create folder. Please try again later.",
+      "titleConflict": "A folder with this name already exists.",
+      "created": "The folder has been created.",
+      "saved": "The folder has been saved.",
+      "edit": "Edit folder: {{title}}",
+      "delete": "Delete folder: {{title}}",
+      "confirmDeleteFolder": "Do you really want to delete this folder? Any jobs which exist in this folder will be moved to the root folder.",
+      "folderDeleteFailed": "Failed to delete folder. Please try again later.",
+      "folderDeleted": "The folder has been deleted."
+    }
   },
   "statuspages": {
     "title": "Title",
