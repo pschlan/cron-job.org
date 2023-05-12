@@ -231,5 +231,6 @@ CREATE TABLE `folder` (
   `userid` int(11) NOT NULL,
   `title` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`folderid`),
-  KEY `userid` (`userid`)
+  KEY `userid` (`userid`),
+  UNIQUE KEY `user_folder_title` (`userid`, `title`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
