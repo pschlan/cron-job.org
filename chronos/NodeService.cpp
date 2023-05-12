@@ -691,8 +691,8 @@ public:
             std::unique_ptr<MySQL_DB> db(App::getInstance()->createMySQLConnection());
 
             db->query("UPDATE `job` SET `folderid`=%v WHERE `userid`=%v AND `folderid`=%v",
-                userId,
                 destFolderId,
+                userId,
                 sourceFolderId);
         }
         catch(const std::exception &ex)
