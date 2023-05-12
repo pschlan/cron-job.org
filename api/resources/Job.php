@@ -228,7 +228,11 @@ class Job {
       $this->schedule->timezone       = $timezone;
     }
 
-    $this->schedule->expiresAt        = $request->job->schedule->expiresAt;
+    if (isset($request->job->schedule->expiresAt)) {
+      $this->schedule->expiresAt      = $request->job->schedule->expiresAt;
+    } else {
+      $this->schedule->expiresAt      = 0;
+    }
     $this->schedule->hours            = $request->job->schedule->hours;
     $this->schedule->mdays            = $request->job->schedule->mdays;
     $this->schedule->minutes          = $request->job->schedule->minutes;
