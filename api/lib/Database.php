@@ -11,7 +11,7 @@ class Database {
       $user,
       $password);
     $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $this->exec('SET NAMES utf8');
+    $this->exec('SET NAMES utf8mb4');
   }
 
   public static function initialize($host, $user, $password, $db) {

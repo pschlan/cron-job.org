@@ -149,6 +149,7 @@ someFailed          boolean                                 ``true`` in case som
                 "type": 0,
                 "requestTimeout": 300,
                 "redirectSuccess": false,
+                "folderId": 0,
                 "schedule": {
                     "timezone": "Europe/Berlin",
                     "expiresAt": 0,
@@ -244,6 +245,7 @@ jobDetails          array of :ref:`DetailedJob`             Job details
             "type": 0,
             "requestTimeout": 300,
             "redirectSuccess": false,
+            "folderId": 0,
             "schedule": {
                 "timezone": "Europe/Berlin",
                 "expiresAt": 0,
@@ -558,6 +560,7 @@ nextExecution       int                                     Unix timestamp of pr
 type                :ref:`JobType`                          Job type
 requestTimeout      int                                     Job timeout in seconds
 redirectSuccess     boolean                                 Whether to treat 3xx HTTP redirect status codes as success or not
+folderId            int                                     The identifier of the folder this job resides in
 schedule            :ref:`JobSchedule`                      Job schedule
 requestMethod       :ref:`RequestMethod`                    HTTP request method
 =================== ======================================= ======================================

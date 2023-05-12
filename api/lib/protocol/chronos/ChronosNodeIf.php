@@ -92,6 +92,13 @@ interface ChronosNodeIf
     public function disableJobsForUser($userId);
     /**
      * @param int $userId
+     * @param int $sourceFolderId
+     * @param int $destFolderId
+     * @throws \chronos\InternalError
+     */
+    public function moveJobsFromUserFolder($userId, $sourceFolderId, $destFolderId);
+    /**
+     * @param int $userId
      * @param int $userGroupId
      * @throws \chronos\InternalError
      */

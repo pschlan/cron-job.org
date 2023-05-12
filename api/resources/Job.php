@@ -54,6 +54,7 @@ class Job {
   public $type;
   public $requestTimeout;
   public $redirectSuccess;
+  public $folderId;
 
   private $node;
 
@@ -74,6 +75,7 @@ class Job {
     $result->type             = $job->metaData->type;
     $result->requestTimeout   = $job->metaData->requestTimeout;
     $result->redirectSuccess  = $job->metaData->redirectSuccess;
+    $result->folderId         = $job->metaData->folderId;
     $result->url              = $job->data->url;
     $result->requestMethod    = $job->data->requestMethod;
 
@@ -150,6 +152,7 @@ class Job {
     $job->metaData->userGroupId     = $userGroupId;
     $job->metaData->requestTimeout  = $this->requestTimeout;
     $job->metaData->redirectSuccess = $this->redirectSuccess;
+    $job->metaData->folderId        = $this->folderId;
 
     $job->data                      = new \chronos\JobData;
     $job->data->url                 = $this->url;
@@ -194,6 +197,10 @@ class Job {
       $this->redirectSuccess          = boolval($request->job->redirectSuccess);
     }
 
+    if (isset($request->job->folderId)) {
+      $this->folderId                 = intval($request->job->folderId);
+    }
+
     $this->auth->enable               = !!$request->job->auth->enable;
     $this->auth->user                 = (string)$request->job->auth->user;
     $this->auth->password             = (string)$request->job->auth->password;
@@ -221,7 +228,11 @@ class Job {
       $this->schedule->timezone       = $timezone;
     }
 
-    $this->schedule->expiresAt        = $request->job->schedule->expiresAt;
+    if (isset($request->job->schedule->expiresAt)) {
+      $this->schedule->expiresAt      = $request->job->schedule->expiresAt;
+    } else {
+      $this->schedule->expiresAt      = 0;
+    }
     $this->schedule->hours            = $request->job->schedule->hours;
     $this->schedule->mdays            = $request->job->schedule->mdays;
     $this->schedule->minutes          = $request->job->schedule->minutes;
@@ -248,6 +259,10 @@ class Job {
 
     if (isset($request->job->redirectSuccess)) {
       $this->redirectSuccess            = intval($request->job->redirectSuccess);
+    }
+
+    if (isset($request->job->folderId)) {
+      $this->folderId                   = intval($request->job->folderId);
     }
 
     if (isset($request->job->auth) && isset($request->job->auth->enable)) {

@@ -225,3 +225,12 @@ CREATE TABLE `user_subscription` (
   `status` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`userid`)
 ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `folder` (
+  `folderid` int(11) NOT NULL AUTO_INCREMENT,
+  `userid` int(11) NOT NULL,
+  `title` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  PRIMARY KEY (`folderid`),
+  KEY `userid` (`userid`),
+  UNIQUE KEY `user_folder_title` (`userid`, `title`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

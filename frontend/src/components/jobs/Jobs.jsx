@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Paper, makeStyles, TableContainer, Link, Typography, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@material-ui/core';
+import { Paper, makeStyles, TableContainer, Link, Typography, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, ButtonGroup } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
 import Table from '../misc/Table';
 import moment from 'moment';
@@ -10,6 +10,7 @@ import HistoryIcon from '@material-ui/icons/History';
 import EnableIcon from '@material-ui/icons/AlarmOnOutlined';
 import DisableIcon from '@material-ui/icons/AlarmOffOutlined';
 import DeleteIcon from '@material-ui/icons/Delete';
+import FolderIcon from '@material-ui/icons/FolderOutlined';
 import { useHistory } from 'react-router-dom';
 import Breadcrumbs from '../misc/Breadcrumbs';
 import useJobs from '../../hooks/useJobs';
@@ -18,6 +19,7 @@ import { formatMs } from '../../utils/Units';
 import JobIcon from './JobIcon';
 import { executeJobMassAction } from '../../utils/API';
 import { useSnackbar } from 'notistack';
+import useFolder from '../../hooks/useFolder';
 
 const useStyles = makeStyles((theme) => ({
   actionButton: {
@@ -27,9 +29,13 @@ const useStyles = makeStyles((theme) => ({
 
 const REFRESH_INTERVAL = 60000;
 
-export default function Jobs() {
+export default function Jobs({ match }) {
+  const { folderId, folderTitle, folderBreadcrumb, urlPrefix } = useFolder(match);
+
+  const jobSelector = jobs => jobs.filter(x => x.folderId === folderId);
+
   const classes = useStyles();
-  const { jobs, loading: isLoading, refresh: refreshJobs } = useJobs(REFRESH_INTERVAL);
+  const { jobs, loading: isLoading, refresh: refreshJobs } = useJobs(REFRESH_INTERVAL, jobSelector);
   const { t } = useTranslation();
   const history = useHistory();
   const { enqueueSnackbar } = useSnackbar();
@@ -83,7 +89,7 @@ export default function Jobs() {
           size="small"
           startIcon={<HistoryIcon />}
           className={classes.actionButton}
-          onClick={() => history.push('/jobs/' + job.jobId + '/history')}
+          onClick={() => history.push(urlPrefix + '/' + job.jobId + '/history')}
           >
           {t('jobs.history')}
         </Button>
@@ -92,7 +98,7 @@ export default function Jobs() {
           size="small"
           startIcon={<EditIcon />}
           className={classes.actionButton}
-          onClick={() => history.push('/jobs/' + job.jobId)}
+          onClick={() => history.push(urlPrefix + '/' + job.jobId)}
           >
           {t('common.edit')}
         </Button>
@@ -126,18 +132,26 @@ export default function Jobs() {
         {
           href: '/jobs',
           text: t('common.cronjobs')
-        }
+        },
+        ...folderBreadcrumb
       ]} />
     <Heading actionButtons={<>
-        <Button
-          variant='contained'
-          size='small'
-          startIcon={<AddIcon />}
-          color='primary'
-          onClick={() => history.push('/jobs/create')}
-          >{t('jobs.createJob')}</Button>
+        <ButtonGroup variant='contained'>
+          <Button
+            variant='contained'
+            size='small'
+            startIcon={<FolderIcon />}
+            onClick={() => history.push('/jobs/folders')}
+            >{t('jobs.folders.manage')}</Button>
+          <Button
+            variant='contained'
+            size='small'
+            startIcon={<AddIcon />}
+            onClick={() => history.push(urlPrefix + '/create')}
+            >{t('jobs.createJob')}</Button>
+        </ButtonGroup>
       </>}>
-      {t('common.cronjobs')}
+      {t('common.cronjobs')}{folderTitle && ': ' + folderTitle}
     </Heading>
     <TableContainer component={Paper}>
       <Table

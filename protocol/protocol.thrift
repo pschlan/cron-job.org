@@ -46,6 +46,7 @@ struct JobMetadata
     5: optional i64 userGroupId;
     6: optional i32 requestTimeout;
     7: optional bool redirectSuccess;
+    8: optional i32 folderId;
 }
 
 struct JobExecutionInfo
@@ -264,6 +265,7 @@ service ChronosNode
     void deleteJob(1: JobIdentifier identifier) throws(1: ResourceNotFound rnf, 2: InternalError ie);
 
     void disableJobsForUser(1: i64 userId) throws(1: InternalError ie);
+    void moveJobsFromUserFolder(1: i64 userId, 2: i64 sourceFolderId, 3: i64 destFolderId) throws(1: InternalError ie);
     void updateUserGroupId(1: i64 userId, 2: i64 userGroupId) throws(1: InternalError ie);
 
     TestRunHandle submitJobTestRun(1: Job job, 2: string xForwardedFor) throws(1: InternalError ie, 2: InvalidArguments ia, 3: FeatureNotAvailable na);

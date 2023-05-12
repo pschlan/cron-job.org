@@ -22,6 +22,7 @@ CREATE TABLE `job` (
   `request_timeout` int(11) NOT NULL DEFAULT '-1',
   `redirect_success` tinyint(4) NOT NULL DEFAULT '0',
   `expires_at` bigint(14) NOT NULL DEFAULT '0',
+  `folderid` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`jobid`),
   KEY `userid` (`userid`),
   KEY `timezone` (`timezone`),

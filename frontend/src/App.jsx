@@ -10,6 +10,7 @@ import DashboardIcon from '@material-ui/icons/Dashboard';
 import ScheduleIcon from '@material-ui/icons/Schedule';
 import SettingsIcon from '@material-ui/icons/Settings';
 import BarChartIcon from '@material-ui/icons/BarChart';
+import FolderIcon from '@material-ui/icons/FolderOutlined';
 import StatusPagesIcon from '@material-ui/icons/NetworkCheck';
 
 import translationEN from './locales/en/translation.json';
@@ -44,8 +45,10 @@ import { Config } from './utils/Config';
 import StatusPages from './components/statuspages/StatusPages';
 import StatusPageEditor from './components/statuspages/StatusPageEditor';
 import useViewport from './hooks/useViewport';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setUiSetting } from './redux/actions';
+import useFolders from './hooks/useFolders';
+import Folders from './components/jobs/Folders';
 
 export let snackbarRef = null;
 
@@ -102,21 +105,10 @@ function diffLang(lang1, lang2, prefix = '') {
   }
 }
 
-function App() {
-  const location = useLocation();
+function ConsoleMenu({ selectedId, onListItemClick, indentSubItems = false }) {
   const { t } = useTranslation();
-  const { isMobile } = useViewport();
-  const dispatch = useDispatch();
 
-  const languageCode = useLanguageCode();
-
-  diffLang(translationEN, translationDE);
-
-  useEffect(() => {
-    moment.updateLocale(languageCode, {
-      calendar: LANGUAGE_RESOURCES[languageCode].translation.common.calendarFormat
-    });
-  }, [languageCode]);
+  const folders = useFolders();
 
   const menuItems = [
     {
@@ -131,7 +123,14 @@ function App() {
           id: 'jobs',
           text: t('common.cronjobs'),
           icon: <ScheduleIcon />,
-          href: '/jobs'
+          href: '/jobs',
+          subItems: folders.map(folder => (
+            {
+              id: 'folders/' + folder.folderId,
+              text: folder.title,
+              icon: <FolderIcon />,
+              href: '/jobs/folders/' + folder.folderId
+            }))
         },
         Config.enableStatusPages && {
           id: 'statuspages',
@@ -159,6 +158,45 @@ function App() {
     }
   ];
 
+  return <AppMenu
+    items={menuItems}
+    selectedId={selectedId}
+    onListItemClick={onListItemClick}
+    indentSubItems={indentSubItems}
+    />;
+}
+
+function getSelectedId(loc) {
+  const locParts = loc.split('/');
+  const item = locParts[1];
+
+  if (item === 'jobs') {
+    if (locParts[2] === 'folders' && locParts.length > 3) {
+      return 'folders/' + locParts[3];
+    }
+  }
+
+  return item;
+}
+
+function App() {
+  const location = useLocation();
+  const { t } = useTranslation();
+  const { isMobile } = useViewport();
+  const dispatch = useDispatch();
+
+  const indentSubItems = !useSelector(state => state.ui && state.ui.menuClosed);
+
+  const languageCode = useLanguageCode();
+
+  diffLang(translationEN, translationDE);
+
+  useEffect(() => {
+    moment.updateLocale(languageCode, {
+      calendar: LANGUAGE_RESOURCES[languageCode].translation.common.calendarFormat
+    });
+  }, [languageCode]);
+
   return (
     <SnackbarProvider maxSnack={5} autoHideDuration={5000} preventDuplicate={true}>
       <SnackbarReferenceProvider />
@@ -166,15 +204,20 @@ function App() {
       <Authenticator>
         <AppLayout
           menuText={t('common.menu')}
-          menu={<AppMenu items={menuItems} selectedId={location.pathname.split('/')[1]} onListItemClick={isMobile ? () => dispatch(setUiSetting('menuClosed', true)) : () => null} />}
+          menu={<ConsoleMenu indentSubItems={indentSubItems} selectedId={getSelectedId(location.pathname)} onListItemClick={isMobile ? () => dispatch(setUiSetting('menuClosed', true)) : () => null} />}
           toolbar={<AppToolbar />}
           >
           <Switch>
             <Route path="/dashboard" exact component={Dashboard} />
+            <Route path="/jobs/folders" exact component={Folders} />
             <Route path="/jobs/:jobId/history" exact component={History} />
             <Route path="/jobs/create" exact component={JobEditor} />
             <Route path="/jobs/:jobId" exact component={JobEditor} />
             <Route path="/jobs" exact component={Jobs} />
+            <Route path="/jobs/folders/:folderId" exact component={Jobs} />
+            <Route path="/jobs/folders/:folderId/:jobId/history" exact component={History} />
+            <Route path="/jobs/folders/:folderId/create" exact component={JobEditor} />
+            <Route path="/jobs/folders/:folderId/:jobId" exact component={JobEditor} />
             {Config.enableStatusPages && <Route path="/statuspages/:statusPageId" exact component={StatusPageEditor} />}
             {Config.enableStatusPages && <Route path="/statuspages" exact component={StatusPages} />}
             <Route path="/settings" exact component={Settings} />

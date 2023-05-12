@@ -277,7 +277,23 @@
     "format": {
       "cronTabCurl": "Crontab + curl"
     },
-    "exportData": "Export-Daten"
+    "exportData": "Export-Daten",
+    "folder": "Ordner",
+    "folders": {
+      "manage": "Ordner verwalten",
+      "noFolders": "Sie haben derzeit keine Ordner.",
+      "title": "Titel",
+      "create": "Ordner erstellen",
+      "createFailed": "Der Ordner konnte nicht erstellt werden. Bitte versuchen Sie es später erneut.",
+      "titleConflict": "Ein Ordner mit diesem Titel existiert bereits.",
+      "created": "Der Ordner wurde erstellt.",
+      "saved": "Der Ordner wurde gespeichert.",
+      "edit": "Ordner bearbeiten: {{title}}",
+      "delete": "Ordner löschen: {{title}}",
+      "confirmDeleteFolder": "Möchten Sie diesen Ordner wirklich löschen? Eventuell in diesem Ordner vorhandene Jobs werden in den Haupt-Ordner verschoben.",
+      "folderDeleteFailed": "Der Ordner konnte nicht gelöscht werden. Bitte versuchen Sie es später erneut.",
+      "folderDeleted": "Der Ordner wurde gelöscht."
+    }
   },
   "statuspages": {
     "title": "Titel",
