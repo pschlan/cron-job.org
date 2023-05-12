@@ -680,6 +680,28 @@ public:
         }
     }
 
+    void moveJobsFromUserFolder(const int64_t userId, const int64_t sourceFolderId, const int64_t destFolderId) override
+    {
+        using namespace Chronos;
+
+        std::cout << "ChronosNodeHandler::moveJobsFromUserFolder(" << userId << ", " << sourceFolderId << ", " << destFolderId << ")" << std::endl;
+
+        try
+        {
+            std::unique_ptr<MySQL_DB> db(App::getInstance()->createMySQLConnection());
+
+            db->query("UPDATE `job` SET `folderid`=%v WHERE `userid`=%v AND `folderid`=%v",
+                userId,
+                destFolderId,
+                sourceFolderId);
+        }
+        catch(const std::exception &ex)
+        {
+            std::cout << "ChronosNodeHandler::moveJobsFromUserFolder(): Exception: "  << ex.what() << std::endl;
+            throw InternalError();
+        }
+    }
+
     std::unique_ptr<Chronos::HTTPRequest> httpRequestFromJob(const Job &job)
     {
         if(!job.__isset.data)
