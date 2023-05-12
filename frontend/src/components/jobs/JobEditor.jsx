@@ -181,7 +181,7 @@ export default function JobEditor({ match }) {
         .then(result => setJob(result.jobDetails))
         .catch(() => setIsLoading(false));
     }
-  }, [jobId, createMode, userProfile]);
+  }, [jobId, createMode, userProfile, folderId]);
 
   useEffect(() => {
     if (job && userProfile && userProfile.userGroup) {
