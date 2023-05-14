@@ -1,5 +1,5 @@
 import React from 'react';
-import { List, ListItem, ListItemText, ListItemIcon, ListSubheader, Divider, makeStyles } from '@material-ui/core';
+import { List, ListItem, ListItemText, ListItemIcon, ListSubheader, Divider, makeStyles, Typography } from '@material-ui/core';
 import { Link as RouterLink } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
@@ -45,7 +45,7 @@ export default function AppMenu({ items, selectedId, indentSubItems, onListItemC
                   <ListItemIcon title={subItem.text}>
                     {subItem.icon}
                   </ListItemIcon>
-                  <ListItemText primary={subItem.text} />
+                  <ListItemText primary={<Typography noWrap>{subItem.text}</Typography>} />
                 </ListItem>)}
             </List>}
           </>)}
