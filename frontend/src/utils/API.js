@@ -200,10 +200,11 @@ export function updateJob(jobId, job) {
   });
 }
 
-export function executeJobMassAction(jobIds, action) {
+export function executeJobMassAction(jobIds, action, args = {}) {
   return performRequest('ExecuteJobMassAction', {
     jobIds,
-    action
+    action,
+    ...args
   });
 }
 

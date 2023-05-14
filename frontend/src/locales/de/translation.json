@@ -293,7 +293,10 @@
       "confirmDeleteFolder": "Möchten Sie diesen Ordner wirklich löschen? Eventuell in diesem Ordner vorhandene Jobs werden in den Haupt-Ordner verschoben.",
       "folderDeleteFailed": "Der Ordner konnte nicht gelöscht werden. Bitte versuchen Sie es später erneut.",
       "folderDeleted": "Der Ordner wurde gelöscht."
-    }
+    },
+    "move": "Verschieben",
+    "moveText": "Ausgewähltes Element verschieben nach:",
+    "moveText_plural": "{{count}} ausgewählte Elemente verschieben nach:"
   },
   "statuspages": {
     "title": "Titel",

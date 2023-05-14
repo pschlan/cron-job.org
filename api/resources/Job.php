@@ -414,7 +414,7 @@ class JobManager {
     }
   }
 
-  public function executeMassAction($jobIds, $action) {
+  public function executeMassAction($jobIds, $action, $args) {
     $result = true;
 
     foreach ($jobIds as $jobId) {
@@ -438,6 +438,8 @@ class JobManager {
           $job->enabled = true;
         } else if ($action === 'disable') {
           $job->enabled = false;
+        } else if ($action === 'move') {
+          $job->folderId = $args->folderId;
         }
 
         if (!$this->updateJob($job)) {

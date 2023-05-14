@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Paper, makeStyles, TableContainer, Link, Typography, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, ButtonGroup } from '@material-ui/core';
+import { Paper, makeStyles, TableContainer, Link, Typography, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, ButtonGroup, Select, MenuItem, InputAdornment } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
 import Table from '../misc/Table';
 import moment from 'moment';
@@ -30,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
 const REFRESH_INTERVAL = 60000;
 
 export default function Jobs({ match }) {
-  const { folderId, folderTitle, folderBreadcrumb, urlPrefix } = useFolder(match);
+  const { folderId, folderTitle, folderBreadcrumb, urlPrefix, folders } = useFolder(match);
 
   const jobSelector = jobs => jobs.filter(x => x.folderId === folderId);
 
@@ -40,9 +40,10 @@ export default function Jobs({ match }) {
   const history = useHistory();
   const { enqueueSnackbar } = useSnackbar();
   const [confirmJobMassAction, setConfirmJobMassAction] = useState(null);
+  const [moveMassAction, setMoveMassAction] = useState(null);
 
-  function jobMassAction(jobIds, action) {
-    executeJobMassAction(jobIds, action)
+  function jobMassAction(jobIds, action, args = {}) {
+    executeJobMassAction(jobIds, action, args)
       .then(() => {
         enqueueSnackbar(t('common.massActionSucceeded'), { variant: 'success' });
       })
@@ -121,6 +122,14 @@ export default function Jobs({ match }) {
       divider: true
     },
     {
+      icon: <FolderIcon />,
+      text: t('jobs.move'),
+      onExecute: rows => setMoveMassAction({ rows, folderId })
+    },
+    {
+      divider: true
+    },
+    {
       icon: <DeleteIcon />,
       text: t('common.delete'),
       onExecute: rows => setConfirmJobMassAction({ rows, action: 'delete' })
@@ -164,6 +173,38 @@ export default function Jobs({ match }) {
         multiActions={MULTI_ACTIONS}
         />
     </TableContainer>
+
+    {moveMassAction !== null && <Dialog open={true} onClose={() => setMoveMassAction(null)} maxWidth='sm' fullWidth>
+      <DialogTitle>{t('jobs.move', { count: moveMassAction.rows.length })}</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          {t('jobs.moveText', { count: moveMassAction.rows.length })}
+        </DialogContentText>
+        <DialogContent>
+          <Select
+              value={moveMassAction.folderId}
+              onChange={({target}) => setMoveMassAction(x => ({ ...x, folderId: target.value }))}
+              labelId='folder-label'
+              startAdornment={<InputAdornment position='start'><FolderIcon /></InputAdornment>}
+              fullWidth>
+                <MenuItem value={0}>-</MenuItem>
+              {folders.map(folder =>
+                <MenuItem value={folder.folderId} key={folder.folderId}>{folder.title}</MenuItem>)}
+            </Select>
+        </DialogContent>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setMoveMassAction(null)}>
+          {t('common.cancel')}
+        </Button>
+        <Button autoFocus color='primary' onClick={() => {
+          jobMassAction(moveMassAction.rows, 'move', { folderId: moveMassAction.folderId });
+          setMoveMassAction(null);
+        }}>
+          {t('jobs.move')}
+        </Button>
+      </DialogActions>
+    </Dialog>}
 
     {confirmJobMassAction !== null && <Dialog open={true} onClose={() => setConfirmJobMassAction(null)}>
       <DialogTitle>{t('common.confirmMassDeleteTitle', { count: confirmJobMassAction.rows.length })}</DialogTitle>
