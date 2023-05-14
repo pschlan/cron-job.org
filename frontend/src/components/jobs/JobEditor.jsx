@@ -261,7 +261,7 @@ export default function JobEditor({ match }) {
       createJob(updatedJob)
         .then(() => {
           enqueueSnackbar(t('jobs.created'), { variant: 'success' });
-          history.push(urlPrefix);
+          history.push(jobFolderId === 0 ? '/jobs' : '/jobs/folders/' + jobFolderId);
         })
         .catch(() => enqueueSnackbar(t('jobs.failedToCreate'), { variant: 'error' }))
         .finally(() => setSaving(false));
