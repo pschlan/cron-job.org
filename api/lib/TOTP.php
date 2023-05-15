@@ -10,7 +10,7 @@ class TOTP {
     return random_bytes($bits / 8);
   }
 
-  public static function verifyCode($secret, $code, $maxOffset = 1) {
+  public static function verifyCode($secret, $code, &$timeslotOut, $maxOffset = 1) {
     if (strlen($code) != self::CODE_LENGTH) {
       return false;
     }
@@ -19,6 +19,7 @@ class TOTP {
     for ($i = 0; $i < 2 * $maxOffset; ++$i, ++$timeSlot) {
       $expectedCode = self::generateCode($secret, $timeSlot);
       if (hash_equals($expectedCode, $code)) {
+        $timeslotOut = $timeSlot;
         return true;
       }
     }

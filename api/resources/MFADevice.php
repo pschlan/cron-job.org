@@ -118,13 +118,15 @@ class MFADeviceManager {
 
     switch ($device->type) {
     case MFADevice::TYPE_TOTP:
-      if (!TOTP::verifyCode($device->getSecret(), $code)) {
+      $timeslot = 0;
+      if (!TOTP::verifyCode($device->getSecret(), $code, $timeslot)) {
         throw new InvalidMFACodeException();
       }
 
-      Database::get()->prepare('UPDATE `mfadevice` SET `enabled`=:enabled WHERE `userid`=:userId AND `mfadeviceid`=:mfaDeviceId')
+      Database::get()->prepare('UPDATE `mfadevice` SET `enabled`=:enabled,`last_timeslot`=:timeslot WHERE `userid`=:userId AND `mfadeviceid`=:mfaDeviceId')
         ->execute([
           ':enabled'      => 1,
+          ':timeslot'     => $timeslot,
           ':userId'       => $this->authToken->userId,
           ':mfaDeviceId'  => $mfaDeviceId
         ]);
@@ -145,7 +147,7 @@ class MFADeviceManager {
   }
 
   public static function verifyMFACode($userId, $code) {
-    $stmt = Database::get()->prepare('SELECT `type`, `secret` FROM `mfadevice` WHERE `userid`=:userId AND `enabled`=:enabled');
+    $stmt = Database::get()->prepare('SELECT `mfadeviceid` AS `mfaDeviceId`, `type`, `secret`, `last_timeslot` AS `lastTimeslot` FROM `mfadevice` WHERE `userid`=:userId AND `enabled`=:enabled');
     $stmt->execute([
       ':userId'   => $userId,
       ':enabled'  => 1
@@ -154,8 +156,16 @@ class MFADeviceManager {
     while ($row = $stmt->fetch(PDO::FETCH_OBJ)) {
       switch ($row->type) {
       case MFADevice::TYPE_TOTP:
-        if (TOTP::verifyCode(base64_decode($row->secret), $code)) {
-          return true;
+        $timeslot = 0;
+        if (TOTP::verifyCode(base64_decode($row->secret), $code, $timeslot)) {
+          if ($timeslot > intval($row->lastTimeslot)) {
+            $updateStmt = Database::get()->prepare('UPDATE `mfadevice` SET `last_timeslot`=:timeslot WHERE `mfadeviceid`=:mfaDeviceId');
+            $updateStmt->execute([
+              ':timeslot'     => $timeslot,
+              ':mfaDeviceId'  => $row->mfaDeviceId
+            ]);
+            return true;
+          }
         }
         break;
 

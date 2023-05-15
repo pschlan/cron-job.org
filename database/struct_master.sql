@@ -163,6 +163,7 @@ CREATE TABLE `mfadevice` (
   `secret` varchar(255) NOT NULL DEFAULT '',
   `type` tinyint(4) NOT NULL DEFAULT '0',
   `created` int(14) NOT NULL DEFAULT '0',
+  `last_timeslot` int(14) NOT NULL DEFAULT '0',
   PRIMARY KEY (`mfadeviceid`),
   KEY `userid` (`userid`)
 ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
