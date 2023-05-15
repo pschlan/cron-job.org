@@ -246,6 +246,7 @@ function processSubscription($eventName, $subscription) {
 
   case 'canceled':
   case 'incomplete_expired':
+  case 'unpaid':
     $subscriptionManager->deactivateSubscription($productId, $subscriptionId);
     break;
 
