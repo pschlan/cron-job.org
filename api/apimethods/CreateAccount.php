@@ -27,6 +27,8 @@ class CreateAccount extends AbstractAPIMethod {
       &&  isset($request->email)
       &&  isset($request->password)
       &&  isset($request->timezone)
+      &&  $request->firstName !== $request->email
+      &&  $request->lastName !== $request->email
     );
   }
 
