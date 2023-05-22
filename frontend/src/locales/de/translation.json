@@ -119,7 +119,15 @@
     "subscribe": "Abonnieren",
     "failedToSaveNewsletter": "Entschuldigung, aber wir konnten Ihre Entscheidung gerade nicht speichern. Bitte versuchen Sie es später erneut.",
     "newsletterSaved": "Vielen Dank, wir haben Ihre Newsletter-Einstellung gespeichert.",
-    "sustainingMembershipText": "Finden Sie {{serviceName}} nützlich? Möchten Sie uns unterstützen und gleichzeitig von exklusiven Vorteilen profitieren? Werden Sie ein Fördermitglied! Mit Ihrer Fördermitgliedschaft leisten Sie einen Beitrag zu unseren Infrastrukturkosten und helfen uns, unseren Dienst zuverlässig, skalierbar und werbefrei zu halten und kontinuierlich weiterzuentwickeln."
+    "sustainingMembershipText": "Finden Sie {{serviceName}} nützlich? Möchten Sie uns unterstützen und gleichzeitig von exklusiven Vorteilen profitieren? Werden Sie ein Fördermitglied! Mit Ihrer Fördermitgliedschaft leisten Sie einen Beitrag zu unseren Infrastrukturkosten und helfen uns, unseren Dienst zuverlässig, skalierbar und werbefrei zu halten und kontinuierlich weiterzuentwickeln.",
+    "bounceWarning": {
+      "title": "Wir konnten Sie nicht erreichen...",
+      "text": "Unsere letzten Versuche, Benachrichtigungen an Ihre im Profil hinterlegte E-Mail-Adresse zu senden, sind leider fehlgeschlagen. Wir werden daher nunmehr nicht mehr versuchen, neue Benachrichtigungen zu senden. Bitte stellen Sie sicher, dass Ihre E-Mail-Adresse im Profil korrekt angegeben ist und aktualisieren Sie diese gegebenenfalls. Sie können Benachrichtigungen auch hier reaktivieren. Bitte beachten Sie jedoch, dass wir die Benachrichtigungen ggf. erneut deaktivieren, wenn E-Mails weiterhin nicht zugestellt werden können.",
+      "updateProfile": "Profil aktualisieren",
+      "reenable": "Benachrichtigungen reaktivieren",
+      "reenableFailed": "Wir konnten Ihre Benachrichtigungen gerade nicht reaktivieren. Bitte versuchen Sie es später erneut.",
+      "reenableSuccess": "Wir haben Ihre Benachrichtigungen reaktiviert."
+    }
   },
   "events": {
     "cronjobExecution": "Cronjob-Ausführung: {{statusText}}",

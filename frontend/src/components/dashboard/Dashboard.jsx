@@ -3,7 +3,7 @@ import { Paper, makeStyles, Typography, Button, TableContainer, Grid, Box } from
 import { useTranslation } from 'react-i18next';
 import Title from '../misc/Title';
 import Table from '../misc/Table';
-import { getDashboard, updateUserNewsletterSubscribe } from '../../utils/API';
+import { getDashboard, reenableUserNotifications, updateUserNewsletterSubscribe } from '../../utils/API';
 import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useState, useCallback } from 'react';
@@ -27,6 +27,8 @@ import { useSnackbar } from 'notistack';
 import useUserProfile from '../../hooks/useUserProfile';
 import LearnMoreIcon from '@material-ui/icons/Loyalty';
 import SubscribeDialog from '../settings/SubscribeDialog';
+import { Alert, AlertTitle } from '@material-ui/lab';
+import EmailIcon from '@material-ui/icons/Email';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -92,6 +94,7 @@ export default function Dashboard() {
   const dispatch = useDispatch();
   const history = useHistory();
   const [ savingNewsletter, setSavingNewsletter ] = useState(false);
+  const [ reenablingNotifications, setReenablingNotifications ] = useState(false);
   const languageCode = useLanguageCode();
   const { enqueueSnackbar } = useSnackbar();
   const userProfile = useUserProfile();
@@ -113,6 +116,17 @@ export default function Dashboard() {
       })
       .catch(() => enqueueSnackbar(t('dashboard.failedToSaveNewsletter'), { variant: 'error' }))
       .finally(() => setSavingNewsletter(false));
+  }
+
+  function reenableNotifications() {
+    setReenablingNotifications(true);
+    reenableUserNotifications()
+      .then(doRefresh)
+      .then(() => {
+        enqueueSnackbar(t('dashboard.bounceWarning.reenableSuccess'), { variant: 'success' });
+      })
+      .catch(() => enqueueSnackbar(t('dashboard.bounceWarning.reenableFailed'), { variant: 'error' }))
+      .finally(() => setReenablingNotifications(false));
   }
 
   useEffect(() => {
@@ -164,6 +178,39 @@ export default function Dashboard() {
       {t('common.dashboard')}
     </Heading>
     <Grid container spacing={2}>
+      {dashboardData && dashboardData.notificationsAutoDisabled && <Grid item xs={12}>
+        <Alert severity='error'>
+          <AlertTitle>{t('dashboard.bounceWarning.title')}</AlertTitle>
+          <div>
+            {t('dashboard.bounceWarning.text')}
+          </div>
+          <div>
+            <Grid container direction='row' justify='flex-end' spacing={2}>
+              <Grid item>
+              </Grid>
+              <Grid item>
+                <Button
+                  size='small'
+                  startIcon={<NotificationsIcon />}
+                  onClick={() => reenableNotifications()}
+                  disabled={reenablingNotifications}>
+                  {t('dashboard.bounceWarning.reenable')}
+                </Button>
+              </Grid>
+              <Grid item>
+                <Button
+                  variant='contained'
+                  size='small'
+                  color='primary'
+                  startIcon={<EmailIcon />}
+                  onClick={() => history.push('/settings')}>
+                  {t('dashboard.bounceWarning.updateProfile')}
+                </Button>
+              </Grid>
+            </Grid>
+          </div>
+        </Alert>
+      </Grid>}
       <Grid item xs={6} sm={3}>
         {dashboardData && <NumberPanel number={dashboardData.enabledJobs} label={t('dashboard.enabledJobs')} />}
       </Grid>
