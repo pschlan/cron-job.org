@@ -169,7 +169,7 @@ export default function JobEditor({ match }) {
           headers: {}
         },
         notification: {
-          onSuccess: true,
+          onSuccess: false,
           onDisable: true,
           onFailure: false
         },
