@@ -35,9 +35,13 @@ $config = array(
   //!       the second one is the sender email address.
   'emailSender'                     => ['cjo OSS', 'no-reply@example.com'],
 
+  //! @note Adjust return path here. Use %s for VERP payload to auto-process bounces.
+  'emailReturnPath'                 => 'bounce+%s@bounces.example.com',
+
   //! @note Replace the following secrets with random, unique, non-guessable
   //!       values of at least 32 characters. They are used to compute signatures
-  //!       for JWT tokens and need to remain strictly confidential.
+  //!       for JWT and other tokens and need to remain strictly confidential.
+  'emailVerpSecret'                 => 'PLACE_RANDOM_STRING_HERE',
   'sessionTokenSecret'              => 'PLACE_RANDOM_STRING_HERE',
   'emailVerificationTokenSecret'    => 'PLACE_RANDOM_STRING_HERE',
   'lostPasswordTokenSecret'         => 'PLACE_RANDOM_STRING_HERE',

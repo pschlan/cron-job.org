@@ -143,6 +143,7 @@ class SubscriptionManager {
     ]);
     if ($userRow = $stmt->fetch(PDO::FETCH_OBJ)) {
       $mail = new Mail();
+      $mail->setVerp('subscription', $this->userId, $config);
       $mail->setSender($config['emailSender']);
       $mail->setRecipient($userRow->email);
       $mail->setPlainText(file_get_contents('./config/EmailTemplate.txt'));

@@ -45,7 +45,8 @@ class GetDashboard extends AbstractAPIMethod {
       'disabledJobs'        => count(array_filter($jobs->jobs, function($item) { return !$item->enabled; })),
       'successfulJobs'      => count(array_filter($jobs->jobs, function($item) { return $item->lastStatus == 1;})),
       'failedJobs'          => count(array_filter($jobs->jobs, function($item) { return $item->lastStatus > 1; })),
-      'newsletterSubscribe' => $userProfile->newsletterSubscribe
+      'newsletterSubscribe' => $userProfile->newsletterSubscribe,
+      'notificationsAutoDisabled' => $userProfile->notificationsAutoDisabled
     ];
 
     return $result;

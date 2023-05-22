@@ -6,6 +6,7 @@ class Mail {
   private $sender;
   private $subject;
   private $boundary;
+  private $returnPath;
   private $vars = [];
 
   function __construct() {
@@ -28,6 +29,17 @@ class Mail {
     $this->sender = $sender;
   }
 
+  public function setReturnPath($returnPath) {
+    $this->returnPath = $returnPath;
+  }
+
+  public function setVerp($type, $id, $config) {
+    $payload = $type . '-' . $id;
+    $encodedHash = substr(hash_hmac('sha256', $payload, $config['emailVerpSecret'], false), 0, 32);
+    $returnPath = sprintf($config['emailReturnPath'], $payload . '-' . $encodedHash);
+    $this->setReturnPath($returnPath);
+  }
+
   public function setSubject($subject) {
     $this->subject = $subject;
     $this->vars['subject'] = $subject;
@@ -45,14 +57,15 @@ class Mail {
       $this->getPrincipalAddress($this->recipient),
       $this->encodeHeader($this->prepareText($this->subject, false)),
       $body,
-      $this->headers()
+      $this->headers(),
+      !empty($this->returnPath) ? '-f ' . $this->returnPath : ''
     );
   }
 
   private function prepareText($text, $isHtml) {
     $text = preg_replace_callback('/\\$(\\.?[a-zA-Z0-9]+)/', function($matches) use($isHtml) {
       $key = $matches[1];
-      
+
       $expand = false;
       if ($key[0] === '.') {
         $key = substr($key, 1);

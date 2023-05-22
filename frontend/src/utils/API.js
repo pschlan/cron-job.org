@@ -383,3 +383,7 @@ export function updateAPIKey(apiKeyId, title, ipAddresses) {
   const limitIPs = ipAddresses.split(',').map(x => x.trim()).filter(x => x.indexOf('.') > 0);
   return performRequest('UpdateAPIKey', { apiKeyId, title, limitIPs });
 }
+
+export function reenableUserNotifications() {
+  return performRequest('ReenableUserNotifications', {});
+}

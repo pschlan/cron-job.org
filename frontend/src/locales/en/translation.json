@@ -119,7 +119,15 @@
     "subscribe": "Subscribe",
     "failedToSaveNewsletter": "Sorry, we couldn't save your decision at this time. Please try again later.",
     "newsletterSaved": "Thanks, your newsletter preference has been saved.",
-    "sustainingMembershipText": "Do you find {{serviceName}} useful and want to support us and at the same time benefit from exclusive membership rewards? Become a Sustaining Member now! Your Sustaining Membership helps us to cover infrastructure costs and ensures our service can operate and scale reliably, stay ad-free and is constantly improved."
+    "sustainingMembershipText": "Do you find {{serviceName}} useful and want to support us and at the same time benefit from exclusive membership rewards? Become a Sustaining Member now! Your Sustaining Membership helps us to cover infrastructure costs and ensures our service can operate and scale reliably, stay ad-free and is constantly improved.",
+    "bounceWarning": {
+      "title": "We couldn't reach you...",
+      "text": "Our last attempts to send notifications to the email address specified in your profile failed, so we refrain from attempting to send any more notifications to you for now. Please ensure your email address is up to date and change it, if necessary. You can also re-enable notifications here. Please note that we might disable them again in case our emails keep on bouncing back.",
+      "updateProfile": "Update profile",
+      "reenable": "Re-enable notifications",
+      "reenableFailed": "We couldn't re-enable your notifications right now. Please try again later.",
+      "reenableSuccess": "We've re-enabled your notifications."
+    }
   },
   "events": {
     "cronjobExecution": "Cronjob execution: {{statusText}}",

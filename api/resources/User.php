@@ -31,10 +31,12 @@ class UserProfile {
   public $email;
   public $signupDate;
   public $userGroupId;
+  public $notificationsAutoDisabled;
 
   function __construct() {
     $this->signupDate = intval($this->signupDate);
     $this->userGroupId = intval($this->userGroupId);
+    $this->notificationsAutoDisabled = boolval($this->notificationsAutoDisabled);
   }
 }
 
@@ -149,7 +151,7 @@ class UserManager {
   }
 
   public function getProfile() {
-    $stmt = Database::get()->prepare('SELECT `firstname` AS `firstName`, `lastname` AS `lastName`, `timezone`, `email`, `signup_date` AS `signupDate`, `newsletter_subscribe` AS `newsletterSubscribe`,`usergroupid` AS `userGroupId` FROM `user` WHERE `userid`=:userId');
+    $stmt = Database::get()->prepare('SELECT `firstname` AS `firstName`, `lastname` AS `lastName`, `timezone`, `email`, `signup_date` AS `signupDate`, `newsletter_subscribe` AS `newsletterSubscribe`, `usergroupid` AS `userGroupId`, `notifications_auto_disabled` AS `notificationsAutoDisabled` FROM `user` WHERE `userid`=:userId');
     $stmt->setFetchMode(PDO::FETCH_CLASS, UserProfile::class);
     $stmt->execute(array(':userId' => $this->authToken->userId));
     return $stmt->fetch();
@@ -307,6 +309,7 @@ class UserManager {
     $verificationToken = new EmailVerificationToken($this->authToken->userId, $newEmail);
 
     $mail = new Mail();
+    $mail->setVerp('changeemail', $this->authToken->userId, $config);
     $mail->setSender($config['emailSender']);
     $mail->setRecipient($newEmail);
     $mail->setPlainText(file_get_contents('./config/EmailTemplate.txt'));
@@ -340,11 +343,20 @@ class UserManager {
     }
 
     Database::get()
-      ->prepare('UPDATE `user` SET `email`=:email WHERE `userid`=:userId')
+      ->prepare('UPDATE `user` SET `email`=:email,`notifications_auto_disabled`=0 WHERE `userid`=:userId')
       ->execute(['userId' => intval($token->userId), 'email' => $token->email]);
 
     Database::get()->commitTransaction();
 
+    return true;
+  }
+
+  public function reenableNotifications() {
+    Database::get()
+      ->prepare('UPDATE `user` SET `notifications_auto_disabled`=0 WHERE `userid`=:userId')
+      ->execute([
+        ':userId'     => $this->authToken->userId
+      ]);
     return true;
   }
 
@@ -399,6 +411,7 @@ class UserManager {
     $verificationToken = new LostPasswordToken($userId, $passwordSalt);
 
     $mail = new Mail();
+    $mail->setVerp('pwreset', $userId, $config);
     $mail->setSender($config['emailSender']);
     $mail->setRecipient($email);
     $mail->setPlainText(file_get_contents('./config/EmailTemplate.txt'));
@@ -471,7 +484,7 @@ class UserManager {
     $userId = Database::get()->insertId();
 
     $confirmationToken = new AccountConfirmationToken($userId);
-    return self::sendActivationEmail($email, $language, $confirmationToken);
+    return self::sendActivationEmail($email, $language, $confirmationToken, $userId);
   }
 
   public static function resendActivationEmail($email, $password) {
@@ -490,13 +503,14 @@ class UserManager {
       throw new WrongPasswordException();
     }
 
-    return self::sendActivationEmail($row->email, $row->language, new AccountConfirmationToken($row->userId));
+    return self::sendActivationEmail($row->email, $row->language, new AccountConfirmationToken($row->userId), $row->userId);
   }
 
-  private static function sendActivationEmail($email, $language, $confirmationToken) {
+  private static function sendActivationEmail($email, $language, $confirmationToken, $userId) {
     global $config;
 
     $mail = new Mail();
+    $mail->setVerp('signup', $userId, $config);
     $mail->setSender($config['emailSender']);
     $mail->setRecipient($email);
     $mail->setPlainText(file_get_contents('./config/EmailTemplate.txt'));
