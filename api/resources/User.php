@@ -343,7 +343,7 @@ class UserManager {
     }
 
     Database::get()
-      ->prepare('UPDATE `user` SET `email`=:email WHERE `userid`=:userId')
+      ->prepare('UPDATE `user` SET `email`=:email,`notifications_auto_disabled`=0 WHERE `userid`=:userId')
       ->execute(['userId' => intval($token->userId), 'email' => $token->email]);
 
     Database::get()->commitTransaction();
