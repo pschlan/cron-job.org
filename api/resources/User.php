@@ -307,6 +307,7 @@ class UserManager {
     $verificationToken = new EmailVerificationToken($this->authToken->userId, $newEmail);
 
     $mail = new Mail();
+    $mail->setVerp('changeemail', $this->authToken->userId, $config);
     $mail->setSender($config['emailSender']);
     $mail->setRecipient($newEmail);
     $mail->setPlainText(file_get_contents('./config/EmailTemplate.txt'));
@@ -399,6 +400,7 @@ class UserManager {
     $verificationToken = new LostPasswordToken($userId, $passwordSalt);
 
     $mail = new Mail();
+    $mail->setVerp('pwreset', $userId, $config);
     $mail->setSender($config['emailSender']);
     $mail->setRecipient($email);
     $mail->setPlainText(file_get_contents('./config/EmailTemplate.txt'));
@@ -471,7 +473,7 @@ class UserManager {
     $userId = Database::get()->insertId();
 
     $confirmationToken = new AccountConfirmationToken($userId);
-    return self::sendActivationEmail($email, $language, $confirmationToken);
+    return self::sendActivationEmail($email, $language, $confirmationToken, $userId);
   }
 
   public static function resendActivationEmail($email, $password) {
@@ -490,13 +492,14 @@ class UserManager {
       throw new WrongPasswordException();
     }
 
-    return self::sendActivationEmail($row->email, $row->language, new AccountConfirmationToken($row->userId));
+    return self::sendActivationEmail($row->email, $row->language, new AccountConfirmationToken($row->userId), $row->userId);
   }
 
-  private static function sendActivationEmail($email, $language, $confirmationToken) {
+  private static function sendActivationEmail($email, $language, $confirmationToken, $userId) {
     global $config;
 
     $mail = new Mail();
+    $mail->setVerp('signup', $userId, $config);
     $mail->setSender($config['emailSender']);
     $mail->setRecipient($email);
     $mail->setPlainText(file_get_contents('./config/EmailTemplate.txt'));
