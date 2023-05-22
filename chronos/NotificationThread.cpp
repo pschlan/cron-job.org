@@ -82,9 +82,9 @@ public:
 		}
 
 		std::stringstream hash;
-		for (unsigned int i = 0; i < 16; ++i)
+		for (unsigned int i = 0; i < 8; ++i)
 		{
-			hash << std::setfill('0') << std::setw(2) << md[i];
+			hash << std::setfill('0') << std::setw(2) << std::hex << static_cast<unsigned int>(md[i]);
 		}
 
 		std::string mailFrom = address;
@@ -394,7 +394,7 @@ void NotificationThread::processNotification(const Notification &notification)
 	}
 
 	Mail mail;
-	mail.setVerp("notification", std::to_string(notification.jobID) + "." + std::to_string(static_cast<int>(notification.type)), mailFrom, mailVerpSecret);
+	mail.setVerp("notify", std::to_string(notification.jobID) + "." + std::to_string(static_cast<int>(notification.type)), mailFrom, mailVerpSecret);
 	mail.setRcptTo(userDetails.email);
 	mail.addHeader("From", mailSender);
 	mail.addHeader("To", std::string("<") + userDetails.email + std::string(">"));
