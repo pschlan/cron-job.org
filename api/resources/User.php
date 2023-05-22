@@ -351,6 +351,15 @@ class UserManager {
     return true;
   }
 
+  public function reenableNotifications() {
+    Database::get()
+      ->prepare('UPDATE `user` SET `notifications_auto_disabled`=0 WHERE `userid`=:userId')
+      ->execute([
+        ':userId'     => $this->authToken->userId
+      ]);
+    return true;
+  }
+
   public function updateLanguage($language) {
     Database::get()
       ->prepare('UPDATE `user` SET `lastlogin_lang`=:language WHERE `userid`=:userId')
