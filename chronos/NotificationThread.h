@@ -77,6 +77,7 @@ namespace Chronos
 		std::shared_ptr<ChronosMasterClient> masterClient;
 		std::string defaultLang;
 		std::string mailFrom;
+		std::string mailVerpSecret;
 		std::string mailSender;
 		std::string smtpServer;
 		std::unordered_map<std::string, std::unordered_map<std::string, std::string>> phrases;

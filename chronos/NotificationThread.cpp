@@ -11,11 +11,14 @@
 
 #include "NotificationThread.h"
 
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 
 #include <stdlib.h>
 #include <time.h>
+
+#include <openssl/hmac.h>
 
 #include <curl/curl.h>
 
@@ -59,6 +62,34 @@ public:
 	void setMailFrom(const std::string &address)
 	{
 		m_mailFrom = address;
+	}
+
+	void setVerp(const std::string &type, const std::string &arg, const std::string &address, const std::string &secret)
+	{
+		const std::string payload = type + "-" + arg;
+
+		unsigned char md[EVP_MAX_MD_SIZE];
+		unsigned int mdLength = 0;
+
+		if (HMAC(EVP_sha256(), secret.c_str(), secret.size(), reinterpret_cast<const unsigned char *>(payload.c_str()), payload.size(), md, &mdLength) == nullptr)
+		{
+			throw std::runtime_error("HMAC() failed!");
+		}
+
+		if (mdLength != 32)
+		{
+			throw std::runtime_error("Unexpected HMAC md length!");
+		}
+
+		std::stringstream hash;
+		for (unsigned int i = 0; i < 16; ++i)
+		{
+			hash << std::setfill('0') << std::setw(2) << md[i];
+		}
+
+		std::string mailFrom = address;
+		Chronos::Utils::replace(mailFrom, "%s", payload + "-" + hash.str());
+		setMailFrom(mailFrom);
 	}
 
 	void setRcptTo(const std::string &address)
@@ -173,6 +204,7 @@ NotificationThread::NotificationThread()
 
 	defaultLang = App::getInstance()->config->get("default_lang");
 	mailFrom = App::getInstance()->config->get("notification_mail_from");
+	mailVerpSecret = App::getInstance()->config->get("notification_mail_verp_secret");
 	mailSender = App::getInstance()->config->get("notification_mail_sender");
 	smtpServer = App::getInstance()->config->get("smtp_server");
 }
@@ -360,9 +392,9 @@ void NotificationThread::processNotification(const Notification &notification)
 	{
 		url = url.substr(0, qmPos + 1) + "...";
 	}
-	
+
 	Mail mail;
-	mail.setMailFrom(mailFrom);
+	mail.setVerp("notification", std::to_string(notification.jobID) + "." + std::to_string(static_cast<int>(notification.type)), mailFrom, mailVerpSecret);
 	mail.setRcptTo(userDetails.email);
 	mail.addHeader("From", mailSender);
 	mail.addHeader("To", std::string("<") + userDetails.email + std::string(">"));
