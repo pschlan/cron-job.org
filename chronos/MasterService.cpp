@@ -79,7 +79,7 @@ public:
             std::unique_ptr<MySQL_DB> db(App::getInstance()->createMasterMySQLConnection());
 
 	        MYSQL_ROW row;
-            auto res = db->query("SELECT `userid`,`email`,`firstname`,`lastname`,`lastlogin_lang` "
+            auto res = db->query("SELECT `userid`,`email`,`firstname`,`lastname`,`lastlogin_lang`,`notifications_auto_disabled` "
                     "FROM `user` WHERE `userid`=%v",
                 userId);
             if(res->numRows() == 0)
@@ -91,6 +91,9 @@ public:
                 _return.firstName   = row[2];
                 _return.lastName    = row[3];
                 _return.language    = row[4];
+
+                _return.__isset.suppressNotifications   = true;
+                _return.suppressNotifications           = std::stoi(row[5]) == 1;
             }
         }
         catch(const std::exception &ex)

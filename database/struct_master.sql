@@ -29,6 +29,7 @@ CREATE TABLE `user` (
   `lastlogin_lang` varchar(4) NOT NULL DEFAULT 'de',
   `timezone` varchar(32) NOT NULL DEFAULT 'Europe/Berlin',
   `newsletter_subscribe` enum('yes', 'no', 'undefined') NOT NULL DEFAULT 'undefined',
+  `notifications_auto_disabled` tinyint(4) NOT NULL DEFAULT 0,
   PRIMARY KEY (`userid`),
   KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

@@ -153,6 +153,7 @@ struct UserDetails
     3: string firstName;
     4: string lastName;
     5: string language;
+    6: optional bool suppressNotifications;
 }
 
 struct UserGroup

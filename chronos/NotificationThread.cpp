@@ -383,6 +383,13 @@ void NotificationThread::processNotification(const Notification &notification)
 	catch (const apache::thrift::TException &ex)
 	{
 		std::cerr << "NotificationThread::processNotification(): Failed to retrieve user details: " << ex.what() << std::endl;
+		return;
+	}
+
+	if (userDetails.__isset.suppressNotifications && userDetails.suppressNotifications)
+	{
+		std::cerr << "NotificationThread::processNotification(): Notifications suppressed for user " << userDetails.userId << std::endl;
+		return;
 	}
 
 	// Remove query part of URL (might contain sensitive data)
