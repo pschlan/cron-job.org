@@ -31,10 +31,12 @@ class UserProfile {
   public $email;
   public $signupDate;
   public $userGroupId;
+  public $notificationsAutoDisabled;
 
   function __construct() {
     $this->signupDate = intval($this->signupDate);
     $this->userGroupId = intval($this->userGroupId);
+    $this->notificationsAutoDisabled = boolval($this->notificationsAutoDisabled);
   }
 }
 
@@ -149,7 +151,7 @@ class UserManager {
   }
 
   public function getProfile() {
-    $stmt = Database::get()->prepare('SELECT `firstname` AS `firstName`, `lastname` AS `lastName`, `timezone`, `email`, `signup_date` AS `signupDate`, `newsletter_subscribe` AS `newsletterSubscribe`,`usergroupid` AS `userGroupId` FROM `user` WHERE `userid`=:userId');
+    $stmt = Database::get()->prepare('SELECT `firstname` AS `firstName`, `lastname` AS `lastName`, `timezone`, `email`, `signup_date` AS `signupDate`, `newsletter_subscribe` AS `newsletterSubscribe`, `usergroupid` AS `userGroupId`, `notifications_auto_disabled` AS `notificationsAutoDisabled` FROM `user` WHERE `userid`=:userId');
     $stmt->setFetchMode(PDO::FETCH_CLASS, UserProfile::class);
     $stmt->execute(array(':userId' => $this->authToken->userId));
     return $stmt->fetch();
