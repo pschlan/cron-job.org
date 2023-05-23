@@ -112,7 +112,8 @@ class Mail {
     return [
       'From'            => $this->encodePrincipalHeader($this->sender),
       'Mime-Version'    => '1.0',
-      'Content-Type'    => 'multipart/alternative; boundary="' . $this->boundary . '"; charset=UTF-8'
+      'Content-Type'    => 'multipart/alternative; boundary="' . $this->boundary . '"; charset=UTF-8',
+      'Auto-Submitted'  => 'auto-generated'
     ];
   }
 
