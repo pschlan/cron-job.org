@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, CircularProgress, Typography, Tabs, Tab, Grid } from '@material-ui/core';
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, CircularProgress, Typography, Tabs, Tab, Grid, Box } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import ReCAPTCHA from 'react-google-recaptcha';
@@ -10,6 +10,7 @@ import { JobStatus, jobStatusText, JobTestRunState } from '../../utils/Constants
 import SuccessIcon from '@material-ui/icons/Check';
 import FailureIcon from '@material-ui/icons/ErrorOutline';
 import PeerIcon from '@material-ui/icons/Dns';
+import UrlIcon from '@material-ui/icons/Link';
 import { makeStyles } from '@material-ui/styles';
 import { green, red } from '@material-ui/core/colors';
 import Timing from './Timing';
@@ -38,14 +39,16 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function JobTestRun({ job, jobId, onClose }) {
+export default function JobTestRun({ job, jobId, onClose, onUpdateUrl = () => null }) {
   const { t } = useTranslation();
   const onCloseRef = useRef(onClose, []);
+  const onUpdateUrlRef = useRef(onUpdateUrl, []);
   const recaptchaRef = useRef();
   const { enqueueSnackbar } = useSnackbar();
   const [ isLoading, setIsLoading ] = useState(false);
   const [ handle, setHandle ] = useState();
   const [ status, setStatus ] = useState();
+  const [ redirectTarget, setRedirectTarget ] = useState(null);
   const [ tabValue, setTabValue ] = useState('response');
   const classes = useStyles();
 
@@ -83,6 +86,30 @@ export default function JobTestRun({ job, jobId, onClose }) {
     setStatus({ state: JobTestRunState.PREPARING });
     refreshStatus();
   }, [handle, refreshStatus]);
+
+  useEffect(() => {
+    let redirectTarget = null;
+
+    if (status && status.state === JobTestRunState.DONE) {
+      if (status.httpStatus >= 300 && status.httpStatus <= 399) {
+        const lines = status.headers.replaceAll('\r', '').split('\n').slice(0, -1);
+
+        for (const line of lines) {
+          const eqPos = line.indexOf(':');
+          if (eqPos !== -1) {
+            const key = line.substring(0, eqPos + 1).trim();
+            const value = line.substring(eqPos + 1).trim();
+
+            if (key.toLowerCase() === 'location:' && value.length > 0) {
+              redirectTarget = value;
+            }
+          }
+        }
+      }
+    }
+
+    setRedirectTarget(redirectTarget);
+  }, [status, setRedirectTarget]);
 
   function executeTestRun() {
     setIsLoading(true);
@@ -153,7 +180,29 @@ export default function JobTestRun({ job, jobId, onClose }) {
           </div>}
         </Typography>
 
-        {status.state === JobTestRunState.DONE && status.result === JobStatus.OK && <>
+        {redirectTarget && <Box mt={2}>
+          <Alert severity='warning'>
+            <AlertTitle>{t('jobs.testRun.redirectNote.title')}</AlertTitle>
+            <div>
+              {t('jobs.testRun.redirectNote.text', { serviceName: Config.productName, target: redirectTarget })}
+            </div>
+            <Box pt={2} pb={2} pl={2}>
+              <strong>{t('jobs.testRun.redirectNote.target')}:</strong> {redirectTarget}
+            </Box>
+            <Box>
+              <Button
+                variant='contained'
+                size='small'
+                color='primary'
+                startIcon={<UrlIcon />}
+                onClick={() => onUpdateUrlRef.current(redirectTarget)}>
+                {t('jobs.testRun.redirectNote.updateUrl')}
+              </Button>
+            </Box>
+          </Alert>
+        </Box>}
+
+        {status.state === JobTestRunState.DONE && [JobStatus.OK].includes(status.result) && <>
           <Grid container>
             <Grid item xs={6}>
               <Typography variant='overline'>{t('jobs.duration')}</Typography>

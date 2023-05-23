@@ -276,7 +276,13 @@
       "response": "Response",
       "rawRequest": "Raw request",
       "rawResponse": "Raw response",
-      "peer": "Peer"
+      "peer": "Peer",
+      "redirectNote": {
+        "title": "Redirection detected",
+        "text": "It looks like your URL redirects to another URL. {{serviceName}} does not automatically follow redirections. In most cases, updating the job URL to the redirection target resolves this issue.",
+        "target": "Redirection target",
+        "updateUrl": "Update job URL"
+      }
     },
     "requestTimeout": "Timeout",
     "redirectSuccess": "Treat redirects with HTTP 3xx status code as success",

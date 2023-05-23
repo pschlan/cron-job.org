@@ -276,7 +276,13 @@
       "response": "Antwort",
       "rawRequest": "Anfrage-Rohdaten",
       "rawResponse": "Antwort-Rohdaten",
-      "peer": "Gegenstelle"
+      "peer": "Gegenstelle",
+      "redirectNote": {
+        "title": "Weiterleitung erkannt",
+        "text": "Ihre URL scheint auf eine andere URL weiterzuleiten. {{serviceName}} folgt Weiterleitungen nicht automatisch. In den meisten Fällen kann dieses Problem einfach gelöst werden, indem die URL des Jobs auf die Ziel-URL der Weiterleitung aktualisiert wird.",
+        "target": "Ziel der Weiterleitung",
+        "updateUrl": "Job-URL aktualisieren"
+      }
     },
     "requestTimeout": "Timeout",
     "redirectSuccess": "Weiterleitungen mit HTTP-3xx-Status-Code als erfolgreich einstufen",

@@ -320,6 +320,15 @@ export default function JobEditor({ match }) {
     setJobHeaders(headers => headers.map((x, index) => index === rowNo ? {...x, value} : x));
   }
 
+  function updateUrl(url) {
+    setJobURL(url);
+    setTabValue('common');
+    if (jobURLRef.current) {
+      jobURLRef.current.value = url;
+    }
+    setShowTestRun(false);
+  }
+
   const HEADERS_COLUMNS = [
     {
       cell: (item, rowNo) => <TextField
@@ -644,7 +653,7 @@ export default function JobEditor({ match }) {
       </Grid>
     </Grid>
 
-    {showTestRun && <JobTestRun onClose={() => setShowTestRun(false)} jobId={jobId} job={updatedJob} />}
+    {showTestRun && <JobTestRun onClose={() => setShowTestRun(false)} onUpdateUrl={updateUrl} jobId={jobId} job={updatedJob} />}
 
     {showExportJob && <JobExport onClose={() => setShowExportJob(false)} job={updatedJob} />}
 
