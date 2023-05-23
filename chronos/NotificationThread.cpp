@@ -407,7 +407,7 @@ void NotificationThread::processNotification(const Notification &notification)
 	mail.addHeader("To", std::string("<") + userDetails.email + std::string(">"));
 	mail.addHeader("Content-Type", "text/plain; charset=UTF-8");
 	mail.addHeader("Content-Transfer-Encoding", "8bit");
-	mail.addHeader("Precedence", "bulk");
+	mail.addHeader("Auto-Submitted", "auto-generated");
 
 	mail.assign("$firstname", userDetails.firstName);
 	mail.assign("$lastname", userDetails.lastName);
