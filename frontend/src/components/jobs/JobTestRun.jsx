@@ -101,7 +101,10 @@ export default function JobTestRun({ job, jobId, onClose, onUpdateUrl = () => nu
             const value = line.substring(eqPos + 1).trim();
 
             if (key.toLowerCase() === 'location:' && value.length > 0) {
-              redirectTarget = value;
+              try {
+                redirectTarget = new URL(value, job.url).href;
+              } catch {
+              }
             }
           }
         }
@@ -109,7 +112,7 @@ export default function JobTestRun({ job, jobId, onClose, onUpdateUrl = () => nu
     }
 
     setRedirectTarget(redirectTarget);
-  }, [status, setRedirectTarget]);
+  }, [status, job]);
 
   function executeTestRun() {
     setIsLoading(true);
