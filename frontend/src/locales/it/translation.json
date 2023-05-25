@@ -308,9 +308,9 @@
       "folderDeleteFailed": "Impossibile eliminare la cartella. Per favore riprova più tardi.",
       "folderDeleted": "La cartella è stata eliminata."
     },
-    "move": "Move",
-    "moveText": "Move selected item to:",
-    "moveText_plural": "Move {{count}} selected items to:"
+    "move": "Sposta",
+    "moveText": "Sposta l'elemento selezionato in:",
+    "moveText_plural": "Sposta {{count}} elementi selezionati in:"
   },
   "statuspages": {
     "title": "Titolo",
