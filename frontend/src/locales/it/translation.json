@@ -1,6 +1,7 @@
 {
   "common": {
     "menu": "Menu",
+    "contact": "Contatti",
     "followontwitter": "Twitter",
     "forkongithub": "GitHub",
     "blog": "Blog",
@@ -57,7 +58,11 @@
     "massActionSucceeded": "Azione eseguita con successo.",
     "massActionFailed": "Impossibile eseguire l'azione richiesta. Riprova più tardi.",
     "sustainingMemberThanks": "Ora sei un utente sostenitore - grazie mille del tuo supporto, ci aiuti a mantenere questo progetto attivo!",
-    "export": "Esportare"
+    "export": "Esportare",
+    "confirmMassDeleteTitle": "Elimina elemento selezionato",
+    "confirmMassDeleteTitle_plural": "Elimina {{count}} elementi selezionati",
+    "confirmMassDeleteText": "Vuoi davvero eliminare l'elemento selezionato?",
+    "confirmMassDeleteText_plural": "Vuoi davvero eliminare i {{count}} elementi selezionati?"
   },
   "login": {
     "emailAddress": "Indirizzo email",
@@ -76,7 +81,13 @@
     "passwordResetDone": "La tua password è stata cambiata con successo. Ora puoi entrare con la tua nuova password.",
     "passwordResetFailed": "Ci dispiace, ma non possiamo cambiare la tua password. Il link di reset della password che hai usato potrebbe essere scaduto. Riprova più tardi.",
     "forgotPasswordText": "Hai dimenticato la password? Nessun problema. Inserisci la tua email e ti invieremo le istruzioni su come resettare la password.",
-    "resetPasswordText": "Inserisci una nuova password per il tuo account e confermala, poi clicca su \"Resetta password\"."
+    "resetPasswordText": "Inserisci una nuova password per il tuo account e confermala, poi clicca su \"Resetta password\".",
+    "mfaTitle": "Autenticazione a più fattori (MFA)",
+    "mfaText": "Inserisci un codice MFA corrente da un dispositivo collegato al tuo account.",
+    "mfaCode": "Codice MFA",
+    "resendActivationMail": "Invia nuovamente la mail di attivazione",
+    "resendSuccess": "Fatto",
+    "resendFailed": "Errore - riprova più tardi"
   },
   "signup": {
     "signup": "Registrati",
@@ -108,7 +119,15 @@
     "subscribe": "Iscriviti",
     "failedToSaveNewsletter": "Ci dispiace, ma al momento non riusciamo a salvare la tua preferenza. Riprova più tardi.",
     "newsletterSaved": "Grazie, le tue preferenze sulla newsletter sono state aggiornate.",
-    "sustainingMembershipText": "Trovi {{serviceName}} utile e vuoi supportarci e al tempo stesso beneficiare di riconoscimenti esclusivi?  Diventa un utente sostenitore ora! La tua adesione ci aiuta a coprire i costi dell'infrastruttura e assicura che i nostri servizi possano operare e scalare in modo affidabile, rimanere liberi da pubblicità e possano essere costantemente migliorati."
+    "sustainingMembershipText": "Trovi {{serviceName}} utile e vuoi supportarci e al tempo stesso beneficiare di riconoscimenti esclusivi?  Diventa un utente sostenitore ora! La tua adesione ci aiuta a coprire i costi dell'infrastruttura e assicura che i nostri servizi possano operare e scalare in modo affidabile, rimanere liberi da pubblicità e possano essere costantemente migliorati.",
+    "bounceWarning": {
+      "title": "Non siamo riusciti a raggiungerti...",
+      "text": "I nostri ultimi tentativi di inviare notifiche all'indirizzo e-mail specificato nel tuo profilo non sono riusciti, quindi per il momento ci asteniamo dal tentare di inviarti altre notifiche. Assicurati che il tuo indirizzo e-mail sia aggiornato e modificalo, se necessario. Puoi anche riattivare le notifiche qui. Tieni presente che potremmo disabilitarli nuovamente nel caso in cui le nostre e-mail continuino a tornare indietro.",
+      "updateProfile": "Aggiorna profilo",
+      "reenable": "Riattiva le notifiche",
+      "reenableFailed": "Al momento non è possibile riattivare le notifiche. Per favore riprova più tardi.",
+      "reenableSuccess": "Abbiamo riattivato le tue notifiche."
+    }
   },
   "events": {
     "cronjobExecution": "Esecuzione cronjob: {{statusText}}",
@@ -193,7 +212,9 @@
       "at": "alle",
       "ofthemonthat": "del mese alle",
       "custom": "Personalizzata",
-      "noExecutionsWarning": "Nessuna esecuzione impostata. Assicurati di aver selezionato almeno un elemento per ogni campo."
+      "noExecutionsWarning": "Nessuna esecuzione impostata. Assicurati di aver selezionato almeno un elemento per ogni campo.",
+      "expires": "Programma la scadenza",
+      "expiresAt": "il"
     },
     "headers": "Headers",
     "common": "Base",
@@ -229,6 +250,7 @@
     "failedToClone": "Clonazione del cronjob fallita. Riprova più tardi.",
     "cloned": "Il cronjob è stato clonato correttamente. Attiva il cronjob per cominciare le esecuzioni.",
     "invalidUrl": "Questo URL non sembra valido.",
+    "invalidTimeout": "Il valore di timeout non è valido. Il timeout massimo è di {{maxRequestTimeout}} secondi.",
     "failedToCreate": "Creazione del cronjob fallita. Riprova più tardi.",
     "created": "Il cronjob è stato creato correttamente.",
     "cantDeleteMonitorJob": "Questo cronjob è utilizzato all'interno di un monitor di stato e quindi non può essere eliminato. Rimuovi il(i) monitor di stato associato(i) e riprova.",
@@ -254,15 +276,41 @@
       "response": "Risposta",
       "rawRequest": "Dati richiesta non elaborati",
       "rawResponse": "Dati risposta non elaborati",
-      "peer": "Peer"
+      "peer": "Peer",
+      "redirectNote": {
+        "title": "Reindirizzamento rilevato",
+        "text": "Sembra che il tuo URL reindirizzi a un altro URL. {{serviceName}} non segue automaticamente i reindirizzamenti. Nella maggior parte dei casi, l'aggiornamento dell'URL del processo alla destinazione del reindirizzamento risolve questo problema.",
+        "target": "Destinazione del reindirizzamento",
+        "updateUrl": "Aggiorna l'URL del cronjob"
+      }
     },
     "requestTimeout": "Timeout",
+    "redirectSuccess": "Considera i reindirizzamenti con codice di stato HTTP 3xx come un successo",
     "exportJob": "Esporta cronjob: {{jobTitle}}",
     "exportFormat": "Formato di esportazione",
     "format": {
       "cronTabCurl": "Crontab + curl"
     },
-    "exportData": "Esporta dati"
+    "exportData": "Esporta dati",
+    "folder": "Cartella",
+    "folders": {
+      "manage": "Gestisci cartelle",
+      "noFolders": "Al momento non disponi di alcuna cartella.",
+      "title": "Titolo",
+      "create": "Crea cartella",
+      "createFailed": "Impossibile creare la cartella. Per favore riprova più tardi.",
+      "titleConflict": "Esiste già una cartella con questo nome.",
+      "created": "La cartella è stata creata.",
+      "saved": "La cartella è stata salvata.",
+      "edit": "Modifica cartella: {{title}}",
+      "delete": "Elimina cartella: {{title}}",
+      "confirmDeleteFolder": "Vuoi davvero eliminare questa cartella? Tutti i cronjob esistenti in questa cartella verranno spostati nella cartella principale.",
+      "folderDeleteFailed": "Impossibile eliminare la cartella. Per favore riprova più tardi.",
+      "folderDeleted": "La cartella è stata eliminata."
+    },
+    "move": "Sposta",
+    "moveText": "Sposta l'elemento selezionato in:",
+    "moveText_plural": "Sposta {{count}} elementi selezionati in:"
   },
   "statuspages": {
     "title": "Titolo",
@@ -391,6 +439,7 @@
       "maxRequestSize": "Dimensione massima della risposta",
       "maxFailures": "Numero massimo di esecuzioni fallite prima di disabilitare un cronjob",
       "maxStatusPages": "Numero massimo pagine di stato / monitor di stato",
+      "maxApiCallsPerDay": "Numero massimo di chiamate API al giorno",
       "price": "Prezzo",
       "free": "gratuito",
       "subscriptionPrices": "5, 10 o 20 EURO al mese \no 12, 24 o 36 EURO al anno (a tua scelta)",
@@ -404,7 +453,64 @@
       "acceptRefundPolicy": "Accetto la Politica di Rimborso"
     },
     "orderFailed": "Impossibile caricare il portale di pagamento. Riprova più tardi o contatta il nostro team di supporto.",
-    "manageSubscription": "Gestisci abbonamento"
+    "manageSubscription": "Gestisci abbonamento",
+    "mfa": {
+      "devices": "Dispositivi di autenticazione a più fattori (MFA)",
+      "noDevices": "Nessun dispositivo trovato. Aggiungi subito un dispositivo MFA per proteggere il tuo account.",
+      "add": "Aggiungi dispositivo",
+      "title": "Titolo",
+      "selectType": "Selezionare il tipo di dispositivo che si desidera aggiungere, specificare un titolo per una più facile identificazione ed eseguire l'autenticazione utilizzando la password dell'account per continuare.",
+      "totpDevice": {
+        "title": "App di autenticazione (TOTP)",
+        "description": "Utilizza un'app di autenticazione come Google Authenticator o Microsoft Authenticator.",
+        "pairInstructions": "Utilizza l'app di autenticazione per eseguire la scansione del QR code di associazione e inserisci un codice di autenticazione qui sotto per completare il processo di associazione.",
+        "enterCode": "Inserisci un codice MFA"
+      },
+      "yubicoOtpDevice": {
+        "title": "YubiKey (Yubico OTP)",
+        "description": "Usa un dispositivo Yubico OTP (YubiKey).",
+        "enterCode": "Genera una OTP utilizzando la tua YubiKey"
+      },
+      "next": "Prossimo",
+      "accountPassword": "Password dell'account",
+      "confirm": "Conferma",
+      "createError": "Impossibile creare il dispositivo MFA. Per favore riprova più tardi.",
+      "confirmError": "Impossibile confermare il dispositivo MFA. Si prega di ricontrollare l'input.",
+      "created": "Il dispositivo MFA è stato aggiunto correttamente.",
+      "confirmDelete": "Vuoi davvero eliminare questo dispositivo MFA? Non potrai più utilizzarlo per l'autenticazione. Tieni presente che l'autenticazione a più fattori sarà disabilitata per il tuo account nel caso in cui elimini tutti i dispositivi MFA collegati. Se vuoi procedere, inserisci la password del tuo account.",
+      "deleteDevice": "Elimina dispositivo MFA: {{title}}",
+      "deleted": "Il dispositivo MFA è stato eliminato correttamente.",
+      "deleteError": "Spiacenti, non è stato possibile eliminare il dispositivo MFA. Per favore riprova più tardi."
+    },
+    "apiKeys": {
+      "keys": "Chiavi API",
+      "title": "Titolo",
+      "add": "Crea chiave API",
+      "showKey": "Mostra chiave",
+      "showDocs": "Visualizza la documentazione dell'API",
+      "ipLimit": "Restrizione indirizzo IP",
+      "ipLimitHelp": "Separa più indirizzi con la virgola. Lascia vuoto per disabilitare la restrizione IP.",
+      "unrestricted": "Senza restrizioni",
+      "noKeys": "Non hai ancora alcuna chiave API.",
+      "showKeyDialogTitle": "Visualizzazione chiave API: {{title}}",
+      "showKeyDialogText": "Esegui l'autenticazione utilizzando la password del tuo account per visualizzare la tua chiave API.",
+      "showKeyError": "Spiacenti, non è stato possibile recuperare la chiave. Per favore riprova più tardi.",
+      "showKeyFindBelow": "Puoi trovare la tua chiave API qui sotto:",
+      "tokenCopySuccess": "La tua chiave API è stata copiata negli appunti.",
+      "tokenCopyError": "Impossibile copiare la chiave API negli appunti.",
+      "accountPassword": "Password dell'account",
+      "deleteKey": "Elimina chiave API: {{title}}",
+      "confirmDelete": "Vuoi davvero eliminare la chiave API? Non sarai più in grado di accedere all'API con questa chiave.",
+      "deleteError": "Spiacenti, non è stato possibile eliminare la tua chiave API. Per favore riprova più tardi.",
+      "deleted": "La tua chiave API è stata eliminata correttamente.",
+      "defaultTitle": "Chiave API",
+      "addText": "Per una più facile identificazione, specifica un titolo per la tua nuova chiave API. Puoi facoltativamente limitare l'accesso a determinati indirizzi IP inserendoli nel campo \"Limitazione indirizzo IP\". Separa più indirizzi con la virgola.",
+      "createError": "Spiacenti, non è stato possibile creare la chiave API. Per favore riprova più tardi.",
+      "created": "La tua chiave API è stata creata. Fare clic su \"Mostra chiave\" per recuperarla.",
+      "editKey": "Modifica chiave API: {{title}}",
+      "saveError": "Spiacenti, non è stato possibile salvare le modifiche. Per favore riprova più tardi.",
+      "saved": "Le tue modifiche alla chiave API sono state salvate correttamente."
+    }
   },
   "statistics": {
     "requestFailed": "Impossibile caricare le statistiche. Riprova più tardi.",
