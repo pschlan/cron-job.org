@@ -1,4 +1,5 @@
 <?php
+require_once('config/denylists.inc.php');
 require_once('lib/APIMethod.php');
 require_once('resources/Job.php');
 
@@ -19,6 +20,17 @@ class CreateJob extends AbstractAPIMethod {
   }
 
   public function validateRequest($request) {
+    global $jobUrlDenyList;
+
+    if (isset($request->job->url)) {
+      $lowerUrl = strtolower($request->job->url);
+      foreach ($jobUrlDenyList as $deniedUrl) {
+        if (strpos($lowerUrl, $deniedUrl) !== false) {
+          return false;
+        }
+      }
+    }
+
     return (
          isset($request->job)
       && is_object($request->job)

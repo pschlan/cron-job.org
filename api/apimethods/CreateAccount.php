@@ -1,5 +1,6 @@
 <?php
 require_once('config/config.inc.php');
+require_once('config/denylists.inc.php');
 require_once('lib/APIMethod.php');
 require_once('lib/RecaptchaVerifier.php');
 require_once('resources/User.php');
@@ -20,6 +21,17 @@ class CreateAccount extends AbstractAPIMethod {
   }
 
   public function validateRequest($request) {
+    global $emailDenyList;
+
+    if (isset($request->email)) {
+      $lowerEmail = strtolower($request->email);
+      foreach ($emailDenyList as $deniedEmail) {
+        if (strpos($lowerEmail, $deniedEmail) !== false) {
+          return false;
+        }
+      }
+    }
+
     return (
           isset($request->token)
       &&  isset($request->firstName)

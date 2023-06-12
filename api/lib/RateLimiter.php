@@ -1,10 +1,23 @@
 <?php
+require_once('config/limits.inc.php');
 require_once('RedisConnection.php');
 require_once('SessionToken.php');
 
 class RateLimiter {
   public static function check($apiMethod, $request, $sessionToken) {
-    foreach ($apiMethod->rateLimits($sessionToken) as $limit) {
+    global $methodRateLimitOverrides;
+
+    $limits = $apiMethod->rateLimits($sessionToken);
+
+    if ($sessionToken !== false) {
+      $userId = $sessionToken->userId;
+      if (isset($methodRateLimitOverrides[$userId])
+          && isset($methodRateLimitOverrides[$userId][$apiMethod->name()])) {
+        $limits = $methodRateLimitOverrides[$userId][$apiMethod->name()]();
+      }
+    }
+
+    foreach ($limits as $limit) {
       $key = join(':', [
         $limit->rateLimitKey(),
         $apiMethod->rateLimitKey($request, $sessionToken)

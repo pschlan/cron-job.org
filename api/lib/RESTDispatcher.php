@@ -1,5 +1,6 @@
 <?php
 require_once('config/config.inc.php');
+require_once('config/limits.inc.php');
 require_once('APIMethod.php');
 require_once('RateLimiter.php');
 require_once('SessionToken.php');
@@ -84,7 +85,7 @@ class RESTDispatcher extends AbstractDispatcher {
   }
 
   public function dispatch() {
-    global $config;
+    global $config, $apiRequetsPerDayOverride;
 
     try {
       header('Access-Control-Allow-Origin: *');
@@ -151,7 +152,11 @@ class RESTDispatcher extends AbstractDispatcher {
         throw new TooManyRequestsAPIException();
       }
 
-      if (!$this->checkApiKeyQuota($apiKey, (new UserManager($sessionToken))->getGroup()->apiRequestsPerDay)) {
+      $apiRequestsPerDay = (new UserManager($sessionToken))->getGroup()->apiRequestsPerDay;
+      if (isset($apiRequetsPerDayOverride[$sessionToken->userId])) {
+        $apiRequestsPerDay = $apiRequetsPerDayOverride[$sessionToken->userId];
+      }
+      if (!$this->checkApiKeyQuota($apiKey, $apiRequestsPerDay)) {
         throw new TooManyRequestsAPIException();
       }
 
