@@ -36,6 +36,7 @@ class CloneJob extends AbstractAPIMethod {
 
     $job->title .= ' (' . $request->suffix . ')';
     $job->enabled = false;
+    $job->type = \chronos\JobType::DEFAULT;
 
     $jobId = $jobManager->createJob($job);
     if (!$jobId) {
