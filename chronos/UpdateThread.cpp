@@ -186,7 +186,7 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 
 	// refresh the old fail counter, if needed (since we pre-fetch jobs, it might be outdated by now)
 	int oldFailCounter = result->oldFailCounter;
-	if(result->status != JOBSTATUS_OK || oldFailCounter > 0)
+	if(result->status != JOBSTATUS_OK || oldFailCounter > 0 || (result->status == JOBSTATUS_OK && result->notifySuccess && oldFailCounter == 0))
 	{
 		MYSQL_ROW row;
 		auto res = db->query("SELECT `fail_counter` FROM `job` WHERE `jobid`=%d",
