@@ -1,4 +1,6 @@
 {
+  "paddleLocale": "de",
+  "landingLocale": "de",
   "common": {
     "menu": "Menü",
     "contact": "Kontakt",
@@ -430,6 +432,8 @@
     "manageSubscriptionFailed": "Fehler beim Laden des Abo-Verwaltungs-Portals. Bitte versuchen Sie es später erneut oder kontaktieren Sie unser Support-Team.",
     "orderFailed": "Fehler beim Laden des Kaufabwicklungs-Portals. Bitte versuchen Sie es später erneut oder kontaktieren Sie unser Support-Team.",
     "manageSubscription": "Abo verwalten",
+    "updatePaymentMethod": "Zahlungsart ändern",
+    "cancelSubscription": "Abo kündigen",
     "subscribeDialog": {
       "text1": "Durch eine Fördermitgliedschaft bei {{serviceName}} unterstützen Sie uns beim Betrieb und bei der Weiterentwicklung unseres Dienstes.",
       "text2": "Als Dankeschön für Ihre Unterstützung können wir Fördermitgliedern exklusive Vorteile anbieten.",
@@ -450,7 +454,7 @@
       "amountAMonth": "{{amount}} EUR / Monat",
       "amountAYear": "{{amount}} EUR / Jahr",
       "subscribeNow": "Jetzt Fördermitglied werden",
-      "orderNow": "Zahlungspflichtig bestellen",
+      "orderNow": "Jetzt bestellen",
       "orderText": "Vielen Dank für Ihre Unterstützung! Sie können nun Ihren Unterstützungsbeitrag wählen und die Buchung abschließen.",
       "acceptRefundPolicy": "Ich akzeptiere die Widerrufsbelehrung"
     },

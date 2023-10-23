@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Button, ButtonGroup, CircularProgress, Grid, InputLabel, LinearProgress, makeStyles, MenuItem, Paper, Select, TableContainer, Typography } from '@material-ui/core';
 import { grey } from '@material-ui/core/colors';
 import { useTranslation } from 'react-i18next';
-import { createBillingPortalSession, getAPIKeys, getMFADevices, getUserProfile, updateUserProfile } from '../../utils/API';
+import { createBillingPortalSession, getAPIKeys, getMFADevices, getSubscriptionLink, getUserProfile, updateUserProfile } from '../../utils/API';
 import useTimezones from '../../hooks/useTimezones';
 import useUserProfile from '../../hooks/useUserProfile';
 import Breadcrumbs from '../misc/Breadcrumbs';
@@ -24,6 +24,7 @@ import DeleteMFADeviceDialog from './DeleteMFADeviceDialog';
 import { RegexPatterns, SubscriptionStatus } from '../../utils/Constants';
 import DeleteAccountDialog from './DeleteAccountDialog';
 import ManageSubscriptionIcon from '@material-ui/icons/CreditCard';
+import CancelSubscriptionIcon from '@material-ui/icons/Cancel';
 import SubscriptionActiveIcon from '@material-ui/icons/FavoriteBorder';
 import SubscriptionInactiveIcon from '@material-ui/icons/PauseCircleOutline';
 import LearnMoreIcon from '@material-ui/icons/Loyalty';
@@ -69,7 +70,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const REFRESH_INTERVAL = 5000;
+const REFRESH_INTERVAL = 2000;
 
 export default function Settings() {
   const classes = useStyles();
@@ -82,6 +83,7 @@ export default function Settings() {
   const [ isLoading, setIsLoading ] = useState(true);
   const [ saving, setSaving ] = useState(false);
   const [ isLoadingManageSubscription, setIsLoadingManageSubscription ] = useState(false);
+  const [ isLoadingCancelSubscription, setIsLoadingCancelSubscription ] = useState(false);
 
   const [ showChangePassword, setShowChangePassword ] = useState(false);
   const [ showChangeEmail, setShowChangeEmail ] = useState(false);
@@ -163,15 +165,37 @@ export default function Settings() {
 
   function manageSubscription() {
     setIsLoadingManageSubscription(true);
-    createBillingPortalSession()
-      .then(respone => window.location.href = respone.url)
+
+    if (userProfile.userSubscription.type === 'stripe') {
+      createBillingPortalSession()
+        .then(respone => window.location.href = respone.url)
+        .catch(() => {
+          enqueueSnackbar(t('settings.manageSubscriptionFailed'), { variant: 'error' });
+          setIsLoadingManageSubscription(false);
+        });
+    } else if (userProfile.userSubscription.type === 'paddle') {
+      getSubscriptionLink('manage')
+        .then(response => window.location.href = response.url)
+        .catch(() => {
+          enqueueSnackbar(t('settings.manageSubscriptionFailed'), { variant: 'error' });
+          setIsLoadingManageSubscription(false);
+        });
+    }
+  }
+
+  function cancelSubscription() {
+    setIsLoadingCancelSubscription(true);
+
+    getSubscriptionLink('cancel')
+      .then(response => window.location.href = response.url)
       .catch(() => {
         enqueueSnackbar(t('settings.manageSubscriptionFailed'), { variant: 'error' });
-        setIsLoadingManageSubscription(false);
+        setIsLoadingCancelSubscription(false);
       });
   }
 
   const isCancelledSubscription = userProfile && userProfile.userSubscription && userProfile.userSubscription.status === SubscriptionStatus.CANCELLED;
+  const isExpiringSubscription = userProfile && userProfile.userSubscription && userProfile.userSubscription.status === SubscriptionStatus.EXPIRING;
   const isPaymentReturn = window && window.location && window.location.search === '?checkoutSuccess=true';
 
   useEffect(() => {
@@ -364,7 +388,7 @@ export default function Settings() {
             </Grid>
             <Grid item sm={6} xs={12} align='right'>
               <ButtonGroup variant='contained' size='small'>
-                {userProfile.userSubscription &&
+                {userProfile.userSubscription && userProfile.userSubscription.type==='stripe' &&
                   <Button
                     size='small'
                     variant='contained'
@@ -375,6 +399,28 @@ export default function Settings() {
                     >
                     {t('settings.manageSubscription')}
                   </Button>}
+                {userProfile.userSubscription && userProfile.userSubscription.type==='paddle' && userProfile.userSubscription.status === SubscriptionStatus.ACTIVE && <ButtonGroup>
+                    <Button
+                      size='small'
+                      variant='contained'
+                      startIcon={isLoadingManageSubscription ? <CircularProgress size='small' /> : <ManageSubscriptionIcon />}
+                      onClick={manageSubscription}
+                      disabled={isLoadingManageSubscription || isCancelledSubscription || isExpiringSubscription}
+                      float='right'
+                      >
+                      {t('settings.updatePaymentMethod')}
+                    </Button>
+                    <Button
+                      size='small'
+                      variant='contained'
+                      startIcon={isLoadingCancelSubscription ? <CircularProgress size='small' /> : <CancelSubscriptionIcon />}
+                      onClick={cancelSubscription}
+                      disabled={isLoadingCancelSubscription || isCancelledSubscription || isExpiringSubscription}
+                      float='right'
+                      >
+                      {t('settings.cancelSubscription')}
+                    </Button>
+                  </ButtonGroup>}
                 {!isPaymentReturn && ((!userProfile.userSubscription) || (userProfile.userSubscription.status === SubscriptionStatus.CANCELLED)) &&
                   <Button
                     size='small'

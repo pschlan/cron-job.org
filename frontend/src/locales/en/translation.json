@@ -1,4 +1,6 @@
 {
+  "paddleLocale": "en",
+  "landingLocale": "en",
   "common": {
     "menu": "Menu",
     "contact": "Contact",
@@ -454,6 +456,8 @@
     },
     "orderFailed": "Failed to load checkout portal. Please try again later or contact our support team.",
     "manageSubscription": "Manage subscription",
+    "updatePaymentMethod": "Update payment method",
+    "cancelSubscription": "Cancel subscription",
     "mfa": {
       "devices": "Multi-Factor Authentication devices",
       "noDevices": "No devices found. Add a MFA device now to secure your account.",

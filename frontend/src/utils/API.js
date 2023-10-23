@@ -332,14 +332,12 @@ export function deleteJobTestRun(handle) {
   });
 }
 
-export function createCheckoutSession(product) {
-  return performRequest('CreateCheckoutSession', {
-    product
-  });
-}
-
 export function createBillingPortalSession() {
   return performRequest('CreateBillingPortalSession', {});
+}
+
+export function getSubscriptionLink(type) {
+  return performRequest('GetSubscriptionLink', { type });
 }
 
 export function getMFADevices() {
