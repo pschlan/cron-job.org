@@ -19,7 +19,8 @@ export const Config = {
     'en': 'English',
     'de': 'Deutsch',
     'it': 'Italiano',
-    'zh_TW': '正體中文'
+    'zh_TW': '嚙踝蕭嚙賡中嚙踝蕭',
+    'ro': 'Rom璽n��',
   },
 
   //! @note Fallback language to use when the user's auto-determined language is not supported.
