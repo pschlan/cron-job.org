@@ -152,7 +152,7 @@ export default function Dashboard() {
           size='small'
           startIcon={<DetailsIcon />}
           className={classes.actionButton}
-          onClick={() => history.push('/jobs/' + event.details.jobId + '/history')}
+          onClick={() => history.push('/jobs' + (event.details.jobFolderId === 0 ? '' : '/folders/' + event.details.jobFolderId) + '/' + event.details.jobId + '/history')}
           >
           {t('common.details')}
         </Button>

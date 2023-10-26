@@ -24,18 +24,30 @@ class GetDashboard extends AbstractAPIMethod {
   }
 
   public function execute($request, $sessionToken, $language) {
-    $events = (new HistoryManager($sessionToken))->getUserEvents();
-    $events = array_map(function ($item) {
-      $event = new stdClass;
-      $event->type = get_class($item);
-      $event->details = $item;
-      return $event;
-    }, $events);
-
     $jobs = (new JobManager($sessionToken))->getJobs();
     if (!$jobs) {
       throw new InternalErrorAPIException();
     }
+
+    $jobIdToFolderId = [];
+    foreach ($jobs->jobs as $job) {
+      $jobIdToFolderId[$job->jobId] = $job->folderId;
+    }
+
+    $events = (new HistoryManager($sessionToken))->getUserEvents();
+    $events = array_map(function ($item) use ($jobIdToFolderId) {
+      $event = new stdClass;
+      $event->type = get_class($item);
+      $event->details = $item;
+
+      if ($event->type === 'HistoryItem') {
+        $event->details->jobFolderId = isset($jobIdToFolderId[$item->jobId])
+          ? $jobIdToFolderId[$item->jobId]
+          : 0;
+      }
+
+      return $event;
+    }, $events);
 
     $userProfile = (new UserManager($sessionToken))->getProfile();
 
