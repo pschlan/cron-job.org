@@ -1,0 +1,36 @@
+{
+  "common": {
+    "poweredBy": "propulsat de",
+    "refresh": "Reîncarcă"
+  },
+  "timespan": {
+    "1year": "un an",
+    "6months": "6 luni",
+    "1month": "o lună",
+    "1week": "o săptămână",
+    "1day": "o zi"
+  },
+  "status": {
+    "availability": "Disponibilitate",
+    "availabilityWarning": "Disponibilitate avertizare",
+    "availabilityError": "Disponibilitate eroare",
+    "lowAvailabilityText": "În prezent, ne confruntăm cu o disponibilitate redusă de {{percent}} % în ultimele 30 de minute.",
+    "latency": "Latență",
+    "latencyWarning": "Latență avertizare",
+    "latencyError": "Latență eroare",
+    "highLatencyText": "În prezent, ne confruntăm cu o latență neobișnuit de mare de {{ms}} ms în ultimele 30 de minute.",
+    "healthy": "Sănătos",
+    "allSystemsRunAsExpected": "Toate sistemele funcționează în prezent conform așteptărilor.",
+    "disabled": "Dezactivat"
+  },
+  "error": {
+    "404": {
+      "title": "Pagina nu există",
+      "text": "Pagina de stare solicitată nu a putut fi găsită. Asigură-tă că legătura este corectă și încearcă din nou."
+    },
+    "other": {
+      "title": "Eroare la preluarea paginii de stare",
+      "text": "Ne pare rău, nu am putut prelua pagina de stare în acest moment. Te rugăm să încerci din nou mai târziu."
+    }
+  }
+}
