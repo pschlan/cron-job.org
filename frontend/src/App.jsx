@@ -39,6 +39,7 @@ import 'moment/locale/de';
 import 'moment/locale/it';
 import 'moment/locale/ru';
 import 'moment/locale/fr';
+import 'moment/locale/ro';
 import 'moment/locale/zh-tw';
 import moment from 'moment';
 import useLanguageCode, { getLanguageCode } from './hooks/useLanguageCode';
