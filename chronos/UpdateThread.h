@@ -18,6 +18,7 @@
 #include <queue>
 #include <string>
 #include <thread>
+#include <atomic>
 
 #include "MySQL.h"
 #include "JobResult.h"
@@ -46,7 +47,7 @@ namespace Chronos
 		void storeResult(const std::unique_ptr<JobResult> &result);
 
 	private:
-		bool stop = false;
+		std::atomic<bool> stop{false};
 		std::unique_ptr<MySQL_DB> db;
 		static UpdateThread *instance;
 		std::mutex queueMutex;

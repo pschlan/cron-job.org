@@ -68,6 +68,8 @@ class MFADeviceManager {
   }
 
   public function createMFADevice($title, $type, $code) {
+    global $config;
+
     $secret = '';
     $enabled = false;
 
@@ -77,15 +79,19 @@ class MFADeviceManager {
       break;
 
     case MFADevice::TYPE_YUBICO_OTP:
-      //! @note This is not really a secret in the YubiKey case.
-      $secret = YubicoOTP::getPublicIdFromOTP($code);
-      if ($secret === false) {
-        throw new InvalidMFACodeException();
+      if ($config['yubicoOTP']['enable']) {
+        //! @note This is not really a secret in the YubiKey case.
+        $secret = YubicoOTP::getPublicIdFromOTP($code);
+        if ($secret === false) {
+          throw new InvalidMFACodeException();
+        }
+        if (!YubicoOTP::verifyCode($secret, $code)) {
+          throw new InvalidMFACodeException();
+        }
+        $enabled = true;
+      } else {
+        throw new InvalidMFATypeException();
       }
-      if (!YubicoOTP::verifyCode($secret, $code)) {
-        throw new InvalidMFACodeException();
-      }
-      $enabled = true;
       break;
 
     default:
@@ -147,6 +153,8 @@ class MFADeviceManager {
   }
 
   public static function verifyMFACode($userId, $code) {
+    global $config;
+
     $stmt = Database::get()->prepare('SELECT `mfadeviceid` AS `mfaDeviceId`, `type`, `secret`, `last_timeslot` AS `lastTimeslot` FROM `mfadevice` WHERE `userid`=:userId AND `enabled`=:enabled');
     $stmt->execute([
       ':userId'   => $userId,
@@ -170,7 +178,7 @@ class MFADeviceManager {
         break;
 
       case MFADevice::TYPE_YUBICO_OTP:
-        if (YubicoOTP::verifyCode(base64_decode($row->secret), $code)) {
+        if ($config['yubicoOTP']['enable'] && YubicoOTP::verifyCode(base64_decode($row->secret), $code)) {
           return true;
         }
         break;

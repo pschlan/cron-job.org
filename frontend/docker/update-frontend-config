@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+
+CFG_FILE="/src/cron-job.org/frontend/src/utils/Config.js"
+
+VARS="CJO_PROJECT_NAME CJO_BASE_URL"
+
+for VAR in $VARS
+do
+  sed -i "s#\$${VAR}#${!VAR}#g" "$CFG_FILE"
+done

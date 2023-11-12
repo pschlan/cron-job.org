@@ -19,6 +19,7 @@
 #include <string>
 #include <thread>
 #include <unordered_map>
+#include <atomic>
 
 #include "Notification.h"
 
@@ -66,7 +67,7 @@ namespace Chronos
 		void sendMail(const Mail &mail) const;
 
 	private:
-		bool stop = false;
+		std::atomic<bool> stop{false};
 		static NotificationThread *instance;
 		std::mutex queueMutex;
 		std::condition_variable queueSignal;

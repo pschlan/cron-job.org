@@ -87,6 +87,26 @@ The status page frontend is written in JavaScript using React and material-ui. Y
 * Create a copy of `src/utils/Config.default.js` as `src/utils/Config.js` and customize it according to your environment
 * Run the web interface via `npm start`
 
+Example Environment (using Docker Compose)
+--------------------
+To quickly start an example environment of most of the cron-job.org system, you can use `docker-compose`:
+* Initialize/update submodules: `git submodule init && git submodule update`
+* Copy `.env.example` to `.env` and open it in a text editor
+* Change the variables in `.env` as desired. As an absolute minimum, fill the `*_SECRET` variables with randomly generated secrets and specify a SMTP server in `SMTP_SERVER`. No authentication is used for the SMTP session, so ensure that the SMTP server is allowing relaying for your machine's IP address.
+* Start via `docker compose up` and wait until all containers are built and all services have been started. This can take a while, especially on first run.
+* Open `http://localhost:8010/` in your browser (assuming you kept the default port and host name settings).
+
+*Important:* The Docker environment contained in this repo is intended as an example / development environment and is not tailored for production usage, especially with regard to security.
+
+The following containers will be started:
+* `mysql-master` for the master service database which also stores users, groups, job -> node associations etc.
+* `mysql-node` for the node service database. Used to store per-executor information like job details with their schedules, etc.
+* `redis` used as a cache for certain features like rate limiting.
+* `api` for the PHP-based API backend used by the frontend. Uses php-fpm.
+* `frontend` which hosts the built frontend code.
+* `wwww` as the frontend nginx-powered HTTP server which connects to `frontend` (HTTP reverse proxy) and `api` (FastCGI).
+* `chronos` which runs chronos in a combined master and node service mode.
+
 General notes
 -------------
 * We strongly recommend to build curl using the c-ares resolver. Otherwise every request might spawn its own thread for DNS resolving and your machine will run out of resources *very* soon.

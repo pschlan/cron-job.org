@@ -169,6 +169,12 @@ App::App(int argc, char *argv[])
 
 App::~App()
 {
+	stopTestRunThread();
+	stopUpdateThread();
+	stopNotificationThread();
+	stopNodeServiceThread();
+	stopMasterServiceThread();
+
 	App::instance		= nullptr;
 }
 
@@ -639,6 +645,10 @@ void App::startUpdateThread()
 
 void App::stopUpdateThread()
 {
+	if (!updateThread.joinable())
+	{
+		return;
+	}
 	updateThreadObj->stopThread();
 	updateThread.join();
 }
@@ -650,6 +660,10 @@ void App::startTestRunThread()
 
 void App::stopTestRunThread()
 {
+	if (!testRunThread.joinable())
+	{
+		return;
+	}
 	testRunThreadObj->stopThread();
 	testRunThread.join();
 }
@@ -661,6 +675,10 @@ void App::startNotificationThread()
 
 void App::stopNotificationThread()
 {
+	if (!notificationThread.joinable())
+	{
+		return;
+	}
 	notificationThreadObj->stopThread();
 	notificationThread.join();
 }
@@ -672,6 +690,10 @@ void App::startNodeServiceThread()
 
 void App::stopNodeServiceThread()
 {
+	if (!nodeServiceThread.joinable())
+	{
+		return;
+	}
 	nodeServiceObj->stop();
 	nodeServiceThread.join();
 }
@@ -683,6 +705,10 @@ void App::startMasterServiceThread()
 
 void App::stopMasterServiceThread()
 {
+	if (!masterServiceThread.joinable())
+	{
+		return;
+	}
 	masterServiceObj->stop();
 	masterServiceThread.join();
 }

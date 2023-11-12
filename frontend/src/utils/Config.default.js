@@ -59,4 +59,6 @@ export const Config = {
   'enableStatusPages': false,
   'statusPageDomain': 'status.example.com',
   'maxLogoSize': 1024 * 128,
+
+  'enableYubicoOTP': true,
 };

@@ -24,6 +24,7 @@
 #include <string>
 #include <unordered_set>
 #include <unordered_map>
+#include <atomic>
 
 namespace Chronos
 {
@@ -112,7 +113,7 @@ namespace Chronos
         void cleanUp();
 
     private:
-        bool stop = false;
+        std::atomic<bool> stop{false};
         static TestRunThread *instance;
         std::unique_ptr<CurlWorker> curlWorker;
         std::mutex queueMutex;

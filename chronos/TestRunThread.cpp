@@ -94,6 +94,9 @@ void TestRunThread::stopThread()
 {
     stop = true;
     curlWorker->stop();
+
+    std::unique_lock<std::mutex> lock(queueMutex);
+    queueSignal.notify_all();
 }
 
 void TestRunThread::run()
@@ -104,6 +107,8 @@ void TestRunThread::run()
     while(!stop)
     {
         processQueue(true);
+        if(stop)
+            break;
         curlWorker->run();
     }
 
@@ -134,8 +139,10 @@ void TestRunThread::processQueue(bool wait)
     decltype(queue) tempQueue;
     {
         std::unique_lock<std::mutex> lock(queueMutex);
-        if(wait && queue.empty())
+        if(wait && queue.empty() && !stop)
             queueSignal.wait(lock);
+        if(stop)
+            return;
         queue.swap(tempQueue);
     }
 
