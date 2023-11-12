@@ -36,12 +36,12 @@ export default function Signup() {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState();
   const recaptchaRef = useRef();
-  
+
   function submit(event) {
     event.preventDefault();
 
     if (password1 !== password2
-        || !password1.match(RegexPatterns.password) 
+        || !password1.match(RegexPatterns.password)
         || !email.match(RegexPatterns.email)
         || !acceptToS
         || !acceptPrivacy) {
@@ -51,41 +51,50 @@ export default function Signup() {
     setIsLoading(true);
     setMessage();
 
-    recaptchaRef.current.executeAsync()
-      .then(token => {
-        return createAccount(token, firstName, lastName, email, password1, moment.tz.guess())
-          .then(() => {
-            setMessage({
-              severity: 'success',
-              text: t('signup.signupSuccess')
-            });
-          })
-          .catch(error => {
-            if (error.response && error.response.status === 409) {
-              setMessage({
-                severity: 'error',
-                text: t('signup.signupConflict')
-              });
-            } else {
-              setMessage({
-                severity: 'error',
-                text: t('signup.signupError')
-              });
-            }
+    const doCreateAccount = token => {
+      return createAccount(token, firstName, lastName, email, password1, moment.tz.guess())
+        .then(() => {
+          setMessage({
+            severity: 'success',
+            text: t('signup.signupSuccess')
           });
-      })
-      .catch(() => {
-        setMessage({
-          severity: 'error',
-          text: t('signup.recaptchaError')
+        })
+        .catch(error => {
+          if (error.response && error.response.status === 409) {
+            setMessage({
+              severity: 'error',
+              text: t('signup.signupConflict')
+            });
+          } else {
+            setMessage({
+              severity: 'error',
+              text: t('signup.signupError')
+            });
+          }
         });
-      })
-      .finally(() => {
-        if (recaptchaRef.current && (!message || message.severity !== 'success')) {
-          recaptchaRef.current.reset();
-        }
-        setIsLoading(false);
-      });
+    };
+
+    if (Config.recaptchaSiteKey !== null) {
+      recaptchaRef.current.executeAsync()
+        .then(doCreateAccount)
+        .catch(() => {
+          setMessage({
+            severity: 'error',
+            text: t('signup.recaptchaError')
+          });
+        })
+        .finally(() => {
+          if (recaptchaRef.current && (!message || message.severity !== 'success')) {
+            recaptchaRef.current.reset();
+          }
+          setIsLoading(false);
+        });
+    } else {
+      doCreateAccount(null)
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }
   }
 
   return <>
@@ -175,11 +184,11 @@ export default function Signup() {
               patternErrorText={t('settings.invalidPassword')} />
           </Grid>
         </Grid>
-        <ReCAPTCHA
+        {Config.recaptchaSiteKey !== null && <ReCAPTCHA
           ref={recaptchaRef}
           sitekey={Config.recaptchaSiteKey}
           size='invisible'
-          />
+          />}
         {(password1.length > 0 && password2.length > 0 && password1 !== password2) &&
           <Alert severity='error'>
             <AlertTitle>{t('common.error')}</AlertTitle>

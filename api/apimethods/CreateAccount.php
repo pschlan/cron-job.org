@@ -21,6 +21,7 @@ class CreateAccount extends AbstractAPIMethod {
   }
 
   public function validateRequest($request) {
+    global $config;
     global $emailDenyList;
 
     if (isset($request->email)) {
@@ -33,7 +34,7 @@ class CreateAccount extends AbstractAPIMethod {
     }
 
     return (
-          isset($request->token)
+          (isset($request->token) || $config['recaptchaSecretKey'] === null)
       &&  isset($request->firstName)
       &&  isset($request->lastName)
       &&  isset($request->email)
@@ -47,7 +48,7 @@ class CreateAccount extends AbstractAPIMethod {
   public function execute($request, $sessionToken, $language) {
     global $config;
 
-    if (!RecaptchaVerifier::verify($config['recaptchaSecretKey'], $request->token)) {
+    if ($config['recaptchaSecretKey'] !== null && !RecaptchaVerifier::verify($config['recaptchaSecretKey'], $request->token)) {
       throw new ForbiddenAPIException();
     }
 

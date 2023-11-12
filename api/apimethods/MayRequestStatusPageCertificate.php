@@ -16,6 +16,10 @@ class MayRequestStatusPageCertificate extends AbstractAPIMethod {
   }
 
   public function validateRequest($request) {
+    global $config;
+    if ($config['statusPageDomain'] === null) {
+      return false;
+    }
     return (
          isset($request->domain)
       && strlen($request->domain) >= 3

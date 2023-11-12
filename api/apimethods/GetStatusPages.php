@@ -18,6 +18,10 @@ class GetStatusPages extends AbstractAPIMethod {
   }
 
   public function validateRequest($request) {
+    global $config;
+    if ($config['statusPageDomain'] === null) {
+      return false;
+    }
     return true;
   }
 

@@ -278,7 +278,7 @@ class UserManager {
     ]);
   }
 
-  private function createRefreshToken($userId, $device) {
+  private static function createRefreshToken($userId, $device) {
     global $config;
 
     $token = self::generateToken($config['refreshTokenLength']);

@@ -54,6 +54,8 @@ CREATE TABLE `usergroup`(
     `request_max_size` int(11) NOT NULL DEFAULT '8192',
     `max_failures` int(11) NOT NULL DEFAULT 15,
     `execution_priority` tinyint(4) NOT NULL DEFAULT 0,
+    `api_requests_per_day` int(11) NOT NULL DEFAULT '100',
+    `max_api_keys` int(11) NOT NULL DEFAULT '1',
     PRIMARY KEY(`usergroupid`)
 ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 INSERT INTO `usergroup`(`usergroupid`, `title`) VALUES(1, 'Default');
@@ -65,6 +67,7 @@ CREATE TABLE `node`(
     `public_ip` varchar(32) NOT NULL DEFAULT '',
     `port` int(11) NOT NULL DEFAULT 9090,
     `enabled` tinyint(4) NOT NULL DEFAULT '1',
+    `load_24h` tinyint(255) NOT NULL DEFAULT '0',
     PRIMARY KEY(`nodeid`)
 ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 INSERT INTO `node`(`nodeid`,`name`,`ip`,`port`) VALUES(1, 'Local Node', '127.0.0.1',9090);

@@ -20,19 +20,20 @@ class SubmitJobTestRun extends AbstractAPIMethod {
   }
 
   public function validateRequest($request) {
+    global $config;
     return (
          isset($request->jobId)
       && is_numeric($request->jobId)
       && isset($request->job)
       && is_object($request->job)
-      && isset($request->token)
+      && (isset($request->token) || $config['recaptchaSecretKey'] === null)
     );
   }
 
   public function execute($request, $sessionToken, $language) {
     global $config;
 
-    if (!RecaptchaVerifier::verify($config['recaptchaSecretKey'], $request->token)) {
+    if ($config['recaptchaSecretKey'] !== null && !RecaptchaVerifier::verify($config['recaptchaSecretKey'], $request->token)) {
       throw new ForbiddenAPIException();
     }
 

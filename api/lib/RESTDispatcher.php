@@ -101,7 +101,7 @@ class RESTDispatcher extends AbstractDispatcher {
         return;
       }
 
-      $uri = trim($_SERVER['REQUEST_URI']);
+      $uri = trim($_SERVER['PATH_INFO']);
 
       $handler = null;
       if (isset($_SERVER['CONTENT_TYPE']) && in_array($_SERVER['CONTENT_TYPE'], ['application/json', 'text/json'])) {
