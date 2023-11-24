@@ -1,0 +1,10 @@
+.DS_Store
+.vscode
+CMakeCache.txt
+CMakeFiles
+/build
+/frontend/build
+/frontend/node_modules
+/statuspage/build
+/statuspage/node_modules
+/docs/build

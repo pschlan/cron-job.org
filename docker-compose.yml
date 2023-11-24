@@ -1,0 +1,90 @@
+# This is a demo configuration for the cron-job.org system running
+# with a single execution node.
+# It is not hardened / tuned for security and we strictly recommend
+# to NOT use it in production.
+version: "3.9"
+services:
+  mysql-master:
+    image: mysql:8
+    command: --default-authentication-plugin=mysql_native_password --sql_mode="" --skip-name-resolve --tls-version=""
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MASTER_MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MASTER_MYSQL_DATABASE}
+      MYSQL_USER: ${MASTER_MYSQL_USER}
+      MYSQL_PASSWORD: ${MASTER_MYSQL_PASSWORD}
+    volumes:
+      - ${MASTER_MYSQL_DATA_DIR-./docker-data/data/mysql-master}:/var/lib/mysql
+      - ${MASTER_MYSQL_LOG_DIR-./docker-data/logs/mysql-master}:/var/log/mysql
+      - ./database/struct_master.sql:/docker-entrypoint-initdb.d/00_struct_master.sql
+      - ./docker-data/config/config_master.sql:/docker-entrypoint-initdb.d/01_config_master.sql
+  mysql-node:
+    image: mysql:8
+    command: --default-authentication-plugin=mysql_native_password --sql_mode="" --skip-name-resolve --tls-version=""
+    environment:
+      MYSQL_ROOT_PASSWORD: ${NODE_MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${NODE_MYSQL_DATABASE}
+      MYSQL_USER: ${NODE_MYSQL_USER}
+      MYSQL_PASSWORD: ${NODE_MYSQL_PASSWORD}
+    volumes:
+      - ${NODE_MYSQL_DATA_DIR-./docker-data/data/mysql-node}:/var/lib/mysql
+      - ${NODE_MYSQL_LOG_DIR-./docker-data/logs/mysql-node}:/var/log/mysql
+      - ./database/struct_node.sql:/docker-entrypoint-initdb.d/struct_node.sql
+  redis:
+    image: redis:7-alpine
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        CJO_PROJECT_NAME: ${CJO_PROJECT_NAME}
+        CJO_BASE_URL: ${CJO_BASE_URL}
+  api:
+    build: ./api
+    volumes:
+      - ${API_CONFIG-./docker-data/config/config.inc.php}:/var/www/html/config/config.inc.php
+    environment:
+      CJO_PROJECT_NAME: ${CJO_PROJECT_NAME}
+      CJO_BASE_URL: ${CJO_BASE_URL}
+      CJO_DOMAIN: ${CJO_DOMAIN}
+      CJO_SESSION_TOKEN_SECRET: ${CJO_SESSION_TOKEN_SECRET}
+      CJO_EMAIL_VERIFICATION_TOKEN_SECRET: ${CJO_EMAIL_VERIFICATION_TOKEN_SECRET}
+      CJO_LOST_PASSWORD_TOKEN_SECRET: ${CJO_LOST_PASSWORD_TOKEN_SECRET}
+      CJO_ACCOUNT_CONFIRMATION_TOKEN_SECRET: ${CJO_ACCOUNT_CONFIRMATION_TOKEN_SECRET}
+      CJO_VERP_SECRET: ${CJO_VERP_SECRET}
+      CJO_EMAIL_SENDER: ${CJO_EMAIL_SENDER}
+      CJO_EMAIL_RETURN_PATH: ${CJO_EMAIL_RETURN_PATH}
+      SMTP_SERVER: ${SMTP_SERVER}
+      MYSQL_DATABASE: ${MASTER_MYSQL_DATABASE}
+      MYSQL_USER: ${MASTER_MYSQL_USER}
+      MYSQL_PASSWORD: ${MASTER_MYSQL_PASSWORD}
+    depends_on:
+      - chronos
+      - mysql-master
+      - redis
+  www:
+    build: ./docker/www
+    ports:
+      - "${CJO_FRONTEND_PORT}:80"
+    depends_on:
+      - frontend
+      - api
+  chronos:
+    build: ./
+    volumes:
+      - ${CHRONOS_DATA_DIR-./docker-data/data/chronos}:/var/lib/cron-job.org-data
+    environment:
+      CJO_PROJECT_NAME: ${CJO_PROJECT_NAME}
+      CJO_VERP_SECRET: ${CJO_VERP_SECRET}
+      CJO_EMAIL_SENDER: ${CJO_EMAIL_SENDER}
+      CJO_EMAIL_RETURN_PATH: ${CJO_EMAIL_RETURN_PATH}
+      SMTP_SERVER: ${SMTP_SERVER}
+      MASTER_MYSQL_HOST: mysql-master
+      MASTER_MYSQL_DATABASE: ${MASTER_MYSQL_DATABASE}
+      MASTER_MYSQL_USER: ${MASTER_MYSQL_USER}
+      MASTER_MYSQL_PASSWORD: ${MASTER_MYSQL_PASSWORD}
+      NODE_MYSQL_HOST: mysql-node
+      NODE_MYSQL_DATABASE: ${NODE_MYSQL_DATABASE}
+      NODE_MYSQL_USER: ${NODE_MYSQL_USER}
+      NODE_MYSQL_PASSWORD: ${NODE_MYSQL_PASSWORD}
+    depends_on:
+      - mysql-master
+      - mysql-node

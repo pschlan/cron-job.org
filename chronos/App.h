@@ -15,6 +15,7 @@
 #include <memory>
 #include <thread>
 #include <vector>
+#include <atomic>
 
 #include <time.h>
 
@@ -84,7 +85,7 @@ namespace Chronos
 		bool isIpAddressBlocked(in_addr_t ipAddress) const;
 
 	private:
-		bool stop = false;
+		std::atomic<bool> stop{false};
 		static App *instance;
 		std::unique_ptr<Private> priv;
 		std::thread updateThread;

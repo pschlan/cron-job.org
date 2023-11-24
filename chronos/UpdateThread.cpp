@@ -407,7 +407,7 @@ void UpdateThread::stopThread()
 	stop = true;
 
 	std::lock_guard<std::mutex> lg(queueMutex);
-	queueSignal.notify_one();
+	queueSignal.notify_all();
 }
 
 void UpdateThread::run()
@@ -423,7 +423,12 @@ void UpdateThread::run()
 		{
 			std::unique_lock<std::mutex> lock(queueMutex);
 			if(queue.empty())
-				queueSignal.wait(lock);
+			{
+				if (!stop)
+					queueSignal.wait(lock);
+			}
+			if(stop)
+				break;
 			queue.swap(tempQueue);
 		}
 

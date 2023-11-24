@@ -116,24 +116,32 @@ export default function JobTestRun({ job, jobId, onClose, onUpdateUrl = () => nu
 
   function executeTestRun() {
     setIsLoading(true);
-    recaptchaRef.current.executeAsync()
-      .then(token => {
-        return submitJobTestRun(token, jobId, job)
-          .then(result => setHandle(result.handle))
-          .catch(() => {
-            enqueueSnackbar(t('jobs.testRun.storeError'), { variant: 'error' });
-            if (recaptchaRef.current) {
-              recaptchaRef.current.reset();
-            }
-          });
-      })
-      .catch(() => {
-        enqueueSnackbar(t('jobs.testRun.recaptchaError'), { variant: 'error' });
-        if (recaptchaRef.current) {
-          recaptchaRef.current.reset();
-        }
-      })
-      .finally(() => setIsLoading(false));
+
+    const doSubmitJobTestRun = token => {
+      return submitJobTestRun(token, jobId, job)
+        .then(result => setHandle(result.handle))
+        .catch(() => {
+          enqueueSnackbar(t('jobs.testRun.storeError'), { variant: 'error' });
+          if (recaptchaRef.current) {
+            recaptchaRef.current.reset();
+          }
+        });
+    };
+
+    if (Config.recaptchaSiteKey !== null) {
+      recaptchaRef.current.executeAsync()
+        .then(doSubmitJobTestRun)
+        .catch(() => {
+          enqueueSnackbar(t('jobs.testRun.recaptchaError'), { variant: 'error' });
+          if (recaptchaRef.current) {
+            recaptchaRef.current.reset();
+          }
+        })
+        .finally(() => setIsLoading(false));
+    } else {
+      doSubmitJobTestRun(null)
+        .finally(() => setIsLoading(false));
+    }
   }
 
   const additionalProps = status && { 'fullWidth': true, 'maxWidth': 'md' };
@@ -153,11 +161,11 @@ export default function JobTestRun({ job, jobId, onClose, onUpdateUrl = () => nu
         </Alert>
       </DialogContent>
       <DialogActions>
-        <ReCAPTCHA
+        {Config.recaptchaSiteKey !== null && <ReCAPTCHA
           ref={recaptchaRef}
           sitekey={Config.recaptchaSiteKey}
           size='invisible'
-          />
+          />}
         <Button onClick={() => onCloseRef.current()}>
           {t('common.cancel')}
         </Button>

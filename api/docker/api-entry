@@ -1,0 +1,13 @@
+#!/bin/bash
+set -e
+
+CFG_FILE="/etc/msmtprc"
+
+VARS="SMTP_SERVER CJO_EMAIL_SENDER"
+
+for VAR in $VARS
+do
+  sed -i "s#\$${VAR}#${!VAR}#g" "$CFG_FILE"
+done
+
+php-fpm

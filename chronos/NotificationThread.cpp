@@ -233,7 +233,7 @@ void NotificationThread::stopThread()
 	stop = true;
 
 	std::lock_guard<std::mutex> lg(queueMutex);
-	queueSignal.notify_one();
+	queueSignal.notify_all();
 }
 
 void NotificationThread::run()
@@ -247,8 +247,10 @@ void NotificationThread::run()
 	{
 		{
 			std::unique_lock<std::mutex> lock(queueMutex);
-			if(queue.empty())
+			if(queue.empty() && !stop)
 				queueSignal.wait(lock);
+			if(stop)
+				break;
 			queue.swap(tempQueue);
 		}
 

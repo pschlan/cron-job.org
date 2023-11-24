@@ -1,0 +1,22 @@
+#!/bin/bash
+
+CFG_FILE="/opt/chronos/etc/chronos.cfg"
+
+VARS="NODE_MYSQL_HOST NODE_MYSQL_USER NODE_MYSQL_PASSWORD NODE_MYSQL_DATABASE \
+  MASTER_MYSQL_HOST MASTER_MYSQL_USER MASTER_MYSQL_PASSWORD MASTER_MYSQL_DATABASE \
+  CJO_PROJECT_NAME CJO_EMAIL_SENDER CJO_EMAIL_RETURN_PATH SMTP_SERVER"
+
+for VAR in $VARS
+do
+  sed -i "s#\$${VAR}#${!VAR}#g" "$CFG_FILE"
+done
+
+ulimit -c unlimited
+ulimit -n 65536
+LC_ALL=en_US.utf8
+
+while [ 1 ]
+do
+  /opt/chronos/bin/chronos "$CFG_FILE"
+  sleep 1
+done

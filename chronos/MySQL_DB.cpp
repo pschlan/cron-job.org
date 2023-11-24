@@ -82,7 +82,7 @@ void MySQL_DB::connect()
 	}
 
 	if(!bEstablished)
-		throw std::runtime_error(std::string("MySQL :") + std::string(mysql_error(handle)));
+		throw std::runtime_error(std::string("MySQL_DB::connect(): ") + std::string(mysql_error(handle)));
 
 	this->query("SET NAMES utf8mb4");
 

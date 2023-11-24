@@ -44,11 +44,11 @@ function convertComponent(array, minElement, maxElement) {
   const multiplier = array[1] - array[0];
   const multiplierValidated =
         array.reduce((prev, cur, index) => prev && (index * multiplier + minElement) === cur, true)
-    &&  array.length === Math.floor((maxElement - minElement + 1) / multiplier);
+    &&  array.length === Math.ceil((maxElement - minElement + 1) / multiplier);
   if (multiplierValidated) {
     return '*/' + multiplier;
   }
-  
+
   return compressSequences(array)
     .map(x => Array.isArray(x) ? x.join('-') : '' + x)
     .join(',');

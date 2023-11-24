@@ -14,6 +14,7 @@ import useLanguageCode from './hooks/useLanguageCode';
 import translationEN from './locales/en/translation.json';
 import translationDE from './locales/de/translation.json';
 import translationIT from './locales/it/translation.json';
+import translationFR from './locales/fr/translation.json';
 import translationRU from './locales/ru/translation.json';
 import translationZhTW from './locales/zh_TW/translation.json';
 import translationRo from './locales/ro/translation.json';
@@ -33,6 +34,9 @@ const LANGUAGE_RESOURCES = {
   },
   it: {
     translation: translationIT
+  },
+  fr: {
+    translation: translationFR
   },
   ru:{
     translation: translationRU
