@@ -15,6 +15,8 @@ RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 COPY ./docker/msmtprc /etc/msmtprc
 COPY ./docker/api-entry /usr/local/bin/
 
+RUN chmod 0755 /usr/local/bin/api-entry
+
 COPY ./ /var/www/html/
 
 RUN rm -rf /var/www/html/docker

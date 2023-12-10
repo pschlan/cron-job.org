@@ -37,6 +37,7 @@ RUN rm -rf /opt/chronos/include
 RUN rm -rf /opt/chronos/share/man
 RUN rm -f /opt/chronos/bin/thrift
 RUN rm -f /opt/chronos/bin/curl-config
+RUN chmod 0755 /opt/chronos/bin/chronos-entry
 
 CMD "/opt/chronos/bin/chronos-entry"
 

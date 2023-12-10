@@ -9,7 +9,7 @@ COPY ./ /src/cron-job.org/frontend
 COPY ./docker/Config.js /src/cron-job.org/frontend/src/utils/
 COPY ./docker/update-frontend-config /usr/local/bin/
 
-RUN /usr/local/bin/update-frontend-config
+RUN chmod 0755 /usr/local/bin/update-frontend-config && /usr/local/bin/update-frontend-config
 
 WORKDIR /src/cron-job.org/frontend
 RUN npm ci && npm run build
