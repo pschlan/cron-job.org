@@ -23,6 +23,7 @@ import translationPL from './locales/pl/translation.json';
 import 'moment/locale/de';
 import 'moment/locale/it';
 import 'moment/locale/ru';
+import 'moment/locale/pl';
 import moment from 'moment';
 import { Config } from './utils/Config';
 
