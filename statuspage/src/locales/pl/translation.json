@@ -1,6 +1,6 @@
 {
   "common": {
-    "poweredBy": "Stworzony przez",
+    "poweredBy": "Napędzany przez",
     "refresh": "Odświerz"
   },
   "timespan": {
@@ -12,13 +12,13 @@
   },
   "status": {
     "availability": "Dostępność",
-    "availabilityWarning": "Availability warning",
-    "availabilityError": "Availability error",
-    "lowAvailabilityText": "We're currently experiencing reduced availability of {{percent}} % in the last 30 minutes.",
+    "availabilityWarning": "Ostrzeżenie o dostępności",
+    "availabilityError": "Błąd dostępności",
+    "lowAvailabilityText": "Obecnie mamy obniżoną dostępność o {{percent}}% w ciągu ostatnich 30 minut.",
     "latency": "Opóźnienie",
-    "latencyWarning": "Latency warning",
-    "latencyError": "Latency error",
-    "highLatencyText": "We're currently experiencing unusually high latency of {{ms}} ms in the last 30 minutes.",
+    "latencyWarning": "Ostrzeżenie o opóźnieniu",
+    "latencyError": "Błąd opóźnienia",
+    "highLatencyText": "Obecnie mamy niezwykle wysokie opóźnienie wynoszące {{ms}}ms w ciągu ostatnich 30 minut.",
     "healthy": "Działający",
     "allSystemsRunAsExpected": "Wszystkie systemy działają obecnie zgodnie z oczekiwaniami.",
     "disabled": "Wyłączony"
