@@ -65,7 +65,7 @@ $config = array(
   'sessionTokenLifetime'            => 15 * 60,
   'emailVerificationTokenLifetime'  => 3 * 86400,
   'lostPasswordTokenLifetime'       => 3 * 86400,
-  'accountConfirmationTokenLifetime'=> 3 * 86400,
+  'accountConfirmationTokenLifetime' => 3 * 86400,
   'refreshTokenValiditySeconds'     => 365 * 86400,
 
   //! @note Minimum session token refresh interval
@@ -90,7 +90,7 @@ $config = array(
 
   //! @note List of supported languages. When adding new language file, be sure
   //!       to add the new language code here.
-  'languages'                       => ['en', 'de', 'fr', 'zh_TW', 'ro'],
+  'languages'                       => ['en', 'de', 'fr', 'zh_TW', 'ro', 'pl'],
 
   //! @note Lifetime for test run meta data in redis cache.
   'testRunLifetime'                 => 5 * 60

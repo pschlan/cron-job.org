@@ -1,0 +1,36 @@
+{
+  "common": {
+    "poweredBy": "Napędzany przez",
+    "refresh": "Odświerz"
+  },
+  "timespan": {
+    "1year": "1 rok",
+    "6months": "6 miesięcy",
+    "1month": "1 miesiąc",
+    "1week": "1 tydzień",
+    "1day": "1 dzień"
+  },
+  "status": {
+    "availability": "Dostępność",
+    "availabilityWarning": "Ostrzeżenie o dostępności",
+    "availabilityError": "Błąd dostępności",
+    "lowAvailabilityText": "Obecnie mamy obniżoną dostępność o {{percent}}% w ciągu ostatnich 30 minut.",
+    "latency": "Opóźnienie",
+    "latencyWarning": "Ostrzeżenie o opóźnieniu",
+    "latencyError": "Błąd opóźnienia",
+    "highLatencyText": "Obecnie mamy niezwykle wysokie opóźnienie wynoszące {{ms}}ms w ciągu ostatnich 30 minut.",
+    "healthy": "Działający",
+    "allSystemsRunAsExpected": "Wszystkie systemy działają obecnie zgodnie z oczekiwaniami.",
+    "disabled": "Wyłączony"
+  },
+  "error": {
+    "404": {
+      "title": "Strony nie znaleziono",
+      "text": "Nie można znaleźć żądanej strony statusu. Upewnij się, że link jest poprawny i spróbuj ponownie.."
+    },
+    "other": {
+      "title": "Błąd podczas pobierania strony statusu",
+      "text": "Przepraszamy, w tej chwili nie mogliśmy pobrać strony statusu. Spróbuj ponownie później."
+    }
+  }
+}
