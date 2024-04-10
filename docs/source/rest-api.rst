@@ -280,7 +280,7 @@ Max. 5 requests per second.
 
 Creating a Cron Job
 ^^^^^^^^^^^^^^^^^^^
-Updating a cron job identified by its `jobId`::
+Creating a new cron job::
 
     PUT /jobs
 
@@ -308,7 +308,7 @@ jobId               int                                     Identifier of the cr
     curl -X PUT \
          -H 'Content-Type: application/json' \
          -H 'Authorization: Bearer zaX78aqKJuIH4l4RX6njoqADn77MQNJJ' \
-         -d '{"job":{"url":"https://example.com","enabled":"true","saveResponses":true,"schedule":{"timezone":"Europe/Berlin","expiresAt":0,"hours":[-1],"mdays":[-1],"minutes":[-1],"months":[-1],"wdays":[-1]}}}' \
+         -d '{"job":{"url":"https://example.com","enabled":true,"saveResponses":true,"schedule":{"timezone":"Europe/Berlin","expiresAt":0,"hours":[-1],"mdays":[-1],"minutes":[-1],"months":[-1],"wdays":[-1]}}}' \
          https://api.cron-job.org/jobs
 
 **Response Example**
