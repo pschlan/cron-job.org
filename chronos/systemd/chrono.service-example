@@ -4,7 +4,7 @@ After=mysql.service network.target
 
 [Service]
 ExecStart=/usr/src/cron-job.org/build/chronos/chronos /etc/chronos.cfg
-User=root
+User=chronos
 LimitCORE=infinity
 LimitNOFILE=65535
 Environment=LC_ALL=en_US.utf8
