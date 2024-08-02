@@ -5,6 +5,7 @@ cron-job.org Documentation
    :maxdepth: 2
    :caption: Contents:
 
+   creating-cron-jobs
    rest-api
 
 Indices and tables
