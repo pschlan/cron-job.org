@@ -735,7 +735,7 @@ public:
         }
 
         std::unique_ptr<Chronos::HTTPRequest> req(Chronos::HTTPRequest::fromURL(
-            job.data.url,
+            Chronos::Utils::replaceVariables(job.data.url),
             job.identifier.userId,
             maxSize,
             requestTimeout
@@ -764,10 +764,10 @@ public:
         {
             for(const auto &item : job.extendedData.headers)
             {
-                req->requestHeaders.push_back({ item.first, item.second });
+                req->requestHeaders.push_back({ item.first, Chronos::Utils::replaceVariables(item.second) });
             }
 
-            req->requestBody = job.extendedData.body;
+            req->requestBody = Chronos::Utils::replaceVariables(job.extendedData.body);
         }
 
         //! @todo X-Forwarded-For, User-Agent for test run
