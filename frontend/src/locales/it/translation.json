@@ -1,6 +1,7 @@
 {
   "paddleLocale": "it",
   "common": {
+    "help": "Aiuto",
     "menu": "Menu",
     "contact": "Contatti",
     "followontwitter": "Twitter",

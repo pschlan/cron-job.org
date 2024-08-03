@@ -8,6 +8,7 @@ export const Config = {
   'termsOfServiceURL': 'https://example.com/tos/',
   'returnPolicyURL': 'https://example.com/returnpolicy/',
   'apiDocsURL': 'https://example.com/docs/rest-api.html',
+  'variablesDocsURL': 'https://example.com/creating-cron-jobs.html#cron-job-variables',
 
   //! @note The URL of the API webserver (/api/ folder in this repo)
   'apiURL': 'https://api.example.com/',

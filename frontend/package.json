@@ -13,6 +13,7 @@
     "clsx": "^1.1.1",
     "i18next": "^19.4.5",
     "i18next-browser-languagedetector": "^6.0.1",
+    "insert-text-at-cursor": "^0.3.0",
     "moment": "^2.29.4",
     "moment-timezone": "^0.5.35",
     "notistack": "^0.9.17",
