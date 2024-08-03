@@ -447,7 +447,7 @@ export default function JobEditor({ match }) {
             fullWidth
             required
             />
-          <div>
+          {folders && folders.length > 0 && <div>
             <InputLabel shrink id='folder-label'>
               {t('jobs.folder')}
             </InputLabel>
@@ -461,7 +461,7 @@ export default function JobEditor({ match }) {
               {folders.map(folder =>
                 <MenuItem value={folder.folderId} key={folder.folderId}>{folder.title}</MenuItem>)}
             </Select>
-          </div>
+          </div>}
           <FormControlLabel
             control={<Switch
               checked={jobEnabled}
