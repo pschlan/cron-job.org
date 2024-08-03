@@ -77,13 +77,13 @@ export default function SubscribeDialog({ onClose }) {
                 </TableRow>
                 <TableRow>
                   <TableCell>{t('settings.subscribeDialog.maxRequestSize')}</TableCell>
-                  <TableCell>8 KB</TableCell>
                   <TableCell>64 KB</TableCell>
+                  <TableCell>256 KB</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>{t('settings.subscribeDialog.maxFailures')}</TableCell>
-                  <TableCell>15</TableCell>
-                  <TableCell>150</TableCell>
+                  <TableCell>25</TableCell>
+                  <TableCell>200</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>{t('settings.subscribeDialog.maxStatusPages')}</TableCell>

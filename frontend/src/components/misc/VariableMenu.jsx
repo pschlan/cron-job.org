@@ -21,7 +21,7 @@ function getTextField(elem) {
       return textField;
     }
   }
-  return undefined;
+  return null;
 }
 
 export default function VariableMenu() {
