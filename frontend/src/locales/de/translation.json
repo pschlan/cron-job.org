@@ -427,6 +427,7 @@
     "subscriptionPending": "Wir bearbeiten gerade Ihre Bestellung - bitte schauen Sie in Kürze noch einmal vorbei.",
     "subscriptionInactive": "Sie sind derzeit kein aktives Fördermitglied.",
     "subscriptionExpiring": "Ihre Fördermitgliedschaft endet am {{expiresAt}}.",
+    "subscriptionGracePeriod": "Ihre kostenlose Fördermitgliedschaftsverlängerung endet am {{expiresAt}}. Wenn Sie weiterhin Fördermitglied bleiben möchten, klicken Sie bite auf \"Fördermitglied werden\".",
     "becomeASustainingMember": "Fördermitglied werden",
     "learnMore": "Mehr erfahren",
     "sustainingMemberTeaser": "Finden Sie {{serviceName}} nützlich und möchten uns unterstützen und gleichzeitig von exklusiven Vorteilen profitieren? Werden Sie ein Fördermitglied!",

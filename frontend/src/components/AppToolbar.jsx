@@ -44,7 +44,7 @@ export default function AppToolbar() {
       <LogoutIcon />
     </IconButton>
   </> : <>
-    {userProfile && userProfile.userSubscription && userProfile.userSubscription.status === SubscriptionStatus.ACTIVE && <Tooltip title={t('common.sustainingMemberThanks')}>
+    {userProfile && userProfile.userSubscription && (userProfile.userSubscription.status in [SubscriptionStatus.ACTIVE, SubscriptionStatus.EXPIRING] || userProfile.userSubscription.isOnGracePeriod === true) && <Tooltip title={t('common.sustainingMemberThanks')}>
       <IconButton
         color='inherit'
         onClick={() => history.push('/settings')}
