@@ -33,7 +33,7 @@ export default function AppMenu({ items, selectedId, indentSubItems, onListItemC
       <List>
         {category.text && <ListSubheader inset>{category.text}</ListSubheader>}
         {category.items.filter(item => !!item).map((item, itemNo) =>
-          <>
+          <React.Fragment key={itemNo}>
             <ListItem key={itemNo} selected={item.id===selectedId} button component={RouterLink} to={item.href} onClick={onListItemClick}>
               <ListItemIcon title={item.text}>
                 {item.icon}
@@ -48,7 +48,7 @@ export default function AppMenu({ items, selectedId, indentSubItems, onListItemC
                   <ListItemText primary={<Typography noWrap>{subItem.text}</Typography>} />
                 </ListItem>)}
             </List>}
-          </>)}
+          </React.Fragment>)}
       </List>
     </div>)}
   </>;
