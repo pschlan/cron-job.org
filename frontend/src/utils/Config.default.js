@@ -1,13 +1,14 @@
 export const Config = {
-    //! @note Adjust project name, domains and URLs accordingly.
-    'productName': 'cron-job.org OSS',
-    'baseURL': 'https://example.com',
-    'twitterURL': 'https://twitter.com/CronJobOrg',
-    'githubURL': 'https://github.com/pschlan/cron-job.org',
-    'privacyPolicyURL': 'https://example.com/privacy/',
-    'termsOfServiceURL': 'https://example.com/tos/',
-    'returnPolicyURL': 'https://example.com/returnpolicy/',
-    'apiDocsURL': 'https://example.com/docs/rest-api.html',
+  //! @note Adjust project name, domains and URLs accordingly.
+  'productName': 'cron-job.org OSS',
+  'baseURL': 'https://example.com',
+  'twitterURL': 'https://twitter.com/CronJobOrg',
+  'githubURL': 'https://github.com/pschlan/cron-job.org',
+  'privacyPolicyURL': 'https://example.com/privacy/',
+  'termsOfServiceURL': 'https://example.com/tos/',
+  'returnPolicyURL': 'https://example.com/returnpolicy/',
+  'apiDocsURL': 'https://example.com/docs/rest-api.html',
+  'variablesDocsURL': 'https://example.com/creating-cron-jobs.html#cron-job-variables',
 
     //! @note The URL of the API webserver (/api/ folder in this repo)
     'apiURL': 'https://api.example.com/',

@@ -378,7 +378,9 @@ export default function Settings() {
                   {userProfile.userSubscription && userProfile.userSubscription.status === SubscriptionStatus.CANCELLED && <>
                       <IconAvatar icon={SubscriptionInactiveIcon} />
                       <div>
-                        {t('settings.subscriptionInactive', { serviceName: Config.productName })}
+                        {userProfile.userSubscription.isOnGracePeriod ?
+                          <>{t('settings.subscriptionGracePeriod', { serviceName: Config.productName, expiresAt: moment(userProfile.userSubscription.gracePeriodEndsAt * 1000).calendar() })}</> :
+                          <>{t('settings.subscriptionInactive', { serviceName: Config.productName })}</>}
                       </div>
                     </>}
                 </> : <>
@@ -388,7 +390,7 @@ export default function Settings() {
             </Grid>
             <Grid item sm={6} xs={12} align='right'>
               <ButtonGroup variant='contained' size='small'>
-                {userProfile.userSubscription && userProfile.userSubscription.type==='stripe' &&
+                {userProfile.userSubscription && userProfile.userSubscription.type==='stripe' && userProfile.userSubscription.status !== SubscriptionStatus.EXPIRING &&
                   <Button
                     size='small'
                     variant='contained'
@@ -542,7 +544,7 @@ export default function Settings() {
         </Grid>
       </Paper>
 
-      <Grid container direction='row' justify='flex-end'>
+      <Grid container direction='row' justifyContent='flex-end'>
         <Grid item>
           <Button
             variant='contained'

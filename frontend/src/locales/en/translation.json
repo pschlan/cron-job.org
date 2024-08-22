@@ -2,6 +2,7 @@
   "paddleLocale": "en",
   "landingLocale": "en",
   "common": {
+    "help": "Help",
     "menu": "Menu",
     "contact": "Contact",
     "followontwitter": "Twitter",
@@ -426,6 +427,7 @@
     "subscriptionPending": "We're currently processing your order - please check back soon!",
     "subscriptionInactive": "You're not currently an active sustaining member.",
     "subscriptionExpiring": "Your sustaining membership is expiring at {{expiresAt}}.",
+    "subscriptionGracePeriod": "Your free sustaining membership extension is expiring at {{expiresAt}}. If you want to continue being a sustaining member, please re-subscribe by clicking \"Become A Sustaining Member\".",
     "becomeASustainingMember": "Become a sustaining member",
     "learnMore": "Learn more",
     "sustainingMemberTeaser": "Do you find {{serviceName}} useful and want to support us and at the same time benefit from exclusive membership rewards? Become a Sustaining Member now!",

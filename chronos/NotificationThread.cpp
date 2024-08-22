@@ -1,6 +1,6 @@
 /*
  * chronos, the cron-job.org execution daemon
- * Copyright (C) 2020 Patrick Schlangen <patrick@schlangen.me>
+ * Copyright (C) 2020-2024 Patrick Schlangen <patrick@schlangen.me>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -11,6 +11,7 @@
 
 #include "NotificationThread.h"
 
+#include <chrono>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -34,6 +35,12 @@
 #include <thrift/transport/TTransportUtils.h>
 
 #include "ChronosMaster.h"
+
+namespace {
+
+constexpr int PHRASE_SYNC_INTERVAL_SECONDS = 300;
+
+} // anon ns
 
 class Mail
 {
@@ -241,6 +248,7 @@ void NotificationThread::run()
 	std::cout << "NotificationThread::run(): Entered" << std::endl;
 
 	decltype(queue) tempQueue;
+	time_t tLastPhraseSync = 0;
 
 	stop = false;
 	while(!stop)
@@ -259,20 +267,34 @@ void NotificationThread::run()
 			std::cout << "NotificationThread::run(): " << numNotifications << " notification jobs fetched" << std::endl;
 
 		time_t tStart = time(nullptr);
-		if(!tempQueue.empty())
+		while(!tempQueue.empty())
 		{
-			masterTransport->open();
-
-			syncPhrases();
-
-			while(!tempQueue.empty())
+			try
 			{
-				Notification notification = std::move(tempQueue.front());
-				tempQueue.pop();
-				processNotification(notification);
-			}
+				masterTransport->open();
 
-			masterTransport->close();
+				if(phrases.empty() || (tLastPhraseSync + PHRASE_SYNC_INTERVAL_SECONDS < time(nullptr)))
+				{
+					syncPhrases();
+					tLastPhraseSync = time(nullptr);
+				}
+
+				while(!tempQueue.empty())
+				{
+					Notification notification = std::move(tempQueue.front());
+					tempQueue.pop();
+					processNotification(notification);
+				}
+
+				masterTransport->close();
+			}
+			catch (const apache::thrift::TException &ex)
+			{
+				std::cerr << "NotificationThread::run(): Caught thrift exception: " << ex.what() << std::endl;
+
+				// Sleep a bit to avoid too frequent retries
+				std::this_thread::sleep_for(std::chrono::milliseconds(250));
+			}
 		}
 		time_t tEnd = time(nullptr);
 

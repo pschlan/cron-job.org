@@ -1,7 +1,8 @@
 {
   "paddleLocale": "pl",
-  "landingLocale": "pl",
+  "landingLocale": "en",
   "common": {
+    "help": "Pomoc",
     "menu": "Menu",
     "contact": "Kontakt",
     "followontwitter": "Twitter",

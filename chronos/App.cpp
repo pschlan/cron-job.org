@@ -1,6 +1,6 @@
 /*
  * chronos, the cron-job.org execution daemon
- * Copyright (C) 2017 Patrick Schlangen <patrick@schlangen.me>
+ * Copyright (C) 2017-2024 Patrick Schlangen <patrick@schlangen.me>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -368,7 +368,7 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 				requestTimeout = groupRequestTimeout;
 			}
 
-			HTTPRequest *req = HTTPRequest::fromURL(row[0], atoi(row[10]), maxSize, requestTimeout);
+			HTTPRequest *req = HTTPRequest::fromURL(Utils::replaceVariables(row[0]), atoi(row[10]), maxSize, requestTimeout);
 			req->result->maxFailures 	= maxFailures;
 			req->result->jobID 			= atoi(row[1]);
 			req->result->datePlanned	= (uint64_t)timestamp * 1000;
@@ -392,13 +392,13 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 					row[1]);
 				while(MYSQL_ROW row = headerRes->fetchRow())
 				{
-					req->requestHeaders.push_back({ std::string(row[0]), std::string(row[1]) });
+					req->requestHeaders.push_back({ std::string(row[0]), Utils::replaceVariables(std::string(row[1])) });
 				}
 			}
 
 			if(row[13] != NULL)
 			{
-				req->requestBody	= row[13];
+				req->requestBody	= Utils::replaceVariables(std::string(row[13]));
 			}
 
 			req->result->title		= row[14];

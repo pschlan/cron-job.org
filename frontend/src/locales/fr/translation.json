@@ -1,6 +1,7 @@
 {
   "paddleLocale": "fr",
   "common": {
+    "help": "Aide",
     "menu": "Menu",
     "followontwitter": "Twitter",
     "forkongithub": "GitHub",

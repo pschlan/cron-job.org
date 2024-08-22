@@ -1,6 +1,6 @@
 /*
  * chronos, the cron-job.org execution daemon
- * Copyright (C) 2017 Patrick Schlangen <patrick@schlangen.me>
+ * Copyright (C) 2017-2024 Patrick Schlangen <patrick@schlangen.me>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -12,7 +12,10 @@
 #include "Utils.h"
 
 #include <algorithm>
+#include <ctime>
+#include <functional>
 #include <iostream>
+#include <random>
 #include <sstream>
 #include <string>
 
@@ -61,7 +64,7 @@ void Utils::replace(std::string &str, const std::string &search, const std::stri
 	while((pos = str.find(search, pos)) != std::string::npos)
 	{
 		str.replace(pos, search.length(), repl);
-		pos += search.length();
+		pos += repl.length();
 	}
 }
 
@@ -225,4 +228,65 @@ Utils::Subnet::Subnet(const std::string &cidrNotation)
 
 	this->netmask = htonl(0xFFFFFFFF << (32 - nBits));
 	this->maskedAddress = ::inet_addr(addressString.c_str()) & this->netmask;
+}
+
+std::string Utils::generateUuid4()
+{
+	static const char HEX_CHARS[] = "0123456789abcdef";
+	static_assert(sizeof(HEX_CHARS) == 16+1, "HEX_CHARS has unexpected size!");
+
+	static thread_local std::mt19937 rng{std::random_device{}()};
+	std::uniform_int_distribution<> dist(0, 15);
+
+	std::string res(36, '-');
+	res[14] = '4';
+	for(std::size_t i = 0; i < 36; ++i)
+	{
+		if (i != 8 && i != 13 && i != 14 && i != 18 && i != 19 && i != 23)
+		{
+			res[i] = HEX_CHARS[dist(rng)];
+		}
+		else if (i == 19)
+		{
+			res[i] = HEX_CHARS[(dist(rng) & 0x3) | 0x8];
+		}
+	}
+	return res;
+}
+
+std::string Utils::replaceVariables(const std::string &in)
+{
+	static const std::string VAR_PREFIX = "%cjo:";
+
+	static const std::unordered_map<std::string, std::function<std::string()>> VARIABLES =
+	{
+		{ "%cjo:unixtime%", [] () { return std::to_string(static_cast<uint64_t>(::time(nullptr))); } },
+		{ "%cjo:uuid4%", [] () { return Utils::generateUuid4(); } },
+	};
+
+	std::string res = in;
+	std::size_t pos = 0;
+	while((pos = res.find(VAR_PREFIX, pos)) != std::string::npos)
+	{
+		bool varMatched = false;
+
+		for(const auto &var : VARIABLES)
+		{
+			if(res.substr(pos, var.first.size()) == var.first)
+			{
+				std::string repl = var.second();
+				res.replace(pos, var.first.size(), repl);
+				pos += repl.size();
+				varMatched = true;
+				break;
+			}
+		}
+
+		if(!varMatched)
+		{
+			pos += VAR_PREFIX.size();
+		}
+	}
+
+	return res;
 }

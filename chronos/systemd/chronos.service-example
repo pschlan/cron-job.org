@@ -1,0 +1,16 @@
+[Unit]
+Description=chronos
+After=mysql.service network.target
+
+[Service]
+ExecStart=/usr/src/cron-job.org/build/chronos/chronos /etc/chronos.cfg
+User=chronos
+LimitCORE=infinity
+LimitNOFILE=65535
+Environment=LC_ALL=en_US.utf8
+Environment=LD_LIBRARY_PATH=/usr/local/lib
+Restart=on-failure
+RestartSec=1s
+
+[Install]
+WantedBy=multi-user.target

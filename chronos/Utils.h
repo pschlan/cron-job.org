@@ -37,6 +37,8 @@ namespace Chronos
 		std::string toLower(const std::string &str);
 		std::vector<std::string> split(const std::string &str, char delimiter);
 		std::string formatString(const std::string &in, const std::unordered_map<char, std::string> &arguments);
+		std::string replaceVariables(const std::string &in);
+		std::string generateUuid4();
 
 		class Subnet
 		{

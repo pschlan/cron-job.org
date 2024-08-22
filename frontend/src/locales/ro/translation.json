@@ -1,6 +1,7 @@
 {
-  "paddleLocale": "ro",
+  "paddleLocale": "en",
   "common": {
+    "help": "Ajutor",
     "menu": "Meniu",
     "contact": "Contact",
     "followontwitter": "Twitter",

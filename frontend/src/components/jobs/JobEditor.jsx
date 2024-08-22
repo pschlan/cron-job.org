@@ -48,6 +48,7 @@ import useUserProfile from '../../hooks/useUserProfile';
 import JobTestRun from './JobTestRun';
 import JobExport from './JobExport';
 import useFolder from '../../hooks/useFolder';
+import VariableMenu from '../misc/VariableMenu';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -346,6 +347,10 @@ export default function JobEditor({ match }) {
         size='small'
         defaultValue={item.value}
         onBlur={({target}) => updateHeaderValue(rowNo, target.value)}
+        InputProps={{ endAdornment: <InputAdornment position='end'>
+            <VariableMenu />
+          </InputAdornment>
+        }}
         fullWidth />
     },
     {
@@ -435,10 +440,14 @@ export default function JobEditor({ match }) {
             onBlur={({target}) => setJobURL(target.value.trim())}
             inputRef={jobURLRef}
             InputLabelProps={{shrink: true}}
+            InputProps={{ endAdornment: <InputAdornment position='end'>
+                <VariableMenu />
+              </InputAdornment>
+            }}
             fullWidth
             required
             />
-          <div>
+          {folders && folders.length > 0 && <div>
             <InputLabel shrink id='folder-label'>
               {t('jobs.folder')}
             </InputLabel>
@@ -452,7 +461,7 @@ export default function JobEditor({ match }) {
               {folders.map(folder =>
                 <MenuItem value={folder.folderId} key={folder.folderId}>{folder.title}</MenuItem>)}
             </Select>
-          </div>
+          </div>}
           <FormControlLabel
             control={<Switch
               checked={jobEnabled}

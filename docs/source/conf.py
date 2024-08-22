@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'cron-job.org'
-copyright = '2023, cron-job.org'
+copyright = '2024, cron-job.org'
 author = 'cron-job.org'
 
 
