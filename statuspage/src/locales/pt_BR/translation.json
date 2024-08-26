@@ -1,36 +1,36 @@
 {
-    "common": {
-        "poweredBy": "distribuído por",
-        "refresh": "Atualizar"
+  "common": {
+    "poweredBy": "distribuído por",
+    "refresh": "Atualizar"
+  },
+  "timespan": {
+    "1year": "1 ano",
+    "6months": "6 meses",
+    "1month": "1 mês",
+    "1week": "1 semana",
+    "1day": "1 dia"
+  },
+  "status": {
+    "availability": "Disponibilidade",
+    "availabilityWarning": "Aviso de disponibilidade",
+    "availabilityError": "Erro de disponibilidade",
+    "lowAvailabilityText": "No momento, estamos enfrentando uma disponibilidade reduzida de {{percent}} % nos últimos 30 minutos.",
+    "latency": "Latência",
+    "latencyWarning": "Aviso de latência",
+    "latencyError": "Erro de latência",
+    "highLatencyText": "No momento, estamos enfrentando uma latência anormalmente alta de {{ms}} ms nos últimos 30 minutos.",
+    "healthy": "Operacional",
+    "allSystemsRunAsExpected": "Todos os sistemas funcionam conforme o esperado.",
+    "disabled": "Desabilitado"
+  },
+  "error": {
+    "404": {
+      "title": "Página não encontrada",
+      "text": "A página de status solicitada não pôde ser encontrada. Certifique-se de que seu link esteja correto e tente novamente."
     },
-    "timespan": {
-        "1year": "1 ano",
-        "6months": "6 meses",
-        "1month": "1 mês",
-        "1week": "1 semana",
-        "1day": "1 dia"
-    },
-    "status": {
-        "availability": "Disponibilidade",
-        "availabilityWarning": "Aviso de disponibilidade",
-        "availabilityError": "Erro de disponibilidade",
-        "lowAvailabilityText": "No momento, estamos enfrentando uma disponibilidade reduzida de {{percent}} % nos últimos 30 minutos.",
-        "latency": "Latência",
-        "latencyWarning": "Aviso de latência",
-        "latencyError": "Erro de latência",
-        "highLatencyText": "No momento, estamos enfrentando uma latência anormalmente alta de {{ms}} ms nos últimos 30 minutos.",
-        "healthy": "Operacional",
-        "allSystemsRunAsExpected": "Todos os sistemas funcionam conforme o esperado.",
-        "disabled": "Desabilitado"
-    },
-    "error": {
-        "404": {
-            "title": "Página não encontrada",
-            "text": "A página de status solicitada não pôde ser encontrada. Certifique-se de que seu link esteja correto e tente novamente."
-        },
-        "other": {
-            "title": "Erro ao recuperar a página de status",
-            "text": "Desculpe, não conseguimos recuperar a página de status neste momento. Tente novamente mais tarde."
-        }
+    "other": {
+      "title": "Erro ao recuperar a página de status",
+      "text": "Desculpe, não conseguimos recuperar a página de status neste momento. Tente novamente mais tarde."
     }
+  }
 }
