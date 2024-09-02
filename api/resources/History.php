@@ -88,7 +88,7 @@ class HistoryManager {
     return $identifier;
   }
 
-  public function getJobHistory($jobId, $maxEntries = 25, $maxPredictions = 3) {
+  public function getJobHistory($jobId, $maxEntries = 50, $maxPredictions = 3) {
     $node = (new NodeManager($this->authToken))->getJobNode($jobId);
     if (!$node) {
       return false;
