@@ -21,6 +21,7 @@ import translationFR from './locales/fr/translation.json';
 import translationZhTW from './locales/zh_TW/translation.json';
 import translationRo from './locales/ro/translation.json';
 import translationPL from './locales/pl/translation.json';
+import translationPtBR from './locales/pt_BR/translation.json';
 
 import AppMenu from './components/AppMenu';
 import Dashboard from './components/dashboard/Dashboard';
@@ -43,6 +44,7 @@ import 'moment/locale/fr';
 import 'moment/locale/ro';
 import 'moment/locale/pl';
 import 'moment/locale/zh-tw';
+import 'moment/locale/pt-br';
 import moment from 'moment';
 import useLanguageCode, { getLanguageCode } from './hooks/useLanguageCode';
 import { Config } from './utils/Config';
@@ -81,6 +83,9 @@ const LANGUAGE_RESOURCES = {
   pl: {
     translation: translationPL,
   },
+  pt_BR: {
+    translation: translationPtBR,
+  },
 };
 
 i18n
@@ -107,9 +112,9 @@ function SnackbarReferenceProvider() {
 
 function diffLang(lang1, lang2, prefix = '') {
   for (let key in lang1) {
-    if (typeof(lang2[key]) === 'undefined') {
+    if (typeof (lang2[key]) === 'undefined') {
       console.log(prefix + key);
-    } else if (typeof(lang1[key]) === 'object') {
+    } else if (typeof (lang1[key]) === 'object') {
       diffLang(lang1[key], lang2[key], key + '.');
     }
   }
@@ -173,7 +178,7 @@ function ConsoleMenu({ selectedId, onListItemClick, indentSubItems = false }) {
     selectedId={selectedId}
     onListItemClick={onListItemClick}
     indentSubItems={indentSubItems}
-    />;
+  />;
 }
 
 function getSelectedId(loc) {
@@ -216,7 +221,7 @@ function App() {
           menuText={t('common.menu')}
           menu={<ConsoleMenu indentSubItems={indentSubItems} selectedId={getSelectedId(location.pathname)} onListItemClick={isMobile ? () => dispatch(setUiSetting('menuClosed', true)) : () => null} />}
           toolbar={<AppToolbar />}
-          >
+        >
           <Switch>
             <Route path="/dashboard" exact component={Dashboard} />
             <Route path="/jobs/folders" exact component={Folders} />

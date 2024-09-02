@@ -19,11 +19,13 @@ import translationRU from './locales/ru/translation.json';
 import translationZhTW from './locales/zh_TW/translation.json';
 import translationRo from './locales/ro/translation.json';
 import translationPL from './locales/pl/translation.json';
+import translationPtBR from './locales/pt_BR/translation.json';
 
 import 'moment/locale/de';
 import 'moment/locale/it';
 import 'moment/locale/ru';
 import 'moment/locale/pl';
+import 'moment/locale/pt-br';
 import moment from 'moment';
 import { Config } from './utils/Config';
 
@@ -40,17 +42,20 @@ const LANGUAGE_RESOURCES = {
   fr: {
     translation: translationFR
   },
-  ru:{
+  ru: {
     translation: translationRU
   },
-  zh_TW:{
+  zh_TW: {
     translation: translationZhTW
   },
-  ro:{
+  ro: {
     translation: translationRo
   },
-  pl:{
+  pl: {
     translation: translationPL
+  },
+  pt_BR: {
+    translation: translationPtBR
   }
 };
 

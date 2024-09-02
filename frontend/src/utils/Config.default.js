@@ -29,14 +29,15 @@ export const Config = {
     'fr': 'Français',
     'zh_TW': '正體中文',
     'ro': 'Română',
-    'pl': 'Polski'
+    'pl': 'Polski',
+    'pt_BR': 'Português Brasil'
   },
 
   //! @note Fallback language to use when the user's auto-determined language is not supported.
   'fallbackLanguage': 'en',
 
   //! @note Session token refresh interval in ms.
-  'sessionRefreshInterval': 10*60*1000,
+  'sessionRefreshInterval': 10 * 60 * 1000,
 
   //! @note A donation box can be enabled here. It will be shown when the user exceeds the
   //!       configured successful job count threshold.

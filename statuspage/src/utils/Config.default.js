@@ -23,7 +23,8 @@ export const Config = {
     'ru': 'Русский',
     'zh_TW': '正體中文',
     'ro': 'Română',
-    'pl': 'Polski'
+    'pl': 'Polski',
+    'pt_BR': 'Português Brasil'
   },
 
   //! @note Fallback language to use when the user's auto-determined language is not supported.
