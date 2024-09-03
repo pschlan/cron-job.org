@@ -5,7 +5,7 @@ export const Config = {
   'githubURL': null,
   'apiDocsURL': 'https://docs.cron-job.org/rest-api.html',
   'apiURL': '/api/',
-  'sessionRefreshInterval': 10*60*1000,
+  'sessionRefreshInterval': 10 * 60 * 1000,
   'languages': {
     'en': 'English',
     'de': 'Deutsch',
@@ -13,7 +13,8 @@ export const Config = {
     'fr': 'Français',
     'ru': 'Русский',
     'zh_TW': '正體中文',
-    'ro': 'Română'
+    'ro': 'Română',
+    'pt_BR': 'Português Brasil'
   },
   'fallbackLanguage': 'en',
   'recaptchaSiteKey': null,
