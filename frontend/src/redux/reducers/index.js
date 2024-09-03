@@ -6,8 +6,9 @@ import timezones from './timezones';
 import userProfile from './userProfile';
 import ui from './ui';
 import folders from './folders';
+import { ActionTypes } from '../actionTypes';
 
-export default combineReducers({
+const appReducer = combineReducers({
   auth,
   dashboard,
   jobs,
@@ -17,4 +18,12 @@ export default combineReducers({
   folders
 });
 
-//! @todo Logout: Flush state
+const rootReducer = (state, action) => {
+  if (action.type === ActionTypes.LOGOUT) {
+    return appReducer(undefined, action);
+  } else {
+    return appReducer(state, action);
+  }
+}
+
+export default rootReducer;

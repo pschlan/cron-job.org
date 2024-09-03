@@ -8,10 +8,8 @@ export function setAuthToken(token) {
 }
 
 export function endSession() {
-  //! @todo Flush complete state!
   return {
-    type: ActionTypes.SET_AUTH_SESSION,
-    session: null
+    type: ActionTypes.LOGOUT
   }
 }
 
