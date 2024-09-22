@@ -36,7 +36,6 @@ $lang = [
       'Hi,' . "\n\n"
     . 'thanks so much for supporting $projectName and making our service possible!' . "\n\n"
     . 'Your subscription has been activated successfully. In rare cases, the subscription status might not show up in your account yet. In that case, please just re-login.' . "\n\n"
-    . 'By the way: You can find your receipts and invoices in your account at Settings -> Manage Subscription.' . "\n\n"
     . 'Best regards,' . "\n\n"
     . '$projectName',
   'subscriptionCancelledEmail.subject' => '$projectName: Subscription terminated',
@@ -51,6 +50,14 @@ $lang = [
       'Hi,' . "\n\n"
     . 'as requested, we are terminating your subscription at $projectName effective at $cancelAt.' . "\n\n"
     . 'Thanks a lot for having supported $projectName!' . "\n\n"
+    . 'Best regards,' . "\n\n"
+    . '$projectName',
+  'paymentFailedEmail.subject' => '$projectName: Failed subscription payment',
+  'paymentFailedEmail.body' =>
+      'Hi,' . "\n\n"
+    . 'our payment provider reported a failed payment for your $projectName subscription.' . "\n\n"
+    . 'Please check your payment method at Settings in your console at https://console.cron-job.org/ to ensure the renewal of your subscription can be processed correctly.' . "\n\n"
+    . 'If you have questions or concerns, please do not hesitate to get in touch.' . "\n\n"
     . 'Best regards,' . "\n\n"
     . '$projectName',
   'dateFormat' => 'Y/m/d'

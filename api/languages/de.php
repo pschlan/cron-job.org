@@ -36,7 +36,6 @@ $lang = [
       'Hi,' . "\n\n"
     . 'vielen Dank, dass Sie $projectName unterstützen und unseren Dienst möglich machen!' . "\n\n"
     . 'Ihr Abo wurde soeben erfolgreich aktiviert. In wenigen Fällen kann es passieren, dass der neue Status noch nicht in Ihrem Account sichtbar ist. In diesem Fall loggen Sie sich bitte einfach erneut ein.' . "\n\n"
-    . 'Übrigens: Ihre Belege und Rechnungen finden Sie in Ihrem Account unter Einstellungen -> Abo verwalten.' . "\n\n"
     . 'Viele Grüße' . "\n\n"
     . '$projectName',
   'subscriptionCancelledEmail.subject' => '$projectName: Abonnement beendet',
@@ -51,6 +50,14 @@ $lang = [
       'Hi,' . "\n\n"
     . 'Ihr Abo bei $projectName werden wir wunschgemäß am $cancelAt beenden und keine weiteren Zahlungen einziehen.' . "\n\n"
     . 'Vielen Dank, dass Sie $projectName unterstützt haben!' . "\n\n"
+    . 'Viele Grüße' . "\n\n"
+    . '$projectName',
+  'paymentFailedEmail.subject' => '$projectName: Abo-Zahlung fehlgeschlagen',
+  'paymentFailedEmail.body' =>
+      'Hi,' . "\n\n"
+    . 'unser Zahlungs-Dienstleiser hat gemeldet, dass der Einzug einer Zahlung für Ihr Abo bei $projectName fehlgeschlagen ist.' . "\n\n"
+    . 'Bitte prüfen Sie die Zahlungsmethode unter https://console.cron-job.org/ in den Einstellungen, um eine Beeinträchtigung des Abos zu vermeiden.' . "\n\n"
+    . 'Bei Rückfragen stehen wir gerne zur Verfügung.' . "\n\n"
     . 'Viele Grüße' . "\n\n"
     . '$projectName',
   'dateFormat' => 'd.m.Y'
