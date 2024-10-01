@@ -28,10 +28,16 @@ class ChangeUserPassword extends AbstractAPIMethod {
   }
 
   public function execute($request, $sessionToken, $language) {
+    global $config;
+
     try {
       if (!(new UserManager($sessionToken))->changePassword($request->oldPassword, $request->newPassword)) {
         throw new InternalErrorAPIException();
       }
+
+      $sessionToken->refresh(time() + $config['sessionTokenLifetime'] + 1);
+      header('X-Refreshed-Token: ' . $sessionToken->toJwt());
+
     } catch (WrongPasswordException $ex) {
       throw new ForbiddenAPIException();
     }

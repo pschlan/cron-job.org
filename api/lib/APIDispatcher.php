@@ -7,9 +7,14 @@ require_once('AbstractDispatcher.php');
 
 class APIDispatcher extends AbstractDispatcher {
   private $refreshTokenHandler = false;
+  private $sessionTokenHandler = false;
 
   public function registerRefreshTokenHandler($handler) {
     $this->refreshTokenHandler = $handler;
+  }
+
+  public function registerSessionTokenHandler($handler) {
+    $this->sessionTokenHandler = $handler;
   }
 
   private function authenticate() {
@@ -24,6 +29,14 @@ class APIDispatcher extends AbstractDispatcher {
     }
 
     return SessionToken::fromJwt($payload);
+  }
+
+  private function validateSessionToken($sessionToken) {
+    if (!$this->sessionTokenHandler) {
+      return true;
+    }
+
+    return $this->sessionTokenHandler->validateSessionToken($sessionToken);
   }
 
   private function validateRefreshToken($sessionToken) {
@@ -116,6 +129,10 @@ class APIDispatcher extends AbstractDispatcher {
             if (!$this->validateRefreshToken($sessionToken)) {
               throw new UnauthorizedAPIException();
             }
+          }
+
+          if (!$this->validateSessionToken($sessionToken)) {
+            throw new UnauthorizedAPIException();
           }
         } catch (Exception $e) {
           throw new UnauthorizedAPIException();

@@ -97,6 +97,27 @@ class UserSubscription {
   }
 }
 
+class SessionTokenHandler {
+  public function validateSessionToken($sessionToken) {
+    global $config;
+
+    if (!is_object($sessionToken) || !isset($sessionToken->expires)) {
+      return false;
+    }
+
+    $stmt = Database::get()->prepare('SELECT `last_password_change` AS `lastPasswordChange` FROM `user` WHERE `userid`=:userId');
+    $stmt->execute([':userId' => $sessionToken->userId]);
+
+    if ($userRow = $stmt->fetch(PDO::FETCH_OBJ)) {
+      if (intval($userRow->lastPasswordChange) < ($sessionToken->expires - $config['sessionTokenLifetime'])) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+}
+
 class RefreshTokenHandler {
   public function validateRefreshToken($refreshToken, $userId) {
     if (empty($refreshToken) || $userId <= 0) {
@@ -148,6 +169,10 @@ class UserManager {
 
   public static function getRefreshTokenHandler() {
     return new RefreshTokenHandler();
+  }
+
+  public static function getSessionTokenHandler() {
+    return new SessionTokenHandler();
   }
 
   public function getProfile() {
@@ -278,7 +303,7 @@ class UserManager {
     ]);
   }
 
-  private static function createRefreshToken($userId, $device) {
+  private function createRefreshToken($userId, $device) {
     global $config;
 
     $token = self::generateToken($config['refreshTokenLength']);
@@ -444,12 +469,19 @@ class UserManager {
     $newHash = self::computePasswordHash($newPassword, $newSalt);
 
     $stmt = Database::get()->prepare('UPDATE `user` '
-      . 'SET `password_salt`=:newPasswordSalt, `password`=:newPasswordHash '
+      . 'SET `password_salt`=:newPasswordSalt, `password`=:newPasswordHash, `last_password_change`=:lastPasswordChange '
       . 'WHERE `userid`=:userId');
     $stmt->execute([
       ':newPasswordSalt'    => $newSalt,
       ':newPasswordHash'    => $newHash,
+      ':lastPasswordChange' => time(),
       ':userId'             => $lostPwToken->userId
+    ]);
+
+    // Revoke all refresh tokens
+    $stmt = Database::get()->prepare('DELETE FROM `refreshtoken` WHERE `userId`=:userId');
+    $stmt->execute([
+      ':userId' => $lostPwToken->userId
     ]);
 
     return true;
@@ -584,14 +616,22 @@ class UserManager {
     $newHash = $this->computePasswordHash($newPassword, $newSalt);
 
     $stmt = Database::get()->prepare('UPDATE `user` '
-      . 'SET `password_salt`=:newPasswordSalt, `password`=:newPasswordHash '
+      . 'SET `password_salt`=:newPasswordSalt, `password`=:newPasswordHash, `last_password_change`=:lastPasswordChange '
       . 'WHERE `userid`=:userId AND `password`=:oldPasswordHash AND `password_salt`=:oldPasswordSalt');
     $stmt->execute([
       ':newPasswordSalt'    => $newSalt,
       ':newPasswordHash'    => $newHash,
+      ':lastPasswordChange' => time(),
       ':oldPasswordSalt'    => $userRow->passwordSalt,
       ':oldPasswordHash'    => $userRow->password,
       ':userId'             => $this->authToken->userId
+    ]);
+
+    // Revoke all refresh tokens for other sessions
+    $stmt = Database::get()->prepare('DELETE FROM `refreshtoken` WHERE `userId`=:userId AND `token`!=:token');
+    $stmt->execute([
+      ':token'  => isset($_COOKIE['refreshToken']) && !empty($_COOKIE['refreshToken']) ? $_COOKIE['refreshToken'] : '',
+      ':userId' => $this->authToken->userId
     ]);
 
     return true;
