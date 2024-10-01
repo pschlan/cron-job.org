@@ -174,7 +174,7 @@ class Job {
     $job->schedule->minutes         = $this->toThriftSet($this->schedule->minutes,  0,  59);
     $job->schedule->months          = $this->toThriftSet($this->schedule->months,   1,  12);
     $job->schedule->wdays           = $this->toThriftSet($this->schedule->wdays,    0,  6);
-    $job->schedule->timezone        = $this->schedule->timezone;
+    $job->schedule->timezone        = empty($this->schedule->timezone) ? 'UTC' : $this->schedule->timezone;
     $job->schedule->expiresAt       = $this->schedule->expiresAt;
 
     $job->extendedData              = new \chronos\JobExtendedData;

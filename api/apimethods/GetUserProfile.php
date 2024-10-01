@@ -30,7 +30,8 @@ class GetUserProfile extends AbstractAPIMethod {
     return (object)[
       'userProfile' => $userManager->getProfile(),
       'userGroup' => $userGroup,
-      'userSubscription' => $userSubscription
+      'userSubscription' => $userSubscription,
+      'userId' => intval($sessionToken->userId)
     ];
   }
 }
