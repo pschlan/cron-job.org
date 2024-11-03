@@ -82,6 +82,9 @@ class UserSubscription {
   public $currentPeriodStart;
   public $currentPeriodEnd;
   public $cancelAt;
+  public $type;
+  public $isOnGracePeriod;
+  public $gracePeriodEndsAt;
 
   private $subscriptionId;
 
@@ -90,6 +93,8 @@ class UserSubscription {
     $this->currentPeriodStart = intval($this->currentPeriodStart);
     $this->currentPeriodEnd = intval($this->currentPeriodEnd);
     $this->cancelAt = intval($this->cancelAt);
+    $this->isOnGracePeriod = false;
+    $this->gracePeriodEndsAt = 0;
   }
 
   function getSubscriptionId() {
@@ -183,10 +188,32 @@ class UserManager {
   }
 
   public function getSubscription() {
-    $stmt = Database::get()->prepare('SELECT `product_id` AS `productId`, `status`, `current_period_start` AS `currentPeriodStart`, `current_period_end` AS `currentPeriodEnd`, `cancel_at` AS `cancelAt`, `subscription_id` AS `subscriptionId` FROM `user_subscription` WHERE `userid`=:userId');
+    $stmt = Database::get()->prepare('SELECT `product_id` AS `productId`, `status`, `current_period_start` AS `currentPeriodStart`, `current_period_end` AS `currentPeriodEnd`, `cancel_at` AS `cancelAt`, `subscription_id` AS `subscriptionId` FROM `user_paddle_subscription` WHERE `userid`=:userId');
     $stmt->setFetchMode(PDO::FETCH_CLASS, UserSubscription::class);
     $stmt->execute(array(':userId' => $this->authToken->userId));
-    return $stmt->fetch();
+    $result = $stmt->fetch();
+
+    if ($result) {
+      $result->type = 'paddle';
+    } else {
+      $stmt = Database::get()->prepare('SELECT `product_id` AS `productId`, `status`, `current_period_start` AS `currentPeriodStart`, `current_period_end` AS `currentPeriodEnd`, `cancel_at` AS `cancelAt`, `subscription_id` AS `subscriptionId` FROM `user_subscription` WHERE `userid`=:userId');
+      $stmt->setFetchMode(PDO::FETCH_CLASS, UserSubscription::class);
+      $stmt->execute(array(':userId' => $this->authToken->userId));
+      $result = $stmt->fetch();
+
+      if ($result) {
+        $result->type = 'stripe';
+
+        $stmt = Database::get()->prepare('SELECT `date_grace_period_end` FROM `deferred_stripe_downgrade` WHERE `userid`=:userId AND `date_grace_period_end`>=UNIX_TIMESTAMP()');
+        $stmt->execute(array(':userId' => $this->authToken->userId));
+        while ($deferredResult = $stmt->fetch()) {
+            $result->isOnGracePeriod = true;
+            $result->gracePeriodEndsAt = intval($deferredResult['date_grace_period_end']);
+        }
+      }
+    }
+
+    return $result;
   }
 
   public function getStripeCustomerId() {
