@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Table as MaterialTable, TableHead, TableRow, TableCell, TableBody, LinearProgress, TableFooter, makeStyles, TablePagination, Checkbox, Box } from '@material-ui/core';
+import { Table as MaterialTable, TableHead, TableRow, TableCell, TableBody, LinearProgress, TableFooter, makeStyles, TablePagination, Checkbox, Box, IconButton } from '@material-ui/core';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
@@ -7,6 +7,9 @@ import DragHandleIcon from '@material-ui/icons/DragHandle';
 import ActionMenu from './ActionMenu';
 import ActionsIcon from '@material-ui/icons/MoreVert';
 import ExpandIcon from '@material-ui/icons/ExpandMore';
+import SelectAllIcon from '@material-ui/icons/SelectAll';
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
+import CheckBoxBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 
 const useStyles = makeStyles(theme => ({
   table: {
@@ -67,7 +70,7 @@ function DraggableComponent({ id, index, isDragging, ...props }) {
   </Draggable>;
 }
 
-export default function Table({ size, columns, items, empty, footer, loading=false, className, noHeader=false, rowIdentifier=null, perPage=null, reorderable=false, multiSelect=false, multiActions=null, onReorder=()=>null, onBeforeDragStart=()=>null, rowsPerPageOptions=null }) {
+export default function Table({ size, columns, items, empty, footer, loading=false, className, noHeader=false, rowIdentifier=null, perPage=null, reorderable=false, multiSelect=false, showSelectAll=false, multiActions=null, onReorder=()=>null, onBeforeDragStart=()=>null, rowsPerPageOptions=null }) {
   const classes = useStyles();
   const { t } = useTranslation();
 
@@ -81,6 +84,15 @@ export default function Table({ size, columns, items, empty, footer, loading=fal
     if (item.onExecute) {
       item.onExecute([...selectedRows]);
     }
+  }
+
+  function selectAll() {
+    const validRowIds = data.map((item, itemNo) => rowIdentifier ? item[rowIdentifier] : itemNo);
+    setSelectedRows(validRowIds);
+  }
+
+  function deselectAll() {
+    setSelectedRows([]);
   }
 
   function onRowSelectChanged(rowId, {target}) {
@@ -125,6 +137,19 @@ export default function Table({ size, columns, items, empty, footer, loading=fal
     isDragging: dragging
   } : {};
 
+  const SELECT_MENU_ITEMS = [
+    {
+      icon: <CheckBoxIcon fontSize='small' />,
+      text: t('common.selectAll'),
+      onClick: selectAll
+    },
+    {
+      icon: <CheckBoxBlankIcon fontSize='small' />,
+      text: t('common.deselectAll'),
+      onClick: deselectAll
+    }
+  ];
+
   useEffect(() => {
     if (page * rowsPerPage >= items.length) {
       setPage(Math.max(1, Math.floor(items.length / rowsPerPage)) - 1);
@@ -151,7 +176,17 @@ export default function Table({ size, columns, items, empty, footer, loading=fal
     {!noHeader && <TableHead>
       <TableRow>
         {reorderable && <TableCell />}
-        {multiSelect && <TableCell />}
+        {multiSelect && <TableCell>
+            {showSelectAll && <ActionMenu
+                color='inherit'
+                text={<SelectAllIcon />}
+                component={<IconButton />}
+                items={SELECT_MENU_ITEMS}
+                size='small'
+                onClickItem={x => x.onClick()}
+                />
+              }
+          </TableCell>}
         {columns.map((column, columnNo) =>
           <TableCell key={columnNo}>{column.head}</TableCell>)}
       </TableRow>
@@ -166,7 +201,7 @@ export default function Table({ size, columns, items, empty, footer, loading=fal
       <>
         {data.map((item, itemNo) =>
           <TableRow {...draggableProps} key={rowIdentifier ? item[rowIdentifier] : itemNo} id={rowIdentifier ? item[rowIdentifier] : itemNo} index={itemNo} component={reorderable ? DraggableComponent : undefined}>
-            {multiSelect && <DraggableTableCell {...draggableProps}><Checkbox onChange={event => onRowSelectChanged(rowIdentifier ? item[rowIdentifier] : itemNo, event)} /></DraggableTableCell>}
+            {multiSelect && <DraggableTableCell {...draggableProps}><Checkbox onChange={event => onRowSelectChanged(rowIdentifier ? item[rowIdentifier] : itemNo, event)} checked={selectedRows.includes(rowIdentifier ? item[rowIdentifier] : itemNo)} /></DraggableTableCell>}
             {columns.map((column, columnNo) =>
               <DraggableTableCell {...draggableProps} key={columnNo}>{column.cell(item, itemNo, columnNo)}</DraggableTableCell>)}
           </TableRow>)}

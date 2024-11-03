@@ -65,7 +65,9 @@
     "confirmMassDeleteTitle": "Delete selected item",
     "confirmMassDeleteTitle_plural": "Delete {{count}} selected items",
     "confirmMassDeleteText": "Do you really want to delete the selected item?",
-    "confirmMassDeleteText_plural": "Do you really want to delete the {{count}} selected items?"
+    "confirmMassDeleteText_plural": "Do you really want to delete the {{count}} selected items?",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all"
   },
   "login": {
     "emailAddress": "Email address",

@@ -171,6 +171,7 @@ export default function Jobs({ match }) {
         rowIdentifier='jobId'
         multiSelect={true}
         multiActions={MULTI_ACTIONS}
+        showSelectAll={true}
         />
     </TableContainer>
 

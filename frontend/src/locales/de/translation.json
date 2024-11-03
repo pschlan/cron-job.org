@@ -65,7 +65,9 @@
     "confirmMassDeleteTitle": "Ausgewähltes Element löschen",
     "confirmMassDeleteTitle_plural": "{{count}} ausgewählte Elemente löschen",
     "confirmMassDeleteText": "Wollen Sie das ausgewählte Element wirklich löschen?",
-    "confirmMassDeleteText_plural": "Wollen Sie die {{count}} ausgewählten Elemente wirklich löschen?"
+    "confirmMassDeleteText_plural": "Wollen Sie die {{count}} ausgewählten Elemente wirklich löschen?",
+    "selectAll": "Alles auswählen",
+    "deselectAll": "Auswahl aufheben"
   },
   "login": {
     "emailAddress": "E-Mail-Adresse",
