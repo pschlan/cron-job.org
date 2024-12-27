@@ -1,0 +1,36 @@
+{
+  "common": {
+    "poweredBy": "技术提供者",
+    "refresh": "刷新"
+  },
+  "timespan": {
+    "1year": "1 年",
+    "6months": "6 个月",
+    "1month": "1 个月",
+    "1week": "1 周",
+    "1day": "1 天"
+  },
+  "status": {
+    "availability": "可用性",
+    "availabilityWarning": "可用性警告",
+    "availabilityError": "可用性错误",
+    "lowAvailabilityText": "我们在过去 30 分钟内遇到了百分之 {{percent}} 的可用性降低。",
+    "latency": "延迟",
+    "latencyWarning": "延迟警告",
+    "latencyError": "延迟错误",
+    "highLatencyText": "我们在过去 30 分钟内遇到高达 {{ms}} 毫秒的异常延迟。",
+    "healthy": "健康",
+    "allSystemsRunAsExpected": "所有系统均运作正常。",
+    "disabled": "已停用"
+  },
+  "error": {
+    "404": {
+      "title": "找不到页面",
+      "text": "找不到请求的状态页面。请确认您的链接是正确的，然后重试。"
+    },
+    "other": {
+      "title": "读取状态页面时发生错误",
+      "text": "很抱歉，我们暂时无法读取状态页面，请稍后再试。"
+    }
+  }
+}
