@@ -21,6 +21,7 @@ import translationRo from './locales/ro/translation.json';
 import translationPL from './locales/pl/translation.json';
 import translationPtBR from './locales/pt_BR/translation.json';
 import translationZhCN from './locales/zh_CN/translation.json';
+import translationtrTR from './locales/tr_TR/translation.json';
 
 import 'moment/locale/de';
 import 'moment/locale/it';
@@ -60,6 +61,9 @@ const LANGUAGE_RESOURCES = {
   },
   zh_CN: {
     translation: translationZhCN
+  },
+  tr_TR: {
+    translation: translationtrTR
   }
 };
 

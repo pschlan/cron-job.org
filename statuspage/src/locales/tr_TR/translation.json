@@ -1,36 +1,36 @@
 {
   "common": {
-    "poweredBy": "powered by",
-    "refresh": "Refresh"
+    "poweredBy": "tarafından desteklenmektedir",
+    "refresh": "Yenile"
   },
   "timespan": {
-    "1year": "1 year",
-    "6months": "6 months",
-    "1month": "1 month",
-    "1week": "1 week",
-    "1day": "1 day"
+    "1year": "1 yıl",
+    "6months": "6 ay",
+    "1month": "1 ay",
+    "1week": "1 hafta",
+    "1day": "1 gün"
   },
   "status": {
-    "availability": "Availability",
-    "availabilityWarning": "Availability warning",
-    "availabilityError": "Availability error",
-    "lowAvailabilityText": "We're currently experiencing reduced availability of {{percent}} % in the last 30 minutes.",
-    "latency": "Latency",
-    "latencyWarning": "Latency warning",
-    "latencyError": "Latency error",
-    "highLatencyText": "We're currently experiencing unusually high latency of {{ms}} ms in the last 30 minutes.",
-    "healthy": "Healthy",
-    "allSystemsRunAsExpected": "All systems currently run as expected.",
-    "disabled": "Disabled"
+    "availability": "Kullanılabilirlik",
+    "availabilityWarning": "Kullanılabilirlik uyarısı",
+    "availabilityError": "Kullanılabilirlik hatası",
+    "lowAvailabilityText": "Son 30 dakikada {{percent}} % oranında azalmış kullanılabilirlik yaşıyoruz.",
+    "latency": "Gecikme",
+    "latencyWarning": "Gecikme uyarısı",
+    "latencyError": "Gecikme hatası",
+    "highLatencyText": "Son 30 dakikada olağandışı yüksek gecikme yaşanıyor: {{ms}} ms.",
+    "healthy": "Sağlıklı",
+    "allSystemsRunAsExpected": "Tüm sistemler şu anda beklendiği gibi çalışıyor.",
+    "disabled": "Devre dışı"
   },
   "error": {
     "404": {
-      "title": "Page Not Found",
-      "text": "The requested status page could not be found. Please ensure your link is correct and try again."
+      "title": "Sayfa Bulunamadı",
+      "text": "Talep edilen durum sayfası bulunamadı. Lütfen bağlantınızın doğru olduğundan emin olun ve tekrar deneyin."
     },
     "other": {
-      "title": "Error Retrieving Status Page",
-      "text": "Sorry, we could not retrieve the status page at this time. Please try again later."
+      "title": "Durum Sayfası Alınırken Hata Oluştu",
+      "text": "Üzgünüz, şu anda durum sayfasını getiremiyoruz. Lütfen daha sonra tekrar deneyin."
     }
   }
 }
