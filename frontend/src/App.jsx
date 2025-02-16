@@ -50,7 +50,7 @@ import 'moment/locale/zh-tw';
 import 'moment/locale/pt-br';
 import 'moment/locale/zh-cn';
 import 'moment/locale/hu';
-import 'moment/locale/tr-tr';
+import 'moment/locale/tr';
 import moment from 'moment';
 import useLanguageCode, { getLanguageCode } from './hooks/useLanguageCode';
 import { Config } from './utils/Config';
@@ -95,7 +95,7 @@ const LANGUAGE_RESOURCES = {
   zh_CN: {
     translation: translationZhCN,
   },
-  hu: {
+  hu_HU: {
     translation: translationHU,
   },
   tr_TR: {
