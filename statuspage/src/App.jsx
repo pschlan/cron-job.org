@@ -21,12 +21,18 @@ import translationRo from './locales/ro/translation.json';
 import translationPL from './locales/pl/translation.json';
 import translationPtBR from './locales/pt_BR/translation.json';
 import translationZhCN from './locales/zh_CN/translation.json';
+import translationHU from './locales/hu/translation.json';
 
 import 'moment/locale/de';
 import 'moment/locale/it';
+import 'moment/locale/fr';
+import 'moment/locale/ro';
 import 'moment/locale/ru';
 import 'moment/locale/pl';
+import 'moment/locale/zh-cn';
+import 'moment/locale/zh-tw';
 import 'moment/locale/pt-br';
+import 'moment/locale/hu';
 import moment from 'moment';
 import { Config } from './utils/Config';
 
@@ -60,6 +66,9 @@ const LANGUAGE_RESOURCES = {
   },
   zh_CN: {
     translation: translationZhCN
+  },
+  hu: {
+    translation: translationHU
   }
 };
 

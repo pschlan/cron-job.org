@@ -1,0 +1,36 @@
+﻿{
+  "common": {
+    "poweredBy": "üzemelteti",
+    "refresh": "Frissítés"
+  },
+  "timespan": {
+    "1year": "1 év",
+    "6months": "6 hónap",
+    "1month": "1 hónap",
+    "1week": "1 hét",
+    "1day": "1 nap"
+  },
+  "status": {
+    "availability": "Elérhetőség",
+    "availabilityWarning": "Elérhetőségi figyelmeztetés",
+    "availabilityError": "Elérhetőségi hiba",
+    "lowAvailabilityText": "Jelenleg csökkent elérhetőséget tapasztalunk, {{percent}} % az elmúlt 30 percben.",
+    "latency": "Késleltetés",
+    "latencyWarning": "Késleltetési figyelmeztetés",
+    "latencyError": "Késleltetési hiba",
+    "highLatencyText": "Jelenleg rendkívül magas késleltetést tapasztalunk: {{ms}} ms az elmúlt 30 percben.",
+    "healthy": "Egészséges",
+    "allSystemsRunAsExpected": "Minden rendszer a várakozásoknak megfelelően működik.",
+    "disabled": "Letiltva"
+  },
+  "error": {
+    "404": {
+      "title": "Az oldal nem található",
+      "text": "A kért állapotoldal nem található. Kérjük, ellenőrizze, hogy a link helyes-e, és próbálja újra."
+    },
+    "other": {
+      "title": "Hiba az állapotoldal lekérésében",
+      "text": "Sajnáljuk, de jelenleg nem tudtuk lekérni az állapotoldalt. Kérjük, próbálkozzon később."
+    }
+  }
+}

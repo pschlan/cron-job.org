@@ -31,7 +31,8 @@ export const Config = {
     'ro': 'Română',
     'pl': 'Polski',
     'pt_BR': 'Português Brasil',
-    'zh_CN': '简体中文'
+    'zh_CN': '简体中文',
+    'hu_HU': Magyar'
   },
 
   //! @note Fallback language to use when the user's auto-determined language is not supported.
