@@ -1,0 +1,36 @@
+{
+  "common": {
+    "poweredBy": "tarafından desteklenmektedir",
+    "refresh": "Yenile"
+  },
+  "timespan": {
+    "1year": "1 yıl",
+    "6months": "6 ay",
+    "1month": "1 ay",
+    "1week": "1 hafta",
+    "1day": "1 gün"
+  },
+  "status": {
+    "availability": "Kullanılabilirlik",
+    "availabilityWarning": "Kullanılabilirlik uyarısı",
+    "availabilityError": "Kullanılabilirlik hatası",
+    "lowAvailabilityText": "Son 30 dakikada {{percent}} % oranında azalmış kullanılabilirlik yaşıyoruz.",
+    "latency": "Gecikme",
+    "latencyWarning": "Gecikme uyarısı",
+    "latencyError": "Gecikme hatası",
+    "highLatencyText": "Son 30 dakikada olağandışı yüksek gecikme yaşanıyor: {{ms}} ms.",
+    "healthy": "Sağlıklı",
+    "allSystemsRunAsExpected": "Tüm sistemler şu anda beklendiği gibi çalışıyor.",
+    "disabled": "Devre dışı"
+  },
+  "error": {
+    "404": {
+      "title": "Sayfa Bulunamadı",
+      "text": "Talep edilen durum sayfası bulunamadı. Lütfen bağlantınızın doğru olduğundan emin olun ve tekrar deneyin."
+    },
+    "other": {
+      "title": "Durum Sayfası Alınırken Hata Oluştu",
+      "text": "Üzgünüz, şu anda durum sayfasını getiremiyoruz. Lütfen daha sonra tekrar deneyin."
+    }
+  }
+}

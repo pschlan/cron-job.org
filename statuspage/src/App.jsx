@@ -22,6 +22,7 @@ import translationPL from './locales/pl/translation.json';
 import translationPtBR from './locales/pt_BR/translation.json';
 import translationZhCN from './locales/zh_CN/translation.json';
 import translationHU from './locales/hu/translation.json';
+import translationTrTR from './locales/tr_TR/translation.json';
 
 import 'moment/locale/de';
 import 'moment/locale/it';
@@ -69,6 +70,9 @@ const LANGUAGE_RESOURCES = {
   },
   hu: {
     translation: translationHU
+  },
+  tr_TR: {
+    translation: translationTrTR
   }
 };
 
