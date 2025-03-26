@@ -277,15 +277,15 @@ class Job {
       $this->auth->password             = (string)$request->job->auth->password;
     }
 
-    if (isset($request->job->notification) && isset($request->notification->onFailure)) {
+    if (isset($request->job->notification) && isset($request->job->notification->onFailure)) {
       $this->notification->onFailure    = !!$request->job->notification->onFailure;
     }
 
-    if (isset($request->job->notification) && isset($request->notification->onSuccess)) {
+    if (isset($request->job->notification) && isset($request->job->notification->onSuccess)) {
       $this->notification->onSuccess    = !!$request->job->notification->onSuccess;
     }
 
-    if (isset($request->job->notification) && isset($request->notification->onDisable)) {
+    if (isset($request->job->notification) && isset($request->job->notification->onDisable)) {
       $this->notification->onDisable    = !!$request->job->notification->onDisable;
     }
 
