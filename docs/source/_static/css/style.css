@@ -9,3 +9,7 @@
 .wy-menu-vertical header, .wy-menu-vertical p.caption {
   color: #c33d1b;
 }
+
+.wy-nav-content {
+  max-width: 1000px;
+}

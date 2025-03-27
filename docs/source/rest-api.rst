@@ -290,7 +290,7 @@ Creating a new cron job::
 =================== ======================================= ======================================
 Key                 Type                                    Description
 =================== ======================================= ======================================
-job                 :ref:`DetailedJob`                      Job (the ``url`` field is mandatory)
+job                 :ref:`DetailedJob`                      Job (only the ``url`` field is mandatory)
 =================== ======================================= ======================================
 
 **Output Object**
@@ -545,25 +545,27 @@ Job
 ^^^
 The Job object represents a cron job.
 
-=================== ======================================= ======================================
-Key                 Type                                    Description
-=================== ======================================= ======================================
-jobId               int                                     Job identifier
-enabled             boolean                                 Whether the job is enabled (i.e. being executed) or not
-title               string                                  Job title
-saveResponses       boolean                                 Whether to save job response header/body or not
-url                 string                                  Job URL
-lastStatus          :ref:`JobStatus`                        Last execution status
-lastDuration        int                                     Last execution duration in milliseconds
-lastExecution       int                                     Unix timestamp of last execution (in seconds)
-nextExecution       int                                     Unix timestamp of predicted next execution (in seconds), ``null`` if no prediction available
-type                :ref:`JobType`                          Job type
-requestTimeout      int                                     Job timeout in seconds
-redirectSuccess     boolean                                 Whether to treat 3xx HTTP redirect status codes as success or not
-folderId            int                                     The identifier of the folder this job resides in
-schedule            :ref:`JobSchedule`                      Job schedule
-requestMethod       :ref:`RequestMethod`                    HTTP request method
-=================== ======================================= ======================================
+=================== ======================================= ===================================================================================================================  =======================================
+Key                 Type                                    Description                                                                                                          Default *
+=================== ======================================= ===================================================================================================================  =======================================
+jobId               int                                     Job identifier (read only; ignored during job creation or update)                                                    (auto-assigned)
+enabled             boolean                                 Whether the job is enabled (i.e. being executed) or not                                                              ``false``
+title               string                                  Job title                                                                                                            (empty)
+saveResponses       boolean                                 Whether to save job response header/body or not                                                                      ``false``
+url                 string                                  Job URL                                                                                                              (mandatory)
+lastStatus          :ref:`JobStatus`                        Last execution status (read only)                                                                                    ``0`` (Unknown / not executed yet)
+lastDuration        int                                     Last execution duration in milliseconds (read only)                                                                  \-
+lastExecution       int                                     Unix timestamp of last execution (in seconds; read only)                                                             \-
+nextExecution       int                                     Unix timestamp of predicted next execution (in seconds), ``null`` if no prediction available (read only)             \-
+type                :ref:`JobType`                          Job type (read only)                                                                                                 ``0`` (Default job)
+requestTimeout      int                                     Job timeout in seconds                                                                                               ``-1`` (i.e. use default timeout)
+redirectSuccess     boolean                                 Whether to treat 3xx HTTP redirect status codes as success or not                                                    ``false``
+folderId            int                                     The identifier of the folder this job resides in                                                                     ``0`` (root folder)
+schedule            :ref:`JobSchedule`                      Job schedule                                                                                                         ``{}``
+requestMethod       :ref:`RequestMethod`                    HTTP request method                                                                                                  ``0`` (GET)
+=================== ======================================= ===================================================================================================================  =======================================
+
+`* Value when field is omitted while creating a job.`
 
 DetailedJob
 ^^^^^^^^^^^
@@ -582,36 +584,42 @@ JobAuth
 ^^^^^^^
 The JobAuth object represents HTTP (basic) authentication settings for a job.
 
-=================== ======================================= ======================================
-Key                 Type                                    Description
-=================== ======================================= ======================================
-enable              boolean                                 Whether to enable HTTP basic authentication or not.
-user                string                                  HTTP basic auth username
-password            string                                  HTTP basic auth password
-=================== ======================================= ======================================
+=================== ======================================= ====================================================== ===========
+Key                 Type                                    Description                                            Default *
+=================== ======================================= ====================================================== ===========
+enable              boolean                                 Whether to enable HTTP basic authentication or not.    ``false``
+user                string                                  HTTP basic auth username                               (empty)
+password            string                                  HTTP basic auth password                               (empty)
+=================== ======================================= ====================================================== ===========
+
+`* Value when field is omitted while creating a job.`
 
 JobNotificationSettings
 ^^^^^^^^^^^^^^^^^^^^^^^
 The JobNotificationSettings specifies notification settings for a job.
 
-=================== ======================================= ======================================
-Key                 Type                                    Description
-=================== ======================================= ======================================
-onFailure           boolean                                 Whether to send a notification on job failure or not.
-onSuccess           boolean                                 Whether to send a notification when the job succeeds after a prior failure or not.
-onDisable           boolean                                 Whether to send a notification when the job has been disabled automatically or not.
-=================== ======================================= ======================================
+=================== ======================================= ======================================================================================= ===========
+Key                 Type                                    Description                                                                             Default *
+=================== ======================================= ======================================================================================= ===========
+onFailure           boolean                                 Whether to send a notification on job failure or not.                                   ``false``
+onSuccess           boolean                                 Whether to send a notification when the job succeeds after a prior failure or not.      ``false``
+onDisable           boolean                                 Whether to send a notification when the job has been disabled automatically or not.     ``false``
+=================== ======================================= ======================================================================================= ===========
+
+`* Value when field is omitted while creating a job.`
 
 JobExtendedData
 ^^^^^^^^^^^^^^^
 The JobExtendedData holds extended request data for a job.
 
-=================== ======================================= ======================================
-Key                 Type                                    Description
-=================== ======================================= ======================================
-headers             dictionary                              Request headers (key-value dictionary)
-body                string                                  Request body data
-=================== ======================================= ======================================
+=================== ======================================= ======================================= ===========
+Key                 Type                                    Description                             Default *
+=================== ======================================= ======================================= ===========
+headers             dictionary                              Request headers (key-value dictionary)  ``{}``
+body                string                                  Request body data                       (empty)
+=================== ======================================= ======================================= ===========
+
+`* Value when field is omitted while creating a job.`
 
 JobStatus
 ^^^^^^^^^
@@ -643,17 +651,19 @@ JobSchedule
 ^^^^^^^^^^^
 The JobSchedule object represents the execution schedule of a job.
 
-=================== ======================================= ======================================
-Key                 Type                                    Description
-=================== ======================================= ======================================
-timezone            string                                  Schedule time zone (see `here <https://www.php.net/manual/timezones.php>`_ for a list of supported values)
-expiresAt           int                                     Date/time (in job's time zone) after which the job expires, i.e. after which it is not scheduled anymore (format: `YYYYMMDDhhmmss`, `0` = does not expire)
-hours               array of int                            Hours in which to execute the job (0-23; `[-1]` = every hour)
-mdays               array of int                            Days of month in which to execute the job (1-31; `[-1]` = every day of month)
-minutes             array of int                            Minutes in which to execute the job (0-59; `[-1]` = every minute)
-months              array of int                            Months in which to execute the job (1-12; `[-1]` = every month)
-wdays               array of int                            Days of week in which to execute the job (0=Sunday - 6=Saturday; `[-1]` = every day of week)
-=================== ======================================= ======================================
+=================== ======================================= ============================================================================================================================================================= =======================================
+Key                 Type                                    Description                                                                                                                                                   Default *
+=================== ======================================= ============================================================================================================================================================= =======================================
+timezone            string                                  Schedule time zone (see `here <https://www.php.net/manual/timezones.php>`_ for a list of supported values)                                                    ``UTC``
+expiresAt           int                                     Date/time (in job's time zone) after which the job expires, i.e. after which it is not scheduled anymore (format: `YYYYMMDDhhmmss`, `0` = does not expire)    ``0``
+hours               array of int                            Hours in which to execute the job (0-23; `[-1]` = every hour)                                                                                                 ``[]``
+mdays               array of int                            Days of month in which to execute the job (1-31; `[-1]` = every day of month)                                                                                 ``[]``
+minutes             array of int                            Minutes in which to execute the job (0-59; `[-1]` = every minute)                                                                                             ``[]``
+months              array of int                            Months in which to execute the job (1-12; `[-1]` = every month)                                                                                               ``[]``
+wdays               array of int                            Days of week in which to execute the job (0=Sunday - 6=Saturday; `[-1]` = every day of week)                                                                  ``[]``
+=================== ======================================= ============================================================================================================================================================= =======================================
+
+`* Value when field is omitted while creating a job.`
 
 RequestMethod
 ^^^^^^^^^^^^^
