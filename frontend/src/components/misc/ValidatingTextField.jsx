@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { TextField } from '@material-ui/core';
 
-export default function ValidatingTextField({ validator, pattern, patternErrorText, ...props }) {
+export default function ValidatingTextField({ validator, pattern, patternErrorText, mutator, ...props }) {
   const [ value, setValue ] = useState(props.defaultValue || props.value || '');
   const [ valid, setValid ] = useState(false);
   const [ typed, setTyped ] = useState(false);
@@ -23,9 +23,11 @@ export default function ValidatingTextField({ validator, pattern, patternErrorTe
     {...props}
     onChange={event => {
       setTyped(true);
-      setValue(event.target.value);
+      const value = mutator ? mutator(event.target.value) : event.target.value;
+      setValue(value);
       props.onChange && props.onChange(event);
     }}
+    value={value}
     error={!valid && typed}
     helperText={!valid && typed && patternErrorText}
     />;

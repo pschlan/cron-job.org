@@ -330,6 +330,15 @@ export default function JobEditor({ match }) {
     setShowTestRun(false);
   }
 
+  function urlMutator(url) {
+    if (typeof(url) == 'string' || url instanceof String) {
+      if (url.startsWith('http://http://') || url.startsWith('http://https://')) {
+        url = url.substring(7);
+      }
+    }
+    return url;
+  }
+
   const HEADERS_COLUMNS = [
     {
       cell: (item, rowNo) => <TextField
@@ -434,6 +443,7 @@ export default function JobEditor({ match }) {
             />
           <ValidatingTextField
             label={t('jobs.url')}
+            mutator={urlMutator}
             defaultValue={jobURL}
             pattern={RegexPatterns.url}
             patternErrorText={t('jobs.invalidUrl')}
