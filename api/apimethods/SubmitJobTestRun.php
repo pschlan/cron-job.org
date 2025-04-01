@@ -1,4 +1,5 @@
 <?php
+require_once('config/denylists.inc.php');
 require_once('lib/APIMethod.php');
 require_once('resources/Job.php');
 require_once('lib/RecaptchaVerifier.php');
@@ -21,6 +22,17 @@ class SubmitJobTestRun extends AbstractAPIMethod {
 
   public function validateRequest($request) {
     global $config;
+    global $jobUrlDenyList;
+
+    if (isset($request->job->url)) {
+      $lowerUrl = strtolower($request->job->url);
+      foreach ($jobUrlDenyList as $deniedUrl) {
+        if (strpos($lowerUrl, $deniedUrl) !== false) {
+          return false;
+        }
+      }
+    }
+
     return (
          isset($request->jobId)
       && is_numeric($request->jobId)
