@@ -289,7 +289,13 @@ export default function JobEditor({ match }) {
           enqueueSnackbar(t('jobs.created'), { variant: 'success' });
           history.push(jobFolderId === 0 ? '/jobs' : '/jobs/folders/' + jobFolderId);
         })
-        .catch(() => enqueueSnackbar(t('jobs.failedToCreate'), { variant: 'error' }))
+        .catch(error => {
+          if (error.response && error.response.status === 422) {
+            enqueueSnackbar(t('common.requestDeniedForSecurityReasons'), { variant: 'error' });
+          } else {
+            enqueueSnackbar(t('jobs.failedToCreate'), { variant: 'error' });
+          }
+        })
         .finally(() => setSaving(false));
     } else {
       updateJob(jobId, updatedJob)
@@ -298,7 +304,13 @@ export default function JobEditor({ match }) {
           setJob(result.jobDetails);
           enqueueSnackbar(t('jobs.saved'), { variant: 'success' });
         })
-        .catch(() => enqueueSnackbar(t('jobs.failedToSave'), { variant: 'error' }))
+        .catch(error => {
+          if (error.response && error.response.status === 422) {
+            enqueueSnackbar(t('common.requestDeniedForSecurityReasons'), { variant: 'error' });
+          } else {
+            enqueueSnackbar(t('jobs.failedToSave'), { variant: 'error' });
+          }
+        })
         .finally(() => setSaving(false));
     }
   }

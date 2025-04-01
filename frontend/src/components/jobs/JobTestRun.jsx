@@ -120,8 +120,12 @@ export default function JobTestRun({ job, jobId, onClose, onUpdateUrl = () => nu
     const doSubmitJobTestRun = token => {
       return submitJobTestRun(token, jobId, job)
         .then(result => setHandle(result.handle))
-        .catch(() => {
-          enqueueSnackbar(t('jobs.testRun.storeError'), { variant: 'error' });
+        .catch(error => {
+          if (error.response && error.response.status === 422) {
+            enqueueSnackbar(t('common.requestDeniedForSecurityReasons'), { variant: 'error' });
+          } else {
+            enqueueSnackbar(t('jobs.testRun.storeError'), { variant: 'error' });
+          }
           if (recaptchaRef.current) {
             recaptchaRef.current.reset();
           }

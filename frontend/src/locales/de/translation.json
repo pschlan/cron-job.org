@@ -67,7 +67,8 @@
     "confirmMassDeleteText": "Wollen Sie das ausgewählte Element wirklich löschen?",
     "confirmMassDeleteText_plural": "Wollen Sie die {{count}} ausgewählten Elemente wirklich löschen?",
     "selectAll": "Alles auswählen",
-    "deselectAll": "Auswahl aufheben"
+    "deselectAll": "Auswahl aufheben",
+    "requestDeniedForSecurityReasons": "Entschuldigung, aber wir konnten Ihre Anforderung nicht verarbeiten. Möglicher Grund ist ein nicht wohlgeformter Job. Wenden Sie sich bei Fragen bitte an unser Support-Team."
   },
   "login": {
     "emailAddress": "E-Mail-Adresse",
