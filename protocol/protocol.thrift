@@ -241,6 +241,14 @@ struct TestRunStatus
     14: JobLogStatsEntry stats;
 }
 
+struct WAFValidatorResult
+{
+    1: bool blocked;
+    2: i16 status;
+    3: string log;
+    4: string additionalLogs;
+}
+
 exception ResourceNotFound          {}
 exception Forbidden                 {}
 exception InvalidArguments          {}
@@ -283,4 +291,11 @@ service ChronosMaster
     Phrases getPhrases() throws(1: InternalError ie);
 
     list<UserGroup> getUserGroups();
+}
+
+service WAFValidator
+{
+    bool ping();
+
+    WAFValidatorResult checkJob(1: Job job);
 }
