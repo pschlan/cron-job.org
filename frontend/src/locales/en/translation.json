@@ -166,6 +166,11 @@
     "scheduled": "Scheduled",
     "jitter": "Jitter",
     "duration": "Duration",
+    "jsonNote": {
+      "title": "Sending JSON data?",
+      "text": "In most cases, an appropriate Content-Type header is required for this to work correctly.",
+      "setContentType": "Add Content-Type header now"
+    },
     "statuses": {
       "OK": "Successful",
       "UNKNOWN": "Unknown",
