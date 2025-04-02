@@ -6,9 +6,11 @@ import {
   LinearProgress, Paper, makeStyles, TextField, Switch, FormControl, FormLabel,
   FormGroup, FormControlLabel, Select, MenuItem, InputLabel, TableContainer, Button,
   IconButton, Tabs, Tab, Grid, CircularProgress, Dialog, DialogTitle, DialogContent,
-  DialogContentText, DialogActions, InputAdornment
+  DialogContentText, DialogActions, InputAdornment,
+  Box
 } from '@material-ui/core';
 import { grey } from '@material-ui/core/colors';
+import { Alert, AlertTitle } from '@material-ui/lab';
 import { useSnackbar } from 'notistack';
 
 import {
@@ -42,6 +44,7 @@ import TestIcon from '@material-ui/icons/PlayCircleOutline';
 import TimerIcon from '@material-ui/icons/Timer';
 import ExportIcon from '@material-ui/icons/ImportExport';
 import FolderIcon from '@material-ui/icons/FolderOutlined';
+import ApplyIcon from '@material-ui/icons/DoubleArrow';
 import ValidatingTextField from '../misc/ValidatingTextField';
 import clsx from 'clsx';
 import useUserProfile from '../../hooks/useUserProfile';
@@ -135,8 +138,20 @@ export default function JobEditor({ match }) {
   const [ showTestRun, setShowTestRun ] = useState(false);
   const [ showExportJob, setShowExportJob ] = useState(false);
   const [ updatedJob, setUpdatedJob ] = useState({});
+  const [ bodyLooksLikeJson, setBodyLooksLikeJson ] = useState(false);
+  const [ showContentTypeNote, setShowContentTypeNote ] = useState(false);
 
   const createMode = (jobId === -1);
+
+  useEffect(() => {
+    if (bodyLooksLikeJson && RequestMethodsSupportingCustomBody.includes(requestMethod)) {
+      if (!jobHeaders.map(x => x['key'].toLowerCase().trim()).includes('content-type')) {
+        setShowContentTypeNote(true);
+        return;
+      }
+    }
+    setShowContentTypeNote(false);
+  }, [bodyLooksLikeJson, jobHeaders, requestMethod]);
 
   //! @todo Export, import
   //! @todo Show warning on leave if not saved?
@@ -184,6 +199,15 @@ export default function JobEditor({ match }) {
     }
   }, [jobId, createMode, userProfile, folderId]);
 
+  function analyzeBody(value) {
+    value = (''+value).trim();
+    if ((value.startsWith('[') && value.endsWith(']')) || (value.startsWith('{') && value.endsWith('}'))) {
+      setBodyLooksLikeJson(true);
+    } else {
+      setBodyLooksLikeJson(false);
+    }
+  }
+
   useEffect(() => {
     if (job && userProfile && userProfile.userGroup) {
       setJobTitle(job.title);
@@ -198,6 +222,7 @@ export default function JobEditor({ match }) {
       setNotification(job.notification);
       setRequestMethod(job.requestMethod);
       setRequestBody(job.extendedData.body);
+      analyzeBody(job.extendedData.body);
       setTimezone(job.schedule.timezone);
       setJobHeaders(Object.keys(job.extendedData.headers).reduce((prev, cur) =>
         [...prev, { key: cur, value: job.extendedData.headers[cur] }], []));
@@ -330,6 +355,15 @@ export default function JobEditor({ match }) {
     setShowTestRun(false);
   }
 
+  function urlMutator(url) {
+    if (typeof(url) == 'string' || url instanceof String) {
+      if (url.startsWith('http://http://') || url.startsWith('http://https://')) {
+        url = url.substring(7);
+      }
+    }
+    return url;
+  }
+
   const HEADERS_COLUMNS = [
     {
       cell: (item, rowNo) => <TextField
@@ -434,6 +468,7 @@ export default function JobEditor({ match }) {
             />
           <ValidatingTextField
             label={t('jobs.url')}
+            mutator={urlMutator}
             defaultValue={jobURL}
             pattern={RegexPatterns.url}
             patternErrorText={t('jobs.invalidUrl')}
@@ -597,12 +632,31 @@ export default function JobEditor({ match }) {
                   <MenuItem value={RequestMethod[method]} key={method}>{method}</MenuItem>)}
               </Select>
             </FormControl>
+            {showContentTypeNote && <Box>
+              <Alert severity='info'>
+                <AlertTitle>{t('jobs.jsonNote.title')}</AlertTitle>
+                <div>
+                  {t('jobs.jsonNote.text')}
+                </div>
+                <Box mt={1}>
+                  <Button
+                    variant='contained'
+                    size='small'
+                    color='default'
+                    startIcon={<ApplyIcon />}
+                    onClick={() => setJobHeaders(x => [...x, {key: 'Content-Type', value: 'application/json'}])}>
+                    {t('jobs.jsonNote.setContentType')}
+                  </Button>
+                </Box>
+              </Alert>
+            </Box>}
             <FormControl className={classes.formControl}>
               <TextField
                 label={t('jobs.requestBody')}
                 className={classes.requestBody}
                 defaultValue={requestBody}
                 onBlur={({target}) => setRequestBody(target.value)}
+                onChange={({target}) => analyzeBody(target.value)}
                 disabled={!RequestMethodsSupportingCustomBody.includes(requestMethod)}
                 multiline
                 rows={8}

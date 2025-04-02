@@ -166,6 +166,11 @@
     "scheduled": "Geplant",
     "jitter": "Jitter",
     "duration": "Dauer",
+    "jsonNote": {
+      "title": "Senden Sie JSON-Daten?",
+      "text": "In den meisten Fällen ist es erforderlich, für korrekte Funktion einen entsprechenden Content-Type-Header zu setzen.",
+      "setContentType": "Content-Type-Header jetzt hinzufügen"
+    },
     "statuses": {
       "OK": "Erfolgreich",
       "UNKNOWN": "Unbekannt",
