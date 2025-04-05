@@ -36,7 +36,6 @@ $lang = [
         'Bonjour,' . "\n\n"
         . 'Merci beaucoup de soutenir $projectName et de rendre notre service possible !' . "\n\n"
         . 'Votre abonnement a été activé avec succès. Dans de rares cas, il se peut que l\'état de l\'abonnement n\'apparaisse pas encore dans votre compte. Dans ce cas, veuillez vous reconnecter.' . "\n\n"
-        . 'A propos : Vous pouvez trouver vos reçus et vos factures dans votre compte à Paramètres -> Gérer l\'abonnement.' . "\n\n"
         . 'Meilleures salutations,' . "\n\n"
         . '$projectName',
     'subscriptionCancelledEmail.subject' => '$projectName : Abonnement résilié',

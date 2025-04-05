@@ -31,6 +31,8 @@ class ChronosClient {
 
   public static function connectToNode($ip, $port) {
     $socket = new TSocket($ip, $port);
+    $socket->setRecvTimeout(10000);
+    $socket->setSendTimeout(250);
     $transport = new TBufferedTransport($socket, 1024, 1024);
     $protocol = new TBinaryProtocol($transport);
     $client = new \chronos\ChronosNodeClient($protocol);
