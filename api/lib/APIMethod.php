@@ -39,6 +39,12 @@ class GoneAPIException extends APIException {
   }
 }
 
+class UnprocessableContentException extends APIException {
+  public function httpStatus() {
+    return '422 Unprocessable Content';
+  }
+}
+
 class LockedAPIException extends APIException {
   public function httpStatus() {
     return '423 Locked';

@@ -452,6 +452,30 @@ class JobManager {
     return $result;
   }
 
+  private function validateAgainstWAF($thriftJob) {
+    global $config;
+
+    if (!isset($config['wafValidator'])) {
+      return;
+    }
+
+    try {
+      $client = WAFValidatorClient::connect();
+      $result = $client->client->checkJob($thriftJob);
+    } catch (Exception $ex) {
+      throw new InternalErrorException($ex);
+    }
+
+    if (!is_object($result)) {
+      throw new InternalErrorException();
+    }
+
+    if ($result->blocked !== false) {
+      error_log('Job rejected by WAF validator: ' . print_r($result, true));
+      throw new UnprocessableContentException();
+    }
+  }
+
   public function submitJobTestRun($jobId, $job, $xForwardedFor) {
     global $config;
 
@@ -472,12 +496,19 @@ class JobManager {
       throw new InternalErrorException();
     }
 
-    $userGroupId = (new UserManager($this->authToken))->getGroup()->userGroupId;
+    $userGroup = (new UserManager($this->authToken))->getGroup();
+    $userGroupId = $userGroup->userGroupId;
+
+    $thriftJob = $job->toThriftJob($this->authToken->userId, $userGroupId);
+
+    if ($userGroup->enableWAFValidator) {
+      $this->validateAgainstWAF($thriftJob);
+    }
 
     try {
       $client = $node->connect();
 
-      $handle = $client->submitJobTestRun($job->toThriftJob($this->authToken->userId, $userGroupId), $xForwardedFor);
+      $handle = $client->submitJobTestRun($thriftJob, $xForwardedFor);
       if ($handle) {
         $redis->set(implode(':', ['testRun', $handle, 'nodeId']), $node->nodeId, $config['testRunLifetime']);
         return $handle;
@@ -546,12 +577,19 @@ class JobManager {
       return false;
     }
 
-    $userGroupId = (new UserManager($this->authToken))->getGroup()->userGroupId;
+    $userGroup = (new UserManager($this->authToken))->getGroup();
+    $userGroupId = $userGroup->userGroupId;
+
+    $thriftJob = $job->toThriftJob($this->authToken->userId, $userGroupId);
+
+    if ($userGroup->enableWAFValidator) {
+      $this->validateAgainstWAF($thriftJob);
+    }
 
     try {
       $client = $node->connect();
 
-      $client->createOrUpdateJob($job->toThriftJob($this->authToken->userId, $userGroupId));
+      $client->createOrUpdateJob($thriftJob);
 
       return true;
     } catch (Exception $ex) {
@@ -566,7 +604,12 @@ class JobManager {
       return false;
     }
 
-    $userGroupId = (new UserManager($this->authToken))->getGroup()->userGroupId;
+    $userGroup = (new UserManager($this->authToken))->getGroup();
+    $userGroupId = $userGroup->userGroupId;
+
+    if ($userGroup->enableWAFValidator) {
+      $this->validateAgainstWAF($job->toThriftJob($this->authToken->userId, $userGroupId));
+    }
 
     $transactionActive = false;
 
@@ -581,7 +624,10 @@ class JobManager {
         ->execute(array('userId' => $this->authToken->userId, 'nodeId' => $node->nodeId));
 
       $job->jobId = Database::get()->insertId();
-      $client->createOrUpdateJob($job->toThriftJob($this->authToken->userId, $userGroupId));
+
+      $thriftJob = $job->toThriftJob($this->authToken->userId, $userGroupId);
+
+      $client->createOrUpdateJob($thriftJob);
 
       Database::get()->commitTransaction();
       $transactionActive = false;
