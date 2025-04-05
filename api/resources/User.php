@@ -50,6 +50,7 @@ class UserGroup {
   public $maxFailures;
   public $apiRequestsPerDay;
   public $maxApiKeys;
+  public $enableWAFValidator;
 
   private $title;
 
@@ -63,6 +64,7 @@ class UserGroup {
     $this->maxFailures = intval($this->maxFailures);
     $this->apiRequestsPerDay = intval($this->apiRequestsPerDay);
     $this->maxApiKeys = intval($this->maxApiKeys);
+    $this->enableWAFValidator = intval($this->enableWAFValidator) != 0;
   }
 
   function getTitle() {
@@ -242,7 +244,7 @@ class UserManager {
   }
 
   public function getGroup() {
-    $stmt = Database::get()->prepare('SELECT `usergroup`.`usergroupid` AS `userGroupId`, `usergroup`.`title`, `usergroup`.`max_status_pages` AS `maxStatusPages`, `usergroup`.`max_status_page_monitors` AS `maxStatusPageMonitors`, `usergroup`.`max_status_page_domains` AS `maxStatusPageDomains`, `usergroup`.`request_timeout` AS `requestTimeout`, `usergroup`.`request_max_size` AS `requestMaxSize`, `usergroup`.`max_failures` AS `maxFailures`, `usergroup`.`api_requests_per_day` AS `apiRequestsPerDay`, `usergroup`.`max_api_keys` AS `maxApiKeys` '
+    $stmt = Database::get()->prepare('SELECT `usergroup`.`usergroupid` AS `userGroupId`, `usergroup`.`title`, `usergroup`.`max_status_pages` AS `maxStatusPages`, `usergroup`.`max_status_page_monitors` AS `maxStatusPageMonitors`, `usergroup`.`max_status_page_domains` AS `maxStatusPageDomains`, `usergroup`.`request_timeout` AS `requestTimeout`, `usergroup`.`request_max_size` AS `requestMaxSize`, `usergroup`.`max_failures` AS `maxFailures`, `usergroup`.`api_requests_per_day` AS `apiRequestsPerDay`, `usergroup`.`max_api_keys` AS `maxApiKeys`, `usergroup`.`enable_waf_validator` AS `enableWAFValidator` '
       . 'FROM `usergroup` '
       . 'INNER JOIN `user` ON `usergroup`.`usergroupid`=`user`.`usergroupid` '
       . 'WHERE `user`.`userid`=:userId');
@@ -330,7 +332,7 @@ class UserManager {
     ]);
   }
 
-  private function createRefreshToken($userId, $device) {
+  private static function createRefreshToken($userId, $device) {
     global $config;
 
     $token = self::generateToken($config['refreshTokenLength']);

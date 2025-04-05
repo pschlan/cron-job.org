@@ -57,6 +57,13 @@ $config = array(
     'secretKey'   => 'PLACE_SECRET_KEY_HERE'
   ),
 
+  //! @note If you want to validate jobs against WAF rules, supply WAFValidator
+  //!       instance details here.
+  //'wafValidator' => array(
+  //  'host'        => 'localhost',
+  //  'port'        => 9092
+  //),
+
   /****************************************************************************************
    ******** The following settings might be kept as is. Customization is optional. ********
    ****************************************************************************************/
