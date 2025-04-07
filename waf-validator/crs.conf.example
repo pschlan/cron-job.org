@@ -1,0 +1,18 @@
+Include /etc/crs4/modsecurity.conf-recommended
+Include /etc/crs4/crs-setup.conf.example
+Include /etc/crs4/plugins/*-config.conf
+Include /etc/crs4/plugins/*-before.conf
+Include /etc/crs4/rules/*.conf
+Include /etc/crs4/plugins/*-after.conf
+
+# Allow any content-type
+SecRuleRemoveById 920420
+
+# Allow any request method
+SecRuleRemoveById 911100
+
+# Also, disable the JSON and XML parsers in modsecurity.conf-recommended to prevent
+# misleading security rejections when user data does not look valid. (Might need to
+# re-visit this decision and add a good error message for this case.)
+
+# Also consider increasing SecPcreMatchLimit, SecPcreMatchLimitRecursion

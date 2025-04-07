@@ -57,6 +57,7 @@ CREATE TABLE `usergroup`(
     `execution_priority` tinyint(4) NOT NULL DEFAULT 0,
     `api_requests_per_day` int(11) NOT NULL DEFAULT '100',
     `max_api_keys` int(11) NOT NULL DEFAULT '1',
+    `enable_waf_validator` tinyint(4) NOT NULL DEFAULT '1',
     PRIMARY KEY(`usergroupid`)
 ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 INSERT INTO `usergroup`(`usergroupid`, `title`) VALUES(1, 'Default');
