@@ -34,6 +34,7 @@ import 'moment/locale/zh-cn';
 import 'moment/locale/zh-tw';
 import 'moment/locale/pt-br';
 import 'moment/locale/hu';
+import 'moment/locale/tr';
 import moment from 'moment';
 import { Config } from './utils/Config';
 
@@ -71,7 +72,7 @@ const LANGUAGE_RESOURCES = {
   hu: {
     translation: translationHU
   },
-  tr_TR: {
+  tr: {
     translation: translationTrTR
   }
 };

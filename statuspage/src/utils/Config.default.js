@@ -26,8 +26,8 @@ export const Config = {
     'pl': 'Polski',
     'pt_BR': 'Português Brasil',
     'zh_CN': '简体中文',
-    'hu_HU': 'Magyar',
-    'tr_TR': 'Türkçe'
+    'hu': 'Magyar',
+    'tr': 'Türkçe'
   },
 
   //! @note Fallback language to use when the user's auto-determined language is not supported.
