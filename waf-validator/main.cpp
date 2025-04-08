@@ -148,7 +148,7 @@ URLComponents parseURL(const std::string &url)
     throw std::runtime_error("curl_url() failed!");
   }
 
-  int rc = curl_url_set(h.get(), CURLUPART_URL, url.c_str(), 0);
+  int rc = curl_url_set(h.get(), CURLUPART_URL, url.c_str(), CURLU_ALLOW_SPACE);
   if (rc != CURLE_OK)
   {
     std::cout << "extractHostname(): curl_url_set(CURLUPART_URL) failed for " << url << std::endl;
