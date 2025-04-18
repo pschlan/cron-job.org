@@ -1,0 +1,36 @@
+{
+  "common": {
+    "poweredBy": "drevet af",
+    "refresh": "Opdater"
+  },
+  "timespan": {
+    "1year": "1 år",
+    "6months": "6 måneder",
+    "1month": "1 måned",
+    "1week": "1 uge",
+    "1day": "1 dag"
+  },
+  "status": {
+    "availability": "Tilgængelighed",
+    "availabilityWarning": "Advarsel om tilgængelighed",
+    "availabilityError": "Fejl i tilgængelighed",
+    "lowAvailabilityText": "Vi oplever i øjeblikket reduceret tilgængelighed på {{percent}} % inden for de sidste 30 minutter.",
+    "latency": "Forsinkelse",
+    "latencyWarning": "Advarsel om forsinkelse",
+    "latencyError": "Fejl i forsinkelse",
+    "highLatencyText": "Vi oplever i øjeblikket usædvanligt høj forsinkelse på {{ms}} ms inden for de sidste 30 minutter.",
+    "healthy": "Sund",
+    "allSystemsRunAsExpected": "Alle systemer kører som forventet.",
+    "disabled": "Deaktiveret"
+  },
+  "error": {
+    "404": {
+      "title": "Side ikke fundet",
+      "text": "Den anmodede statusside kunne ikke findes. Tjek, at linket er korrekt, og prøv igen."
+    },
+    "other": {
+      "title": "Fejl ved hentning af statusside",
+      "text": "Beklager, vi kunne ikke hente statussiden lige nu. Prøv igen senere."
+    }
+  }
+}
