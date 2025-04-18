@@ -24,6 +24,7 @@ export const Config = {
   //!       to add the new language code here.
   'languages': {
     'en': 'English',
+    'da': 'Dansk',
     'de': 'Deutsch',
     'it': 'Italiano',
     'fr': 'Français',
