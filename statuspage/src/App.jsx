@@ -12,7 +12,7 @@ import { initReactI18next } from 'react-i18next';
 import useLanguageCode from './hooks/useLanguageCode';
 
 import translationEN from './locales/en/translation.json';
-import translationEN from './locales/da/translation.json';
+import translationDA from './locales/da/translation.json';
 import translationDE from './locales/de/translation.json';
 import translationIT from './locales/it/translation.json';
 import translationFR from './locales/fr/translation.json';

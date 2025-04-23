@@ -14,6 +14,7 @@ import FolderIcon from '@material-ui/icons/FolderOutlined';
 import StatusPagesIcon from '@material-ui/icons/NetworkCheck';
 
 import translationEN from './locales/en/translation.json';
+import translationDA from './locales/da/translation.json';
 import translationDE from './locales/de/translation.json';
 import translationIT from './locales/it/translation.json';
 import translationRU from './locales/ru/translation.json';
@@ -70,6 +71,9 @@ const LANGUAGE_RESOURCES = {
   },
   de: {
     translation: translationDE
+  },
+  da: {
+    translation: translationDA
   },
   it: {
     translation: translationIT
