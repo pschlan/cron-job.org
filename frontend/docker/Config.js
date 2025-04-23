@@ -8,7 +8,7 @@ export const Config = {
   'sessionRefreshInterval': 10 * 60 * 1000,
   'languages': {
     'en': 'English',
-    'da': 'Danish',
+    'da': 'Dansk',
     'de': 'Deutsch',
     'it': 'Italiano',
     'fr': 'Français',
