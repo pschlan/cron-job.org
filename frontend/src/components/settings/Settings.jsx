@@ -24,7 +24,6 @@ import DeleteMFADeviceDialog from './DeleteMFADeviceDialog';
 import { RegexPatterns, SubscriptionStatus } from '../../utils/Constants';
 import DeleteAccountDialog from './DeleteAccountDialog';
 import ManageSubscriptionIcon from '@material-ui/icons/CreditCard';
-import CancelSubscriptionIcon from '@material-ui/icons/Cancel';
 import SubscriptionActiveIcon from '@material-ui/icons/FavoriteBorder';
 import SubscriptionInactiveIcon from '@material-ui/icons/PauseCircleOutline';
 import LearnMoreIcon from '@material-ui/icons/Loyalty';
@@ -83,7 +82,6 @@ export default function Settings() {
   const [ isLoading, setIsLoading ] = useState(true);
   const [ saving, setSaving ] = useState(false);
   const [ isLoadingManageSubscription, setIsLoadingManageSubscription ] = useState(false);
-  const [ isLoadingCancelSubscription, setIsLoadingCancelSubscription ] = useState(false);
 
   const [ showChangePassword, setShowChangePassword ] = useState(false);
   const [ showChangeEmail, setShowChangeEmail ] = useState(false);
@@ -181,17 +179,6 @@ export default function Settings() {
           setIsLoadingManageSubscription(false);
         });
     }
-  }
-
-  function cancelSubscription() {
-    setIsLoadingCancelSubscription(true);
-
-    getSubscriptionLink('cancel')
-      .then(response => window.location.href = response.url)
-      .catch(() => {
-        enqueueSnackbar(t('settings.manageSubscriptionFailed'), { variant: 'error' });
-        setIsLoadingCancelSubscription(false);
-      });
   }
 
   const isCancelledSubscription = userProfile && userProfile.userSubscription && userProfile.userSubscription.status === SubscriptionStatus.CANCELLED;
@@ -401,7 +388,7 @@ export default function Settings() {
                     >
                     {t('settings.manageSubscription')}
                   </Button>}
-                {userProfile.userSubscription && userProfile.userSubscription.type==='paddle' && userProfile.userSubscription.status === SubscriptionStatus.ACTIVE && <ButtonGroup>
+                {userProfile.userSubscription && userProfile.userSubscription.type==='paddle' && userProfile.userSubscription.status === SubscriptionStatus.ACTIVE &&
                     <Button
                       size='small'
                       variant='contained'
@@ -410,19 +397,8 @@ export default function Settings() {
                       disabled={isLoadingManageSubscription || isCancelledSubscription || isExpiringSubscription}
                       float='right'
                       >
-                      {t('settings.updatePaymentMethod')}
-                    </Button>
-                    <Button
-                      size='small'
-                      variant='contained'
-                      startIcon={isLoadingCancelSubscription ? <CircularProgress size='small' /> : <CancelSubscriptionIcon />}
-                      onClick={cancelSubscription}
-                      disabled={isLoadingCancelSubscription || isCancelledSubscription || isExpiringSubscription}
-                      float='right'
-                      >
-                      {t('settings.cancelSubscription')}
-                    </Button>
-                  </ButtonGroup>}
+                      {t('settings.manageSubscription')}
+                    </Button>}
                 {!isPaymentReturn && ((!userProfile.userSubscription) || (userProfile.userSubscription.status === SubscriptionStatus.CANCELLED)) &&
                   <Button
                     size='small'
