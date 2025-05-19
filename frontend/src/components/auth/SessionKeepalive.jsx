@@ -7,7 +7,7 @@ export default function SessionKeepalive() {
   const sessionToken = useSelector(state => state.auth && state.auth.session && state.auth.session.token);
 
   useEffect(() => {
-    const timeoutID = window.setTimeout(() => refreshSession(), Config.sessionRefreshInterval);
+    const timeoutID = window.setInterval(() => refreshSession(), Config.sessionRefreshInterval);
     return () => window.clearInterval(timeoutID);
   }, [sessionToken]);
 
