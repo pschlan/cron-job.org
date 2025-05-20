@@ -172,12 +172,23 @@ export default function Settings() {
           setIsLoadingManageSubscription(false);
         });
     } else if (userProfile.userSubscription.type === 'paddle') {
+      const wnd = window.open('', '_blank');
+
       getSubscriptionLink('manage')
-        .then(response => window.location.href = response.url)
+        .then(response => {
+          if (wnd) {
+            wnd.location.href = response.url;
+          } else {
+            window.location.href = response.url;
+          }
+        })
         .catch(() => {
+          if (wnd) {
+            wnd.close();
+          }
           enqueueSnackbar(t('settings.manageSubscriptionFailed'), { variant: 'error' });
-          setIsLoadingManageSubscription(false);
-        });
+        })
+        .finally(() => setIsLoadingManageSubscription(false));
     }
   }
 
