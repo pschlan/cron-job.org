@@ -193,7 +193,6 @@ export default function Settings() {
   }
 
   const isCancelledSubscription = userProfile && userProfile.userSubscription && userProfile.userSubscription.status === SubscriptionStatus.CANCELLED;
-  const isExpiringSubscription = userProfile && userProfile.userSubscription && userProfile.userSubscription.status === SubscriptionStatus.EXPIRING;
   const isPaymentReturn = window && window.location && window.location.search === '?checkoutSuccess=true';
 
   useEffect(() => {
@@ -399,13 +398,13 @@ export default function Settings() {
                     >
                     {t('settings.manageSubscription')}
                   </Button>}
-                {userProfile.userSubscription && userProfile.userSubscription.type==='paddle' && userProfile.userSubscription.status === SubscriptionStatus.ACTIVE &&
+                {userProfile.userSubscription && userProfile.userSubscription.type==='paddle' &&
                     <Button
                       size='small'
                       variant='contained'
                       startIcon={isLoadingManageSubscription ? <CircularProgress size='small' /> : <ManageSubscriptionIcon />}
                       onClick={manageSubscription}
-                      disabled={isLoadingManageSubscription || isCancelledSubscription || isExpiringSubscription}
+                      disabled={isLoadingManageSubscription}
                       float='right'
                       >
                       {t('settings.manageSubscription')}
