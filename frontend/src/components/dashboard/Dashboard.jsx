@@ -18,7 +18,7 @@ import IconAvatar from '../misc/IconAvatar';
 import YesIcon from '@material-ui/icons/Check';
 import NoIcon from '@material-ui/icons/Close';
 import DetailsIcon from '@material-ui/icons/MoreVert';
-import { useHistory } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 import NumberPanel from '../misc/NumberPanel';
 import AddIcon from '@material-ui/icons/AlarmAdd';
 import { Config } from '../../utils/Config';
@@ -92,7 +92,6 @@ export default function Dashboard() {
   const { t } = useTranslation();
   const [ isLoading, setIsLoading ] = useState(true);
   const dispatch = useDispatch();
-  const history = useHistory();
   const [ savingNewsletter, setSavingNewsletter ] = useState(false);
   const [ reenablingNotifications, setReenablingNotifications ] = useState(false);
   const languageCode = useLanguageCode();
@@ -152,7 +151,8 @@ export default function Dashboard() {
           size='small'
           startIcon={<DetailsIcon />}
           className={classes.actionButton}
-          onClick={() => history.push('/jobs' + (event.details.jobFolderId === 0 ? '' : '/folders/' + event.details.jobFolderId) + '/' + event.details.jobId + '/history')}
+          component={RouterLink}
+          to={'/jobs' + (event.details.jobFolderId === 0 ? '' : '/folders/' + event.details.jobFolderId) + '/' + event.details.jobId + '/history'}
           >
           {t('common.details')}
         </Button>
@@ -172,7 +172,8 @@ export default function Dashboard() {
           variant='contained'
           size='small'
           startIcon={<AddIcon />}
-          onClick={() => history.push('/jobs/create')}
+          component={RouterLink}
+          to='/jobs/create'
           >{t('jobs.createJob')}</Button>
       </>}>
       {t('common.dashboard')}
@@ -203,7 +204,8 @@ export default function Dashboard() {
                   size='small'
                   color='primary'
                   startIcon={<EmailIcon />}
-                  onClick={() => history.push('/settings')}>
+                  component={RouterLink}
+                  to='/settings'>
                   {t('dashboard.bounceWarning.updateProfile')}
                 </Button>
               </Grid>

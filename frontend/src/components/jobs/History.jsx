@@ -17,7 +17,7 @@ import IconAvatar from '../misc/IconAvatar';
 import { JobStatus, jobStatusText, TimingFields, ChartColors } from '../../utils/Constants';
 import HistoryDetailsButton from './HistoryDetailsButton';
 import Heading from '../misc/Heading';
-import { useHistory } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 import { ResponsiveContainer, AreaChart, XAxis, Area, YAxis, Tooltip } from 'recharts';
 import { formatMs } from '../../utils/Units';
 import useViewport from '../../hooks/useViewport';
@@ -34,7 +34,6 @@ export default function History({ match }) {
   const [ history, setHistory ] = useState([]);
   const [ isLoading, setIsLoading ] = useState(true);
   const [ chartData, setChartData ] = useState(null);
-  const routerHistory = useHistory();
   const { isMobile } = useViewport();
 
   useEffect(() => {
@@ -148,7 +147,8 @@ export default function History({ match }) {
           variant='contained'
           size='small'
           startIcon={<EditIcon />}
-          onClick={() => routerHistory.push(urlPrefix + '/' + jobId)}
+          component={RouterLink}
+          to={`${urlPrefix}/${jobId}`}
           >{t('jobs.editJob')}</Button>
       </>}>
       {t('jobs.jobHistoryHeading', { jobTitle: job.title || job.url })}

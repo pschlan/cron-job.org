@@ -11,7 +11,7 @@ import EnableIcon from '@material-ui/icons/AlarmOnOutlined';
 import DisableIcon from '@material-ui/icons/AlarmOffOutlined';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FolderIcon from '@material-ui/icons/FolderOutlined';
-import { useHistory } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 import Breadcrumbs from '../misc/Breadcrumbs';
 import useJobs from '../../hooks/useJobs';
 import Heading from '../misc/Heading';
@@ -37,7 +37,6 @@ export default function Jobs({ match }) {
   const classes = useStyles();
   const { jobs, loading: isLoading, refresh: refreshJobs } = useJobs(REFRESH_INTERVAL, jobSelector);
   const { t } = useTranslation();
-  const history = useHistory();
   const { enqueueSnackbar } = useSnackbar();
   const [confirmJobMassAction, setConfirmJobMassAction] = useState(null);
   const [moveMassAction, setMoveMassAction] = useState(null);
@@ -90,7 +89,8 @@ export default function Jobs({ match }) {
           size="small"
           startIcon={<HistoryIcon />}
           className={classes.actionButton}
-          onClick={() => history.push(urlPrefix + '/' + job.jobId + '/history')}
+          component={RouterLink}
+          to={`${urlPrefix}/${job.jobId}/history`}
           >
           {t('jobs.history')}
         </Button>
@@ -99,7 +99,8 @@ export default function Jobs({ match }) {
           size="small"
           startIcon={<EditIcon />}
           className={classes.actionButton}
-          onClick={() => history.push(urlPrefix + '/' + job.jobId)}
+          component={RouterLink}
+          to={`${urlPrefix}/${job.jobId}`}
           >
           {t('common.edit')}
         </Button>
@@ -150,13 +151,15 @@ export default function Jobs({ match }) {
             variant='contained'
             size='small'
             startIcon={<FolderIcon />}
-            onClick={() => history.push('/jobs/folders')}
+            component={RouterLink}
+            to='/jobs/folders'
             >{t('jobs.folders.manage')}</Button>
           <Button
             variant='contained'
             size='small'
             startIcon={<AddIcon />}
-            onClick={() => history.push(urlPrefix + '/create')}
+            component={RouterLink}
+            to={`${urlPrefix}/create`}
             >{t('jobs.createJob')}</Button>
         </ButtonGroup>
       </>}>

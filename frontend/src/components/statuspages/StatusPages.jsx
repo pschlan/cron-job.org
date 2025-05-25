@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getStatusPages } from '../../utils/API';
 import EditIcon from '@material-ui/icons/Edit';
-import { useHistory } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 import Breadcrumbs from '../misc/Breadcrumbs';
 import Table from '../misc/Table';
 import Heading from '../misc/Heading';
@@ -25,7 +25,6 @@ const useStyles = makeStyles((theme) => ({
 export default function StatusPages() {
   const classes = useStyles();
   const { t } = useTranslation();
-  const history = useHistory();
 
   const [statusPages, setStatusPages] = useState(null);
   const [maxStatusPages, setMaxStatusPages] = useState(0);
@@ -65,7 +64,8 @@ export default function StatusPages() {
           size="small"
           startIcon={<EditIcon />}
           className={classes.actionButton}
-          onClick={() => history.push('/statuspages/' + page.statusPageId)}
+          component={RouterLink}
+          to={`/statuspages/${page.statusPageId}`}
           >
           {t('common.edit')}
         </Button>

@@ -15,7 +15,7 @@ import useViewport from '../hooks/useViewport';
 import { logOut } from '../utils/Utils';
 import useUserProfile from '../hooks/useUserProfile';
 import { SubscriptionStatus } from '../utils/Constants';
-import { useHistory } from 'react-router';
+import { Link as RouterLink } from 'react-router-dom';
 
 export default function AppToolbar() {
   const dispatch = useDispatch();
@@ -23,7 +23,6 @@ export default function AppToolbar() {
   const languageCode = useLanguageCode();
   const { isMobile } = useViewport();
   const userProfile = useUserProfile();
-  const history = useHistory();
 
   return isMobile ? <>
     <ActionMenu
@@ -47,7 +46,8 @@ export default function AppToolbar() {
     {userProfile && userProfile.userSubscription && (userProfile.userSubscription.status===SubscriptionStatus.ACTIVE || userProfile.userSubscription.status===SubscriptionStatus.EXPIRING || userProfile.userSubscription.isOnGracePeriod === true) && <Tooltip title={t('common.sustainingMemberThanks')}>
       <IconButton
         color='inherit'
-        onClick={() => history.push('/settings')}
+        component={RouterLink}
+        to='/settings'
         >
         <SustainingMemberIcon />
       </IconButton>
