@@ -155,6 +155,7 @@
     }
   },
   "jobs": {
+    "allJobs": "Alle",
     "nojobs": "Keine Jobs gefunden.",
     "titleurl": "Titel, URL",
     "lastExecution": "Letzte Ausführung",

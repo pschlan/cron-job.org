@@ -11,6 +11,7 @@ import ScheduleIcon from '@material-ui/icons/Schedule';
 import SettingsIcon from '@material-ui/icons/Settings';
 import BarChartIcon from '@material-ui/icons/BarChart';
 import FolderIcon from '@material-ui/icons/FolderOutlined';
+import AllJobsIcon from '@material-ui/icons/FolderSpecialOutlined';
 import StatusPagesIcon from '@material-ui/icons/NetworkCheck';
 
 import translationEN from './locales/en/translation.json';
@@ -144,6 +145,22 @@ function ConsoleMenu({ selectedId, onListItemClick, indentSubItems = false }) {
 
   const folders = useFolders();
 
+  const jobsSubItems = folders.map(folder => (
+    {
+      id: 'folders/' + folder.folderId,
+      text: folder.title,
+      icon: <FolderIcon />,
+      href: '/jobs/folders/' + folder.folderId
+    }));
+  if (folders.length > 0) {
+    jobsSubItems.push({
+      id: 'folders/all',
+      text: t('jobs.allJobs'),
+      icon: <AllJobsIcon />,
+      href: '/jobs/folders/all'
+    });
+  }
+
   const menuItems = [
     {
       items: [
@@ -158,13 +175,7 @@ function ConsoleMenu({ selectedId, onListItemClick, indentSubItems = false }) {
           text: t('common.cronjobs'),
           icon: <ScheduleIcon />,
           href: '/jobs',
-          subItems: folders.map(folder => (
-            {
-              id: 'folders/' + folder.folderId,
-              text: folder.title,
-              icon: <FolderIcon />,
-              href: '/jobs/folders/' + folder.folderId
-            }))
+          subItems: jobsSubItems
         },
         Config.enableStatusPages && {
           id: 'statuspages',

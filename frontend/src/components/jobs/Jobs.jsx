@@ -32,7 +32,7 @@ const REFRESH_INTERVAL = 60000;
 export default function Jobs({ match }) {
   const { folderId, folderTitle, folderBreadcrumb, urlPrefix, folders } = useFolder(match);
 
-  const jobSelector = jobs => jobs.filter(x => x.folderId === folderId);
+  const jobSelector = jobs => jobs.filter(x => x.folderId === folderId || folderId === 'all');
 
   const classes = useStyles();
   const { jobs, loading: isLoading, refresh: refreshJobs } = useJobs(REFRESH_INTERVAL, jobSelector);
@@ -50,6 +50,14 @@ export default function Jobs({ match }) {
         enqueueSnackbar(t('common.massActionFailed'), { variant: 'error' });
       })
       .finally(() => refreshJobs());
+  }
+
+  function jobLink(job, path = '') {
+    if (job.folderId === 0) {
+      return `/jobs/${job.jobId}${path}`;
+    } else {
+      return `/jobs/folders/${job.folderId}/${job.jobId}${path}`;
+    }
   }
 
   const COLUMNS = [
@@ -90,7 +98,7 @@ export default function Jobs({ match }) {
           startIcon={<HistoryIcon />}
           className={classes.actionButton}
           component={RouterLink}
-          to={`${urlPrefix}/${job.jobId}/history`}
+          to={folderId === 'all' ? jobLink(job, '/history') : `${urlPrefix}/${job.jobId}/history`}
           >
           {t('jobs.history')}
         </Button>
@@ -100,7 +108,7 @@ export default function Jobs({ match }) {
           startIcon={<EditIcon />}
           className={classes.actionButton}
           component={RouterLink}
-          to={`${urlPrefix}/${job.jobId}`}
+          to={folderId === 'all' ? jobLink(job) : `${urlPrefix}/${job.jobId}`}
           >
           {t('common.edit')}
         </Button>
@@ -159,7 +167,7 @@ export default function Jobs({ match }) {
             size='small'
             startIcon={<AddIcon />}
             component={RouterLink}
-            to={`${urlPrefix}/create`}
+            to={folderId === 'all' ? '/jobs/create' : `${urlPrefix}/create`}
             >{t('jobs.createJob')}</Button>
         </ButtonGroup>
       </>}>
