@@ -886,6 +886,8 @@ private:
     template<std::size_t N_BINS>
     double computerPercentileFromHistogramRow(const std::unique_ptr<Chronos::SQLite_Statement> &stmt, double p = 0.99) const
     {
+        static const double SQRT_2 = sqrt(2);
+
         int binSum = 0;
         std::vector<int> binValues(N_BINS);
 
@@ -912,8 +914,8 @@ private:
 
             if (p > prevEcdf && p <= curEcdf)
             {
-                double x0 = i > 0 ? pow(sqrt(2), i - 1) : 0;
-                double x1 = pow(sqrt(2), i);
+                double x0 = i > 0 ? pow(SQRT_2, i - 1) : 0;
+                double x1 = pow(SQRT_2, i);
 
                 return (x0 + (x1 - x0) * (p - prevEcdf) / (curEcdf - prevEcdf));
             }
