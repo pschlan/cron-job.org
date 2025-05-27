@@ -8,6 +8,7 @@ $loader->registerNamespace('Thrift', 'lib/3rdparty/thrift');
 $loader->registerDefinition('chronos', 'lib/protocol');
 $loader->register();
 
+use Thrift\Protocol\TBinaryProtocolAccelerated;
 use Thrift\Protocol\TBinaryProtocol;
 use Thrift\Transport\TSocket;
 use Thrift\Transport\THttpClient;
@@ -34,7 +35,7 @@ class ChronosClient {
     $socket->setRecvTimeout(10000);
     $socket->setSendTimeout(250);
     $transport = new TBufferedTransport($socket, 1024, 1024);
-    $protocol = new TBinaryProtocol($transport);
+    $protocol = new TBinaryProtocolAccelerated($transport);
     $client = new \chronos\ChronosNodeClient($protocol);
 
     $transport->open();
@@ -65,7 +66,7 @@ class WAFValidatorClient {
     $socket->setRecvTimeout(5000);
     $socket->setSendTimeout(250);
     $transport = new TBufferedTransport($socket, 1024, 1024);
-    $protocol = new TBinaryProtocol($transport);
+    $protocol = new TBinaryProtocolAccelerated($transport);
     $client = new \chronos\WAFValidatorClient($protocol);
 
     $transport->open();
