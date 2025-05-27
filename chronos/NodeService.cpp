@@ -531,37 +531,19 @@ public:
         getDayTimeSeriesForYear(_return.last12Months, identifier, now.tm_year + 1900 - 1, now.tm_mon, now.tm_mday, p);
         getDayTimeSeriesForYear(_return.last12Months, identifier, now.tm_year + 1900, 0, 1, p);
 
-        std::vector<JobLogEntry> jobLog;
-        getJobLogForDay(jobLog,  identifier, tmYesterday.tm_mday, tmYesterday.tm_mon, -1);
-        getJobLogForDay(jobLog,  identifier, now.tm_mday, now.tm_mon, -1);
-
+        const time_t minDate = time(nullptr) - 86400;
         std::vector<TimeSeriesDataEntry> jobLogTimeSeries;
-        jobLogTimeSeries.reserve(jobLog.size());
+        getTimeSeriesForDay(jobLogTimeSeries, identifier, tmYesterday.tm_mday, tmYesterday.tm_mon, minDate);
+        getTimeSeriesForDay(jobLogTimeSeries, identifier, now.tm_mday, now.tm_mon, minDate);
 
-        for(const auto &entry : jobLog)
-        {
-            TimeSeriesDataEntry td;
-            td.date = entry.date;
-            td.uptimeCounter = (entry.status == JobStatus::OK) ? 1 : 0;
-            td.uptimeDenominator = 1;
-            td.duration = entry.stats.total / 1000;
-
-            jobLogTimeSeries.push_back(td);
-        }
-
-        _return.last24Hours = downsampleTimeSeriesData(jobLogTimeSeries, time(nullptr) - 86400, 15 * 60, p);
+        _return.last24Hours = downsampleTimeSeriesData(jobLogTimeSeries, 15 * 60, p);
     }
 
-    std::vector<TimeSeriesDataEntry> downsampleTimeSeriesData(const std::vector<TimeSeriesDataEntry> &in, const time_t minDate, const int seconds, const double p)
+    std::vector<TimeSeriesDataEntry> downsampleTimeSeriesData(const std::vector<TimeSeriesDataEntry> &in, const int seconds, const double p)
     {
         std::map<int64_t, std::vector<TimeSeriesDataEntry>> aggregate;
         for (const auto &entry : in)
         {
-            if (entry.date < minDate)
-            {
-                continue;
-            }
-
             TimeSeriesDataEntry newEntry(entry);
             newEntry.date -= newEntry.date % seconds;
 
@@ -994,6 +976,42 @@ private:
         if(gmtime_r(&tmTime, &tmStruct) == nullptr)
             throw std::runtime_error("gmtime_r returned nullptr");
         return tmStruct;
+    }
+
+    void getTimeSeriesForDay(std::vector<TimeSeriesDataEntry> &_return, const JobIdentifier &identifier, const int mday, const int month, const time_t minDate) const
+    {
+        using namespace Chronos;
+
+        std::string dbFilePath = Utils::userDbFilePath(userDbFilePathScheme, userDbFileNameScheme, identifier.userId, mday, month);
+        std::unique_ptr<SQLite_DB> userDB;
+
+        try
+        {
+            userDB = std::make_unique<SQLite_DB>(dbFilePath.c_str(), true /* read only */);
+        }
+        catch(const std::exception &ex)
+        {
+            //! @note Ignore failures during open (the db probably doesn't exist because there's no log entry on that day)
+            return;
+        }
+
+        std::string query = "SELECT \"joblog\".\"date\",\"joblog\".\"status\",\"total\" FROM \"joblog\" "
+            "LEFT JOIN \"joblog_stats\" ON \"joblog_stats\".\"joblogid\"=\"joblog\".\"joblogid\" "
+            "WHERE \"joblog\".\"jobid\"=:jobid AND \"joblog\".\"date\">=:mindate";
+
+        auto stmt = userDB->prepare(query);
+        stmt->bind(":jobid", identifier.jobId);
+        stmt->bind(":mindate", std::to_string(static_cast<uint64_t>(minDate)));
+
+        while(stmt->execute())
+        {
+            TimeSeriesDataEntry td;
+            td.date = stmt->intValue("date");
+            td.uptimeCounter = (static_cast<JobStatus::type>(stmt->intValue("status")) == JobStatus::OK) ? 1 : 0;
+            td.uptimeDenominator = 1;
+            td.duration = stmt->intValue("total") / 1000;
+            _return.push_back(td);
+        }
     }
 
     void getJobLogForDay(std::vector<JobLogEntry> &_return, const JobIdentifier &identifier, const int mday, const int month, const int16_t maxEntries) const
