@@ -83,6 +83,7 @@ class APIDispatcher extends AbstractDispatcher {
       header('HTTP/1.1 204 No Content');
       header('Access-Control-Allow-Headers: Content-Type, Authorization, X-API-Method, X-UI-Language');
       header('Access-Control-Allow-Methods: POST');
+      header('Access-Control-Max-Age: 1800');
       return;
     }
 

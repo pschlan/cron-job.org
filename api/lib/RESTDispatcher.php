@@ -98,6 +98,7 @@ class RESTDispatcher extends AbstractDispatcher {
         header('HTTP/1.1 204 No Content');
         header('Access-Control-Allow-Methods: GET, PUT, PATCH, DELETE');
         header('Access-Control-Allow-Headers: Content-Type,Authorization,Keep-Alive,User-Agent,If-Modified-Since,Cache-Control');
+        header('Access-Control-Max-Age: 1800');
         return;
       }
 
