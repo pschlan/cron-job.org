@@ -1,6 +1,6 @@
 /*
  * chronos, the cron-job.org execution daemon
- * Copyright (C) 2017-2019 Patrick Schlangen <patrick@schlangen.me>
+ * Copyright (C) 2017-2025 Patrick Schlangen <patrick@schlangen.me>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -12,6 +12,7 @@
 #include "NodeService.h"
 
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 
 #include <thrift/protocol/TBinaryProtocol.h>
