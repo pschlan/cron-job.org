@@ -171,7 +171,7 @@ AsyncWatcher::AsyncWatcher(CurlWorker *w, const std::function<void()> &callback)
 {
     privateData->w = w;
 
-    ev_async_init(&privateData->async, CurlWorker::Callbacks::evAsyncWatcherCallback); // todo
+    ev_async_init(&privateData->async, CurlWorker::Callbacks::evAsyncWatcherCallback);
     privateData->async.data = this;
 
     ev_async_start(privateData->w->privateData->evLoop, &privateData->async);
