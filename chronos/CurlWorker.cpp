@@ -1,6 +1,6 @@
 /*
  * chronos, the cron-job.org execution daemon
- * Copyright (C) 2021 Patrick Schlangen <patrick@schlangen.me>
+ * Copyright (C) 2021-2025 Patrick Schlangen <patrick@schlangen.me>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -129,10 +129,18 @@ struct CurlWorker::Callbacks
         if(rc != CURLM_OK)
             throw std::runtime_error("curl_multi_socket_action failed (2)!");
 
-        worker->checkResults();
-
         if(worker->curlStillRunning <= 0)
+        {
             ev_timer_stop(worker->privateData->evLoop, &worker->privateData->timerEvent);
+        }
+
+        worker->checkResults();
+    }
+
+    static void evAsyncWatcherCallback(EV_P_ struct ev_async *w, int revents)
+    {
+        AsyncWatcher *watcher = static_cast<AsyncWatcher *>(w->data);
+        watcher->callback();
     }
 
 private:
@@ -150,6 +158,33 @@ private:
         ev_io_start(worker->privateData->evLoop, &sockInfo->ev);
     }
 };
+
+struct AsyncWatcher::PrivateData
+{
+    CurlWorker *w;
+    ev_async async;
+};
+
+AsyncWatcher::AsyncWatcher(CurlWorker *w, const std::function<void()> &callback)
+    : privateData(std::make_unique<AsyncWatcher::PrivateData>())
+    , callback{callback}
+{
+    privateData->w = w;
+
+    ev_async_init(&privateData->async, CurlWorker::Callbacks::evAsyncWatcherCallback); // todo
+    privateData->async.data = this;
+
+    ev_async_start(privateData->w->privateData->evLoop, &privateData->async);
+}
+
+AsyncWatcher::~AsyncWatcher()
+{
+}
+
+void AsyncWatcher::fire()
+{
+    ev_async_send(privateData->w->privateData->evLoop, &privateData->async);
+}
 
 CurlWorker::CurlWorker()
     : privateData{std::make_unique<PrivateData>()}
@@ -228,4 +263,11 @@ bool CurlWorker::add(CURL *handle)
 void CurlWorker::remove(CURL *handle)
 {
     curl_multi_remove_handle(privateData->curlHandle, handle);
+}
+
+std::shared_ptr<AsyncWatcher> CurlWorker::addAsyncWatcher(const std::function<void()> &handler)
+{
+    std::shared_ptr<AsyncWatcher> w(new AsyncWatcher(this, handler));
+    asyncWatchers.push_back(w);
+    return w;
 }

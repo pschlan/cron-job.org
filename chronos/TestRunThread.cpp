@@ -1,6 +1,6 @@
 /*
  * chronos, the cron-job.org execution daemon
- * Copyright (C) 2021 Patrick Schlangen <patrick@schlangen.me>
+ * Copyright (C) 2021-2025 Patrick Schlangen <patrick@schlangen.me>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -68,13 +68,19 @@ TestRunThread::TestRunThread()
 
     TestRunThread::instance = this;
 
+    queueProcessingTrigger = curlWorker->addAsyncWatcher([this] () {
+        processQueue(false);
+    });
+
+    stopTrigger = curlWorker->addAsyncWatcher([this] () {
+        curlWorker->stop();
+    });
+
     curlWorker->onDone([this] (CURL *easy, CURLcode res) {
         HTTPRequest *req = nullptr;
         if(curl_easy_getinfo(easy, CURLINFO_PRIVATE, &req) != CURLE_OK || req == nullptr)
             throw std::runtime_error("Failed to retrieve associated HTTPRequest!");
         req->done(res);
-
-        processQueue(false);
     });
 }
 
@@ -93,10 +99,8 @@ TestRunThread *TestRunThread::getInstance()
 void TestRunThread::stopThread()
 {
     stop = true;
-    curlWorker->stop();
 
-    std::unique_lock<std::mutex> lock(queueMutex);
-    queueSignal.notify_all();
+    stopTrigger->fire();
 }
 
 void TestRunThread::run()
@@ -106,9 +110,6 @@ void TestRunThread::run()
     stop = false;
     while(!stop)
     {
-        processQueue(true);
-        if(stop)
-            break;
         curlWorker->run();
     }
 
@@ -139,8 +140,6 @@ void TestRunThread::processQueue(bool wait)
     decltype(queue) tempQueue;
     {
         std::unique_lock<std::mutex> lock(queueMutex);
-        if(wait && queue.empty() && !stop)
-            queueSignal.wait(lock);
         if(stop)
             return;
         queue.swap(tempQueue);
@@ -236,8 +235,9 @@ TestRunThread::Handle TestRunThread::submit(std::unique_ptr<HTTPRequest> &&reque
     {
         std::unique_lock<std::mutex> lock(queueMutex);
         queue.push(testRun);
-        queueSignal.notify_one();
     }
+
+    queueProcessingTrigger->fire();
 
     return handle;
 }
