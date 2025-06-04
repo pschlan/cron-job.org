@@ -346,7 +346,7 @@
     "checkUptimeThresholdInput": "Tilgængelighedstrin skal være mellem 0 og 100.",
     "thresholdLatencyWarning": "Advarsel for forsinkelse (ms)",
     "thresholdLatencyError": "Fejl for forsinkelse (ms)",
-    "checkLatencyThresholdInput": "Forsinkelsestrin skal være mellem 0 og 30.000.",
+    "checkLatencyThresholdInput": "Forsinkelsestrin skal være mellem 0 og 600.000.",
     "monitorUpdateFailed": "Kunne ikke opdatere overvågning. Tjek dine indtastninger og prøv igen.",
     "deleteMonitor": "Slet overvågning: {{title}}",
     "confirmDeleteMonitor": "Vil du virkelig slette denne overvågning? Dette kan ikke fortrydes.",

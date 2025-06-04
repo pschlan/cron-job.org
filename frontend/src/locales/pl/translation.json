@@ -339,7 +339,7 @@
     "checkUptimeThresholdInput": "Progi dostępności muszą być liczbami z zakresu od 0 do 100.",
     "thresholdLatencyWarning": "Próg ostrzeżenia opóźnienia (ms)",
     "thresholdLatencyError": "Próg błędu opóźnienia (ms)",
-    "checkLatencyThresholdInput": "Progi opóźnienia muszą być liczbami z zakresu od 0 do 30 000.",
+    "checkLatencyThresholdInput": "Progi opóźnienia muszą być liczbami z zakresu od 0 do 600 000.",
     "monitorUpdateFailed": "Nie udało się zaktualizować monitora statusu. Sprawdź swoje dane wejściowe i spróbuj ponownie później.",
     "deleteMonitor": "Usuń monitor statusu: {{title}}",
     "confirmDeleteMonitor": "Czy na pewno chcesz usunąć ten monitor statusu? Tej operacji nie można cofnąć.",

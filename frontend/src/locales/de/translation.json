@@ -348,7 +348,7 @@
     "checkUptimeThresholdInput": "Verfügbarkeits-Schwellwerte müssen eine Zahl zwischen 0 und 100 sein.",
     "thresholdLatencyWarning": "Latenz-Schwellwert Warnung (ms)",
     "thresholdLatencyError": "Latenz-Schwellwert Fehler (ms)",
-    "checkLatencyThresholdInput": "Latenz-Schwellwerte müssen eine Zahl zwischen 0 und 30.000 sein.",
+    "checkLatencyThresholdInput": "Latenz-Schwellwerte müssen eine Zahl zwischen 0 und 600.000 sein.",
     "monitorUpdateFailed": "Der Status-Monitor konnte nicht gespeichert wrden. Bitte prüfen Sie Ihre Eingaben und versuchen Sie es später erneut.",
     "deleteMonitor": "Status-Monitor löschen: {{title}}",
     "confirmDeleteMonitor": "Soll dieser Status-Monitor wirklich gelöscht werden? Diese Aktion kann nicht rückgängig gemacht werden.",

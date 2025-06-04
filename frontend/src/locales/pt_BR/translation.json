@@ -359,7 +359,7 @@
     "checkUptimeThresholdInput": "Os limites de disponibilidade devem ser um número entre 0 e 100.",
     "thresholdLatencyWarning": "Limite de aviso de latência (ms)",
     "thresholdLatencyError": "Limite de erro de latência (ms)",
-    "checkLatencyThresholdInput": "Os limites de latência devem ser um número entre 0 e 30.000.",
+    "checkLatencyThresholdInput": "Os limites de latência devem ser um número entre 0 e 600.000.",
     "monitorUpdateFailed": "Falha ao atualizar o monitor de status. Verifique sua entrada e tente novamente mais tarde.",
     "deleteMonitor": "Excluir monitor de status: {{title}}",
     "confirmDeleteMonitor": "Você realmente deseja excluir este monitor de status? Esta ação não pode ser desfeita.",

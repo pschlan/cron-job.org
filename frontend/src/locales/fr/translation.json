@@ -301,7 +301,7 @@
     "checkUptimeThresholdInput": "Les seuils de disponibilité doivent être un nombre compris entre 0 et 100.",
     "thresholdLatencyWarning": "Seuil d'avertissement de latence (ms)",
     "thresholdLatencyError": "Seuil d'erreur de latence (ms)",
-    "checkLatencyThresholdInput": "Les seuils de latence doivent être un nombre compris entre 0 et 30 000.",
+    "checkLatencyThresholdInput": "Les seuils de latence doivent être un nombre compris entre 0 et 600 000.",
     "monitorUpdateFailed": "Échec de la mise à jour du moniteur d'état. Veuillez vérifier votre saisie et réessayer plus tard.",
     "deleteMonitor": "Supprimer le moniteur d'état : {titre}}",
     "confirmDeleteMonitor": "Voulez-vous vraiment supprimer ce moniteur d'état ? Cette action ne peut pas être annulée.",

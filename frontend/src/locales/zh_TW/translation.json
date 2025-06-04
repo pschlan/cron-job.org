@@ -337,7 +337,7 @@
     "checkUptimeThresholdInput": "可用性閾值必須是 0 到 100 之間的數字。",
     "thresholdLatencyWarning": "延遲警告閾值（毫秒）",
     "thresholdLatencyError": "延遲錯誤閾值（毫秒）",
-    "checkLatencyThresholdInput": "延遲閾值必須是 0 到 30000 之間的數字。",
+    "checkLatencyThresholdInput": "延遲閾值必須是 0 到 600000 之間的數字。",
     "monitorUpdateFailed": "無法更新狀態監視器。請檢查您的輸入並稍後重試。",
     "deleteMonitor": "刪除狀態監視器：{{title}}",
     "confirmDeleteMonitor": "您真的要刪除這個狀態監視器嗎？此操作無法復原。",

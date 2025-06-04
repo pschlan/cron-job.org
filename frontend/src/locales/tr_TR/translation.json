@@ -362,7 +362,7 @@
     "checkUptimeThresholdInput": "Erişilebilirlik eşiklerinin 0 ile 100 arasında bir sayı olması gerekir.",
     "thresholdLatencyWarning": "Gecikme uyarı eşiği (ms)",
     "thresholdLatencyError": "Gecikme hata eşiği (ms)",
-    "checkLatencyThresholdInput": "Gecikme eşiklerinin 0 ile 30.000 arasında bir sayı olması gerekir.",
+    "checkLatencyThresholdInput": "Gecikme eşiklerinin 0 ile 600.000 arasında bir sayı olması gerekir.",
     "monitorUpdateFailed": "Durum monitörü güncellenemedi. Lütfen girdilerinizi kontrol edip tekrar deneyin.",
     "deleteMonitor": "Durum Monitörünü Sil: {{title}}",
     "confirmDeleteMonitor": "Bu durum monitörünü silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",

@@ -31,7 +31,7 @@ function msValidator(value) {
   if (isNaN(intValue)) {
     return false;
   }
-  return (intValue >= 0 && intValue <= 30*1000);
+  return (intValue >= 0 && intValue <= 600*1000);
 }
 
 function getFloat(value) {

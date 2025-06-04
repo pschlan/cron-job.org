@@ -351,7 +351,7 @@
     "checkUptimeThresholdInput": "Pragurile de disponibilitate trebuie să fie un număr între 0 și 100.",
     "thresholdLatencyWarning": "Latență prag avertizare (ms)",
     "thresholdLatencyError": "Latență prag eroare (ms)",
-    "checkLatencyThresholdInput": "Pragurile de latență trebuie să fie un număr între 0 și 30 000.",
+    "checkLatencyThresholdInput": "Pragurile de latență trebuie să fie un număr între 0 și 600 000.",
     "monitorUpdateFailed": "Nu s-a putut actualiza monitorul de stare. Te rugăm să verifici datele introduse și să încerci din nou mai târziu.",
     "deleteMonitor": "Ștergere monitor de stare: {{title}}",
     "confirmDeleteMonitor": "Sigur vrei să ștergi acest monitor de stare? Această acțiune nu poate fi anulată.",

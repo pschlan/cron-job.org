@@ -338,7 +338,7 @@
     "checkUptimeThresholdInput": "Le soglie di disponibilità devono essere un numero compreso tra 0 e 100.",
     "thresholdLatencyWarning": "Soglia di avviso latenza (ms)",
     "thresholdLatencyError": "Soglia di errore latenza (ms)",
-    "checkLatencyThresholdInput": "Le soglie di latenza devono essere un numero compreso tra 0 e 30,000.",
+    "checkLatencyThresholdInput": "Le soglie di latenza devono essere un numero compreso tra 0 e 600,000.",
     "monitorUpdateFailed": "Aggiornamento del monitor di stato fallito. Controlla i dati inseriti e riprova.",
     "deleteMonitor": "Elimina monitor di stato: {{title}}",
     "confirmDeleteMonitor": "Sei sicuro di voler eliminare questo monitor di stato? Questa azione non può essere annullata.",

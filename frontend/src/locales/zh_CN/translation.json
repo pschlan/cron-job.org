@@ -337,7 +337,7 @@
     "checkUptimeThresholdInput": "可用性阈值必须是 0 到 100 之间的数字。",
     "thresholdLatencyWarning": "延迟警告阈值（毫秒）",
     "thresholdLatencyError": "延迟错误阈值（毫秒）",
-    "checkLatencyThresholdInput": "延迟阈值必须是 0 到 30000 之间的数字。",
+    "checkLatencyThresholdInput": "延迟阈值必须是 0 到 600000 之间的数字。",
     "monitorUpdateFailed": "无法更新状态监视器。请检查您的输入并稍后重试。",
     "deleteMonitor": "删除状态监视器：{{title}}",
     "confirmDeleteMonitor": "您真的要删除这个状态监视器吗？此操作无法复原。",

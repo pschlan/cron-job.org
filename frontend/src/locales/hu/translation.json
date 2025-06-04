@@ -341,7 +341,7 @@
     "checkUptimeThresholdInput": "Az elérhetőségi küszöböknek 0 és 100 közötti számnak kell lenniük.",
     "thresholdLatencyWarning": "Késleltetési figyelmeztetés küszöb (ms)",
     "thresholdLatencyError": "Késleltetési hiba küszöb (ms)",
-    "checkLatencyThresholdInput": "A késleltetési küszöböknek 0 és 30 000 közötti számnak kell lenniük.",
+    "checkLatencyThresholdInput": "A késleltetési küszöböknek 0 és 600 000 közötti számnak kell lenniük.",
     "monitorUpdateFailed": "Az állapotfigyelő frissítése nem sikerült. Kérjük, ellenőrizze a megadott adatokat, és próbálkozzon később.",
     "deleteMonitor": "Állapotfigyelő törlése: {{title}}",
     "confirmDeleteMonitor": "Valóban törölni szeretné ezt az állapotfigyelőt? Ez a művelet nem vonható vissza.",

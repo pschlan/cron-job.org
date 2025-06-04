@@ -348,7 +348,7 @@
     "checkUptimeThresholdInput": "Availability thresholds have to be a number between 0 and 100.",
     "thresholdLatencyWarning": "Latency warning threshold (ms)",
     "thresholdLatencyError": "Latency error threshold (ms)",
-    "checkLatencyThresholdInput": "Latency thresholds have to be a number between 0 and 30,000.",
+    "checkLatencyThresholdInput": "Latency thresholds have to be a number between 0 and 600,000.",
     "monitorUpdateFailed": "Failed to update the status monitor. Please check your input and try again later.",
     "deleteMonitor": "Delete Status Monitor: {{title}}",
     "confirmDeleteMonitor": "Do you really want to delete this status monitor? This action cannot be undone.",
