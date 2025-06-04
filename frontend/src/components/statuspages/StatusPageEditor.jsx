@@ -52,7 +52,7 @@ const useStyles = makeStyles(theme => ({
     '& > div > span': {
       marginRight: theme.spacing(1),
       display: 'inline-block',
-      minWidth: '5em'
+      minWidth: '6em'
     },
     '& > div > .MuiSvgIcon-root': {
       marginRight: theme.spacing(0.5)
