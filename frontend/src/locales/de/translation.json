@@ -68,7 +68,10 @@
     "confirmMassDeleteText_plural": "Wollen Sie die {{count}} ausgewählten Elemente wirklich löschen?",
     "selectAll": "Alles auswählen",
     "deselectAll": "Auswahl aufheben",
-    "requestDeniedForSecurityReasons": "Entschuldigung, aber wir konnten Ihre Anforderung nicht verarbeiten. Möglicher Grund ist ein nicht wohlgeformter Job. Wenden Sie sich bei Fragen bitte an unser Support-Team."
+    "requestDeniedForSecurityReasons": "Entschuldigung, aber wir konnten Ihre Anforderung nicht verarbeiten. Möglicher Grund ist ein nicht wohlgeformter Job. Wenden Sie sich bei Fragen bitte an unser Support-Team.",
+    "clipboardCopySuccess": "Erfolgreich in die Zwischenablage kopiert.",
+    "clipboardCopyFailed": "Entschuldigung, aber wir konnten die Daten nicht in die Zwischenablage kopieren.",
+    "copyToClipboard": "In die Zwischenablage kopieren"
   },
   "login": {
     "emailAddress": "E-Mail-Adresse",
@@ -322,7 +325,17 @@
     },
     "move": "Verschieben",
     "moveText": "Ausgewähltes Element verschieben nach:",
-    "moveText_plural": "{{count}} ausgewählte Elemente verschieben nach:"
+    "moveText_plural": "{{count}} ausgewählte Elemente verschieben nach:",
+    "statusBadge": "Status-Badge",
+    "statusBadgeFor": "Status-Badge für: {{jobTitle}}",
+    "statusBadgeOptions": {
+      "withTitle": "Job-Titel anzeigen",
+      "withLastExecutionDate": "letzte Ausführung anzeigen",
+      "withLatency": "Dauer anzeigen"
+    },
+    "statusBadgeURL": "Badge-URL",
+    "statusBadgeMarkdown": "Markdown-Beispiel",
+    "statusBadgeURLNote": "Wenn Sie die Status-Badge-URL teilen, denken Sie daran, dass jeder im Besitz der URL den Status des Jobs sowie die anderen gewählten Informationen einsehen kann."
   },
   "statuspages": {
     "title": "Titel",

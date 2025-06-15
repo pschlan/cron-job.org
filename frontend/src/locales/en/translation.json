@@ -68,7 +68,10 @@
     "confirmMassDeleteText_plural": "Do you really want to delete the {{count}} selected items?",
     "selectAll": "Select all",
     "deselectAll": "Deselect all",
-    "requestDeniedForSecurityReasons": "Sorry, we couldn't process your request. Possible reason is a non-wellformed job. If you have questions, please contact our support team."
+    "requestDeniedForSecurityReasons": "Sorry, we couldn't process your request. Possible reason is a non-wellformed job. If you have questions, please contact our support team.",
+    "clipboardCopySuccess": "Successfully copied to clipboard.",
+    "clipboardCopyFailed": "Sorry, we could not copy the data to your clipboard.",
+    "copyToClipboard": "Copy to clipboard"
   },
   "login": {
     "emailAddress": "Email address",
@@ -322,7 +325,17 @@
     },
     "move": "Move",
     "moveText": "Move selected item to:",
-    "moveText_plural": "Move {{count}} selected items to:"
+    "moveText_plural": "Move {{count}} selected items to:",
+    "statusBadge": "Status badge",
+    "statusBadgeFor": "Status badge for: {{jobTitle}}",
+    "statusBadgeOptions": {
+      "withTitle": "include job title",
+      "withLastExecutionDate": "include last execution date",
+      "withLatency": "include last execution duration"
+    },
+    "statusBadgeURL": "Badge URL",
+    "statusBadgeMarkdown": "Markdown example",
+    "statusBadgeURLNote": "When sharing the status badge URL, keep in mind that anyone in possession of the URL can view the status of your job and the selected other information."
   },
   "statuspages": {
     "title": "Title",

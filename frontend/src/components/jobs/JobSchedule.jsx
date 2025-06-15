@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { RadioGroup, FormControlLabel, Radio, Select, MenuItem, makeStyles, FormControl, InputLabel, FormLabel, FormGroup, List, ListItem, ListItemText, TextField, InputAdornment, IconButton, Switch } from '@material-ui/core';
+import { RadioGroup, FormControlLabel, Radio, Select, MenuItem, makeStyles, FormControl, InputLabel, FormLabel, FormGroup, List, ListItem, ListItemText, Switch } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 import { predictNextExecutions, ExecutionDate } from '../../utils/ExecutionPredictor';
 import { Alert } from '@material-ui/lab';
 import { scheduleToCrontabExpression } from '../../utils/CrontabExpression';
-import CopyIcon from '@material-ui/icons/FileCopy';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { useSnackbar } from 'notistack';
 import useViewport from '../../hooks/useViewport';
+import CopyableTextField from '../misc/CopyableTextField';
 
 const useStyles = makeStyles((theme) => ({
   schedule: {
@@ -511,7 +509,6 @@ export default function JobSchedule({ initialSchedule, onChange = () => null }) 
   const [ schedules, setSchedules ] = useState({});
   const [ crontabExpression, setCrontabExpression ] = useState(null);
   const onChangeHook = useRef(onChange, []);
-  const { enqueueSnackbar } = useSnackbar();
   const { isMobile } = useViewport();
 
   useEffect(() => {
@@ -631,23 +628,14 @@ export default function JobSchedule({ initialSchedule, onChange = () => null }) 
     </div>
 
     <div className={classes.crontabExpression}>
-      <TextField
+      <CopyableTextField
         value={crontabExpression || t('jobs.invalidSchedule')}
         label={t('jobs.crontabExpression')}
         variant='outlined'
         size='small'
-        InputProps={{ endAdornment: crontabExpression && <InputAdornment position='end'>
-            <CopyToClipboard
-              text={crontabExpression}
-              onCopy={(text, result) => enqueueSnackbar(t(result ? 'jobs.crontabExpressionCopySuccess' : 'jobs.crontabExpressionCopyFailed'), { variant: result ? 'success' : 'error' })}
-              >
-              <IconButton size='small'>
-                <CopyIcon />
-              </IconButton>
-            </CopyToClipboard>
-          </InputAdornment>
-        }}
         fullWidth
+        successMsg={t('jobs.crontabExpressionCopySuccess')}
+        errorMsg={t('jobs.crontabExpressionCopyFailed')}
         />
     </div>
 

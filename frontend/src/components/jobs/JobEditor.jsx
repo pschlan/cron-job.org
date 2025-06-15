@@ -43,6 +43,7 @@ import CloneIcon from '@material-ui/icons/FileCopy';
 import TestIcon from '@material-ui/icons/PlayCircleOutline';
 import TimerIcon from '@material-ui/icons/Timer';
 import ExportIcon from '@material-ui/icons/ImportExport';
+import StatusBadgeIcon from '@material-ui/icons/Label';
 import FolderIcon from '@material-ui/icons/FolderOutlined';
 import ApplyIcon from '@material-ui/icons/DoubleArrow';
 import ValidatingTextField from '../misc/ValidatingTextField';
@@ -52,6 +53,7 @@ import JobTestRun from './JobTestRun';
 import JobExport from './JobExport';
 import useFolder from '../../hooks/useFolder';
 import VariableMenu from '../misc/VariableMenu';
+import JobStatusBadgeDialog from './JobStatusBadgeDialog';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -137,6 +139,7 @@ export default function JobEditor({ match }) {
   const [ showDeleteJob, setShowDeleteJob ] = useState(false);
   const [ showTestRun, setShowTestRun ] = useState(false);
   const [ showExportJob, setShowExportJob ] = useState(false);
+  const [ showStatusBadgeDialog, setShowStatusBadgeDialog ] = useState(false);
   const [ updatedJob, setUpdatedJob ] = useState({});
   const [ bodyLooksLikeJson, setBodyLooksLikeJson ] = useState(false);
   const [ showContentTypeNote, setShowContentTypeNote ] = useState(false);
@@ -447,6 +450,11 @@ export default function JobEditor({ match }) {
               onClick: () => setShowExportJob(true)
             },
             {
+              icon: <StatusBadgeIcon fontSize='small' />,
+              text: t('jobs.statusBadge'),
+              onClick: () => setShowStatusBadgeDialog(true)
+            },
+            {
               icon: <DeleteIcon fontSize='small' />,
               text: t('common.delete'),
               onClick: () => setShowDeleteJob(true)
@@ -731,6 +739,8 @@ export default function JobEditor({ match }) {
     {showTestRun && <JobTestRun onClose={() => setShowTestRun(false)} onUpdateUrl={updateUrl} jobId={jobId} job={updatedJob} />}
 
     {showExportJob && <JobExport onClose={() => setShowExportJob(false)} job={updatedJob} />}
+
+    {showStatusBadgeDialog && <JobStatusBadgeDialog onClose={() => setShowStatusBadgeDialog(false)} jobId={jobId} job={updatedJob} />}
 
     {showDeleteJob && <Dialog open={true} onClose={() => setShowDeleteJob(false)}>
       <DialogTitle>

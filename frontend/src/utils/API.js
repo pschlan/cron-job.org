@@ -95,6 +95,13 @@ export function getJobDetails(jobId) {
   });
 }
 
+export function getJobStatusBadgeURL(jobId, options = {}) {
+  return performRequest('GetJobStatusBadgeURL', {
+    jobId,
+    ...options
+  });
+}
+
 export function getStatusPages() {
   return performRequest('GetStatusPages');
 }
