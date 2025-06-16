@@ -17,6 +17,7 @@ $config = array(
   'projectURL'                      => getenv('CJO_BASE_URL'),
   'logoURL'                         => getenv('CJO_BASE_URL') . 'logo.png',
   'frontendURL'                     => getenv('CJO_BASE_URL'),
+  'statusBadgeURL'                  => getenv('CJO_BASE_URL') . 'api/jobs/%d/%s/status-%d.svg',
   'statusPageDomain'                => null,
   'sessionTokenLifetime'            => 15 * 60,
   'sessionTokenSecret'              => getenv('CJO_SESSION_TOKEN_SECRET'),
@@ -42,6 +43,8 @@ $config = array(
   'refreshTokenValiditySeconds'     => 365 * 86400,
   'refreshTokenLength'              => 64,
   'testRunLifetime'                 => 5 * 60,
+  'statusBadgeTokenSecret'          => getenv('CJO_STATUS_BADGE_TOKEN_SECRET'),
+  'statusBadgeTokenLength'          => 16,
   'yubicoOTP' => array(
     'enable'      => false,
     'clientId'    => 'PLACE_CLIENT_ID_HERE',
@@ -63,4 +66,7 @@ if (empty($config['accountConfirmationTokenSecret'])) {
 }
 if (empty($config['emailVerpSecret'])) {
   throw new Exception('Please set CJO_VERP_SECRET in .env!');
+}
+if (empty($config['statusBadgeTokenSecret'])) {
+  throw new Exception('Please set CJO_STATUS_BADGE_TOKEN_SECRET in .env!');
 }
