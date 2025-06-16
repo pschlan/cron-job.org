@@ -1,14 +1,14 @@
 FROM php:8.1-fpm
 
+RUN apt-get -y update \
+    && apt-get install -y msmtp msmtp-mta zlib1g-dev libpng-dev libfreetype-dev \
+	&& apt-get clean \
+	&& rm -r /var/lib/apt/lists/*
+
 RUN docker-php-ext-install pdo pdo_mysql gd
 RUN pecl install redis \
     && rm -rf /tmp/pear \
     && docker-php-ext-enable redis opcache gd
-
-RUN apt-get -y update \
-    && apt-get install -y msmtp msmtp-mta \
-	&& apt-get clean \
-	&& rm -r /var/lib/apt/lists/*
 
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 
