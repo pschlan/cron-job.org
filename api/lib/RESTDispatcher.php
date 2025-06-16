@@ -34,11 +34,17 @@ class RESTDispatcher extends AbstractDispatcher {
   }
 
   public function registerURI($method, $pattern, $handler) {
-    $this->uriHandlers[] = (object) [
-      'method'  => $method,
-      'pattern' => $pattern,
-      'handler' => $handler
-    ];
+    if (!is_array($method)) {
+      $method = [ $method ];
+    }
+
+    foreach ($method as $m) {
+      $this->uriHandlers[] = (object) [
+        'method'  => $m,
+        'pattern' => $pattern,
+        'handler' => $handler
+      ];
+    }
   }
 
   private function authenticate($apiKey, $ip, $method) {
@@ -107,6 +113,9 @@ class RESTDispatcher extends AbstractDispatcher {
       $handler = null;
       if (isset($_SERVER['CONTENT_TYPE']) && in_array($_SERVER['CONTENT_TYPE'], ['application/json', 'text/json'])) {
         $request = json_decode(file_get_contents('php://input'));
+        if ($request === null) {
+          $request = new stdClass;
+        }
       } else {
         $request = new stdClass;
       }
@@ -147,18 +156,22 @@ class RESTDispatcher extends AbstractDispatcher {
         } catch (Exception $e) {
           throw new UnauthorizedAPIException();
         }
+      } else {
+        $sessionToken = false;
       }
 
       if (!RateLimiter::check($handler, $request, $sessionToken)) {
         throw new TooManyRequestsAPIException();
       }
 
-      $apiRequestsPerDay = (new UserManager($sessionToken))->getGroup()->apiRequestsPerDay;
-      if (isset($apiRequetsPerDayOverride[$sessionToken->userId])) {
-        $apiRequestsPerDay = $apiRequetsPerDayOverride[$sessionToken->userId];
-      }
-      if (!$this->checkApiKeyQuota($apiKey, $apiRequestsPerDay)) {
-        throw new TooManyRequestsAPIException();
+      if ($sessionToken !== false) {
+        $apiRequestsPerDay = (new UserManager($sessionToken))->getGroup()->apiRequestsPerDay;
+        if (isset($apiRequetsPerDayOverride[$sessionToken->userId])) {
+          $apiRequestsPerDay = $apiRequetsPerDayOverride[$sessionToken->userId];
+        }
+        if (!$this->checkApiKeyQuota($apiKey, $apiRequestsPerDay)) {
+          throw new TooManyRequestsAPIException();
+        }
       }
 
       if (!$handler->validateRequest($request)) {

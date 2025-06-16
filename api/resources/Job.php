@@ -7,6 +7,12 @@ require_once('lib/Exceptions.php');
 require_once('resources/User.php');
 require_once('Node.php');
 
+class JobStatusBadgeOptions {
+  const WITH_TITLE = (1 << 0);
+  const WITH_LAST_EXECUTION_DATE = (1 << 1);
+  const WITH_LATENCY = (1 << 2);
+}
+
 class CannotDeleteMonitorJobException extends Exception {}
 
 class JobSchedule {
@@ -217,7 +223,8 @@ class Job {
     $this->extendedData->headers      = array();
     foreach ((array)$request->job->extendedData->headers as $key => $value) {
       $key = trim(str_replace(array("\r", "\n"), '', $key));
-      if (empty($key)) {
+      $value = trim(str_replace(array("\r", "\n"), '', $value));
+      if (empty($key) || empty($value)) {
         continue;
       }
       $this->extendedData->headers[$key] = $value;
@@ -305,7 +312,8 @@ class Job {
       $this->extendedData->headers      = array();
       foreach ((array)$request->job->extendedData->headers as $key => $value) {
         $key = trim(str_replace(array("\r", "\n"), '', $key));
-        if (empty($key)) {
+        $value = trim(str_replace(array("\r", "\n"), '', $value));
+        if (empty($key) || empty($value)) {
           continue;
         }
         $this->extendedData->headers[$key] = $value;
@@ -362,9 +370,11 @@ class Job {
 
 class JobManager {
   private $authToken;
+  private $mgmtMode;
 
-  function __construct($authToken) {
+  function __construct($authToken, $mgmtMode = false) {
     $this->authToken = $authToken;
+    $this->mgmtMode = $mgmtMode;
   }
 
   public function getJobs() {
@@ -379,7 +389,11 @@ class JobManager {
 
         $nodeJobs = $client->getJobsForUser($this->authToken->userId);
         foreach ($nodeJobs as $nodeJob) {
-          $jobs[] = Job::fromThriftJob($nodeJob, $node);
+          $convertedJob = Job::fromThriftJob($nodeJob, $node);
+          if ($this->mgmtMode) {
+            $convertedJob->nodeId = intval($node->nodeId);
+          }
+          $jobs[] = $convertedJob;
         }
       } catch (Exception $ex) {
         $someFailed = true;
@@ -400,6 +414,84 @@ class JobManager {
     ];
   }
 
+  private static function generatePublicJobStatusToken($jobId, $userId, $options) {
+    global $config;
+
+    $jobId = intval($jobId);
+    if ($jobId <= 0) {
+      throw new ValueError('Invalid job id!');
+    }
+
+    $userId = intval($userId);
+    if ($userId <= 0) {
+      throw new ValueError('Invalid user id!');
+    }
+
+    $options = intval($options);
+
+    if (empty($config['statusBadgeTokenSecret'])) {
+      throw new Exception('Status badge token secret is empty!');
+    }
+
+    $str = 'statusBadge:' . $userId . ':' . $jobId . ':' . $options;
+
+    $token = hash_hmac('sha256', $str, $config['statusBadgeTokenSecret']);
+    return substr($token, 0, $config['statusBadgeTokenLength']);
+  }
+
+  public static function getPublicJobStatus($jobId, $options, $token) {
+    $stmt = Database::get()->prepare('SELECT `nodeid` AS `nodeId`, `userid` AS `userId` FROM `job` WHERE `jobid`=:jobId');
+    $stmt->execute([':jobId' => $jobId]);
+    if ($jobMeta = $stmt->fetch(PDO::FETCH_OBJ)) {
+      $correctToken = self::generatePublicJobStatusToken($jobId, $jobMeta->userId, $options);
+      if (!hash_equals($correctToken, $token)) {
+        return false;
+      }
+
+      $node = NodeManager::getNodeByNodeId(intval($jobMeta->nodeId));
+      if (!$node) {
+        return false;
+      }
+
+      try {
+        $client = $node->connect();
+        $jobDetails = $client->getJobDetails(Job::createIdentifier($jobId, intval($jobMeta->userId)));
+        return (object)[
+          'enabled'       => boolval($jobDetails->metaData->enabled),
+          'lastStatus'    => $jobDetails->executionInfo->lastStatus,
+          'lastDuration'  => $jobDetails->executionInfo->lastDuration,
+          'lastFetch'     => $jobDetails->executionInfo->lastFetch,
+          'timezone'      => $jobDetails->schedule->timezone,
+          'title'         => $jobDetails->metaData->title
+        ];
+
+      } catch (Exception $ex) {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+
+  public function getPublicJobStatusBadgeURL($jobId, $options) {
+    global $config;
+
+    $jobId = intval($jobId);
+    $options = intval($options);
+
+    $job = $this->getJobDetails($jobId);
+    if (!$job) {
+      return false;
+    }
+
+    $token = self::generatePublicJobStatusToken($job->jobId, $this->authToken->userId, $options);
+
+    return sprintf($config['statusBadgeURL'],
+      $job->jobId,
+      $token,
+      $options);
+  }
+
   public function getJobDetails($jobId) {
     $node = (new NodeManager($this->authToken))->getJobNode($jobId);
     if (!$node) {
@@ -408,7 +500,11 @@ class JobManager {
 
     try {
       $client = $node->connect();
-      return Job::fromThriftJob($client->getJobDetails(Job::createIdentifier($jobId, $this->authToken->userId)), $node);
+      $convertedJob = Job::fromThriftJob($client->getJobDetails(Job::createIdentifier($jobId, $this->authToken->userId)), $node);
+      if ($this->mgmtMode) {
+        $convertedJob->nodeId = intval($node->nodeId);
+      }
+      return $convertedJob;
     } catch (Exception $ex) {
       return false;
     }
@@ -582,7 +678,7 @@ class JobManager {
 
     $thriftJob = $job->toThriftJob($this->authToken->userId, $userGroupId);
 
-    if ($userGroup->enableWAFValidator) {
+    if ($userGroup->enableWAFValidator && $thriftJob->metaData->enabled) {
       $this->validateAgainstWAF($thriftJob);
     }
 

@@ -60,6 +60,13 @@ class NodeManager {
     return $stmt->fetch();
   }
 
+  public static function getNodeByNodeId($nodeId) {
+    $stmt = Database::get()->prepare('SELECT `nodeid` AS `nodeId`, `ip`, `port` FROM `node` WHERE `nodeid`=:nodeId');
+    $stmt->setFetchMode(PDO::FETCH_CLASS, Node::class);
+    $stmt->execute(array(':nodeId' => $nodeId));
+    return $stmt->fetch();
+  }
+
   public function getNodeForNewJob() {
     $stmt = Database::get()->prepare('SELECT `node`.`nodeid` AS `nodeId`, `node`.`ip` AS `ip`, `node`.`port` AS `port` FROM `node` '
                                       . 'INNER JOIN `usergroupnode` ON `node`.`nodeid`=`usergroupnode`.`nodeid` '

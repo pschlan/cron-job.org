@@ -62,6 +62,7 @@ try {
     $dispatcher->registerURI('PUT', '/jobs', 'CreateJob');
 
     $dispatcher->registerURI('GET', '/jobs/(?<jobId>[0-9]+)', 'GetJobDetails');
+    $dispatcher->registerURI(['GET', 'HEAD'], '/jobs/(?<jobId>[0-9]+)/(?<token>[a-f0-9]+)/status-(?<options>[a-f0-9]+).svg', 'GetJobStatusBadge');
     $dispatcher->registerURI('PATCH', '/jobs/(?<jobId>[0-9]+)', 'PatchJob');
     $dispatcher->registerURI('DELETE', '/jobs/(?<jobId>[0-9]+)', 'DeleteJob');
 

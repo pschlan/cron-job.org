@@ -28,6 +28,9 @@ $config = array(
   //! @note Origins which are allowed to access the API as the console including the 'Remember me' feature.
   'allowCredentialsOrigins'         => ['https://console.example.com'],
 
+  //! @note URL template for status badge, usually points to the subdomain which hosts the API.
+  'statusBadgeURL'                  => 'https://api.example.com/jobs/%d/%s/status-%d.svg',
+
   //! @note The logo is used in sent HTML emails.
   'logoURL'                         => 'https://example.com/img/logo.png',
 
@@ -46,6 +49,7 @@ $config = array(
   'emailVerificationTokenSecret'    => 'PLACE_RANDOM_STRING_HERE',
   'lostPasswordTokenSecret'         => 'PLACE_RANDOM_STRING_HERE',
   'accountConfirmationTokenSecret'  => 'PLACE_RANDOM_STRING_HERE',
+  'statusBadgeTokenSecret'          => 'PLACE_RANDOM_STRING_HERE',
 
   //! @note Put your reCAPTCHA secret key here. Set to null to disable reCAPTCHA.
   'recaptchaSecretKey'              => 'PLACE_RECAPTCHA_SECRET_KEY_HERE',
@@ -83,6 +87,7 @@ $config = array(
   'minPasswordLength'               => 8,
   'passwordSaltLength'              => 16,
   'refreshTokenLength'              => 64,
+  'statusBadgeTokenLength'          => 16,
 
   //! @note This is the length of auto-generated unique IDs oft status pages.
   'statusPageUniqueIdLength'        => 8,

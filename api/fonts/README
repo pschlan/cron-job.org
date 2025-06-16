@@ -1,0 +1,3 @@
+If you want to use the status badge feature, put `arial.ttf` in this folder.
+The font is required for calculation of elements in the generated SVG status
+badge.
