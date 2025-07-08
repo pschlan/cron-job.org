@@ -354,7 +354,11 @@ export default function JobEditor({ match }) {
   }
 
   function updateHeaderKey(rowNo, key) {
-    setJobHeaders(headers => headers.map((x, index) => index === rowNo ? {...x, key: key.trim()} : x));
+    key = key.trim();
+    if (key.endsWith(':')) {
+      key = key.substring(0, key.length - 1).trim();
+    }
+    setJobHeaders(headers => headers.map((x, index) => index === rowNo ? {...x, key: key} : x));
   }
 
   function updateHeaderValue(rowNo, value) {
