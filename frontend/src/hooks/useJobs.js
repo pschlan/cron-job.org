@@ -29,9 +29,11 @@ export default function useJobs(refreshInterval = 0, selector = (jobs) => jobs, 
   }, [dispatch, refreshInterval, enqueueSnackbar, t, refreshRequest]);
 
   const jobs = useSelector(state => state && state.jobs && state.jobs.jobs);
+  const someFailed = useSelector(state => state && state.jobs && state.jobs.someJobsFailedToRetrieve);
 
   return {
     jobs: selector(jobs || []),
+    someFailed,
     loading: jobs === undefined,
     refresh: () => setRefreshRequest(Math.random())
   };

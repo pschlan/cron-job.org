@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Paper, makeStyles, TableContainer, Link, Typography, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, ButtonGroup, Select, MenuItem, InputAdornment } from '@material-ui/core';
+import { Paper, makeStyles, TableContainer, Link, Typography, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, ButtonGroup, Select, MenuItem, InputAdornment, Box } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
 import Table from '../misc/Table';
 import moment from 'moment';
@@ -20,6 +20,7 @@ import JobIcon from './JobIcon';
 import { executeJobMassAction } from '../../utils/API';
 import { useSnackbar } from 'notistack';
 import useFolder from '../../hooks/useFolder';
+import { Alert, AlertTitle } from '@material-ui/lab';
 
 const useStyles = makeStyles((theme) => ({
   actionButton: {
@@ -35,7 +36,7 @@ export default function Jobs({ match }) {
   const jobSelector = jobs => jobs.filter(x => x.folderId === folderId || folderId === 'all');
 
   const classes = useStyles();
-  const { jobs, loading: isLoading, refresh: refreshJobs } = useJobs(REFRESH_INTERVAL, jobSelector);
+  const { jobs, someFailed, loading: isLoading, refresh: refreshJobs } = useJobs(REFRESH_INTERVAL, jobSelector);
   const { t } = useTranslation();
   const { enqueueSnackbar } = useSnackbar();
   const [confirmJobMassAction, setConfirmJobMassAction] = useState(null);
@@ -173,6 +174,14 @@ export default function Jobs({ match }) {
       </>}>
       {t('common.cronjobs')}{folderTitle && ': ' + folderTitle}
     </Heading>
+
+    {!isLoading && someFailed && <Box mb={2}>
+      <Alert severity='error'>
+        <AlertTitle>{t('common.oops')}</AlertTitle>
+        {t('jobs.someFailed')}
+      </Alert>
+    </Box>}
+
     <TableContainer component={Paper}>
       <Table
         columns={COLUMNS}

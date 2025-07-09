@@ -71,7 +71,8 @@
     "requestDeniedForSecurityReasons": "Entschuldigung, aber wir konnten Ihre Anforderung nicht verarbeiten. Möglicher Grund ist ein nicht wohlgeformter Job. Wenden Sie sich bei Fragen bitte an unser Support-Team.",
     "clipboardCopySuccess": "Erfolgreich in die Zwischenablage kopiert.",
     "clipboardCopyFailed": "Entschuldigung, aber wir konnten die Daten nicht in die Zwischenablage kopieren.",
-    "copyToClipboard": "In die Zwischenablage kopieren"
+    "copyToClipboard": "In die Zwischenablage kopieren",
+    "oops": "Hoppla..."
   },
   "login": {
     "emailAddress": "E-Mail-Adresse",
@@ -335,7 +336,8 @@
     },
     "statusBadgeURL": "Badge-URL",
     "statusBadgeMarkdown": "Markdown-Beispiel",
-    "statusBadgeURLNote": "Wenn Sie die Status-Badge-URL teilen, denken Sie daran, dass jeder im Besitz der URL den Status des Jobs sowie die anderen gewählten Informationen einsehen kann."
+    "statusBadgeURLNote": "Wenn Sie die Status-Badge-URL teilen, denken Sie daran, dass jeder im Besitz der URL den Status des Jobs sowie die anderen gewählten Informationen einsehen kann.",
+    "someFailed": "Wegen eines technischen Problem konnten wir nicht alle Ihre Cronjobs abrufen. Unser Team wurde über das Problem informiert. Bitte versuchen Sie es später erneut und kontaktieren Sie unser Support-Team, falls das Problem bestehen bleibt."
   },
   "statuspages": {
     "title": "Titel",

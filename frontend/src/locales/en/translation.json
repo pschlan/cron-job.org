@@ -71,7 +71,8 @@
     "requestDeniedForSecurityReasons": "Sorry, we couldn't process your request. Possible reason is a non-wellformed job. If you have questions, please contact our support team.",
     "clipboardCopySuccess": "Successfully copied to clipboard.",
     "clipboardCopyFailed": "Sorry, we could not copy the data to your clipboard.",
-    "copyToClipboard": "Copy to clipboard"
+    "copyToClipboard": "Copy to clipboard",
+    "oops": "Oops..."
   },
   "login": {
     "emailAddress": "Email address",
@@ -335,7 +336,8 @@
     },
     "statusBadgeURL": "Badge URL",
     "statusBadgeMarkdown": "Markdown example",
-    "statusBadgeURLNote": "When sharing the status badge URL, keep in mind that anyone in possession of the URL can view the status of your job and the selected other information."
+    "statusBadgeURLNote": "When sharing the status badge URL, keep in mind that anyone in possession of the URL can view the status of your job and the selected other information.",
+    "someFailed": "We couldn't retrieve some of your jobs at this time due to a technical problem. Our staff has been notified. Please try again later. If this issue persists, please contact our support team."
   },
   "statuspages": {
     "title": "Title",
