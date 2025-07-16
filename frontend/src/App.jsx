@@ -27,6 +27,7 @@ import translationPtBR from './locales/pt_BR/translation.json';
 import translationZhCN from './locales/zh_CN/translation.json';
 import translationHU from './locales/hu/translation.json';
 import translationtrTR from './locales/tr_TR/translation.json';
+import translationAR from './locales/ar/translation.json';
 
 import AppMenu from './components/AppMenu';
 import Dashboard from './components/dashboard/Dashboard';
@@ -53,6 +54,7 @@ import 'moment/locale/pt-br';
 import 'moment/locale/zh-cn';
 import 'moment/locale/hu';
 import 'moment/locale/tr';
+import 'moment/locale/ar';
 import moment from 'moment';
 import useLanguageCode, { getLanguageCode } from './hooks/useLanguageCode';
 import { Config } from './utils/Config';
@@ -105,6 +107,9 @@ const LANGUAGE_RESOURCES = {
   },
   tr_TR: {
     translation: translationtrTR,
+  },
+  ar: {
+    translation: translationAR
   }
 };
 

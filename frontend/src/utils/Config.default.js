@@ -34,7 +34,8 @@ export const Config = {
     'pt_BR': 'Português Brasil',
     'zh_CN': '简体中文',
     'hu_HU': 'Magyar',
-    'tr_TR': 'Türkçe'
+    'tr_TR': 'Türkçe',
+    'ar': 'عربي'
   },
 
   //! @note Fallback language to use when the user's auto-determined language is not supported.
