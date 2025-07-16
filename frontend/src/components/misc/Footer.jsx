@@ -26,7 +26,7 @@ function LanguageSelectorDialog({ onClose }) {
     <DialogTitle>{t('common.language')}</DialogTitle>
     <DialogContent>
       <RadioGroup value={languageCode} onChange={({target}) => i18n.changeLanguage(target.value)}>
-        {Object.keys(Config.languages).map(lang => <FormControlLabel
+        {Object.keys(Config.languages).sort((a, b) => Config.languages[a].localeCompare(Config.languages[b])).map(lang => <FormControlLabel
           key={lang}
           value={lang}
           label={Config.languages[lang]}

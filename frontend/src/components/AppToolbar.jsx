@@ -24,11 +24,13 @@ export default function AppToolbar() {
   const { isMobile } = useViewport();
   const userProfile = useUserProfile();
 
+  const sortedLangCodes = Object.keys(Config.languages).sort((a, b) => Config.languages[a].localeCompare(Config.languages[b]));
+
   return isMobile ? <>
     <ActionMenu
       color='inherit'
       text={<LanguageIcon />}
-      items={Object.keys(Config.languages).map(lang => ({
+      items={sortedLangCodes.map(lang => ({
           icon: languageCode===lang ? <CheckedIcon fontSize='small' /> : <UncheckedIcon fontSize='small' />,
           text: Config.languages[lang],
           lang
@@ -58,7 +60,7 @@ export default function AppToolbar() {
         text={Config.languages[languageCode]}
         startIcon={<LanguageIcon />}
         endIcon={<ExpandIcon />}
-        items={Object.keys(Config.languages).map(lang => ({
+        items={sortedLangCodes.map(lang => ({
             icon: languageCode===lang ? <CheckedIcon fontSize='small' /> : <UncheckedIcon fontSize='small' />,
             text: Config.languages[lang],
             lang
