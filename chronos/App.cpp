@@ -1,6 +1,6 @@
 /*
  * chronos, the cron-job.org execution daemon
- * Copyright (C) 2017-2024 Patrick Schlangen <patrick@schlangen.me>
+ * Copyright (C) 2017-2025 Patrick Schlangen <patrick@schlangen.me>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -328,15 +328,19 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 									"LEFT JOIN `job_body` ON `job_body`.`jobid`=`job`.`jobid` "
 									"WHERE (`hour`=-1 OR `hour`=%d) "
 									"AND (`minute`=-1 OR `minute`=%d) "
-									"AND (`mday`=-1 OR `mday`=%d) "
-									"AND (`wday`=-1 OR `wday`=%d) "
+									"AND ("
+									"    (`mday`=-1 AND `wday`=-1)"
+									" OR (`mday`=-1 AND `wday`=%d)"
+									" OR (`mday`=%d AND `wday`=-1)"
+									" OR (`mday`!=-1 AND `wday`!=-1 AND (`wday`=%d OR `mday`=%d))"
+									") "
 									"AND (`month`=-1 OR `month`=%d) "
 									"AND `job`.`timezone`='%q' "
 									"AND (`job`.`expires_at`=0 OR `job`.`expires_at`>=%u) "
 									"AND `enabled`=1 "
 									"GROUP BY `job`.`jobid` "
 									"ORDER BY `fail_counter` ASC, `job`.`jobid` ASC",
-									hour, minute, mday, wday, month, timeZone.c_str(), expiryCompareVal);
+									hour, minute, wday, mday, wday, mday, month, timeZone.c_str(), expiryCompareVal);
 
 	int jobCount = res->numRows();
 	std::cout << "App::processJobs(): " << jobCount << " jobs found" << std::endl;
