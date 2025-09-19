@@ -152,14 +152,21 @@ export function predictNextExecution(schedule, now) {
       continue;
     }
 
-    if (!isWildcard(schedule.mdays) && !schedule.mdays.includes(next.day())) {
+    if ((!isWildcard(schedule.mdays) && !isWildcard(schedule.wdays)) && (!schedule.mdays.includes(next.day()) && !schedule.wdays.includes(next.weekDay()))) {
       next.addDays(1);
       next.setHour(0);
       next.setMinute(0);
       continue;
     }
 
-    if (!isWildcard(schedule.wdays) && !schedule.wdays.includes(next.weekDay())) {
+    if (!isWildcard(schedule.mdays) && isWildcard(schedule.wdays) && !schedule.mdays.includes(next.day())) {
+      next.addDays(1);
+      next.setHour(0);
+      next.setMinute(0);
+      continue;
+    }
+
+    if (!isWildcard(schedule.wdays) && isWildcard(schedule.mdays) && !schedule.wdays.includes(next.weekDay())) {
       next.addDays(1);
       next.setHour(0);
       next.setMinute(0);

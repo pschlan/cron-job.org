@@ -179,14 +179,21 @@ class ExecutionPredictor {
         continue;
       }
 
-      if ($this->mdays != array(-1) && !in_array($next->day(), $this->mdays)) {
+      if ($this->mdays != array(-1) && $this->wdays != array(-1) && (!in_array($next->day(), $this->mdays) && !in_array($next->weekDay(), $this->wdays))) {
         $next->addDays(1);
         $next->setHour(0);
         $next->setMinute(0);
         continue;
       }
 
-      if ($this->wdays != array(-1) && !in_array($next->weekDay(), $this->wdays)) {
+      if ($this->mdays != array(-1) && $this->wdays == array(-1) && !in_array($next->day(), $this->mdays)) {
+        $next->addDays(1);
+        $next->setHour(0);
+        $next->setMinute(0);
+        continue;
+      }
+
+      if ($this->wdays != array(-1) && $this->mdays == array(-1) && !in_array($next->weekDay(), $this->wdays)) {
         $next->addDays(1);
         $next->setHour(0);
         $next->setMinute(0);
