@@ -572,6 +572,9 @@ export default function JobSchedule({ initialSchedule, onChange = () => null }) 
     setExpiresAt(newValue);
   }, [scheduleDoesExpire, scheduleExpiresAt]);
 
+  const expiryDropdownStartYear = Math.min(scheduleExpiresAt ? scheduleExpiresAt.year : (new Date().getFullYear()), (new Date().getFullYear()));
+  const numExpiryDropDownStartYearChoices = 11 + (scheduleExpiresAt ? Math.max(0, (new Date().getFullYear()) - scheduleExpiresAt.year) : 0)
+
   return <>
     <div className={!isMobile && classes.root}>
       <div className={classes.firstColumn}>
@@ -663,7 +666,7 @@ export default function JobSchedule({ initialSchedule, onChange = () => null }) 
         </FormControl>
         <FormControl>
           <Select value={scheduleExpiresAt.year} onChange={({target}) => setScheduleExpiresAt(sched => ({ ...sched, year: parseInt(target.value) }))}>
-            {[...Array(11).keys()].map(offset => (new Date().getFullYear()) + offset).map(y => <MenuItem value={y} key={y}>{y}</MenuItem>)}
+            {[...Array(numExpiryDropDownStartYearChoices).keys()].map(offset => expiryDropdownStartYear + offset).map(y => <MenuItem value={y} key={y}>{y}</MenuItem>)}
           </Select>
         </FormControl>
         <FormControl>
