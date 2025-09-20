@@ -23,6 +23,7 @@ CREATE TABLE `job` (
   `redirect_success` tinyint(4) NOT NULL DEFAULT '0',
   `expires_at` bigint(14) NOT NULL DEFAULT '0',
   `folderid` int(11) NOT NULL DEFAULT 0,
+  `schedule_load_factor` FLOAT DEFAULT NULL,
   PRIMARY KEY (`jobid`),
   KEY `userid` (`userid`),
   KEY `timezone` (`timezone`),

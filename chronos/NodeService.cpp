@@ -304,8 +304,9 @@ public:
 
             if(job.__isset.schedule)
             {
-                db->query("UPDATE `job` SET `timezone`='%q' WHERE `jobid`=%v",
+                db->query("UPDATE `job` SET `timezone`='%q', `schedule_load_factor`=%f WHERE `jobid`=%v",
                     job.schedule.timezone.c_str(),
+                    calculateScheduleLoad(job.schedule),
                     job.identifier.jobId);
 
                 saveJobSchedule(db, job.identifier, "hour",      job.schedule.hours);
@@ -952,6 +953,39 @@ private:
                 identifier.jobId,
                 val);
         }
+    }
+
+    template<typename T>
+    bool isWildcardSet(const std::set<T> &items) const
+    {
+        return items.size() == 1 && items.find(-1) != items.end();
+    }
+
+    double calculateScheduleLoad(const JobSchedule &schedule) const
+    {
+        double load =
+                (isWildcardSet(schedule.hours)      ? 24    : schedule.hours.size())
+            *   (isWildcardSet(schedule.minutes)    ? 60    : schedule.minutes.size())
+            *   (isWildcardSet(schedule.months)     ? 12    : schedule.months.size());
+        if(isWildcardSet(schedule.mdays) && isWildcardSet(schedule.wdays))
+        {
+            load *= 31;
+        }
+        else if(isWildcardSet(schedule.mdays) && !isWildcardSet(schedule.wdays))
+        {
+            load *= schedule.wdays.size();
+        }
+        else if(!isWildcardSet(schedule.mdays) && isWildcardSet(schedule.wdays))
+        {
+            load *= schedule.mdays.size();
+        }
+        else
+        {
+            load *= std::min<std::size_t>(schedule.mdays.size() + schedule.wdays.size(), 31);
+        }
+        load /= (24 * 60 * 12 * 31);
+
+        return load;
     }
 
     long long jobUserId(std::unique_ptr<Chronos::MySQL_DB> &db, const long long jobId) const
