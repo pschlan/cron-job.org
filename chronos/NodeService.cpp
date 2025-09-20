@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <ctime>
 
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/server/TThreadedServer.h>
@@ -656,9 +657,15 @@ public:
         {
             std::unique_ptr<MySQL_DB> db(App::getInstance()->createMySQLConnection());
 
+            struct tm t = { 0 };
+            time_t now = time(nullptr);
+            if(gmtime_r(&now, &t) == nullptr)
+                throw std::runtime_error("gmtime_r returned nullptr");
+	        const int64_t expiryCompareVal = (t.tm_year + 1900) * 10000000000 + (t.tm_mon + 1) * 100000000 + t.tm_mday * 1000000 + t.tm_hour * 10000 + t.tm_min * 100;
+
             MYSQL_ROW row;
-            auto res = db->query("SELECT SUM(`schedule_load_factor`) FROM `job` WHERE `userid`=%v AND `schedule_load_factor` IS NOT NULL",
-                userId);
+            auto res = db->query("SELECT SUM(`schedule_load_factor`) FROM `job` WHERE `userid`=%v AND `schedule_load_factor` IS NOT NULL AND (`expires_at`=0 OR `expires_at`>=%u) AND `enabled`=1",
+                userId, expiryCompareVal);
             while((row = res->fetchRow()))
             {
                 result = std::stod(row[0]);
