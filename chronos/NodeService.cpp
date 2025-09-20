@@ -644,6 +644,35 @@ public:
         }
     }
 
+    double getUserScheduleLoad(const int64_t userId) override
+    {
+        using namespace Chronos;
+
+        double result = 0.;
+
+        std::cout << "ChronosNodeHandler::getUserScheduleLoad(" << userId << ")" << std::endl;
+
+        try
+        {
+            std::unique_ptr<MySQL_DB> db(App::getInstance()->createMySQLConnection());
+
+            MYSQL_ROW row;
+            auto res = db->query("SELECT SUM(`schedule_load_factor`) FROM `job` WHERE `userid`=%v AND `schedule_load_factor` IS NOT NULL",
+                userId);
+            while((row = res->fetchRow()))
+            {
+                result = std::stod(row[0]);
+            }
+        }
+        catch(const std::exception &ex)
+        {
+            std::cout << "ChronosNodeHandler::getUserScheduleLoad(): Exception: "  << ex.what() << std::endl;
+            throw InternalError();
+        }
+
+        return result;
+    }
+
     void disableJobsForUser(const int64_t userId) override
     {
         using namespace Chronos;
