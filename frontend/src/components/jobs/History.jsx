@@ -1,6 +1,6 @@
 import React from 'react';
 import Breadcrumbs from '../misc/Breadcrumbs';
-import { TableContainer, Paper, LinearProgress, Typography, Button } from '@material-ui/core';
+import { TableContainer, Paper, LinearProgress, Typography, Button, useTheme } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
 import { useJob } from '../../hooks/useJobs';
 import NotFound from '../misc/NotFound';
@@ -14,7 +14,7 @@ import ErrorIcon from '@material-ui/icons/ErrorOutline';
 import ScheduleIcon from '@material-ui/icons/Schedule';
 import EditIcon from '@material-ui/icons/Edit';
 import IconAvatar from '../misc/IconAvatar';
-import { JobStatus, jobStatusText, TimingFields, ChartColors } from '../../utils/Constants';
+import { JobStatus, jobStatusText, TimingFields, ChartColors, ChartColorsDark } from '../../utils/Constants';
 import HistoryDetailsButton from './HistoryDetailsButton';
 import Heading from '../misc/Heading';
 import { Link as RouterLink } from 'react-router-dom';
@@ -35,6 +35,8 @@ export default function History({ match }) {
   const [ isLoading, setIsLoading ] = useState(true);
   const [ chartData, setChartData ] = useState(null);
   const { isMobile } = useViewport();
+  const theme = useTheme();
+  const tick = { fill: theme.palette.text.primary };
 
   useEffect(() => {
     const doRefresh = async () => {
@@ -156,13 +158,13 @@ export default function History({ match }) {
     {chartData && chartData.length > 2 && <>
         <ResponsiveContainer width='100%' height={200}>
         <AreaChart data={chartData} margin={{right: 30, left: 10, bottom: 20, top: 10}}>
-          <XAxis dataKey='date' type='category' tickFormatter={value => moment(value*1000).format('LT')} interval={isMobile ? 6 : 2} />
-          <YAxis type='number' tickFormatter={x => formatMs(x, t)} tickCount={3} />
+          <XAxis dataKey='date' type='category' tick={tick} tickFormatter={value => moment(value*1000).format('LT')} interval={isMobile ? 6 : 2} />
+          <YAxis type='number' tick={tick} tickFormatter={x => formatMs(x, t)} tickCount={3} />
 
-          <Tooltip formatter={formatTooltip} labelFormatter={value => moment(value*1000).format('LLLL')} />
+          <Tooltip contentStyle={{backgroundColor: theme.palette.background.paper}} formatter={formatTooltip} labelFormatter={value => moment(value*1000).format('LLLL')} />
 
           {TimingFields.map((item, index) =>
-            <Area type='monotone' dataKey={item} key={item} stackId='timing' stroke={ChartColors[index]} fill={ChartColors[index]} />)}
+            <Area type='monotone' dataKey={item} key={item} stackId='timing' stroke={theme.palette.type === 'dark' ? ChartColorsDark[index] : ChartColors[index]} fill={ChartColors[index]} />)}
         </AreaChart>
       </ResponsiveContainer>
     </>}

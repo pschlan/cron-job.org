@@ -17,7 +17,7 @@ const useStyles = makeStyles(theme => ({
       fontWeight: 'bold'
     },
     '& tr': {
-      backgroundColor: '#fff'
+      backgroundColor: theme.palette.background.paper
     }
   }
 }));

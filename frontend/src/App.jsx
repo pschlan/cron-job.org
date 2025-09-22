@@ -5,7 +5,7 @@ import detector from 'i18next-browser-languagedetector';
 import { initReactI18next, useTranslation } from 'react-i18next';
 import { Redirect, Switch, Route, useLocation } from 'react-router-dom';
 import { SnackbarProvider, useSnackbar } from 'notistack';
-import { CssBaseline } from '@material-ui/core';
+import { createTheme, CssBaseline, ThemeProvider, useMediaQuery } from '@material-ui/core';
 import DashboardIcon from '@material-ui/icons/Dashboard';
 import ScheduleIcon from '@material-ui/icons/Schedule';
 import SettingsIcon from '@material-ui/icons/Settings';
@@ -65,6 +65,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setUiSetting } from './redux/actions';
 import useFolders from './hooks/useFolders';
 import Folders from './components/jobs/Folders';
+import { useMemo } from 'react';
 
 export let snackbarRef = null;
 
@@ -247,40 +248,60 @@ function App() {
     });
   }, [languageCode]);
 
+  const darkModePreferred = useMediaQuery('(prefers-color-scheme: dark)');
+
+  const theme = useMemo(() => createTheme({
+    palette: {
+      type: darkModePreferred ? 'dark' : 'light',
+      primary: {
+        main: darkModePreferred ? '#e35835' : '#c33d1b',
+        light: '#fc6e46',
+        dark: '#8b0000'
+      },
+      secondary: {
+        main: '#ed7b16',
+        light: '#ffab4b',
+        dark: '#b44d00'
+      }
+    }
+  }), [darkModePreferred]);
+
   return (
-    <SnackbarProvider maxSnack={5} autoHideDuration={5000} preventDuplicate={true}>
-      <SnackbarReferenceProvider />
-      <CssBaseline />
-      <Authenticator>
-        <AppLayout
-          menuText={t('common.menu')}
-          menu={<ConsoleMenu indentSubItems={indentSubItems} selectedId={getSelectedId(location.pathname)} onListItemClick={isMobile ? () => dispatch(setUiSetting('menuClosed', true)) : () => null} />}
-          toolbar={<AppToolbar />}
-        >
-          <Switch>
-            <Route path="/dashboard" exact component={Dashboard} />
-            <Route path="/jobs/folders" exact component={Folders} />
-            <Route path="/jobs/:jobId/history" exact component={History} />
-            <Route path="/jobs/create" exact component={JobEditor} />
-            <Route path="/jobs/:jobId" exact component={JobEditor} />
-            <Route path="/jobs" exact component={Jobs} />
-            <Route path="/jobs/folders/:folderId" exact component={Jobs} />
-            <Route path="/jobs/folders/:folderId/:jobId/history" exact component={History} />
-            <Route path="/jobs/folders/:folderId/create" exact component={JobEditor} />
-            <Route path="/jobs/folders/:folderId/:jobId" exact component={JobEditor} />
-            {Config.enableStatusPages && <Route path="/statuspages/:statusPageId" exact component={StatusPageEditor} />}
-            {Config.enableStatusPages && <Route path="/statuspages" exact component={StatusPages} />}
-            <Route path="/settings" exact component={Settings} />
-            <Route path="/statistics" exact component={Statistics} />
-            <Route path="/confirmEmailChange/:token" exact component={ConfirmEmailChange} />
-            <Redirect from="/login" exact to="/dashboard" />
-            <Redirect from="/signup" exact to="/dashboard" />
-            <Redirect from="/" exact to="/dashboard" />
-            <NotFound />
-          </Switch>
-        </AppLayout>
-      </Authenticator>
-    </SnackbarProvider>
+    <ThemeProvider theme={theme}>
+      <SnackbarProvider maxSnack={5} autoHideDuration={5000} preventDuplicate={true}>
+        <SnackbarReferenceProvider />
+        <CssBaseline />
+        <Authenticator>
+          <AppLayout
+            menuText={t('common.menu')}
+            menu={<ConsoleMenu indentSubItems={indentSubItems} selectedId={getSelectedId(location.pathname)} onListItemClick={isMobile ? () => dispatch(setUiSetting('menuClosed', true)) : () => null} />}
+            toolbar={<AppToolbar />}
+          >
+            <Switch>
+              <Route path="/dashboard" exact component={Dashboard} />
+              <Route path="/jobs/folders" exact component={Folders} />
+              <Route path="/jobs/:jobId/history" exact component={History} />
+              <Route path="/jobs/create" exact component={JobEditor} />
+              <Route path="/jobs/:jobId" exact component={JobEditor} />
+              <Route path="/jobs" exact component={Jobs} />
+              <Route path="/jobs/folders/:folderId" exact component={Jobs} />
+              <Route path="/jobs/folders/:folderId/:jobId/history" exact component={History} />
+              <Route path="/jobs/folders/:folderId/create" exact component={JobEditor} />
+              <Route path="/jobs/folders/:folderId/:jobId" exact component={JobEditor} />
+              {Config.enableStatusPages && <Route path="/statuspages/:statusPageId" exact component={StatusPageEditor} />}
+              {Config.enableStatusPages && <Route path="/statuspages" exact component={StatusPages} />}
+              <Route path="/settings" exact component={Settings} />
+              <Route path="/statistics" exact component={Statistics} />
+              <Route path="/confirmEmailChange/:token" exact component={ConfirmEmailChange} />
+              <Redirect from="/login" exact to="/dashboard" />
+              <Redirect from="/signup" exact to="/dashboard" />
+              <Redirect from="/" exact to="/dashboard" />
+              <NotFound />
+            </Switch>
+          </AppLayout>
+        </Authenticator>
+      </SnackbarProvider>
+    </ThemeProvider>
   );
 }
 

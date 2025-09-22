@@ -71,6 +71,15 @@ export const ChartColors = [
   '#ffa600'
 ];
 
+export const ChartColorsDark = [
+  '#04b0ff',
+  '#848ec1',
+  '#c492c4',
+  '#eb97b4',
+  '#ffa898',
+  '#ffca66'
+];
+
 export const TimingFields = [
   'nameLookup', 'connect', 'appConnect', 'preTransfer', 'startTransfer', 'total'
 ];

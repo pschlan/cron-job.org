@@ -1,4 +1,4 @@
-import { Box, Grid, LinearProgress, Paper } from '@material-ui/core';
+import { Box, Grid, LinearProgress, Paper, useTheme } from '@material-ui/core';
 import { useSnackbar } from 'notistack';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -8,7 +8,7 @@ import { getServiceStatistics } from '../../utils/API';
 import { ResponsiveContainer, XAxis, YAxis, Tooltip, LineChart, Line, CartesianGrid, Legend } from 'recharts';
 import moment from 'moment';
 import { formatMs } from '../../utils/Units';
-import { ChartColors } from '../../utils/Constants';
+import { ChartColors, ChartColorsDark } from '../../utils/Constants';
 import Title from '../misc/Title';
 import NumberPanel from '../misc/NumberPanel';
 import useViewport from '../../hooks/useViewport';
@@ -19,6 +19,9 @@ export default function Statistics() {
   const [ stats, setStats ] = useState(null);
   const [ domains, setDomains ] = useState({});
   const { isMobile } = useViewport();
+
+  const theme = useTheme();
+  const tick = { fill: theme.palette.text.primary };
 
   useEffect(() => {
     getServiceStatistics()
@@ -84,15 +87,15 @@ export default function Statistics() {
                 <LineChart data={stats.executionStats.samples}>
                   <CartesianGrid strokeDasharray='5 5' />
 
-                  <XAxis dataKey='timestamp' type='category' tickFormatter={value => moment(value*1000).format('LT')} interval={isMobile ? 6 : 2} />
-                  <YAxis yAxisId={1} type='number' tickFormatter={x => formatMs(x, t)} tickCount={10} domain={domains.averageJitter} />
-                  <YAxis yAxisId={2} type='number' tickFormatter={x => x.toLocaleString()} tickCount={10} orientation='right' domain={domains.numExecutions} />
+                  <XAxis dataKey='timestamp' type='category' tick={tick} tickFormatter={value => moment(value*1000).format('LT')} interval={isMobile ? 6 : 2} />
+                  <YAxis yAxisId={1} type='number' tick={tick} tickFormatter={x => formatMs(x, t)} tickCount={10} domain={domains.averageJitter} />
+                  <YAxis yAxisId={2} type='number' tick={tick} tickFormatter={x => x.toLocaleString()} tickCount={10} orientation='right' domain={domains.numExecutions} />
 
-                  <Tooltip labelFormatter={value => moment(value*1000).format('LLL')} formatter={formatTooltip} />
+                  <Tooltip contentStyle={{backgroundColor: theme.palette.background.paper}} labelFormatter={value => moment(value*1000).format('LLL')} formatter={formatTooltip} />
                   <Legend />
 
-                  <Line type='monotone' dataKey='sumExecutions' yAxisId={2} stroke={ChartColors[3]} name={t('statistics.sumExecutions')} />
-                  <Line type='monotone' dataKey='averageJitter' yAxisId={1} stroke={ChartColors[1]} name={t('statistics.averageJitter')} />
+                  <Line type='monotone' dataKey='sumExecutions' yAxisId={2} stroke={theme.palette.type === 'dark' ? ChartColorsDark[3] : ChartColors[3]} name={t('statistics.sumExecutions')} />
+                  <Line type='monotone' dataKey='averageJitter' yAxisId={1} stroke={theme.palette.type === 'dark' ? ChartColorsDark[1] : ChartColors[1]} name={t('statistics.averageJitter')} />
                 </LineChart>
             </ResponsiveContainer> : <LinearProgress />}
           </Box>

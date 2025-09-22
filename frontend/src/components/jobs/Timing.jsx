@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BarChart, Bar, ResponsiveContainer, Legend, XAxis, YAxis, Tooltip } from 'recharts';
-import { ChartColors, TimingFields } from '../../utils/Constants';
+import { ChartColors, ChartColorsDark, TimingFields } from '../../utils/Constants';
 import { formatMs } from '../../utils/Units';
+import { useTheme } from '@material-ui/core';
 
 export default function Timing({ stats, header })  {
   const [ timingData, setTimingData ] = useState(null);
   const { t } = useTranslation();
+
+  const theme = useTheme();
+  const tick = { fill: theme.palette.text.primary };
 
   useEffect(() => {
     if (Math.max(...Object.values(stats || {})) === 0) {
@@ -44,19 +48,21 @@ export default function Timing({ stats, header })  {
           <XAxis
             type='number'
             domain={[0, timingData[0].total]}
+            tick={tick}
             tickCount={10}
             tickFormatter={x => formatMs(x, t)} />
           <YAxis
             dataKey='name'
             type='category'
             hide={true}
+            tick={tick}
             />
 
           <Legend formatter={formatLegend} />
-          <Tooltip formatter={formatTooltip} />
+          <Tooltip contentStyle={{backgroundColor: theme.palette.background.paper}} formatter={formatTooltip} />
 
           {TimingFields.map((item, index) =>
-            <Bar dataKey={item} key={item} stackId='timing' fill={ChartColors[index]} />)}
+            <Bar dataKey={item} key={item} stackId='timing' fill={theme.palette.type === 'dark' ? ChartColorsDark[index] : ChartColors[index]} />)}
         </BarChart>
       </ResponsiveContainer>
     </div>
