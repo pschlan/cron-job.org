@@ -31,6 +31,10 @@ class CreateAccount extends AbstractAPIMethod {
           return false;
         }
       }
+
+      if (UserManager::isEmailBanned($request->email)) {
+        return false;
+      }
     }
 
     return (

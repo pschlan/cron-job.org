@@ -182,6 +182,27 @@ class UserManager {
     return new SessionTokenHandler();
   }
 
+  public static function isEmailBanned($email) {
+    $email = strtolower(trim($email));
+    $atPos = strpos($email, '@');
+    if ($atPos === false) {
+      return false;
+    }
+
+    $domain = substr($email, $atPos + 1);
+
+    $stmt = Database::get()->prepare('SELECT COUNT(*) AS `count` FROM `banned_email_domain` WHERE `domain`=:domain');
+    $stmt->execute([':domain' => $domain]);
+
+    $count = intval($stmt->fetch(PDO::FETCH_OBJ)->count);
+
+    if ($count > 0) {
+      return true;
+    }
+
+    return false;
+  }
+
   public function getProfile() {
     $stmt = Database::get()->prepare('SELECT `firstname` AS `firstName`, `lastname` AS `lastName`, `timezone`, `email`, `signup_date` AS `signupDate`, `newsletter_subscribe` AS `newsletterSubscribe`, `usergroupid` AS `userGroupId`, `notifications_auto_disabled` AS `notificationsAutoDisabled` FROM `user` WHERE `userid`=:userId');
     $stmt->setFetchMode(PDO::FETCH_CLASS, UserProfile::class);

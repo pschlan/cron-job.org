@@ -1,3 +1,8 @@
+CREATE TABLE `banned_email_domain`(
+  `domain` varchar(255) NOT NULL,
+  PRIMARY KEY(`domain`)
+);
+
 CREATE TABLE `nodestats`(
   `nodeid` int(11) NOT NULL,
   `d` tinyint(4) NOT NULL DEFAULT '0',

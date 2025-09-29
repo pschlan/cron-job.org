@@ -30,6 +30,10 @@ class ChangeUserEmail extends AbstractAPIMethod {
           return false;
         }
       }
+
+      if (UserManager::isEmailBanned($request->newEmail)) {
+        return false;
+      }
     }
 
     return (
