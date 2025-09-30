@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import './App.css';
-import { Container, CssBaseline } from '@material-ui/core';
+import { Container, createMuiTheme, CssBaseline, ThemeProvider, useMediaQuery } from '@material-ui/core';
 import { Switch, Route } from 'react-router-dom';
 import StatusPage from './components/StatusPage';
 import ErrorPage from './components/ErrorPage';
@@ -100,7 +100,24 @@ function App() {
     moment.locale(languageCode);
   }, [languageCode]);
 
-  return <>
+  const darkModePreferred = useMediaQuery('(prefers-color-scheme: dark)');
+  const theme = createMuiTheme({
+    palette: {
+      type: darkModePreferred ? 'dark' : 'light',
+      primary: {
+        main: '#c33d1b',
+        light: '#fc6e46',
+        dark: '#8b0000'
+      },
+      secondary: {
+        main: '#ed7b16',
+        light: '#ffab4b',
+        dark: '#b44d00'
+      }
+    }
+  });
+
+  return <ThemeProvider theme={theme}>
     <CssBaseline />
     <Container maxWidth='md'>
       <Switch>
@@ -110,7 +127,7 @@ function App() {
         </Route>
       </Switch>
     </Container>
-  </>;
+  </ThemeProvider>;
 }
 
 export default App;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Grid, LinearProgress, makeStyles, Paper, Typography } from '@material-ui/core';
+import { Box, Grid, LinearProgress, makeStyles, Paper, Typography, useTheme } from '@material-ui/core';
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import moment from 'moment';
 import { calculateAverage, calculatePercentile } from '../utils/Stats';
@@ -85,6 +85,9 @@ function intervalFromTimespan(timespan) {
 }
 
 function Chart({ data, timespan, dataKey, title, tickFormatter, syncId }) {
+  const theme = useTheme();
+  const tick = { fill: theme.palette.text.primary };
+
   return <>
     <ResponsiveContainer width='100%' height={120}>
       <AreaChart data={data} syncId={syncId}>
@@ -95,10 +98,10 @@ function Chart({ data, timespan, dataKey, title, tickFormatter, syncId }) {
           </linearGradient>
         </defs>
 
-        <XAxis dataKey='date' type='category' tickFormatter={x => dateTickFormatter(x, timespan)} minTickGap={100} />
-        <YAxis type='number' tickFormatter={tickFormatter} />
+        <XAxis dataKey='date' type='category' tick={tick} tickFormatter={x => dateTickFormatter(x, timespan)} minTickGap={100} />
+        <YAxis type='number' tick={tick} tickFormatter={tickFormatter} />
 
-        <Tooltip labelFormatter={x => dateFormatter(x, timespan)} formatter={tooltipFormatter} />
+        <Tooltip contentStyle={{backgroundColor: theme.palette.background.paper}} labelFormatter={x => dateFormatter(x, timespan)} formatter={tooltipFormatter} />
 
         <Area type='monotone' dot={{r:1,strokeWidth:1}} dataKey={dataKey} isAnimationActive={false} name={title} fill='url(#gradient)' stroke='#c33d1b' strokeWidth={2} />
       </AreaChart>
