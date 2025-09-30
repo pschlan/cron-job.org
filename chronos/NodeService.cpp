@@ -657,15 +657,9 @@ public:
         {
             std::unique_ptr<MySQL_DB> db(App::getInstance()->createMySQLConnection());
 
-            struct tm t = { 0 };
-            time_t now = time(nullptr);
-            if(gmtime_r(&now, &t) == nullptr)
-                throw std::runtime_error("gmtime_r returned nullptr");
-	        const int64_t expiryCompareVal = (t.tm_year + 1900) * 10000000000 + (t.tm_mon + 1) * 100000000 + t.tm_mday * 1000000 + t.tm_hour * 10000 + t.tm_min * 100;
-
             MYSQL_ROW row;
             auto res = db->query("SELECT SUM(`schedule_load_factor`) FROM `job` WHERE `userid`=%v AND `schedule_load_factor` IS NOT NULL AND (`expires_at`=0 OR `expires_at`>=%u) AND `enabled`=1",
-                userId, expiryCompareVal);
+                userId, getExpiryCompareVal(time(nullptr)));
             while((row = res->fetchRow()))
             {
                 result = std::stod(row[0]);
@@ -678,6 +672,34 @@ public:
         }
 
         return result;
+    }
+
+    void getUserInfoForAllUsers(std::vector<UserInfo> &_return) override
+    {
+        using namespace Chronos;
+
+        std::cout << "ChronosNodeHandler::getUserInfoForAllUsers()" << std::endl;
+
+        try
+        {
+            std::unique_ptr<MySQL_DB> db(App::getInstance()->createMySQLConnection());
+
+            MYSQL_ROW row;
+            auto res = db->query("SELECT `userid`, SUM(`schedule_load_factor`) FROM `job` WHERE `schedule_load_factor` IS NOT NULL AND (`expires_at`=0 OR `expires_at`>=%u) AND `enabled`=1 GROUP BY `userid`",
+                getExpiryCompareVal(time(nullptr)));
+            while((row = res->fetchRow()))
+            {
+                UserInfo ui;
+                ui.userId = std::stoll(row[0]);
+                ui.scheduleLoad = std::stod(row[1]);
+                _return.push_back(ui);
+            }
+        }
+        catch(const std::exception &ex)
+        {
+            std::cout << "ChronosNodeHandler::getUserInfoForAllUsers(): Exception: "  << ex.what() << std::endl;
+            throw InternalError();
+        }
     }
 
     void disableJobsForUser(const int64_t userId) override
@@ -878,6 +900,15 @@ public:
     }
 
 private:
+    int64_t getExpiryCompareVal(time_t forTime) const
+    {
+        struct tm t = { 0 };
+        if(gmtime_r(&forTime, &t) == nullptr)
+            throw std::runtime_error("gmtime_r returned nullptr");
+        const int64_t expiryCompareVal = (t.tm_year + 1900) * 10000000000 + (t.tm_mon + 1) * 100000000 + t.tm_mday * 1000000 + t.tm_hour * 10000 + t.tm_min * 100;
+        return expiryCompareVal;
+    }
+
     void getDayTimeSeriesForYear(std::vector<TimeSeriesDataEntry> &dest, const JobIdentifier &identifier, const int year, const int minMonth = 0, const int minDay = 1, const double p = 0.99) const
     {
         using namespace Chronos;
