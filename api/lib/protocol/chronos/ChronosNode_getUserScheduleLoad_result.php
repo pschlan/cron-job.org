@@ -16,7 +16,7 @@ use Thrift\Protocol\TProtocol;
 use Thrift\Protocol\TBinaryProtocolAccelerated;
 use Thrift\Exception\TApplicationException;
 
-class ChronosMaster_ping_result
+class ChronosNode_getUserScheduleLoad_result
 {
     static public $isValidate = false;
 
@@ -24,14 +24,24 @@ class ChronosMaster_ping_result
         0 => array(
             'var' => 'success',
             'isRequired' => false,
-            'type' => TType::BOOL,
+            'type' => TType::DOUBLE,
+        ),
+        1 => array(
+            'var' => 'ie',
+            'isRequired' => false,
+            'type' => TType::STRUCT,
+            'class' => '\chronos\InternalError',
         ),
     );
 
     /**
-     * @var bool
+     * @var double
      */
     public $success = null;
+    /**
+     * @var \chronos\InternalError
+     */
+    public $ie = null;
 
     public function __construct($vals = null)
     {
@@ -39,12 +49,15 @@ class ChronosMaster_ping_result
             if (isset($vals['success'])) {
                 $this->success = $vals['success'];
             }
+            if (isset($vals['ie'])) {
+                $this->ie = $vals['ie'];
+            }
         }
     }
 
     public function getName()
     {
-        return 'ChronosMaster_ping_result';
+        return 'ChronosNode_getUserScheduleLoad_result';
     }
 
 
@@ -62,8 +75,16 @@ class ChronosMaster_ping_result
             }
             switch ($fid) {
                 case 0:
-                    if ($ftype == TType::BOOL) {
-                        $xfer += $input->readBool($this->success);
+                    if ($ftype == TType::DOUBLE) {
+                        $xfer += $input->readDouble($this->success);
+                    } else {
+                        $xfer += $input->skip($ftype);
+                    }
+                    break;
+                case 1:
+                    if ($ftype == TType::STRUCT) {
+                        $this->ie = new \chronos\InternalError();
+                        $xfer += $this->ie->read($input);
                     } else {
                         $xfer += $input->skip($ftype);
                     }
@@ -81,10 +102,15 @@ class ChronosMaster_ping_result
     public function write($output)
     {
         $xfer = 0;
-        $xfer += $output->writeStructBegin('ChronosMaster_ping_result');
+        $xfer += $output->writeStructBegin('ChronosNode_getUserScheduleLoad_result');
         if ($this->success !== null) {
-            $xfer += $output->writeFieldBegin('success', TType::BOOL, 0);
-            $xfer += $output->writeBool($this->success);
+            $xfer += $output->writeFieldBegin('success', TType::DOUBLE, 0);
+            $xfer += $output->writeDouble($this->success);
+            $xfer += $output->writeFieldEnd();
+        }
+        if ($this->ie !== null) {
+            $xfer += $output->writeFieldBegin('ie', TType::STRUCT, 1);
+            $xfer += $this->ie->write($output);
             $xfer += $output->writeFieldEnd();
         }
         $xfer += $output->writeFieldStop();

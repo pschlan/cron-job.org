@@ -16,35 +16,35 @@ use Thrift\Protocol\TProtocol;
 use Thrift\Protocol\TBinaryProtocolAccelerated;
 use Thrift\Exception\TApplicationException;
 
-class ChronosMaster_ping_result
+class ChronosNode_getUserScheduleLoad_args
 {
     static public $isValidate = false;
 
     static public $_TSPEC = array(
-        0 => array(
-            'var' => 'success',
+        1 => array(
+            'var' => 'userId',
             'isRequired' => false,
-            'type' => TType::BOOL,
+            'type' => TType::I64,
         ),
     );
 
     /**
-     * @var bool
+     * @var int
      */
-    public $success = null;
+    public $userId = null;
 
     public function __construct($vals = null)
     {
         if (is_array($vals)) {
-            if (isset($vals['success'])) {
-                $this->success = $vals['success'];
+            if (isset($vals['userId'])) {
+                $this->userId = $vals['userId'];
             }
         }
     }
 
     public function getName()
     {
-        return 'ChronosMaster_ping_result';
+        return 'ChronosNode_getUserScheduleLoad_args';
     }
 
 
@@ -61,9 +61,9 @@ class ChronosMaster_ping_result
                 break;
             }
             switch ($fid) {
-                case 0:
-                    if ($ftype == TType::BOOL) {
-                        $xfer += $input->readBool($this->success);
+                case 1:
+                    if ($ftype == TType::I64) {
+                        $xfer += $input->readI64($this->userId);
                     } else {
                         $xfer += $input->skip($ftype);
                     }
@@ -81,10 +81,10 @@ class ChronosMaster_ping_result
     public function write($output)
     {
         $xfer = 0;
-        $xfer += $output->writeStructBegin('ChronosMaster_ping_result');
-        if ($this->success !== null) {
-            $xfer += $output->writeFieldBegin('success', TType::BOOL, 0);
-            $xfer += $output->writeBool($this->success);
+        $xfer += $output->writeStructBegin('ChronosNode_getUserScheduleLoad_args');
+        if ($this->userId !== null) {
+            $xfer += $output->writeFieldBegin('userId', TType::I64, 1);
+            $xfer += $output->writeI64($this->userId);
             $xfer += $output->writeFieldEnd();
         }
         $xfer += $output->writeFieldStop();

@@ -747,6 +747,11 @@ class UserManager {
       ':userId'             => $this->authToken->userId
     ]);
 
+    $stmt = Database::get()->prepare('DELETE FROM `user_schedule_load` WHERE `userid`=:userId');
+    $stmt->execute([
+      ':userId'             => $this->authToken->userId
+    ]);
+
     $stmt = Database::get()->prepare('DELETE FROM `user` WHERE `userid`=:userId');
     $stmt->execute([
       ':userId'             => $this->authToken->userId

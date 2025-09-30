@@ -16,35 +16,21 @@ use Thrift\Protocol\TProtocol;
 use Thrift\Protocol\TBinaryProtocolAccelerated;
 use Thrift\Exception\TApplicationException;
 
-class ChronosMaster_ping_result
+class ChronosNode_getUserInfoForAllUser_args
 {
     static public $isValidate = false;
 
     static public $_TSPEC = array(
-        0 => array(
-            'var' => 'success',
-            'isRequired' => false,
-            'type' => TType::BOOL,
-        ),
     );
 
-    /**
-     * @var bool
-     */
-    public $success = null;
 
-    public function __construct($vals = null)
+    public function __construct()
     {
-        if (is_array($vals)) {
-            if (isset($vals['success'])) {
-                $this->success = $vals['success'];
-            }
-        }
     }
 
     public function getName()
     {
-        return 'ChronosMaster_ping_result';
+        return 'ChronosNode_getUserInfoForAllUser_args';
     }
 
 
@@ -61,13 +47,6 @@ class ChronosMaster_ping_result
                 break;
             }
             switch ($fid) {
-                case 0:
-                    if ($ftype == TType::BOOL) {
-                        $xfer += $input->readBool($this->success);
-                    } else {
-                        $xfer += $input->skip($ftype);
-                    }
-                    break;
                 default:
                     $xfer += $input->skip($ftype);
                     break;
@@ -81,12 +60,7 @@ class ChronosMaster_ping_result
     public function write($output)
     {
         $xfer = 0;
-        $xfer += $output->writeStructBegin('ChronosMaster_ping_result');
-        if ($this->success !== null) {
-            $xfer += $output->writeFieldBegin('success', TType::BOOL, 0);
-            $xfer += $output->writeBool($this->success);
-            $xfer += $output->writeFieldEnd();
-        }
+        $xfer += $output->writeStructBegin('ChronosNode_getUserInfoForAllUser_args');
         $xfer += $output->writeFieldStop();
         $xfer += $output->writeStructEnd();
         return $xfer;

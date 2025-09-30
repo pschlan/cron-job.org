@@ -50,6 +50,12 @@ CREATE TABLE `user_pwreset` (
   KEY `expires` (`expires`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+CREATE TABLE `user_schedule_load` (
+  `userid` int(11) NOT NULL DEFAULT '0',
+  `load` FLOAT NOT NULL,
+  PRIMARY KEY(`userid`)
+) ENGINE=InnoDB;
+
 CREATE TABLE `usergroup`(
     `usergroupid` int(11) NOT NULL AUTO_INCREMENT,
     `title` varchar(128) NOT NULL DEFAULT '',

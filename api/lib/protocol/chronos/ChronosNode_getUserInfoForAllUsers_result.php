@@ -16,7 +16,7 @@ use Thrift\Protocol\TProtocol;
 use Thrift\Protocol\TBinaryProtocolAccelerated;
 use Thrift\Exception\TApplicationException;
 
-class ChronosMaster_getUserDetails_result
+class ChronosNode_getUserInfoForAllUsers_result
 {
     static public $isValidate = false;
 
@@ -24,16 +24,14 @@ class ChronosMaster_getUserDetails_result
         0 => array(
             'var' => 'success',
             'isRequired' => false,
-            'type' => TType::STRUCT,
-            'class' => '\chronos\UserDetails',
+            'type' => TType::LST,
+            'etype' => TType::STRUCT,
+            'elem' => array(
+                'type' => TType::STRUCT,
+                'class' => '\chronos\UserInfo',
+                ),
         ),
         1 => array(
-            'var' => 'rnf',
-            'isRequired' => false,
-            'type' => TType::STRUCT,
-            'class' => '\chronos\ResourceNotFound',
-        ),
-        2 => array(
             'var' => 'ie',
             'isRequired' => false,
             'type' => TType::STRUCT,
@@ -42,13 +40,9 @@ class ChronosMaster_getUserDetails_result
     );
 
     /**
-     * @var \chronos\UserDetails
+     * @var \chronos\UserInfo[]
      */
     public $success = null;
-    /**
-     * @var \chronos\ResourceNotFound
-     */
-    public $rnf = null;
     /**
      * @var \chronos\InternalError
      */
@@ -60,9 +54,6 @@ class ChronosMaster_getUserDetails_result
             if (isset($vals['success'])) {
                 $this->success = $vals['success'];
             }
-            if (isset($vals['rnf'])) {
-                $this->rnf = $vals['rnf'];
-            }
             if (isset($vals['ie'])) {
                 $this->ie = $vals['ie'];
             }
@@ -71,7 +62,7 @@ class ChronosMaster_getUserDetails_result
 
     public function getName()
     {
-        return 'ChronosMaster_getUserDetails_result';
+        return 'ChronosNode_getUserInfoForAllUsers_result';
     }
 
 
@@ -89,22 +80,23 @@ class ChronosMaster_getUserDetails_result
             }
             switch ($fid) {
                 case 0:
-                    if ($ftype == TType::STRUCT) {
-                        $this->success = new \chronos\UserDetails();
-                        $xfer += $this->success->read($input);
+                    if ($ftype == TType::LST) {
+                        $this->success = array();
+                        $_size102 = 0;
+                        $_etype105 = 0;
+                        $xfer += $input->readListBegin($_etype105, $_size102);
+                        for ($_i106 = 0; $_i106 < $_size102; ++$_i106) {
+                            $elem107 = null;
+                            $elem107 = new \chronos\UserInfo();
+                            $xfer += $elem107->read($input);
+                            $this->success []= $elem107;
+                        }
+                        $xfer += $input->readListEnd();
                     } else {
                         $xfer += $input->skip($ftype);
                     }
                     break;
                 case 1:
-                    if ($ftype == TType::STRUCT) {
-                        $this->rnf = new \chronos\ResourceNotFound();
-                        $xfer += $this->rnf->read($input);
-                    } else {
-                        $xfer += $input->skip($ftype);
-                    }
-                    break;
-                case 2:
                     if ($ftype == TType::STRUCT) {
                         $this->ie = new \chronos\InternalError();
                         $xfer += $this->ie->read($input);
@@ -125,22 +117,21 @@ class ChronosMaster_getUserDetails_result
     public function write($output)
     {
         $xfer = 0;
-        $xfer += $output->writeStructBegin('ChronosMaster_getUserDetails_result');
+        $xfer += $output->writeStructBegin('ChronosNode_getUserInfoForAllUsers_result');
         if ($this->success !== null) {
-            if (!is_object($this->success)) {
+            if (!is_array($this->success)) {
                 throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
             }
-            $xfer += $output->writeFieldBegin('success', TType::STRUCT, 0);
-            $xfer += $this->success->write($output);
-            $xfer += $output->writeFieldEnd();
-        }
-        if ($this->rnf !== null) {
-            $xfer += $output->writeFieldBegin('rnf', TType::STRUCT, 1);
-            $xfer += $this->rnf->write($output);
+            $xfer += $output->writeFieldBegin('success', TType::LST, 0);
+            $output->writeListBegin(TType::STRUCT, count($this->success));
+            foreach ($this->success as $iter108) {
+                $xfer += $iter108->write($output);
+            }
+            $output->writeListEnd();
             $xfer += $output->writeFieldEnd();
         }
         if ($this->ie !== null) {
-            $xfer += $output->writeFieldBegin('ie', TType::STRUCT, 2);
+            $xfer += $output->writeFieldBegin('ie', TType::STRUCT, 1);
             $xfer += $this->ie->write($output);
             $xfer += $output->writeFieldEnd();
         }
