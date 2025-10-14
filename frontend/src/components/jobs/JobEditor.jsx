@@ -127,7 +127,7 @@ export default function JobEditor({ match }) {
   const [ authEnable, setAuthEnable ] = useState(false);
   const [ authUser, setAuthUser ] = useState('');
   const [ authPassword, setAuthPassword ] = useState('');
-  const [ notification, setNotification ] = useState({ onSuccess: false, onFailure: false, onDisable: true });
+  const [ notification, setNotification ] = useState({ onSuccess: false, onFailure: false, onFailureCount: 1, onDisable: true });
   const [ requestMethod, setRequestMethod ] = useState(RequestMethod.GET);
   const [ requestBody, setRequestBody ] = useState('');
   const [ jobHeaders, setJobHeaders ] = useState([]);
@@ -190,7 +190,8 @@ export default function JobEditor({ match }) {
         notification: {
           onSuccess: false,
           onDisable: true,
-          onFailure: false
+          onFailure: false,
+          onFailureCount: 1
         },
         requestMethod: RequestMethod.GET,
         folderId
@@ -552,6 +553,20 @@ export default function JobEditor({ match }) {
                 />}
               label={t('jobs.notifyOn.onFailure')}
               />
+            <Box ml={'3rem'} mb={1}>
+              <ValidatingTextField
+                label={t('jobs.notifyOnFailureRequiredTimes')}
+                defaultValue={notification.onFailureCount}
+                onChange={({target}) => setNotification(x => ({...x, onFailureCount: Math.max(1, parseInt(target.value))}))}
+                validator={val => parseInt(val) >= 1}
+                InputLabelProps={{shrink: true}}
+                inputProps={{min: 1, type: 'number'}}
+                InputProps={{
+                  endAdornment: <InputAdornment position='end'>{t('jobs.notifyOnFailureFailures', { count: notification.onFailureCount })}</InputAdornment>
+                }}
+                size='small'
+                />
+            </Box>
             <FormControlLabel
               control={<Switch
                 checked={notification.onSuccess}

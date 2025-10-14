@@ -201,6 +201,9 @@
       "onSuccess": "execution of the cronjob succeeds after it failed before",
       "onDisable": "the cronjob will be disabled because of too many failures"
     },
+    "notifyOnFailureRequiredTimes": "Notify after",
+    "notifyOnFailureFailures": "failure",
+    "notifyOnFailureFailures_plural": "subsequent failures",
     "requireshttpauth": "Requires HTTP authentication",
     "username": "Username",
     "password": "Password",

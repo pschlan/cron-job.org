@@ -201,6 +201,9 @@
       "onSuccess": "die Ausführung des Cronjobs erfolgreich ist nachdem sie zuvor fehlschlug",
       "onDisable": "der Cronjob automatisch wegen zu vieler Fehlschläge deaktiviert wird"
     },
+    "notifyOnFailureRequiredTimes": "Benachrichtigung nach",
+    "notifyOnFailureFailures": "Fehlschlag",
+    "notifyOnFailureFailures_plural": "aufeinanderfolgenden Fehlschlägen",
     "requireshttpauth": "Erfordert HTTP-Authentifizierung",
     "username": "Benutzername",
     "password": "Passwort",
