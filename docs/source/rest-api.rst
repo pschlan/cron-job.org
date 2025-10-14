@@ -233,6 +233,7 @@ jobDetails          array of :ref:`DetailedJob`             Job details
             },
             "notification": {
                 "onFailure": false,
+                "onFailureCount": 1,
                 "onSuccess": false,
                 "onDisable": false
             },
@@ -602,6 +603,7 @@ The JobNotificationSettings specifies notification settings for a job.
 Key                 Type                                    Description                                                                             Default *
 =================== ======================================= ======================================================================================= ===========
 onFailure           boolean                                 Whether to send a notification on job failure or not.                                   ``false``
+onFailureCount      int                                     How many failures are required before a notification is sent (min 1).                   ``1``
 onSuccess           boolean                                 Whether to send a notification when the job succeeds after a prior failure or not.      ``false``
 onDisable           boolean                                 Whether to send a notification when the job has been disabled automatically or not.     ``false``
 =================== ======================================= ======================================================================================= ===========

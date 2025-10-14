@@ -186,14 +186,16 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 
 	// refresh the old fail counter, if needed (since we pre-fetch jobs, it might be outdated by now)
 	int oldFailCounter = result->oldFailCounter;
+	int oldUnfilteredFailCounter = result->oldUnfilteredFailCounter;
 	if(result->status != JOBSTATUS_OK || oldFailCounter > 0 || (result->status == JOBSTATUS_OK && result->notifySuccess && oldFailCounter == 0))
 	{
 		MYSQL_ROW row;
-		auto res = db->query("SELECT `fail_counter` FROM `job` WHERE `jobid`=%d",
+		auto res = db->query("SELECT `fail_counter`,`unfiltered_fail_counter` FROM `job` WHERE `jobid`=%d",
 			result->jobID);
 		while((row = res->fetchRow()) != NULL)
 		{
 			oldFailCounter = atoi(row[0]);
+			oldUnfilteredFailCounter = atoi(row[1]);
 		}
 		res.reset();
 	}
@@ -201,15 +203,15 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 	std::string query;
 	if(result->status == JOBSTATUS_OK)
 	{
-		query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`fail_counter`=0 WHERE `jobid`=%d";
+		query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`fail_counter`=0,`unfiltered_fail_counter`=0 WHERE `jobid`=%d";
 	}
 	else if(result->status == JOBSTATUS_FAILED_TIMEOUT)
 	{
-		query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`fail_counter`=GREATEST(`fail_counter`,1) WHERE `jobid`=%d";
+		query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`fail_counter`=GREATEST(`fail_counter`,1),`unfiltered_fail_counter`=`unfiltered_fail_counter`+1 WHERE `jobid`=%d";
 	}
 	else
 	{
-		query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`fail_counter`=`fail_counter`+1 WHERE `jobid`=%d";
+		query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`fail_counter`=`fail_counter`+1,`unfiltered_fail_counter`=`unfiltered_fail_counter`+1 WHERE `jobid`=%d";
 	}
 	db->query(query.c_str(),
 		static_cast<int>(result->status),
@@ -219,14 +221,16 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 
 	// get (new) fail counter and latest enabled status
 	int failCounter = 0;
+	int unfilteredFailCounter = 0;
 	bool isEnabled = false;
 	MYSQL_ROW row;
-	auto res = db->query("SELECT `fail_counter`, `enabled` FROM `job` WHERE `jobid`=%d",
+	auto res = db->query("SELECT `fail_counter`,`unfiltered_fail_counter`,`enabled` FROM `job` WHERE `jobid`=%d",
 		result->jobID);
 	while((row = res->fetchRow()) != NULL)
 	{
 		failCounter = atoi(row[0]);
-		isEnabled = atoi(row[1]) != 0;
+		unfilteredFailCounter = atoi(row[1]);
+		isEnabled = atoi(row[2]) != 0;
 	}
 	res.reset();
 
@@ -237,7 +241,7 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 	if(failCounter > result->maxFailures && result->jobType != JobType_t::MONITORING)
 	{
 		// disable
-		db->query("UPDATE `job` SET `enabled`=0,`fail_counter`=0 WHERE `jobid`=%d",
+		db->query("UPDATE `job` SET `enabled`=0,`fail_counter`=0,`unfiltered_fail_counter`=0 WHERE `jobid`=%d",
 			result->jobID);
 
 		// notify?
@@ -251,8 +255,8 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 	// send failure notification?
 	if(result->notifyFailure
 		&& result->status != JOBSTATUS_OK
-		&& oldFailCounter == 0
-		&& failCounter == 1)
+		&& oldUnfilteredFailCounter < unfilteredFailCounter
+		&& unfilteredFailCounter == result->notifyFailureCount)
 	{
 		createNotification 			= true;
 		notificationType 			= NOTIFICATION_TYPE_FAILURE;
@@ -282,7 +286,7 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 		n.status = result->status;
 		n.statusText = result->statusText;
 		n.httpStatus = result->httpStatus;
-		n.failCounter = failCounter;
+		n.failCounter = std::max(unfilteredFailCounter, failCounter);
 
 		db->query("INSERT INTO `notification`(`jobid`,`joblogid`,`date`,`type`,`date_started`,`date_planned`,`url`,`execution_status`,`execution_status_text`,`execution_http_status`) "
 			"VALUES(%d,%d,%u,%u,%u,%u,'%q',%u,'%q',%u)",

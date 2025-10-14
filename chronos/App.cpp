@@ -318,7 +318,7 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 
 	const int64_t expiryCompareVal = year * 10000000000 + month * 100000000 + mday * 1000000 + hour * 10000 + minute * 100;
 
-	auto res = db->query("SELECT TRIM(`url`),`job`.`jobid`,`auth_enable`,`auth_user`,`auth_pass`,`notify_failure`,`notify_success`,`notify_disable`,`fail_counter`,`save_responses`,`job`.`userid`,`request_method`,COUNT(`job_header`.`jobheaderid`),`job_body`.`body`,`title`,`job`.`type`,`usergroupid`,`request_timeout`,`redirect_success` FROM `job` "
+	auto res = db->query("SELECT TRIM(`url`),`job`.`jobid`,`auth_enable`,`auth_user`,`auth_pass`,`notify_failure`,`notify_success`,`notify_disable`,`fail_counter`,`save_responses`,`job`.`userid`,`request_method`,COUNT(`job_header`.`jobheaderid`),`job_body`.`body`,`title`,`job`.`type`,`usergroupid`,`request_timeout`,`redirect_success`,`unfiltered_fail_counter`,`notify_failure_count` FROM `job` "
 									"INNER JOIN `job_hours` ON `job_hours`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_mdays` ON `job_mdays`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_wdays` ON `job_wdays`.`jobid`=`job`.`jobid` "
@@ -339,7 +339,7 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 									"AND (`job`.`expires_at`=0 OR `job`.`expires_at`>=%u) "
 									"AND `enabled`=1 "
 									"GROUP BY `job`.`jobid` "
-									"ORDER BY `fail_counter` ASC, `job`.`jobid` ASC",
+									"ORDER BY `unfiltered_fail_counter` ASC, `job`.`jobid` ASC",
 									hour, minute, wday, mday, wday, mday, month, timeZone.c_str(), expiryCompareVal);
 
 	int jobCount = res->numRows();
@@ -377,9 +377,11 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 			req->result->jobID 			= atoi(row[1]);
 			req->result->datePlanned	= (uint64_t)timestamp * 1000;
 			req->result->notifyFailure 	= strcmp(row[5], "1") == 0;
+			req->result->notifyFailureCount = std::max(1, atoi(row[20]));
 			req->result->notifySuccess 	= strcmp(row[6], "1") == 0;
 			req->result->notifyDisable 	= strcmp(row[7], "1") == 0;
 			req->result->oldFailCounter	= atoi(row[8]);
+			req->result->oldUnfilteredFailCounter = atoi(row[19]);
 			req->result->saveResponses	= strcmp(row[9], "1") == 0;
 			if(atoi(row[2]) == 1)
 			{

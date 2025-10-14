@@ -55,10 +55,12 @@ namespace Chronos
 		std::string responseBody;
 		std::string statusText;
 		bool notifyFailure = false;
+		int notifyFailureCount = 1;
 		bool notifySuccess = false;
 		bool notifyDisable = false;
 		bool saveResponses = false;
 		int oldFailCounter = 0;
+		int oldUnfilteredFailCounter = 0;
 		std::string peerAddress;
 		int peerPort = 0;
 

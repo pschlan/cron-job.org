@@ -42,6 +42,11 @@ class JobExecutionInfo
             'isRequired' => false,
             'type' => TType::I32,
         ),
+        5 => array(
+            'var' => 'unfilteredFailCounter',
+            'isRequired' => false,
+            'type' => TType::I32,
+        ),
     );
 
     /**
@@ -60,6 +65,10 @@ class JobExecutionInfo
      * @var int
      */
     public $failCounter = null;
+    /**
+     * @var int
+     */
+    public $unfilteredFailCounter = null;
 
     public function __construct($vals = null)
     {
@@ -75,6 +84,9 @@ class JobExecutionInfo
             }
             if (isset($vals['failCounter'])) {
                 $this->failCounter = $vals['failCounter'];
+            }
+            if (isset($vals['unfilteredFailCounter'])) {
+                $this->unfilteredFailCounter = $vals['unfilteredFailCounter'];
             }
         }
     }
@@ -126,6 +138,13 @@ class JobExecutionInfo
                         $xfer += $input->skip($ftype);
                     }
                     break;
+                case 5:
+                    if ($ftype == TType::I32) {
+                        $xfer += $input->readI32($this->unfilteredFailCounter);
+                    } else {
+                        $xfer += $input->skip($ftype);
+                    }
+                    break;
                 default:
                     $xfer += $input->skip($ftype);
                     break;
@@ -158,6 +177,11 @@ class JobExecutionInfo
         if ($this->failCounter !== null) {
             $xfer += $output->writeFieldBegin('failCounter', TType::I32, 4);
             $xfer += $output->writeI32($this->failCounter);
+            $xfer += $output->writeFieldEnd();
+        }
+        if ($this->unfilteredFailCounter !== null) {
+            $xfer += $output->writeFieldBegin('unfilteredFailCounter', TType::I32, 5);
+            $xfer += $output->writeI32($this->unfilteredFailCounter);
             $xfer += $output->writeFieldEnd();
         }
         $xfer += $output->writeFieldStop();

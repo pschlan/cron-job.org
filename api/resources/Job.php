@@ -27,6 +27,7 @@ class JobSchedule {
 
 class JobNotification {
   public $onFailure = false;
+  public $onFailureCount = 1;
   public $onSuccess = false;
   public $onDisable = false;
 }
@@ -102,6 +103,7 @@ class Job {
     if (isset($job->notification)) {
       $result->notification->onSuccess  = $job->notification->onSuccess;
       $result->notification->onFailure  = $job->notification->onFailure;
+      $result->notification->onFailureCount = $job->notification->onFailureCount;
       $result->notification->onDisable  = $job->notification->onDisable;
     } else {
       unset($result->notification);
@@ -173,6 +175,7 @@ class Job {
     $job->notification->onDisable   = $this->notification->onDisable;
     $job->notification->onSuccess   = $this->notification->onSuccess;
     $job->notification->onFailure   = $this->notification->onFailure;
+    $job->notification->onFailureCount = $this->notification->onFailureCount;
 
     $job->schedule                  = new \chronos\JobSchedule;
     $job->schedule->hours           = $this->toThriftSet($this->schedule->hours,    0,  23);
@@ -212,6 +215,9 @@ class Job {
     $this->auth->password             = (string)$request->job->auth->password;
 
     $this->notification->onFailure    = !!$request->job->notification->onFailure;
+    if (isset($request->job->notification->onFailureCount)) {
+      $this->notification->onFailureCount = max(1, $request->job->notification->onFailureCount);
+    }
     $this->notification->onSuccess    = !!$request->job->notification->onSuccess;
     $this->notification->onDisable    = !!$request->job->notification->onDisable;
 
@@ -286,6 +292,10 @@ class Job {
 
     if (isset($request->job->notification) && isset($request->job->notification->onFailure)) {
       $this->notification->onFailure    = !!$request->job->notification->onFailure;
+    }
+
+    if (isset($request->job->notification) && isset($request->job->notification->onFailureCount)) {
+      $this->notification->onFailureCount = max(1, $request->job->notification->onFailureCount);
     }
 
     if (isset($request->job->notification) && isset($request->job->notification->onSuccess)) {

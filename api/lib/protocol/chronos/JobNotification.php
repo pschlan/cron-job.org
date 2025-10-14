@@ -36,6 +36,11 @@ class JobNotification
             'isRequired' => false,
             'type' => TType::BOOL,
         ),
+        4 => array(
+            'var' => 'onFailureCount',
+            'isRequired' => false,
+            'type' => TType::I32,
+        ),
     );
 
     /**
@@ -50,6 +55,10 @@ class JobNotification
      * @var bool
      */
     public $onDisable = null;
+    /**
+     * @var int
+     */
+    public $onFailureCount = null;
 
     public function __construct($vals = null)
     {
@@ -62,6 +71,9 @@ class JobNotification
             }
             if (isset($vals['onDisable'])) {
                 $this->onDisable = $vals['onDisable'];
+            }
+            if (isset($vals['onFailureCount'])) {
+                $this->onFailureCount = $vals['onFailureCount'];
             }
         }
     }
@@ -106,6 +118,13 @@ class JobNotification
                         $xfer += $input->skip($ftype);
                     }
                     break;
+                case 4:
+                    if ($ftype == TType::I32) {
+                        $xfer += $input->readI32($this->onFailureCount);
+                    } else {
+                        $xfer += $input->skip($ftype);
+                    }
+                    break;
                 default:
                     $xfer += $input->skip($ftype);
                     break;
@@ -133,6 +152,11 @@ class JobNotification
         if ($this->onDisable !== null) {
             $xfer += $output->writeFieldBegin('onDisable', TType::BOOL, 3);
             $xfer += $output->writeBool($this->onDisable);
+            $xfer += $output->writeFieldEnd();
+        }
+        if ($this->onFailureCount !== null) {
+            $xfer += $output->writeFieldBegin('onFailureCount', TType::I32, 4);
+            $xfer += $output->writeI32($this->onFailureCount);
             $xfer += $output->writeFieldEnd();
         }
         $xfer += $output->writeFieldStop();

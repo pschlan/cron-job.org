@@ -55,6 +55,7 @@ struct JobExecutionInfo
     2: i64 lastFetch;
     3: i32 lastDuration;
     4: i32 failCounter;
+    5: i32 unfilteredFailCounter;
 }
 
 struct JobData
@@ -92,6 +93,7 @@ struct JobNotification
     1: bool onFailure;
     2: bool onSuccess;
     3: bool onDisable;
+    4: i32 onFailureCount;
 }
 
 struct Job

@@ -67,7 +67,7 @@ public:
             std::unique_ptr<Chronos::MySQL_DB> db(Chronos::App::getInstance()->createMySQLConnection());
 
 	        MYSQL_ROW row;
-            auto res = db->query("SELECT `jobid`,`userid`,`enabled`,`title`,`save_responses`,`last_status`,`last_fetch`,`last_duration`,`fail_counter`,`url`,`request_method`,`timezone`,`type`,`usergroupid`,`request_timeout`,`redirect_success`,`expires_at`,`folderid` FROM `job` WHERE `userid`=%v",
+            auto res = db->query("SELECT `jobid`,`userid`,`enabled`,`title`,`save_responses`,`last_status`,`last_fetch`,`last_duration`,`fail_counter`,`url`,`request_method`,`timezone`,`type`,`usergroupid`,`request_timeout`,`redirect_success`,`expires_at`,`folderid`,`unfiltered_fail_counter` FROM `job` WHERE `userid`=%v",
                 userId);
             _return.reserve(res->numRows());
             while((row = res->fetchRow()))
@@ -95,6 +95,7 @@ public:
                 job.executionInfo.lastFetch = std::stoll(row[6]);
                 job.executionInfo.lastDuration = std::stoi(row[7]);
                 job.executionInfo.failCounter = std::stoi(row[8]);
+                job.executionInfo.unfilteredFailCounter = std::stoi(row[18]);
                 job.__isset.executionInfo = true;
 
                 job.data.url = row[9];
@@ -135,7 +136,7 @@ public:
             auto res = db->query("SELECT `jobid`,`userid`,`enabled`,`title`,`save_responses`,`last_status`,`last_fetch`,"
                     "`last_duration`,`fail_counter`,`url`,`request_method`,`auth_enable`,`auth_user`,`auth_pass`,"
                     "`notify_failure`,`notify_success`,`notify_disable`,`timezone`,`type`,`usergroupid`,`request_timeout`, "
-                    "`redirect_success`,`expires_at`, `folderid` "
+                    "`redirect_success`,`expires_at`,`folderid`,`notify_failure_count`,`unfiltered_fail_counter` "
                     "FROM `job` WHERE `jobid`=%v AND `userid`=%v",
                 identifier.jobId,
                 identifier.userId);
@@ -164,6 +165,7 @@ public:
                 _return.executionInfo.lastFetch = std::stoll(row[6]);
                 _return.executionInfo.lastDuration = std::stoi(row[7]);
                 _return.executionInfo.failCounter = std::stoi(row[8]);
+                _return.executionInfo.unfilteredFailCounter = std::stoi(row[25]);
                 _return.__isset.executionInfo = true;
 
                 _return.data.url = row[9];
@@ -176,6 +178,7 @@ public:
                 _return.__isset.authentication = true;
 
                 _return.notification.onFailure = std::strcmp(row[14], "1") == 0;
+                _return.notification.onFailureCount = std::stoi(row[24]);
                 _return.notification.onSuccess = std::strcmp(row[15], "1") == 0;
                 _return.notification.onDisable = std::strcmp(row[16], "1") == 0;
                 _return.__isset.notification = true;
@@ -296,8 +299,9 @@ public:
 
             if(job.__isset.notification)
             {
-                db->query("UPDATE `job` SET `notify_failure`=%d, `notify_success`=%d, `notify_disable`=%d WHERE `jobid`=%v",
+                db->query("UPDATE `job` SET `notify_failure`=%d, `notify_failure_count`=%d, `notify_success`=%d, `notify_disable`=%d WHERE `jobid`=%v",
                     job.notification.onFailure ? 1 : 0,
+                    std::max(1, job.notification.onFailureCount),
                     job.notification.onSuccess ? 1 : 0,
                     job.notification.onDisable ? 1 : 0,
                     job.identifier.jobId);
@@ -357,7 +361,7 @@ public:
                 }
             }
 
-            db->query("UPDATE `job` SET `fail_counter`=0 WHERE `jobid`=%v",
+            db->query("UPDATE `job` SET `fail_counter`=0,`unfiltered_fail_counter`=0 WHERE `jobid`=%v",
                 job.identifier.jobId);
 
             db->query("COMMIT");
@@ -785,9 +789,11 @@ public:
         req->result->jobID          = job.identifier.jobId;
         req->result->datePlanned    = Chronos::Utils::getTimestampMS();
         req->result->notifyFailure 	= false;
+        req->result->notifyFailureCount = 1;
         req->result->notifySuccess 	= false;
         req->result->notifyDisable 	= false;
         req->result->oldFailCounter	= 0;
+        req->result->oldUnfilteredFailCounter = 0;
         req->result->saveResponses	= true;
 
         if(job.__isset.authentication)
