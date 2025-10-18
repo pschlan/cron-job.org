@@ -101,7 +101,7 @@ function parseMinutesSchedule({ hours, minutes, wdays, mdays, months }) {
   }
 
   else if (  (minutes.length === 1  && minutes[0] === 0)
-          && (hours.length > 0      && !isWildcard(hours))
+          && (hours.length > 1      && !isWildcard(hours))
           && (wdays.length === 7    || isWildcard(wdays))
           && (mdays.length  === 31  || isWildcard(mdays))
           && (months.length === 12  || isWildcard(months))) {
