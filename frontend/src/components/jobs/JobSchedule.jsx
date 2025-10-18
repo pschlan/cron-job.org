@@ -99,11 +99,32 @@ function parseMinutesSchedule({ hours, minutes, wdays, mdays, months }) {
       return { minuteDiffVal: diffVal };
     }
   }
+
+  else if (  (minutes.length === 1  && minutes[0] === 0)
+          && (hours.length > 0      && !isWildcard(hours))
+          && (wdays.length === 7    || isWildcard(wdays))
+          && (mdays.length  === 31  || isWildcard(mdays))
+          && (months.length === 12  || isWildcard(months))) {
+    let diffVal = -1;
+
+    const multiplier = hours[1] - hours[0];
+    const multiplierValidated =
+          hours.reduce((prev, cur, index) => prev && (index * multiplier) === cur, true)
+      &&  hours.length === Math.floor(24 / multiplier);
+    if (multiplierValidated) {
+      diffVal = multiplier * 60;
+    }
+
+    if (diffVal > 0) {
+      return { minuteDiffVal: diffVal };
+    }
+  }
+
   return false;
 }
 
 function MinutesSchedule({ initialSchedule, onChange = () => null }) {
-  const MINUTES = [ 1, 2, 5, 10, 15, 30, 60 ];
+  const MINUTES = [ 1, 2, 5, 10, 15, 30, 60, 2 * 60, 3 * 60, 4 * 60, 6 * 60, 8 * 60, 12 * 60 ];
   const DEFAULT_MINUTE = 15;
 
   const { t } = useTranslation();
@@ -124,19 +145,33 @@ function MinutesSchedule({ initialSchedule, onChange = () => null }) {
 
   useEffect(() => {
     const minutes = [];
+    const hours = [];
+
     if (minuteDiffVal === 1) {
       minutes.push(-1);
-    } else {
+    } else if (minuteDiffVal <= 60) {
      for (let i = 0; i < 60; i += minuteDiffVal) {
         minutes.push(i);
       }
+    } else if (minuteDiffVal > 60) {
+      const hourDiffVal = minuteDiffVal / 60;
+
+      minutes.push(0);
+
+      for (let i = 0; i < 24; i += hourDiffVal) {
+        hours.push(i);
+      }
+    }
+
+    if (hours.length === 0) {
+      hours.push(-1);
     }
 
     onChangeHook.current({
       mdays:    [-1],
       wdays:    [-1],
       months:   [-1],
-      hours:    [-1],
+      hours,
       minutes
     });
   }, [minuteDiffVal, onChangeHook]);
@@ -145,9 +180,12 @@ function MinutesSchedule({ initialSchedule, onChange = () => null }) {
     <FormControl>
       <span>{t('jobs.schedule.every')}</span>
       <Select value={minuteDiffVal} onChange={({target}) => setMinuteDiffVal(parseInt(target.value))}>
-        {MINUTES.map(minute => <MenuItem value={minute} key={minute}>{minute}</MenuItem>)}
+        {MINUTES.map(minute => <MenuItem value={minute} key={minute}>
+            {(minute < 60 || minute % 60 !== 0) ?
+              <>{minute} {t('jobs.schedule.minutesSmall', { count: minute })}</> :
+              <>{minute/60} {t('jobs.schedule.hoursSmall', { count: minute / 60 })}</>}
+          </MenuItem>)}
       </Select>
-      <span>{t('jobs.schedule.minutesSmall')}</span>
     </FormControl>
   </span>;
 }
