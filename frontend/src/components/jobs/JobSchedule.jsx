@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { RadioGroup, FormControlLabel, Radio, Select, MenuItem, makeStyles, FormControl, InputLabel, FormLabel, FormGroup, List, ListItem, ListItemText, Switch } from '@material-ui/core';
+import ErrorIcon from '@material-ui/icons/ErrorOutline';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 import { predictNextExecutions, ExecutionDate } from '../../utils/ExecutionPredictor';
 import { Alert } from '@material-ui/lab';
-import { scheduleToCrontabExpression } from '../../utils/CrontabExpression';
+import { crontabExpressionToSchedule, scheduleToCrontabExpression } from '../../utils/CrontabExpression';
 import useViewport from '../../hooks/useViewport';
 import CopyableTextField from '../misc/CopyableTextField';
 
@@ -70,6 +71,8 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
+const MINUTE_CHOICES = [ 1, 2, 5, 10, 15, 30, 60, 2 * 60, 3 * 60, 4 * 60, 6 * 60, 8 * 60, 12 * 60 ];
+
 function isWildcard(array) {
   return array.length === 1 && array[0] === -1;
 }
@@ -95,7 +98,7 @@ function parseMinutesSchedule({ hours, minutes, wdays, mdays, months }) {
       }
     }
 
-    if (diffVal > 0) {
+    if (diffVal > 0 && MINUTE_CHOICES.includes(diffVal)) {
       return { minuteDiffVal: diffVal };
     }
   }
@@ -124,7 +127,6 @@ function parseMinutesSchedule({ hours, minutes, wdays, mdays, months }) {
 }
 
 function MinutesSchedule({ initialSchedule, onChange = () => null }) {
-  const MINUTES = [ 1, 2, 5, 10, 15, 30, 60, 2 * 60, 3 * 60, 4 * 60, 6 * 60, 8 * 60, 12 * 60 ];
   const DEFAULT_MINUTE = 15;
 
   const { t } = useTranslation();
@@ -137,7 +139,7 @@ function MinutesSchedule({ initialSchedule, onChange = () => null }) {
   useEffect(() => {
     if (initialSchedule) {
       const parsedSchedule = parseMinutesSchedule(initialSchedule);
-      if (parsedSchedule) {
+      if (parsedSchedule && MINUTE_CHOICES.includes(parsedSchedule.minuteDiffVal)) {
         setMinuteDiffVal(parsedSchedule.minuteDiffVal);
       }
     }
@@ -180,7 +182,7 @@ function MinutesSchedule({ initialSchedule, onChange = () => null }) {
     <FormControl>
       <span>{t('jobs.schedule.every')}</span>
       <Select value={minuteDiffVal} onChange={({target}) => setMinuteDiffVal(parseInt(target.value))}>
-        {MINUTES.map(minute => <MenuItem value={minute} key={minute}>
+        {MINUTE_CHOICES.map(minute => <MenuItem value={minute} key={minute}>
             {(minute < 60 || minute % 60 !== 0) ?
               <>{minute} {t('jobs.schedule.minutesSmall', { count: minute })}</> :
               <>{minute/60} {t('jobs.schedule.hoursSmall', { count: minute / 60 })}</>}
@@ -539,23 +541,37 @@ function SchedulePreview({ schedule, scheduleType, expiresAt }) {
 export default function JobSchedule({ initialSchedule, onChange = () => null }) {
   const classes = useStyles();
   const { t } = useTranslation();
+  const [ initSchedule, setInitSchedule ] = useState();
   const [ scheduleType, setScheduleType ] = useState('');
   const [ scheduleArgs, setScheduleArgs ] = useState();
   const [ scheduleDoesExpire, setScheduleDoesExpire ] = useState(false);
   const [ scheduleExpiresAt, setScheduleExpiresAt ] = useState(null);
+  const [ scheduleValid, setScheduleValid ] = useState(undefined);
   const [ expiresAt, setExpiresAt ] = useState(0);
   const [ schedules, setSchedules ] = useState({});
   const [ crontabExpression, setCrontabExpression ] = useState(null);
+  const crontabExpressionFieldRef = useRef(null);
   const onChangeHook = useRef(onChange, []);
   const { isMobile } = useViewport();
 
   useEffect(() => {
+    if (!initialSchedule) {
+      return;
+    }
+    setInitSchedule(initialSchedule);
+  }, [initialSchedule]);
+
+  useEffect(() => {
+    if (!initSchedule) {
+      return;
+    }
+
     const schedArgs = {
-      hours:    Object.values(initialSchedule.hours).map(x => parseInt(x)),
-      minutes:  Object.values(initialSchedule.minutes).map(x => parseInt(x)),
-      wdays:    Object.values(initialSchedule.wdays).map(x => parseInt(x)),
-      mdays:    Object.values(initialSchedule.mdays).map(x => parseInt(x)),
-      months:   Object.values(initialSchedule.months).map(x => parseInt(x))
+      hours:    Object.values(initSchedule.hours).map(x => parseInt(x)),
+      minutes:  Object.values(initSchedule.minutes).map(x => parseInt(x)),
+      wdays:    Object.values(initSchedule.wdays).map(x => parseInt(x)),
+      mdays:    Object.values(initSchedule.mdays).map(x => parseInt(x)),
+      months:   Object.values(initSchedule.months).map(x => parseInt(x))
     };
 
     setScheduleArgs(schedArgs);
@@ -563,10 +579,10 @@ export default function JobSchedule({ initialSchedule, onChange = () => null }) 
       prev || (SCHEDULE_TYPES[cur](schedArgs) && cur),
       false) || 'custom');
 
-    if (initialSchedule.expiresAt && initialSchedule.expiresAt > 0) {
+    if (initSchedule.expiresAt && initSchedule.expiresAt > 0) {
       setScheduleDoesExpire(true);
 
-      const expiryStr = parseInt(initialSchedule.expiresAt).toString().padStart(14, '0');
+      const expiryStr = parseInt(initSchedule.expiresAt).toString().padStart(14, '0');
       setScheduleExpiresAt({
         mday: parseInt(expiryStr.substring(6, 8)),
         month: parseInt(expiryStr.substring(4, 6)),
@@ -587,16 +603,22 @@ export default function JobSchedule({ initialSchedule, onChange = () => null }) 
         minute: date.getMinutes()
       });
     }
-  }, [initialSchedule]);
+  }, [initSchedule]);
 
   useEffect(() => {
-    setCrontabExpression(scheduleToCrontabExpression(schedules[scheduleType]));
+    if (document.activeElement !== crontabExpressionFieldRef.current) {
+      setCrontabExpression(scheduleToCrontabExpression(schedules[scheduleType]));
+    }
 
     onChangeHook.current({
       ...schedules[scheduleType],
       expiresAt
     });
-  }, [schedules, scheduleType, expiresAt, onChangeHook]);
+  }, [schedules, scheduleType, expiresAt, onChangeHook, crontabExpressionFieldRef]);
+
+  useEffect(() => {
+    setScheduleValid(undefined);
+  }, [schedules]);
 
   useEffect(() => {
     let newValue = 0;
@@ -609,6 +631,17 @@ export default function JobSchedule({ initialSchedule, onChange = () => null }) 
     }
     setExpiresAt(newValue);
   }, [scheduleDoesExpire, scheduleExpiresAt]);
+
+  function setFromCrontabExpression(value) {
+    setCrontabExpression(value);
+    const parsed = crontabExpressionToSchedule(value);
+    if (parsed !== null) {
+      setInitSchedule({...initSchedule, ...parsed});
+      setScheduleValid(true);
+    } else {
+      setScheduleValid(false);
+    }
+  }
 
   const expiryDropdownStartYear = Math.min(scheduleExpiresAt ? scheduleExpiresAt.year : (new Date().getFullYear()), (new Date().getFullYear()));
   const numExpiryDropDownStartYearChoices = 11 + (scheduleExpiresAt ? Math.max(0, (new Date().getFullYear()) - scheduleExpiresAt.year) : 0)
@@ -670,13 +703,17 @@ export default function JobSchedule({ initialSchedule, onChange = () => null }) 
 
     <div className={classes.crontabExpression}>
       <CopyableTextField
-        value={crontabExpression || t('jobs.invalidSchedule')}
+        value={crontabExpression === null ? t('jobs.invalidSchedule') : crontabExpression}
+        inputRef={crontabExpressionFieldRef}
         label={t('jobs.crontabExpression')}
         variant='outlined'
         size='small'
         fullWidth
         successMsg={t('jobs.crontabExpressionCopySuccess')}
         errorMsg={t('jobs.crontabExpressionCopyFailed')}
+        onChange={({target}) => setFromCrontabExpression(target.value)}
+        InputProps={scheduleValid === false ? { endAdornment: <ErrorIcon color='error' />} : {}}
+        error={scheduleValid === false}
         />
     </div>
 

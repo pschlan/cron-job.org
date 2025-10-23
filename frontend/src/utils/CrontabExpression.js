@@ -102,7 +102,7 @@ function parseExpressionComponent(str, minVal, maxVal) {
 
   const elements = str.split(',').map(x => x.trim());
   for (const elem of elements) {
-    if (elem.indexOf('-') != -1) {
+    if (elem.indexOf('-') !== -1) {
       const parts = elem
         .split('-')
         .map(x => x.trim())
@@ -127,7 +127,7 @@ function parseExpressionComponent(str, minVal, maxVal) {
     }
   }
 
-  return result;
+  return [...new Set(result)].sort();
 }
 
 export function crontabExpressionToSchedule(expr) {
@@ -142,10 +142,10 @@ export function crontabExpressionToSchedule(expr) {
     minutes:  parseExpressionComponent(parts[0], 0, 59),
     hours:    parseExpressionComponent(parts[1], 0, 23),
     mdays:    parseExpressionComponent(parts[2], 1, 31),
-    months:   parseExpressionComponent(parts[3], 1, 23),
+    months:   parseExpressionComponent(parts[3], 1, 12),
     wdays:    parseExpressionComponent(parts[4], 0, 6)
   };
-  if (Object.values(schedule).find(x => x === null) !== undefined) {
+  if (Object.values(schedule).findIndex(x => x === null) !== -1) {
     return null;
   }
   return schedule;

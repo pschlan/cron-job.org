@@ -15,7 +15,7 @@ export default function CopyableTextField({ value, successMsg, errorMsg, InputPr
   return <TextField
     value={value}
     {...props}
-    InputProps={{ endAdornment: value && <InputAdornment position='end'>
+    InputProps={{ ...InputProps, endAdornment: <>{InputProps.endAdornment}{value && <InputAdornment position='end'>
         <CopyToClipboard
           text={value}
           onCopy={(text, result) => enqueueSnackbar(result ? successMsg : errorMsg, { variant: result ? 'success' : 'error' })}
@@ -24,6 +24,6 @@ export default function CopyableTextField({ value, successMsg, errorMsg, InputPr
             <CopyIcon />
           </IconButton>
         </CopyToClipboard>
-      </InputAdornment>, ...InputProps}}
+      </InputAdornment>}</>}}
     />;
 };
