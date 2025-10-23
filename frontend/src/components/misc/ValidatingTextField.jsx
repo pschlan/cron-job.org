@@ -21,6 +21,7 @@ export default function ValidatingTextField({ validator, pattern, patternErrorTe
 
   return <TextField
     {...props}
+    defaultValue={undefined}
     onChange={event => {
       setTyped(true);
       const value = mutator ? mutator(event.target.value) : event.target.value;

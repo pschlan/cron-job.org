@@ -632,7 +632,7 @@ export default function JobEditor({ match }) {
               />
           </TableContainer>
 
-          <Grid container direction='row' justify='flex-end'>
+          <Grid container direction='row' justifyContent='flex-end'>
             <Grid item>
               <Button
                 variant="contained"
@@ -698,8 +698,8 @@ export default function JobEditor({ match }) {
                 onChange={({target}) => analyzeBody(target.value)}
                 disabled={!RequestMethodsSupportingCustomBody.includes(requestMethod)}
                 multiline
-                rows={8}
-                rowsMax={8}
+                minRows={8}
+                maxRows={8}
                 InputLabelProps={{shrink: true}}
                 fullWidth
                 />
@@ -735,7 +735,7 @@ export default function JobEditor({ match }) {
       </Paper>
     </div>
 
-    <Grid container direction='row' justify='flex-end' spacing={1}>
+    <Grid container direction='row' justifyContent='flex-end' spacing={1}>
       <Grid item>
         <Button
           startIcon={<TestIcon />}

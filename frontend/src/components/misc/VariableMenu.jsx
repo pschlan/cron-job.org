@@ -40,7 +40,7 @@ export default function VariableMenu() {
     variant='contained'
     size='small'
     component={<IconButton />}
-    buttonRef={buttonRef}
+    innerRef={buttonRef}
     items={[
       {
         icon: <VariableIcon />,

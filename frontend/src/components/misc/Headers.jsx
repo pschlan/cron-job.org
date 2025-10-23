@@ -21,17 +21,17 @@ export default function Headers({ data }) {
 
     setFormattedData(lines.map((line, lineNo) => {
       if (lineNo === 0 && line.toLowerCase().indexOf('http/') !== -1) {
-        return <div className={classes.statusRequestLine}>{line}</div>;
+        return <div className={classes.statusRequestLine} key={lineNo}>{line}</div>;
       } else {
         const eqPos = line.indexOf(':');
         if (eqPos !== -1) {
           const key = line.substring(0, eqPos + 1);
           const value = line.substring(eqPos + 1);
-          return <div><span className={classes.key}>{key}</span>{value}</div>;
+          return <div key={lineNo}><span className={classes.key}>{key}</span>{value}</div>;
         }
       }
 
-      return <div>{line.length ? line : ' '}</div>;
+      return <div key={lineNo}>{line.length ? line : ' '}</div>;
     }));
   }, [data, classes]);
 

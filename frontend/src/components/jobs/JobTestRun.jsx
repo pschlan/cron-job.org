@@ -243,7 +243,6 @@ export default function JobTestRun({ job, jobId, onClose, onUpdateUrl = () => nu
                 onChange={(e, val) => setTabValue(val)}
                 indicatorColor="primary"
                 textColor="primary"
-                fullWidth
                 centered>
                 <Tab label={t('jobs.testRun.response')} value='response' />
                 <Tab label={t('jobs.testRun.rawResponse')} value='rawResponse' />
