@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 const useStyles = makeStyles(theme => ({
   key: {
     fontWeight: 'bold',
-    color: blue[900]
+    color: theme.palette.type === 'dark' ? blue[400] : blue[900]
   },
   statusRequestLine: {
     fontWeight: 'bold'
