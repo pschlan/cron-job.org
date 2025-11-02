@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { RadioGroup, FormControlLabel, Radio, Select, MenuItem, makeStyles, FormControl, InputLabel, FormLabel, FormGroup, List, ListItem, ListItemText, Switch } from '@material-ui/core';
+import { RadioGroup, FormControlLabel, Radio, Select, MenuItem, makeStyles, FormControl, InputLabel, FormLabel, FormGroup, List, ListItem, ListItemText, Switch, Typography, Box } from '@material-ui/core';
 import ErrorIcon from '@material-ui/icons/ErrorOutline';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
@@ -514,7 +514,7 @@ const SCHEDULE_TYPES = {
   'onceAYearTime': parseOnceAYearTimeSchedule
 };
 
-function SchedulePreview({ schedule, scheduleType, expiresAt }) {
+function SchedulePreview({ schedule, scheduleType, expiresAt, timezone }) {
   const { t } = useTranslation();
   const classes = useStyles();
 
@@ -535,10 +535,11 @@ function SchedulePreview({ schedule, scheduleType, expiresAt }) {
           </ListItemText>
         </ListItem>)}
     </List>
+    {nextExecutions && <Box variant='caption' pl={1}><Typography variant='caption'>{t('jobs.schedule.jobTimezoneNote', { timezone })}</Typography></Box>}
   </>;
 }
 
-export default function JobSchedule({ initialSchedule, onChange = () => null }) {
+export default function JobSchedule({ initialSchedule, timezone, onChange = () => null }) {
   const classes = useStyles();
   const { t } = useTranslation();
   const [ initSchedule, setInitSchedule ] = useState();
@@ -697,7 +698,7 @@ export default function JobSchedule({ initialSchedule, onChange = () => null }) 
       </div>
       <div className={clsx(classes.secondColumn, isMobile ? classes.helperMobile : classes.helper)}>
         <FormLabel component='legend'>{t('jobs.executionPreview')}</FormLabel>
-        <SchedulePreview schedule={schedules[scheduleType]} scheduleType={scheduleType} expiresAt={expiresAt} />
+        <SchedulePreview schedule={schedules[scheduleType]} scheduleType={scheduleType} expiresAt={expiresAt} timezone={timezone} />
       </div>
     </div>
 

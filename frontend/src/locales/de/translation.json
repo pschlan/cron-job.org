@@ -236,7 +236,8 @@
       "custom": "Benutzerdefiniert",
       "noExecutionsWarning": "Es konnten keine Ausführungen bestimmt werden. Bitte stellen Sie sicher, dass Sie mindestens einen Eintrag pro Feld ausgewählt haben.",
       "expires": "Terminplan läuft ab",
-      "expiresAt": "am"
+      "expiresAt": "am",
+      "jobTimezoneNote": "In der Zeitzone dieses Jobs ({{timezone}})."
     },
     "headers": "Header",
     "common": "Allgemein",

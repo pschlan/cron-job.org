@@ -236,7 +236,8 @@
       "custom": "Custom",
       "noExecutionsWarning": "No executions determined. Please ensure you have selected at least one item in every field.",
       "expires": "Schedule expires",
-      "expiresAt": "on"
+      "expiresAt": "on",
+      "jobTimezoneNote": "In this job's individual timezone ({{timezone}})."
     },
     "headers": "Headers",
     "common": "Common",

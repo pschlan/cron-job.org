@@ -540,7 +540,7 @@ export default function JobEditor({ match }) {
 
         <fieldset className={classes.fieldSet}>
           <FormLabel component='legend'>{t('jobs.executionSchedule')}</FormLabel>
-          <JobSchedule initialSchedule={job.schedule || {}} onChange={sched => setSchedule(sched)} />
+          <JobSchedule initialSchedule={job.schedule || {}} timezone={timezone} onChange={sched => setSchedule(sched)} />
         </fieldset>
 
         <fieldset className={classes.fieldSet}>
