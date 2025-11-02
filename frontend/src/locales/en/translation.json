@@ -249,6 +249,8 @@
     "enableJob": "Enable job",
     "saveResponses": "Save responses in job history",
     "timezone": "Time zone",
+    "localTimezone": "Local time zone",
+    "jobTimezone": "Job time zone",
     "editJob": "Edit cronjob",
     "editJobHeading": "Edit cronjob: {{jobTitle}}",
     "jobHistoryHeading": "Execution history: {{jobTitle}}",

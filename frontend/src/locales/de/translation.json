@@ -249,6 +249,8 @@
     "enableJob": "Job aktivieren",
     "saveResponses": "Antwort-Daten in Job-Verlauf speichern",
     "timezone": "Zeitzone",
+    "localTimezone": "Lokale Zeitzone",
+    "jobTimezone": "Job-Zeitzone",
     "editJob": "Cronjob bearbeiten",
     "editJobHeading": "Cronjob bearbeiten: {{jobTitle}}",
     "jobHistoryHeading": "Ausführungs-Verlauf: {{jobTitle}}",

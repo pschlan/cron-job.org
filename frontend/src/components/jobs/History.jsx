@@ -1,6 +1,6 @@
 import React from 'react';
 import Breadcrumbs from '../misc/Breadcrumbs';
-import { TableContainer, Paper, LinearProgress, Typography, Button, useTheme } from '@material-ui/core';
+import { TableContainer, Paper, LinearProgress, Typography, Button, useTheme, Box, Switch, Tooltip as MuiTooltip } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
 import { useJob } from '../../hooks/useJobs';
 import NotFound from '../misc/NotFound';
@@ -34,9 +34,11 @@ export default function History({ match }) {
   const [ history, setHistory ] = useState([]);
   const [ isLoading, setIsLoading ] = useState(true);
   const [ chartData, setChartData ] = useState(null);
+  const [ useJobTimezone, setUseJobTimezone ] = useState(false);
   const { isMobile } = useViewport();
   const theme = useTheme();
   const tick = { fill: theme.palette.text.primary };
+  const localTimezone = moment.tz.guess();
 
   useEffect(() => {
     const doRefresh = async () => {
@@ -76,6 +78,13 @@ export default function History({ match }) {
     }
   }, [history]);
 
+  function m(timestamp) {
+    if (useJobTimezone && job && job.schedule && job.schedule.timezone) {
+      return moment(timestamp).tz(job.schedule.timezone);
+    }
+    return moment(timestamp);
+  }
+
   function formatTooltip(value, name) {
     return [
       formatMs(value, t),
@@ -98,12 +107,12 @@ export default function History({ match }) {
           {log.isPrediction && <IconAvatar icon={ScheduleIcon} />}
           {log.status === JobStatus.OK && <IconAvatar color='green' icon={SuccessIcon} />}
           {log.status >= JobStatus.FAILED_DNS && <IconAvatar color='orange' icon={ErrorIcon} />}
-          {!log.isPrediction && <div>{moment(log.date * 1000).calendar()}</div>}
+          {!log.isPrediction && <div>{m(log.date * 1000).calendar()}</div>}
       </div>
     },
     {
       head: t('jobs.scheduled'),
-      cell: log => moment(log.datePlanned * 1000).calendar()
+      cell: log => m(log.datePlanned * 1000).calendar()
     },
     {
       head: t('jobs.jitter'),
@@ -124,7 +133,7 @@ export default function History({ match }) {
     },
     {
       head: t('common.actions'),
-      cell: log => !log.isPrediction && <HistoryDetailsButton log={log} />
+      cell: log => !log.isPrediction && <HistoryDetailsButton log={log} moment={m} />
     }
   ];
 
@@ -152,16 +161,25 @@ export default function History({ match }) {
           component={RouterLink}
           to={`${urlPrefix}/${jobId}`}
           >{t('jobs.editJob')}</Button>
+      </>} otherElements={<>
+        {job && job.schedule && job.schedule.timezone && job.schedule.timezone !== localTimezone &&
+          <Box display='flex' flexDirection='row' alignItems='center' mr={2}>
+            <MuiTooltip title={localTimezone} arrow><Typography noWrap>{t('jobs.localTimezone')}</Typography></MuiTooltip>
+            <Switch
+              checked={useJobTimezone}
+              onChange={({target}) => setUseJobTimezone(target.checked)} />
+            <MuiTooltip title={job.schedule.timezone} arrow><Typography noWrap>{t('jobs.jobTimezone')}</Typography></MuiTooltip>
+          </Box>}
       </>}>
       {t('jobs.jobHistoryHeading', { jobTitle: job.title || job.url })}
     </Heading>
     {chartData && chartData.length > 2 && <>
         <ResponsiveContainer width='100%' height={200}>
         <AreaChart data={chartData} margin={{right: 30, left: 10, bottom: 20, top: 10}}>
-          <XAxis dataKey='date' type='category' tick={tick} tickFormatter={value => moment(value*1000).format('LT')} interval={isMobile ? 6 : 2} />
+          <XAxis dataKey='date' type='category' tick={tick} tickFormatter={value => m(value*1000).format('LT')} interval={isMobile ? 6 : 2} />
           <YAxis type='number' tick={tick} tickFormatter={x => formatMs(x, t)} tickCount={3} />
 
-          <Tooltip contentStyle={{backgroundColor: theme.palette.background.paper}} formatter={formatTooltip} labelFormatter={value => moment(value*1000).format('LLLL')} />
+          <Tooltip contentStyle={{backgroundColor: theme.palette.background.paper}} formatter={formatTooltip} labelFormatter={value => m(value*1000).format('LLLL')} />
 
           {TimingFields.map((item, index) =>
             <Area type='monotone' dataKey={item} key={item} stackId='timing' stroke={theme.palette.type === 'dark' ? ChartColorsDark[index] : ChartColors[index]} fill={ChartColors[index]} />)}

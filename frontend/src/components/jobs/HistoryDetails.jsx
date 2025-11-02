@@ -3,12 +3,11 @@ import { Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography, 
 import { useTranslation } from 'react-i18next';
 import { JobStatus, jobStatusText } from '../../utils/Constants';
 import { getJobHistoryDetails } from '../../utils/API';
-import moment from 'moment';
 import Timing from './Timing';
 import Code from '../misc/Code';
 import Headers from '../misc/Headers';
 
-export default function HistoryDetails({ log, open, onClose }) {
+export default function HistoryDetails({ log, open, onClose, moment }) {
   const { t } = useTranslation();
   const [ isLoading, setIsLoading ] = useState(true);
   const onCloseHook = useRef(onClose, []);

@@ -10,7 +10,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export default function HistoryDetailsButton({ log }) {
+export default function HistoryDetailsButton({ log, moment }) {
   const classes = useStyles();
   const { t } = useTranslation();
   const [ isOpen, setIsOpen ] = useState(false);
@@ -25,6 +25,6 @@ export default function HistoryDetailsButton({ log }) {
       >
       {t('common.details')}
     </Button>
-    {isOpen && <HistoryDetails log={log} open={isOpen} onClose={() => setIsOpen(false)} />}
+    {isOpen && <HistoryDetails log={log} open={isOpen} onClose={() => setIsOpen(false)} moment={moment} />}
   </>;
 }

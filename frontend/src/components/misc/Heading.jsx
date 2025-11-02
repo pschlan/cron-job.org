@@ -8,7 +8,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function Heading({ children, actionButtons }) {
+export default function Heading({ children, actionButtons, otherElements }) {
   const classes = useStyles();
   const { isMobile } = useViewport();
 
@@ -18,11 +18,15 @@ export default function Heading({ children, actionButtons }) {
 
   return isMobile ? <>
       <Box>{heading}</Box>
-      {actionButtons && <Box mt={2} mb={4}>{actionButtons}</Box>}
+      {actionButtons && <Box mt={2} mb={otherElements ? 2 : 4}>{actionButtons}</Box>}
+      {otherElements && <Box mb={4}>{otherElements}</Box>}
     </> : <Box display='flex' mb={2} alignItems='center'>
     <Box pr={1} flexGrow={1} className={classes.titleBox}>
       {heading}
     </Box>
+    {otherElements && <Box pl={1}>
+      {otherElements}
+    </Box>}
     {actionButtons && <Box pl={1}>
       {actionButtons}
     </Box>}
