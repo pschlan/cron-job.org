@@ -226,7 +226,7 @@ export default function Table({ size, columns, items, empty, footer, loading=fal
                   startIcon={<ActionsIcon />}
                   endIcon={<ExpandIcon />}
                   text={t('common.actions')}
-                  items={multiActions}
+                  items={multiActions.filter(x => !x.predicate || x.predicate(selectedRows))}
                   onClickItem={item => onMultiActionClick(item)}
                   />
               </Box>}

@@ -540,16 +540,29 @@ class JobManager {
           continue;
         }
 
-        if ($action === 'enable') {
-          $job->enabled = true;
-        } else if ($action === 'disable') {
+        if ($action === 'clone') {
+          $job->title .= ' (' . $args->suffix . ')';
           $job->enabled = false;
-        } else if ($action === 'move') {
-          $job->folderId = $args->folderId;
-        }
+          $job->type = \chronos\JobType::DEFAULT;
 
-        if (!$this->updateJob($job)) {
-          $result = false;
+          $jobId = $this->createJob($job);
+          if (!$jobId) {
+            $result = false;
+          }
+
+        } else {
+          if ($action === 'enable') {
+            $job->enabled = true;
+          } else if ($action === 'disable') {
+            $job->enabled = false;
+          } else if ($action === 'move') {
+            $job->folderId = $args->folderId;
+          }
+
+          if (!$this->updateJob($job)) {
+            $result = false;
+          }
+
         }
       }
 

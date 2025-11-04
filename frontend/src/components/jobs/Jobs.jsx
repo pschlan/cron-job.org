@@ -11,6 +11,7 @@ import EnableIcon from '@material-ui/icons/AlarmOnOutlined';
 import DisableIcon from '@material-ui/icons/AlarmOffOutlined';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FolderIcon from '@material-ui/icons/FolderOutlined';
+import CloneIcon from '@material-ui/icons/FileCopy';
 import { Link as RouterLink } from 'react-router-dom';
 import Breadcrumbs from '../misc/Breadcrumbs';
 import useJobs from '../../hooks/useJobs';
@@ -117,6 +118,8 @@ export default function Jobs({ match }) {
     }
   ];
 
+  const MULTI_CLONE_MAX_ITEMS = 10;
+
   const MULTI_ACTIONS = [
     {
       icon: <EnableIcon />,
@@ -135,6 +138,12 @@ export default function Jobs({ match }) {
       icon: <FolderIcon />,
       text: t('jobs.move'),
       onExecute: rows => setMoveMassAction({ rows, folderId })
+    },
+    {
+      icon: <CloneIcon />,
+      text: t('common.clone'),
+      onExecute: rows => jobMassAction(rows, 'clone', { suffix: t('jobs.cloneSuffix') }),
+      predicate: rows => rows && rows.length <= MULTI_CLONE_MAX_ITEMS
     },
     {
       divider: true

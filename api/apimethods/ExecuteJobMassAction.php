@@ -22,8 +22,9 @@ class ExecuteJobMassAction extends AbstractAPIMethod {
          isset($request->jobIds)
       && is_array($request->jobIds)
       && isset($request->action)
-      && in_array($request->action, ['enable', 'disable', 'delete', 'move'])
+      && in_array($request->action, ['enable', 'disable', 'delete', 'move', 'clone'])
       && ($request->action !== 'move' || isset($request->folderId))
+      && ($request->action !== 'clone' || (isset($request->suffix) && count($request->jobIds) <= 10))
     );
   }
 
