@@ -261,6 +261,11 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 		std::cout << "App::processJobs(): " << prioSlotIt->second.size() << " jobs with priority " << static_cast<int>(prioSlotIt->first) << std::endl;
 		for(auto req : prioSlotIt->second)
 		{
+			if (req->result->jobType == JobType_t::MONITORING)
+			{
+				req->result->datePlanned += deferMonitorJobsMs;
+			}
+
 			const auto &wt = workerThreads[req->result->jobType == JobType_t::MONITORING ? ((i % numMonitoringThreads) + numThreads) : (i % numThreads)];
 			wt->addJob(req);
 			++i;
