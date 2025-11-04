@@ -7,6 +7,7 @@ import HealthyIcon from '@material-ui/icons/CheckCircleOutline';
 import DisabledIcon from '@material-ui/icons/RemoveCircleOutline';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { useTranslation } from 'react-i18next';
+import clsx from 'clsx';
 
 function determineMonitorHealth(monitor) {
   const healthSamples = monitor.timeSeriesData.last24Hours.slice(-2);
@@ -51,27 +52,22 @@ const useStyles = makeStyles(theme => ({
     alignItems: 'flex-end',
     flexDirection: 'column'
   },
-  healthIndicator: {
-    '& .MuiIcon-root': {
-      marginTop: theme.spacing(0.5),
-      marginRight: theme.spacing(0.5)
-    }
+  healthIndicatorBase: {
+    display: 'flex',
+    alignItems: 'center',
+    columnGap: theme.spacing(0.5)
   },
   warning: {
-    color: 'darkorange',
-    display: 'flex'
+    color: 'darkorange'
   },
   error: {
-    color: 'red',
-    display: 'flex'
+    color: 'red'
   },
   ok: {
-    color: 'darkgreen',
-    display: 'flex'
+    color: 'darkgreen'
   },
   disabled: {
-    color: 'grey',
-    display: 'flex'
+    color: 'grey'
   },
   accordionSummary: {
     fontSize: '1.25rem'
@@ -82,24 +78,24 @@ function HealthIndicator({ health, okText, warningText, errorText }) {
   const classes = useStyles();
   const { t } = useTranslation();
 
-  return <div className={classes.healthIndicator}>
-    {health === 'OK' && <span className={classes.ok}>
+  return <>
+    {health === 'OK' && <div className={clsx(classes.healthIndicatorBase, classes.ok)}>
       <Icon component={HealthyIcon} fontSize='small' />
-      <span>{okText}</span>
-    </span>}
-    {health === 'WARNING' && <span className={classes.warning}>
+      <div>{okText}</div>
+    </div>}
+    {health === 'WARNING' && <div className={clsx(classes.healthIndicatorBase, classes.warning)}>
       <Icon component={WarningIcon} fontSize='small' />
-      {warningText}
-    </span>}
-    {health === 'ERROR' && <span className={classes.error}>
+      <div>{warningText}</div>
+    </div>}
+    {health === 'ERROR' && <div className={clsx(classes.healthIndicatorBase, classes.error)}>
       <Icon component={ErrorIcon} fontSize='small' />
-      {errorText}
-    </span>}
-    {health === 'DISABLED' && <span className={classes.disabled}>
+      <div>{errorText}</div>
+    </div>}
+    {health === 'DISABLED' && <div className={clsx(classes.healthIndicatorBase, classes.disabled)}>
       <Icon component={DisabledIcon} fontSize='small' />
-      {t('status.disabled')}
-    </span>}
-  </div>;
+      <div>{t('status.disabled')}</div>
+    </div>}
+  </>;
 }
 
 export default function MonitorSummary({ monitor, timespan }) {
