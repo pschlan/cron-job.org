@@ -114,7 +114,7 @@ const LANGUAGE_RESOURCES = {
   ar: {
     translation: translationAR
   },
-    id: {
+  id: {
     translation: translationID
   }
 };

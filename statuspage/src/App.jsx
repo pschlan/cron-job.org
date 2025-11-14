@@ -24,7 +24,7 @@ import translationPtBR from './locales/pt_BR/translation.json';
 import translationZhCN from './locales/zh_CN/translation.json';
 import translationHU from './locales/hu/translation.json';
 import translationTrTR from './locales/tr_TR/translation.json';
-import translationID from './locales/ID/translation.json';
+import translationID from './locales/id/translation.json';
 
 import 'moment/locale/da';
 import 'moment/locale/de';
