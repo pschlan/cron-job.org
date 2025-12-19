@@ -2,7 +2,7 @@
 require_once('config/config.inc.php');
 require_once('config/denylists.inc.php');
 require_once('lib/APIMethod.php');
-require_once('lib/RecaptchaVerifier.php');
+require_once('lib/TurnstileVerifier.php');
 require_once('resources/User.php');
 
 class CreateAccount extends AbstractAPIMethod {
@@ -38,7 +38,7 @@ class CreateAccount extends AbstractAPIMethod {
     }
 
     return (
-          (isset($request->token) || $config['recaptchaSecretKey'] === null)
+          (isset($request->token) || $config['turnstileSecretKey'] === null)
       &&  isset($request->firstName)
       &&  isset($request->lastName)
       &&  isset($request->email)
@@ -52,7 +52,7 @@ class CreateAccount extends AbstractAPIMethod {
   public function execute($request, $sessionToken, $language) {
     global $config;
 
-    if ($config['recaptchaSecretKey'] !== null && !RecaptchaVerifier::verify($config['recaptchaSecretKey'], $request->token)) {
+    if ($config['turnstileSecretKey'] !== null && !TurnstileVerifier::verify($config['turnstileSecretKey'], $request->token)) {
       throw new ForbiddenAPIException();
     }
 

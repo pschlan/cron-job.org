@@ -2,7 +2,7 @@
 require_once('config/denylists.inc.php');
 require_once('lib/APIMethod.php');
 require_once('resources/Job.php');
-require_once('lib/RecaptchaVerifier.php');
+require_once('lib/TurnstileVerifier.php');
 
 class SubmitJobTestRun extends AbstractAPIMethod {
   static function name() {
@@ -38,14 +38,14 @@ class SubmitJobTestRun extends AbstractAPIMethod {
       && is_numeric($request->jobId)
       && isset($request->job)
       && is_object($request->job)
-      && (isset($request->token) || $config['recaptchaSecretKey'] === null)
+      && (isset($request->token) || $config['turnstileSecretKey'] === null)
     );
   }
 
   public function execute($request, $sessionToken, $language) {
     global $config;
 
-    if ($config['recaptchaSecretKey'] !== null && !RecaptchaVerifier::verify($config['recaptchaSecretKey'], $request->token)) {
+    if ($config['turnstileSecretKey'] !== null && !TurnstileVerifier::verify($config['turnstileSecretKey'], $request->token)) {
       throw new ForbiddenAPIException();
     }
 

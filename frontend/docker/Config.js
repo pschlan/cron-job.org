@@ -18,7 +18,7 @@ export const Config = {
     'pt_BR': 'Português Brasil'
   },
   'fallbackLanguage': 'en',
-  'recaptchaSiteKey': null,
+  'turnstileSiteKey': null,
   'privacyPolicyURL': '#',
   'termsOfServiceURL': '#',
   'refundPolicyURL': '#',

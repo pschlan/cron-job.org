@@ -13,8 +13,8 @@ export const Config = {
   //! @note The URL of the API webserver (/api/ folder in this repo)
   'apiURL': 'https://api.example.com/',
 
-  //! @note Put your reCAPTCHA site key here.
-  'recaptchaSiteKey': 'PLACE_RECAPTCHA_SITE_KEY_HERE',
+  //! @note Put your turnstile site key here.
+  'turnstileSiteKey': 'PLACE_TURNSTILE_SITE_KEY_HERE',
 
   /****************************************************************************************
    ******** The following settings might be kept as is. Customization is optional. ********

@@ -22,11 +22,11 @@
     "react-beautiful-dnd": "^13.0.0",
     "react-copy-to-clipboard": "^5.0.2",
     "react-dom": "^16.13.1",
-    "react-google-recaptcha": "^2.1.0",
     "react-i18next": "^11.5.1",
     "react-redux": "^7.2.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "^5.0.0",
+    "react-turnstile": "^1.1.4",
     "recharts": "^2.1.14",
     "redux": "^4.0.5"
   },

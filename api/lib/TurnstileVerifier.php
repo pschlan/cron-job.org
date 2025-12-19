@@ -1,6 +1,6 @@
 <?php
-class RecaptchaVerifier {
-  const SERVICE_URL = 'https://www.google.com/recaptcha/api/siteverify';
+class TurnstileVerifier {
+  const SERVICE_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
   public static function verify($secret, $response) {
     $ch = curl_init();

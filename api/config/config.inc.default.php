@@ -51,8 +51,8 @@ $config = array(
   'accountConfirmationTokenSecret'  => 'PLACE_RANDOM_STRING_HERE',
   'statusBadgeTokenSecret'          => 'PLACE_RANDOM_STRING_HERE',
 
-  //! @note Put your reCAPTCHA secret key here. Set to null to disable reCAPTCHA.
-  'recaptchaSecretKey'              => 'PLACE_RECAPTCHA_SECRET_KEY_HERE',
+  //! @note Put your turnstile secret key here. Set to null to disable turnstile.
+  'turnstileSecretKey'              => 'PLACE_TURNSTILE_SECRET_KEY_HERE',
 
   //! @note If you want to use Yubico OTP for Yubikey MFA devices, adjust this.
   'yubicoOTP' => array(

@@ -1,12 +1,12 @@
-import React, { useRef, useState } from 'react';
-import { Box, Button, Checkbox, FormControlLabel, Grid, Link, makeStyles, Typography } from '@material-ui/core';
+import React, { useState } from 'react';
+import { Box, Button, Checkbox, FormControlLabel, Grid, Link, makeStyles, Typography, useTheme } from '@material-ui/core';
 import { Alert, AlertTitle } from '@material-ui/lab';
+import Turnstile from 'react-turnstile';
 import { Link as RouterLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { createAccount } from '../../utils/API';
 import ValidatingTextField from '../misc/ValidatingTextField';
 import { RegexPatterns } from '../../utils/Constants';
-import ReCAPTCHA from 'react-google-recaptcha';
 import { Config } from '../../utils/Config';
 import moment from 'moment-timezone';
 
@@ -35,7 +35,9 @@ export default function Signup() {
   const [acceptPrivacy, setAcceptPrivacy] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState();
-  const recaptchaRef = useRef();
+  const theme = useTheme();
+  const [ turnstileToken, setTurnstileToken ] = useState(null);
+  const turnstileReady = Config.turnstileSiteKey === null || turnstileToken !== null;
 
   function submit(event) {
     event.preventDefault();
@@ -51,8 +53,8 @@ export default function Signup() {
     setIsLoading(true);
     setMessage();
 
-    const doCreateAccount = token => {
-      return createAccount(token, firstName, lastName, email, password1, moment.tz.guess())
+    const doCreateAccount = (token, tokenType) => {
+      return createAccount(token, tokenType, firstName, lastName, email, password1, moment.tz.guess())
         .then(() => {
           setMessage({
             severity: 'success',
@@ -74,23 +76,13 @@ export default function Signup() {
         });
     };
 
-    if (Config.recaptchaSiteKey !== null) {
-      recaptchaRef.current.executeAsync()
-        .then(doCreateAccount)
-        .catch(() => {
-          setMessage({
-            severity: 'error',
-            text: t('signup.recaptchaError')
-          });
-        })
+    if (Config.turnstileSiteKey !== null) {
+      doCreateAccount(turnstileToken, 'turnstile')
         .finally(() => {
-          if (recaptchaRef.current && (!message || message.severity !== 'success')) {
-            recaptchaRef.current.reset();
-          }
           setIsLoading(false);
         });
     } else {
-      doCreateAccount(null)
+      doCreateAccount(null, null)
         .finally(() => {
           setIsLoading(false);
         });
@@ -184,10 +176,17 @@ export default function Signup() {
               patternErrorText={t('settings.invalidPassword')} />
           </Grid>
         </Grid>
-        {Config.recaptchaSiteKey !== null && <ReCAPTCHA
-          ref={recaptchaRef}
-          sitekey={Config.recaptchaSiteKey}
+        {Config.turnstileSiteKey !== null && <Turnstile
+          sitekey={Config.turnstileSiteKey}
+          theme={theme.palette.type === 'dark' ? 'dark' : 'light'}
           size='invisible'
+          onVerify={(token) => setTurnstileToken(token)}
+          onError={() => {
+            setMessage({
+              severity: 'error',
+              text: t('signup.recaptchaError')
+            });
+          }}
           />}
         {(password1.length > 0 && password2.length > 0 && password1 !== password2) &&
           <Alert severity='error'>
@@ -214,7 +213,7 @@ export default function Signup() {
           variant="contained"
           color="primary"
           className={classes.submit}
-          disabled={isLoading || !firstName.length || !lastName.length || !email.match(RegexPatterns.email) || !password1.match(RegexPatterns.password) || password1 !== password2 || !acceptToS || !acceptPrivacy}>
+          disabled={isLoading || !firstName.length || !lastName.length || !email.match(RegexPatterns.email) || !password1.match(RegexPatterns.password) || password1 !== password2 || !acceptToS || !acceptPrivacy || !turnstileReady}>
           {t('signup.createAccount')}
         </Button>
       </>}

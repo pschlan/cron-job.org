@@ -289,9 +289,10 @@ export function resetPassword(token, newPassword) {
   }, false);
 }
 
-export function createAccount(token, firstName, lastName, email, password, timezone) {
+export function createAccount(token, tokenType, firstName, lastName, email, password, timezone) {
   return performRequest('CreateAccount', {
     token,
+    tokenType,
     firstName,
     lastName,
     email,
@@ -319,11 +320,12 @@ export function updateUserNewsletterSubscribe(subscribe) {
   });
 }
 
-export function submitJobTestRun(token, jobId, job) {
+export function submitJobTestRun(token, tokenType, jobId, job) {
   return performRequest('SubmitJobTestRun', {
     jobId,
     job,
-    token
+    token,
+    tokenType
   });
 }
 
