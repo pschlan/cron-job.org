@@ -1,0 +1,36 @@
+{
+  "common": {
+    "poweredBy": "didukung oleh",
+    "refresh": "Segarkan"
+  },
+  "timespan": {
+    "1year": "1 tahun",
+    "6months": "6 bulan",
+    "1month": "1 bulan",
+    "1week": "1 minggu",
+    "1day": "1 hari"
+  },
+  "status": {
+    "availability": "Ketersediaan",
+    "availabilityWarning": "Peringatan ketersediaan",
+    "availabilityError": "Kesalahan ketersediaan",
+    "lowAvailabilityText": "Saat ini kami mengalami penurunan ketersediaan sebesar {{percent}} % dalam 30 menit terakhir.",
+    "latency": "Latensi",
+    "latencyWarning": "Peringatan latensi",
+    "latencyError": "Kesalahan latensi",
+    "highLatencyText": "Saat ini kami mengalami latensi tinggi yang tidak biasa sebesar {{ms}} ms dalam 30 menit terakhir.",
+    "healthy": "Sehat",
+    "allSystemsRunAsExpected": "Semua sistem saat ini berjalan seperti yang diharapkan.",
+    "disabled": "Dinonaktifkan"
+  },
+  "error": {
+    "404": {
+      "title": "Halaman Tidak Ditemukan",
+      "text": "Halaman status yang diminta tidak dapat ditemukan. Pastikan tautan Anda benar dan coba lagi."
+    },
+    "other": {
+      "title": "Kesalahan Mengambil Halaman Status",
+      "text": "Maaf, kami tidak dapat mengambil halaman status saat ini. Silakan coba lagi nanti."
+    }
+  }
+}

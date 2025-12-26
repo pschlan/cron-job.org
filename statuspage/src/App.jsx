@@ -24,6 +24,7 @@ import translationPtBR from './locales/pt_BR/translation.json';
 import translationZhCN from './locales/zh_CN/translation.json';
 import translationHU from './locales/hu/translation.json';
 import translationTrTR from './locales/tr_TR/translation.json';
+import translationID from './locales/id/translation.json';
 
 import 'moment/locale/da';
 import 'moment/locale/de';
@@ -37,6 +38,7 @@ import 'moment/locale/zh-tw';
 import 'moment/locale/pt-br';
 import 'moment/locale/hu';
 import 'moment/locale/tr';
+import 'moment/locale/id';
 import moment from 'moment';
 import { Config } from './utils/Config';
 
@@ -79,6 +81,9 @@ const LANGUAGE_RESOURCES = {
   },
   tr: {
     translation: translationTrTR
+  },
+  id: {
+    translation: translationID
   }
 };
 
