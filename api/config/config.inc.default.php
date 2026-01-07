@@ -105,5 +105,8 @@ $config = array(
   'languages'                       => ['en', 'de', 'fr', 'zh_TW', 'ro', 'pl', 'pt_BR', 'zh_CN', 'tr_TR', 'id'],
 
   //! @note Lifetime for test run meta data in redis cache.
-  'testRunLifetime'                 => 5 * 60
+  'testRunLifetime'                 => 5 * 60,
+
+  //! @note Lifetime for status badges in redis cache.
+  'statusBadgeCacheTimeSeconds'     => 60
 );
