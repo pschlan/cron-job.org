@@ -3,6 +3,8 @@ name: Build and deploy frontend
 on:
   push:
     branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
 jobs:
   build-frontend:
@@ -34,6 +36,7 @@ jobs:
     - run: npm run build
       working-directory: ./frontend
     - name: Deploy to S3/CloudFront
+      if: github.event_name == 'push'
       run: |
         aws s3 sync ./build s3://$FRONTEND_S3_BUCKET --exclude "*.map" --exclude "index.html"
         aws s3 cp ./build/index.html s3://$FRONTEND_S3_BUCKET/index.html --metadata-directive REPLACE --cache-control max-age=0,s-maxage=86400 --content-type text/html
