@@ -5,8 +5,8 @@
 version: "3.9"
 services:
   mysql-master:
-    image: mysql:8
-    command: --default-authentication-plugin=mysql_native_password --sql_mode="" --skip-name-resolve --tls-version=""
+    image: mysql:8.4
+    command: --skip-name-resolve
     environment:
       MYSQL_ROOT_PASSWORD: ${MASTER_MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MASTER_MYSQL_DATABASE}
@@ -18,8 +18,8 @@ services:
       - ./database/struct_master.sql:/docker-entrypoint-initdb.d/00_struct_master.sql
       - ./docker-data/config/config_master.sql:/docker-entrypoint-initdb.d/01_config_master.sql
   mysql-node:
-    image: mysql:8
-    command: --default-authentication-plugin=mysql_native_password --sql_mode="" --skip-name-resolve --tls-version=""
+    image: mysql:8.4
+    command: --skip-name-resolve
     environment:
       MYSQL_ROOT_PASSWORD: ${NODE_MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${NODE_MYSQL_DATABASE}
