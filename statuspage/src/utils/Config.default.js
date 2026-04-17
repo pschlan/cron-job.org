@@ -29,7 +29,8 @@ export const Config = {
     'zh_CN': '简体中文',
     'hu': 'Magyar',
     'tr': 'Türkçe',
-    'id': 'Bahasa Indonesia'
+    'id': 'Bahasa Indonesia',
+    'es': 'Español'
   },
 
   //! @note Fallback language to use when the user's auto-determined language is not supported.
