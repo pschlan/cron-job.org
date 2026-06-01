@@ -24,6 +24,12 @@ SQLite_DB::SQLite_DB(const std::string &fileName, const bool readOnly, const int
 		readOnly ? SQLITE_OPEN_READONLY : SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nullptr);
 	if(res != SQLITE_OK)
 	{
+		if(handle != nullptr)
+		{
+			sqlite3_close(handle);
+			handle = nullptr;
+		}
+
 		std::stringstream err;
 		err << "Failed to open database " << strFileName
 			<< ": " << sqlite3_errstr(res);
@@ -33,6 +39,12 @@ SQLite_DB::SQLite_DB(const std::string &fileName, const bool readOnly, const int
 	res = sqlite3_busy_timeout(handle, BusyTimeoutMs);
 	if(res != SQLITE_OK)
 	{
+		if(handle != nullptr)
+		{
+			sqlite3_close(handle);
+			handle = nullptr;
+		}
+
 		std::stringstream err;
 		err << "Failed to set busy timeout:"
 			<< sqlite3_errstr(res);

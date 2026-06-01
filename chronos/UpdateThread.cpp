@@ -180,7 +180,7 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 	}
 	catch(const std::exception &ex)
 	{
-		std::cout << "Error SQLite query: " << ex.what() << std::endl;
+		std::cerr << "Error SQLite query: " << ex.what() << std::endl;
 		return;
 	}
 
