@@ -221,7 +221,7 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 			i >= numThreads ? deferMonitorJobsMs : 0));
 	}
 
-	std::map<uint8_t, std::vector<HTTPRequest *>> requestsByPriority;
+	std::map<uint8_t, std::vector<std::unique_ptr<HTTPRequest>>> requestsByPriority;
 	MYSQL_ROW row;
 	auto res = db->query("SELECT DISTINCT(`timezone`) FROM `job` WHERE `enabled`=1");
 	while((row = res->fetchRow()) != nullptr)
@@ -259,7 +259,7 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 	for(auto prioSlotIt = requestsByPriority.rbegin(); prioSlotIt != requestsByPriority.rend(); ++prioSlotIt)
 	{
 		std::cout << "App::processJobs(): " << prioSlotIt->second.size() << " jobs with priority " << static_cast<int>(prioSlotIt->first) << std::endl;
-		for(auto req : prioSlotIt->second)
+		for(auto &req : prioSlotIt->second)
 		{
 			if (req->result->jobType == JobType_t::MONITORING)
 			{
@@ -267,7 +267,7 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 			}
 
 			const auto &wt = workerThreads[req->result->jobType == JobType_t::MONITORING ? ((i % numMonitoringThreads) + numThreads) : (i % numThreads)];
-			wt->addJob(req);
+			wt->addJob(req.release());
 			++i;
 		}
 	}
@@ -303,7 +303,7 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 }
 
 void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int wday, int year, time_t timestamp, const std::string &timeZone,
-	std::map<uint8_t, std::vector<HTTPRequest *>> &requestsByPriority)
+	std::map<uint8_t, std::vector<std::unique_ptr<HTTPRequest>>> &requestsByPriority)
 {
 	std::cout 	<< "App::processJobsForTimeZone(): Called for "
 				<< "hour = " << hour << ", "
@@ -415,7 +415,7 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 			req->result->title		= row[14];
 			req->result->jobType  	= static_cast<JobType_t>(atoi(row[15]));
 
-			requestsByPriority[executionPriority].push_back(req.release());
+			requestsByPriority[executionPriority].push_back(std::move(req));
 		}
 	}
 
