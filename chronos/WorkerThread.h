@@ -51,7 +51,8 @@ namespace Chronos
 		std::shared_ptr<WorkerThread> keepAlive;
 		std::unique_ptr<CurlWorker> curlWorker;
 		std::queue<std::unique_ptr<HTTPRequest>> requestQueue;
-		std::size_t runningJobs = 0;
+		std::unordered_set<HTTPRequest *> runningJobs;
+		std::size_t runningJobsCount = 0;
 		std::thread workerThread;
 		std::size_t parallelJobs;
 		std::size_t deferMs;

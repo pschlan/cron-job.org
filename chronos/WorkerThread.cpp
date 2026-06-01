@@ -37,6 +37,17 @@ WorkerThread::WorkerThread(int mday, int month, int year, int hour, int minute, 
 
 WorkerThread::~WorkerThread()
 {
+	if(!runningJobs.empty())
+	{
+		std::cerr << "WorkerThread::~WorkerThread(): runningJobs is not empty: " << runningJobs.size() << ", " << runningJobsCount << std::endl;
+
+		for(const auto &job : runningJobs)
+		{
+			delete job;
+		}
+		runningJobs.clear();
+		runningJobsCount = 0;
+	}
 }
 
 void WorkerThread::addJob(std::unique_ptr<HTTPRequest> req)
@@ -62,15 +73,18 @@ void WorkerThread::runJobs()
 
 	inRunJobs = true;
 
-	while(runningJobs < parallelJobs && !requestQueue.empty())
+	while(runningJobsCount < parallelJobs && !requestQueue.empty())
 	{
-		HTTPRequest *job = requestQueue.front().release();
+		auto job = std::move(requestQueue.front());
 		requestQueue.pop();
 
-		++runningJobs;
+		runningJobs.insert(job.get());
+		++runningJobsCount;
 
-		job->onDone = std::bind(&WorkerThread::jobDone, this, job);
+		job->onDone = std::bind(&WorkerThread::jobDone, this, job.get());
 		job->submit(curlWorker.get());
+
+		job.release();
 	}
 
 	inRunJobs = false;
@@ -112,15 +126,16 @@ void WorkerThread::jobDone(HTTPRequest *req)
 	UpdateThread::getInstance()->addResult(std::move(req->result));
 
 	// clean up
+	runningJobs.erase(req);
 	delete req;
-	if(runningJobs > 0)
-		--runningJobs;
+	if (runningJobsCount > 0)
+		--runningJobsCount;
 
 	// start more jobs
 	runJobs();
 
 	// exit event loop when all requests have finished
-	if(runningJobs == 0 && curlWorker)
+	if(runningJobsCount == 0 && curlWorker)
 		curlWorker->stop();
 }
 
