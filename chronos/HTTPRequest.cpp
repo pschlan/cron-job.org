@@ -43,7 +43,8 @@ size_t curlHeaderFunction(char *buffer, size_t size, size_t nitems, void *userda
 {
 	size_t realSize = size * nitems;
 	std::string headerData(buffer, realSize);
-	static_cast<HTTPRequest *>(userdata)->processHeaders(headerData);
+	if(!static_cast<HTTPRequest *>(userdata)->processHeaders(headerData))
+		return 0;
 	return realSize;
 }
 
@@ -188,7 +189,7 @@ HTTPRequest::~HTTPRequest()
 	}
 }
 
-void HTTPRequest::processHeaders(const std::string &headers)
+bool HTTPRequest::processHeaders(const std::string &headers)
 {
 	if(headers.length() > sizeof("HTTP/1.1 000")
 		&& headers.find("HTTP/") == 0
@@ -202,17 +203,24 @@ void HTTPRequest::processHeaders(const std::string &headers)
 		{
 			result->statusText.pop_back();
 		}
-		return;
+		return true;
 	}
 
 	result->responseHeaders += headers;
+	if(result->responseHeaders.length() > maxSize)
+	{
+		result->responseHeaders = {};
+		return false;
+	}
+
+	return true;
 }
 
 bool HTTPRequest::processData(const std::string &data)
 {
 	result->responseBody += data;
 
-	if(result->responseBody.length() > maxSize)
+	if((result->responseBody.length() + result->responseHeaders.length()) > maxSize)
 	{
 		result->responseBody = {};
 		return false;
