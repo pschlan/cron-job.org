@@ -517,9 +517,9 @@ void HTTPRequest::submit(CurlWorker *worker)
 		addedToWorker = true;
 }
 
-HTTPRequest *HTTPRequest::fromURL(const std::string &url, int userID, size_t maxSize, int requestTimeout)
+std::unique_ptr<HTTPRequest> HTTPRequest::fromURL(const std::string &url, int userID, size_t maxSize, int requestTimeout)
 {
-	HTTPRequest *req = new HTTPRequest(maxSize, requestTimeout);
+	std::unique_ptr<HTTPRequest> req(new HTTPRequest(maxSize, requestTimeout));
 	req->result->userID = userID;
 	req->result->url = url;
 	req->url = url;

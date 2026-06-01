@@ -780,12 +780,12 @@ public:
             redirectSuccess = job.metaData.redirectSuccess;
         }
 
-        std::unique_ptr<Chronos::HTTPRequest> req(Chronos::HTTPRequest::fromURL(
+        std::unique_ptr<Chronos::HTTPRequest> req = Chronos::HTTPRequest::fromURL(
             Chronos::Utils::replaceVariables(job.data.url),
             job.identifier.userId,
             maxSize,
             requestTimeout
-        ));
+        );
         req->result->jobID          = job.identifier.jobId;
         req->result->datePlanned    = Chronos::Utils::getTimestampMS();
         req->result->notifyFailure 	= false;

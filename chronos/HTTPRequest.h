@@ -59,7 +59,7 @@ namespace Chronos
 		~HTTPRequest();
 
 	public:
-		static HTTPRequest *fromURL(const std::string &url, int userID, size_t maxSize, int requestTimeout);
+		static std::unique_ptr<HTTPRequest> fromURL(const std::string &url, int userID, size_t maxSize, int requestTimeout);
 
 		void submit(CurlWorker *worker);
 		void done(CURLcode res);
