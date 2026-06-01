@@ -46,9 +46,13 @@ struct CurlWorker::Callbacks
 
         if(what == CURL_POLL_REMOVE)
         {
-            if(sockInfo->evset)
-                ev_io_stop(worker->privateData->evLoop, &sockInfo->ev);
-            delete sockInfo;
+            if(sockInfo != nullptr)
+            {
+                if(sockInfo->evset)
+                    ev_io_stop(worker->privateData->evLoop, &sockInfo->ev);
+                delete sockInfo;
+            }
+            curl_multi_assign(worker->privateData->curlHandle, s, nullptr);
         }
         else
         {
