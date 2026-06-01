@@ -267,7 +267,7 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 			}
 
 			const auto &wt = workerThreads[req->result->jobType == JobType_t::MONITORING ? ((i % numMonitoringThreads) + numThreads) : (i % numThreads)];
-			wt->addJob(req.release());
+			wt->addJob(std::move(req));
 			++i;
 		}
 	}

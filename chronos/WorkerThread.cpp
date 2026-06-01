@@ -39,9 +39,9 @@ WorkerThread::~WorkerThread()
 {
 }
 
-void WorkerThread::addJob(HTTPRequest *req)
+void WorkerThread::addJob(std::unique_ptr<HTTPRequest> req)
 {
-	requestQueue.push(req);
+	requestQueue.push(std::move(req));
 }
 
 void WorkerThread::run()
@@ -64,7 +64,7 @@ void WorkerThread::runJobs()
 
 	while(runningJobs < parallelJobs && !requestQueue.empty())
 	{
-		HTTPRequest *job = requestQueue.front();
+		HTTPRequest *job = requestQueue.front().release();
 		requestQueue.pop();
 
 		++runningJobs;

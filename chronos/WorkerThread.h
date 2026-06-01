@@ -36,7 +36,7 @@ namespace Chronos
 		WorkerThread &operator=(WorkerThread &&other) = delete;
 
 	public:
-		void addJob(HTTPRequest *req);
+		void addJob(std::unique_ptr<HTTPRequest> req);
 		bool empty() const { return requestQueue.empty(); }
 		std::size_t numJobs() const { return requestQueue.size(); }
 		void run();
@@ -50,7 +50,7 @@ namespace Chronos
 	private:
 		std::shared_ptr<WorkerThread> keepAlive;
 		std::unique_ptr<CurlWorker> curlWorker;
-		std::queue<HTTPRequest *> requestQueue;
+		std::queue<std::unique_ptr<HTTPRequest>> requestQueue;
 		std::size_t runningJobs = 0;
 		std::thread workerThread;
 		std::size_t parallelJobs;
