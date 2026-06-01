@@ -122,12 +122,6 @@ void WorkerThread::jobDone(HTTPRequest *req)
 		++failedJobs;
 	}
 
-	if(!req->result->saveResponses)
-	{
-		req->result->responseHeaders.clear();
-		req->result->responseBody.clear();
-	}
-
 	// push result to result queue
 	UpdateThread::getInstance()->addResult(std::move(req->result));
 

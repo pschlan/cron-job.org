@@ -206,26 +206,33 @@ bool HTTPRequest::processHeaders(const std::string &headers)
 		return true;
 	}
 
-	result->responseHeaders += headers;
-	if(result->responseHeaders.length() > maxSize)
+	result->responseHeadersSize += headers.size();
+	if(result->responseHeadersSize > maxSize)
 	{
 		result->responseHeaders = {};
 		return false;
 	}
 
+	if(result->saveResponses)
+	{
+		result->responseHeaders += headers;
+	}
 	return true;
 }
 
 bool HTTPRequest::processData(const std::string &data)
 {
-	result->responseBody += data;
-
-	if((result->responseBody.length() + result->responseHeaders.length()) > maxSize)
+	result->responseBodySize += data.size();
+	if(result->responseBodySize + result->responseHeadersSize > maxSize)
 	{
 		result->responseBody = {};
 		return false;
 	}
 
+	if(result->saveResponses)
+	{
+		result->responseBody += data;
+	}
 	return true;
 }
 

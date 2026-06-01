@@ -73,6 +73,9 @@ namespace Chronos
 
 		JobType_t jobType = JobType_t::DEFAULT;
 		int maxFailures = 0;
+
+		std::size_t responseHeadersSize = 0;
+		std::size_t responseBodySize = 0;
 	};
 };
 
