@@ -33,8 +33,7 @@ namespace {
 size_t curlWriteFunction(char *buffer, size_t size, size_t nitems, void *userdata)
 {
 	size_t realSize = size * nitems;
-	std::string data(buffer, realSize);
-	if(!static_cast<HTTPRequest *>(userdata)->processData(data))
+	if(!static_cast<HTTPRequest *>(userdata)->processData(buffer, realSize))
 		return 0;
 	return realSize;
 }
@@ -42,8 +41,7 @@ size_t curlWriteFunction(char *buffer, size_t size, size_t nitems, void *userdat
 size_t curlHeaderFunction(char *buffer, size_t size, size_t nitems, void *userdata)
 {
 	size_t realSize = size * nitems;
-	std::string headerData(buffer, realSize);
-	if(!static_cast<HTTPRequest *>(userdata)->processHeaders(headerData))
+	if(!static_cast<HTTPRequest *>(userdata)->processHeaders(buffer, realSize))
 		return 0;
 	return realSize;
 }
@@ -189,14 +187,23 @@ HTTPRequest::~HTTPRequest()
 	}
 }
 
-bool HTTPRequest::processHeaders(const std::string &headers)
+bool HTTPRequest::processHeaders(const char *headers, size_t size)
 {
-	if(headers.length() > sizeof("HTTP/1.1 000")
-		&& headers.find("HTTP/") == 0
-		&& headers.at(8) == ' '
-		&& headers.at(12) == ' ')
+	if (size == 0)
 	{
-		result->statusText = headers.substr(13);
+		return true;
+	}
+	if (headers == nullptr)
+	{
+		return false;
+	}
+
+	if(size > sizeof("HTTP/1.1 000")
+		&& strncmp(headers, "HTTP/", 5) == 0
+		&& headers[8] == ' '
+		&& headers[12] == ' ')
+	{
+		result->statusText = std::string(headers + 13, size - 13);
 		while(!result->statusText.empty()
 			&& (result->statusText.back() == '\n'
 				|| result->statusText.back() == '\r'))
@@ -206,7 +213,7 @@ bool HTTPRequest::processHeaders(const std::string &headers)
 		return true;
 	}
 
-	result->responseHeadersSize += headers.size();
+	result->responseHeadersSize += size;
 	if(result->responseHeadersSize > maxSize)
 	{
 		result->responseHeaders = {};
@@ -215,14 +222,23 @@ bool HTTPRequest::processHeaders(const std::string &headers)
 
 	if(result->saveResponses)
 	{
-		result->responseHeaders += headers;
+		result->responseHeaders.append(headers, size);
 	}
 	return true;
 }
 
-bool HTTPRequest::processData(const std::string &data)
+bool HTTPRequest::processData(const char *data, size_t size)
 {
-	result->responseBodySize += data.size();
+	if (size == 0)
+	{
+		return true;
+	}
+	if (data == nullptr)
+	{
+		return false;
+	}
+
+	result->responseBodySize += size;
 	if(result->responseBodySize + result->responseHeadersSize > maxSize)
 	{
 		result->responseBody = {};
@@ -231,7 +247,7 @@ bool HTTPRequest::processData(const std::string &data)
 
 	if(result->saveResponses)
 	{
-		result->responseBody += data;
+		result->responseBody.append(data, size);
 	}
 	return true;
 }

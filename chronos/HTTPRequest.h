@@ -64,8 +64,8 @@ namespace Chronos
 		void submit(CurlWorker *worker);
 		void done(CURLcode res);
 
-		bool processData(const std::string &headers);
-		bool processHeaders(const std::string &headers);
+		bool processData(const char *data, size_t size);
+		bool processHeaders(const char *headers, size_t size);
 
 		bool verifyPeerAddress(unsigned int addressLength, const struct sockaddr *address) const;
 
