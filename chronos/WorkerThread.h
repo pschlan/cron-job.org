@@ -17,7 +17,7 @@
 #include <memory>
 #include <queue>
 #include <thread>
-#include <unordered_set>
+#include <unordered_map>
 
 namespace Chronos
 {
@@ -51,8 +51,7 @@ namespace Chronos
 		std::shared_ptr<WorkerThread> keepAlive;
 		std::unique_ptr<CurlWorker> curlWorker;
 		std::queue<std::unique_ptr<HTTPRequest>> requestQueue;
-		std::unordered_set<HTTPRequest *> runningJobs;
-		std::size_t runningJobsCount = 0;
+		std::unordered_map<HTTPRequest *, std::unique_ptr<HTTPRequest>> runningJobs;
 		std::thread workerThread;
 		std::size_t parallelJobs;
 		std::size_t deferMs;

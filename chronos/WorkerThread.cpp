@@ -33,20 +33,15 @@ using namespace Chronos;
 WorkerThread::WorkerThread(int mday, int month, int year, int hour, int minute, std::size_t parallelJobs, std::size_t deferMs)
 	: mday(mday), month(month), year(year), hour(hour), minute(minute), parallelJobs(parallelJobs), deferMs(deferMs)
 {
+	runningJobs.reserve(parallelJobs);
 }
 
 WorkerThread::~WorkerThread()
 {
 	if(!runningJobs.empty())
 	{
-		std::cerr << "WorkerThread::~WorkerThread(): runningJobs is not empty: " << runningJobs.size() << ", " << runningJobsCount << std::endl;
-
-		for(const auto &job : runningJobs)
-		{
-			delete job;
-		}
+		std::cerr << "WorkerThread::~WorkerThread(): runningJobs is not empty: " << runningJobs.size() << std::endl;
 		runningJobs.clear();
-		runningJobsCount = 0;
 	}
 }
 
@@ -73,18 +68,17 @@ void WorkerThread::runJobs()
 
 	inRunJobs = true;
 
-	while(runningJobsCount < parallelJobs && !requestQueue.empty())
+	while(runningJobs.size() < parallelJobs && !requestQueue.empty())
 	{
 		auto job = std::move(requestQueue.front());
 		requestQueue.pop();
 
-		runningJobs.insert(job.get());
-		++runningJobsCount;
+		HTTPRequest *request = job.get();
 
-		job->onDone = std::bind(&WorkerThread::jobDone, this, job.get());
-		job->submit(curlWorker.get());
+		runningJobs.emplace(request, std::move(job));
 
-		job.release();
+		request->onDone = std::bind(&WorkerThread::jobDone, this, request);
+		request->submit(curlWorker.get());
 	}
 
 	inRunJobs = false;
@@ -126,17 +120,22 @@ void WorkerThread::jobDone(HTTPRequest *req)
 	UpdateThread::getInstance()->addResult(std::move(req->result));
 
 	// clean up
-	runningJobs.erase(req);
-	delete req;
-	if (runningJobsCount > 0)
-		--runningJobsCount;
+	if (runningJobs.erase(req) == 0)
+	{
+		std::cerr << "WorkerThread::jobDone(): request not found in runningJobs: " << req << std::endl;
+	}
 
 	// start more jobs
 	runJobs();
 
 	// exit event loop when all requests have finished
-	if(runningJobsCount == 0 && curlWorker)
-		curlWorker->stop();
+	if(runningJobs.empty() && curlWorker)
+	{
+		if(requestQueue.empty() || !inRunJobs)
+		{
+			curlWorker->stop();
+		}
+	}
 }
 
 void WorkerThread::addStat()
