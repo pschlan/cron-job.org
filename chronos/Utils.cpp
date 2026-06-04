@@ -1,6 +1,6 @@
 /*
  * chronos, the cron-job.org execution daemon
- * Copyright (C) 2017-2024 Patrick Schlangen <patrick@schlangen.me>
+ * Copyright (C) 2017-2026 Patrick Schlangen <patrick@schlangen.me>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -14,8 +14,8 @@
 #include <algorithm>
 #include <ctime>
 #include <functional>
-#include <iostream>
 #include <random>
+#include <stdexcept>
 #include <sstream>
 #include <string>
 
@@ -60,6 +60,11 @@ std::string Utils::trim(const std::string &in)
 
 void Utils::replace(std::string &str, const std::string &search, const std::string &repl)
 {
+	if(search.empty())
+	{
+		return;
+	}
+
 	size_t pos = 0;
 	while((pos = str.find(search, pos)) != std::string::npos)
 	{
@@ -70,6 +75,11 @@ void Utils::replace(std::string &str, const std::string &search, const std::stri
 
 std::string Utils::userPathPart(const int userID)
 {
+	if(userID < 0)
+	{
+		throw std::invalid_argument("userID must be non-negative!");
+	}
+
 	std::stringstream ss;
 	ss << std::hex << userID;
 	std::string userIdHex = ss.str();
@@ -160,13 +170,6 @@ bool Utils::mkPath(const std::string &path, const mode_t mode)
 	return true;
 }
 
-std::string Utils::toLower(const std::string &str)
-{
-	std::string result;
-	std::transform(str.begin(), str.end(), result.begin(), ::tolower);
-	return result;
-}
-
 std::vector<std::string> Utils::split(const std::string &str, char delimiter)
 {
 	std::vector<std::string> result;
@@ -191,7 +194,7 @@ std::string Utils::formatString(const std::string &in, const std::unordered_map<
 
 	for(auto it = in.begin(); it != in.end(); ++it)
 	{
-		if(*it == '%' && it != in.end())
+		if(*it == '%' && it + 1 != in.end())
 		{
 			char c = *++it;
 			auto argIt = arguments.find(c);
@@ -223,10 +226,10 @@ Utils::Subnet::Subnet(const std::string &cidrNotation)
 	const std::string bitsString = cidrNotation.substr(slashPos + 1);
 
 	int nBits = std::stoi(bitsString);
-	if(nBits > 32)
+	if(nBits < 0 || nBits > 32)
 		throw std::runtime_error("Invalid CIDR bits: " + cidrNotation);
 
-	this->netmask = htonl(0xFFFFFFFF << (32 - nBits));
+	this->netmask = (nBits == 0) ? 0 : htonl(0xFFFFFFFF << (32 - nBits));
 	this->maskedAddress = ::inet_addr(addressString.c_str()) & this->netmask;
 }
 

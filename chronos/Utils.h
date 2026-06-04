@@ -1,6 +1,6 @@
 /*
  * chronos, the cron-job.org execution daemon
- * Copyright (C) 2017 Patrick Schlangen <patrick@schlangen.me>
+ * Copyright (C) 2017-2026 Patrick Schlangen <patrick@schlangen.me>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -34,7 +34,6 @@ namespace Chronos
 		std::string toString(int num, int places);
 		bool directoryExists(const std::string &path);
 		bool mkPath(const std::string &path, const mode_t mode = 0755);
-		std::string toLower(const std::string &str);
 		std::vector<std::string> split(const std::string &str, char delimiter);
 		std::string formatString(const std::string &in, const std::unordered_map<char, std::string> &arguments);
 		std::string replaceVariables(const std::string &in);
