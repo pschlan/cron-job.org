@@ -246,6 +246,29 @@ describe('parseCurl', () => {
     expect(r.url).toBe('https://example.com');
   });
 
+  it('consumes the value of -m (short for --max-time) so it is not picked up as the URL', () => {
+    const r = parseCurl('curl -m 30 https://example.com');
+    expect(r.url).toBe('https://example.com');
+  });
+
+  it('consumes the value of -C (short for --continue-at)', () => {
+    const r = parseCurl('curl -C - https://example.com');
+    expect(r.url).toBe('https://example.com');
+  });
+
+  it('round-trips a command produced by JobExporter (uses -m and -u)', () => {
+    // Format mirrors frontend/src/utils/JobExporter.js (exportToCrontab):
+    //   curl -X METHOD -H "K: v" -d "body" -m TIMEOUT -u "user:pass" URL > /dev/null
+    const exported = 'curl -X POST -H "Accept: application/json" -d "name=ada"'
+      + ' -m 30 -u "alice:secret" https://example.com/api > /dev/null';
+    const r = parseCurl(exported);
+    expect(r.url).toBe('https://example.com/api');
+    expect(r.method).toBe('POST');
+    expect(r.body).toBe('name=ada');
+    expect(r.auth).toEqual({ user: 'alice', password: 'secret' });
+    expect(r.headers).toContainEqual({ key: 'Accept', value: 'application/json' });
+  });
+
   it('survives a redirection that follows the URL', () => {
     const r = parseCurl('curl https://example.com > /dev/null 2>&1');
     expect(r.url).toBe('https://example.com');

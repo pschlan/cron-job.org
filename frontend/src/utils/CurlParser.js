@@ -22,7 +22,10 @@ const FLAGS_TAKING_VALUE_IGNORED = new Set([
   '-Y', '--speed-limit',
   '-z', '--time-cond',
   '-x', '--proxy',
-  '--max-time',
+  '-m', '--max-time',
+  '-C', '--continue-at',
+  '-r', '--range',
+  '-Z', '--parallel-max',
   '--connect-timeout',
   '--retry',
   '--retry-delay',
@@ -83,7 +86,6 @@ const FLAGS_NO_VALUE_IGNORED = new Set([
   '--tcp-fastopen',
   '--remote-name', '-O',
   '--remote-header-name', '-J',
-  '--continue-at', '-C',
 ]);
 
 // Tokenize a shell-like command, honouring single quotes (literal), double
