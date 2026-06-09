@@ -46,11 +46,13 @@ import ExportIcon from '@material-ui/icons/ImportExport';
 import StatusBadgeIcon from '@material-ui/icons/Label';
 import FolderIcon from '@material-ui/icons/FolderOutlined';
 import ApplyIcon from '@material-ui/icons/DoubleArrow';
+import CodeIcon from '@material-ui/icons/Code';
 import ValidatingTextField from '../misc/ValidatingTextField';
 import clsx from 'clsx';
 import useUserProfile from '../../hooks/useUserProfile';
 import JobTestRun from './JobTestRun';
 import JobExport from './JobExport';
+import CurlImportDialog from './CurlImportDialog';
 import useFolder from '../../hooks/useFolder';
 import VariableMenu from '../misc/VariableMenu';
 import JobStatusBadgeDialog from './JobStatusBadgeDialog';
@@ -120,6 +122,9 @@ export default function JobEditor({ match }) {
   const [ jobURL, setJobURL ] = useState('');
   const jobURLRef = useRef();
   const requestTimeoutRef = useRef();
+  const requestBodyRef = useRef();
+  const authUserRef = useRef();
+  const authPasswordRef = useRef();
   const [ jobEnabled, setJobEnabled ] = useState(false);
   const [ saveResponses, setSaveResponses ] = useState(false);
   const [ requestTimeout, setRequestTimeout ] = useState(-1);
@@ -139,6 +144,7 @@ export default function JobEditor({ match }) {
   const [ showDeleteJob, setShowDeleteJob ] = useState(false);
   const [ showTestRun, setShowTestRun ] = useState(false);
   const [ showExportJob, setShowExportJob ] = useState(false);
+  const [ showCurlImport, setShowCurlImport ] = useState(false);
   const [ showStatusBadgeDialog, setShowStatusBadgeDialog ] = useState(false);
   const [ updatedJob, setUpdatedJob ] = useState({});
   const [ bodyLooksLikeJson, setBodyLooksLikeJson ] = useState(false);
@@ -384,6 +390,36 @@ export default function JobEditor({ match }) {
     return url;
   }
 
+  function applyImportedCurl({ url, method, headers, body, auth }) {
+    if (url) updateUrl(url);
+    if (method !== null && method !== undefined) setRequestMethod(method);
+    setJobHeaders(headers || []);
+
+    const nextBody = body === null || body === undefined ? '' : body;
+    setRequestBody(nextBody);
+    analyzeBody(nextBody);
+    if (requestBodyRef.current) requestBodyRef.current.value = nextBody;
+
+    if (auth) {
+      setAuthEnable(true);
+      setAuthUser(auth.user || '');
+      setAuthPassword(auth.password || '');
+      if (authUserRef.current) authUserRef.current.value = auth.user || '';
+      if (authPasswordRef.current) authPasswordRef.current.value = auth.password || '';
+    }
+
+    setTabValue('common');
+    setShowCurlImport(false);
+
+    const parts = [];
+    if (url) parts.push(t('jobs.curlImport.appliedParts.url'));
+    if (method !== null && method !== undefined) parts.push(t('jobs.curlImport.appliedParts.method'));
+    if (headers && headers.length > 0) parts.push(t('jobs.curlImport.appliedParts.headers', { count: headers.length }));
+    if (body) parts.push(t('jobs.curlImport.appliedParts.body'));
+    if (auth) parts.push(t('jobs.curlImport.appliedParts.auth'));
+    enqueueSnackbar(t('jobs.curlImport.applied', { parts: parts.join(', ') }), { variant: 'success' });
+  }
+
   const HEADERS_COLUMNS = [
     {
       cell: (item, rowNo) => <TextField
@@ -604,6 +640,7 @@ export default function JobEditor({ match }) {
             defaultValue={authUser}
             disabled={!authEnable}
             onBlur={({target}) => setAuthUser(target.value)}
+            inputRef={authUserRef}
             InputLabelProps={{shrink: true}}
             fullWidth
             />
@@ -613,6 +650,7 @@ export default function JobEditor({ match }) {
             type='password'
             disabled={!authEnable}
             onBlur={({target}) => setAuthPassword(target.value)}
+            inputRef={authPasswordRef}
             InputLabelProps={{shrink: true}}
             fullWidth
             />
@@ -697,6 +735,7 @@ export default function JobEditor({ match }) {
                 onBlur={({target}) => setRequestBody(target.value)}
                 onChange={({target}) => analyzeBody(target.value)}
                 disabled={!RequestMethodsSupportingCustomBody.includes(requestMethod)}
+                inputRef={requestBodyRef}
                 multiline
                 minRows={8}
                 maxRows={8}
@@ -735,29 +774,46 @@ export default function JobEditor({ match }) {
       </Paper>
     </div>
 
-    <Grid container direction='row' justifyContent='flex-end' spacing={1}>
+    <Grid container direction='row' justifyContent='space-between' spacing={1}>
       <Grid item>
         <Button
-          startIcon={<TestIcon />}
-          onClick={() => setShowTestRun(true)}>
-          {t('jobs.testRun.testRun')}
+          startIcon={<CodeIcon />}
+          onClick={() => setShowCurlImport(true)}>
+          {t('jobs.curlImport.button')}
         </Button>
       </Grid>
       <Grid item>
-        <Button
-          variant='contained'
-          color='primary'
-          startIcon={saving ? <CircularProgress size='small' /> : <SaveIcon />}
-          onClick={() => saveJob()}
-          disabled={saving}>
-          {createMode ? t('common.create') : t('common.save')}
-        </Button>
+        <Grid container direction='row' justifyContent='flex-end' spacing={1}>
+          <Grid item>
+            <Button
+              startIcon={<TestIcon />}
+              onClick={() => setShowTestRun(true)}>
+              {t('jobs.testRun.testRun')}
+            </Button>
+          </Grid>
+          <Grid item>
+            <Button
+              variant='contained'
+              color='primary'
+              startIcon={saving ? <CircularProgress size='small' /> : <SaveIcon />}
+              onClick={() => saveJob()}
+              disabled={saving}>
+              {createMode ? t('common.create') : t('common.save')}
+            </Button>
+          </Grid>
+        </Grid>
       </Grid>
     </Grid>
 
     {showTestRun && <JobTestRun onClose={() => setShowTestRun(false)} onUpdateUrl={updateUrl} jobId={jobId} job={updatedJob} />}
 
     {showExportJob && <JobExport onClose={() => setShowExportJob(false)} job={updatedJob} />}
+
+    <CurlImportDialog
+      open={showCurlImport}
+      onClose={() => setShowCurlImport(false)}
+      onImport={applyImportedCurl}
+      />
 
     {showStatusBadgeDialog && <JobStatusBadgeDialog onClose={() => setShowStatusBadgeDialog(false)} jobId={jobId} job={updatedJob} />}
 

@@ -279,6 +279,24 @@
     "failedToCreate": "Failed to create cronjob. Please try again later.",
     "created": "The cronjob has been created successfully.",
     "cantDeleteMonitorJob": "This job is used for a status monitor and therefore cannot be deleted. Please remove the associated status monitor(s) first and try again.",
+    "curlImport": {
+      "button": "Import from cURL",
+      "title": "Import from cURL",
+      "help": "Paste a cURL command. We will populate the URL, request method, headers, body and authentication fields from it.",
+      "command": "cURL command",
+      "import": "Import",
+      "parseError": "We couldn't recognize a cURL command in your input. Please make sure it starts with 'curl' and contains a URL.",
+      "unsupportedMethod": "The request method '{{method}}' is not supported. Please pick a supported method manually.",
+      "applied": "Imported from cURL: {{parts}}.",
+      "appliedParts": {
+        "url": "URL",
+        "method": "request method",
+        "headers": "{{count}} header",
+        "headers_plural": "{{count}} headers",
+        "body": "request body",
+        "auth": "authentication"
+      }
+    },
     "testRun": {
       "testRun": "Test run",
       "performTestRun": "Perform test run: {{jobTitle}}",
