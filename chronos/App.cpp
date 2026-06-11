@@ -377,7 +377,7 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 				requestTimeout = groupRequestTimeout;
 			}
 
-			std::unique_ptr<HTTPRequest> req = HTTPRequest::fromURL(Utils::replaceVariables(row[0]), atoi(row[11]), maxSize, requestTimeout);
+			std::unique_ptr<HTTPRequest> req = HTTPRequest::fromURL(Utils::replaceVariables(row[0]), atoi(row[10]), maxSize, requestTimeout);
 			req->result->maxFailures 	= maxFailures;
 			req->result->jobID 			= atoi(row[1]);
 			req->result->datePlanned	= (uint64_t)timestamp * 1000;
