@@ -24,10 +24,13 @@ final class NotificationType
 
     const DISABLE = 2;
 
+    const SSL_CERT_EXPIRY = 3;
+
     static public $__names = array(
         0 => 'FAILURE',
         1 => 'SUCCESS',
         2 => 'DISABLE',
+        3 => 'SSL_CERT_EXPIRY',
     );
 }
 

@@ -181,7 +181,8 @@ enum NotificationType
 {
     FAILURE             = 0,
     SUCCESS             = 1,
-    DISABLE             = 2
+    DISABLE             = 2,
+    SSL_CERT_EXPIRY     = 3
 }
 
 struct NotificationEntry

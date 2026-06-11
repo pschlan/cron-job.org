@@ -246,16 +246,51 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 	int failCounter = 0;
 	int unfilteredFailCounter = 0;
 	bool isEnabled = false;
+	int sslCertExpiryNotified = 0;
 	MYSQL_ROW row;
-	auto res = db->query("SELECT `fail_counter`,`unfiltered_fail_counter`,`enabled` FROM `job` WHERE `jobid`=%d",
+	auto res = db->query("SELECT `fail_counter`,`unfiltered_fail_counter`,`enabled`,`ssl_cert_expiry_notified` FROM `job` WHERE `jobid`=%d",
 		result->jobID);
 	while((row = res->fetchRow()) != NULL)
 	{
 		failCounter = atoi(row[0]);
 		unfilteredFailCounter = atoi(row[1]);
 		isEnabled = atoi(row[2]) != 0;
+		sslCertExpiryNotified = atoi(row[3]);
 	}
 	res.reset();
+
+	const auto queueNotification = [&](NotificationType_t type, int notificationFailCounter, uint64_t sslCertExpiry = 0)
+	{
+		Notification n;
+		n.userID = result->userID;
+		n.jobID = result->jobID;
+		n.date = time(NULL);
+		n.dateStarted = result->dateStarted / 1000;
+		n.datePlanned = result->datePlanned / 1000;
+		n.type = type;
+		n.url = result->url;
+		n.title = result->title;
+		n.status = result->status;
+		n.statusText = result->statusText;
+		n.httpStatus = result->httpStatus;
+		n.failCounter = notificationFailCounter;
+		n.sslCertExpiry = sslCertExpiry;
+
+		db->query("INSERT INTO `notification`(`jobid`,`joblogid`,`date`,`type`,`date_started`,`date_planned`,`url`,`execution_status`,`execution_status_text`,`execution_http_status`) "
+			"VALUES(%d,%d,%u,%u,%u,%u,'%q',%u,'%q',%u)",
+			result->jobID,
+			jobLogID,
+			static_cast<unsigned long>(time(NULL)),
+			static_cast<unsigned long>(n.type),
+			static_cast<unsigned long>(n.dateStarted),
+			static_cast<unsigned long>(n.datePlanned),
+			n.url.c_str(),
+			static_cast<unsigned long>(n.status),
+			n.statusText.c_str(),
+			static_cast<unsigned long>(n.httpStatus));
+
+		NotificationThread::getInstance()->addNotification(std::move(n));
+	};
 
 	bool createNotification = false;
 	NotificationType_t notificationType;
@@ -297,34 +332,21 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 
 	if(createNotification && isEnabled)
 	{
-		Notification n;
-		n.userID = result->userID;
-		n.jobID = result->jobID;
-		n.date = time(NULL);
-		n.dateStarted = result->dateStarted / 1000;
-		n.datePlanned = result->datePlanned / 1000;
-		n.type = notificationType;
-		n.url = result->url;
-		n.title = result->title;
-		n.status = result->status;
-		n.statusText = result->statusText;
-		n.httpStatus = result->httpStatus;
-		n.failCounter = std::max(unfilteredFailCounter, failCounter);
+		queueNotification(notificationType, std::max(unfilteredFailCounter, failCounter));
+	}
 
-		db->query("INSERT INTO `notification`(`jobid`,`joblogid`,`date`,`type`,`date_started`,`date_planned`,`url`,`execution_status`,`execution_status_text`,`execution_http_status`) "
-			"VALUES(%d,%d,%u,%u,%u,%u,'%q',%u,'%q',%u)",
-			result->jobID,
-			jobLogID,
-			static_cast<unsigned long>(time(NULL)),
-			static_cast<unsigned long>(n.type),
-			static_cast<unsigned long>(n.dateStarted),
-			static_cast<unsigned long>(n.datePlanned),
-			n.url.c_str(),
-			static_cast<unsigned long>(n.status),
-			n.statusText.c_str(),
-			static_cast<unsigned long>(n.httpStatus));
+	const time_t now = time(nullptr);
+	if(result->notifySslCertExpiry
+		&& result->sslCertExpiry > 0
+		&& isEnabled
+		&& static_cast<uint64_t>(now) + static_cast<uint64_t>(result->notifySslCertExpirySeconds) >= result->sslCertExpiry
+		&& sslCertExpiryNotified != static_cast<int>(result->sslCertExpiry))
+	{
+		queueNotification(NOTIFICATION_TYPE_SSL_CERT_EXPIRY, std::max(unfilteredFailCounter, failCounter), result->sslCertExpiry);
 
-		NotificationThread::getInstance()->addNotification(std::move(n));
+		db->query("UPDATE `job` SET `ssl_cert_expiry_notified`=%d WHERE `jobid`=%d",
+			static_cast<int>(result->sslCertExpiry),
+			result->jobID);
 	}
 
 	if(result->jobType == JobType_t::MONITORING)

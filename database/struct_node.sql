@@ -18,6 +18,7 @@ CREATE TABLE `job` (
   `last_fetch` int(11) NOT NULL DEFAULT '0',
   `last_duration` int(11) NOT NULL DEFAULT '0',
   `ssl_cert_expiry` int(11) NOT NULL DEFAULT '0',
+  `ssl_cert_expiry_notified` int(11) NOT NULL DEFAULT '0',
   `fail_counter` int(11) NOT NULL DEFAULT '0',
   `unfiltered_fail_counter` int(11) NOT NULL DEFAULT '0',
   `save_responses` tinyint(4) NOT NULL DEFAULT '0',

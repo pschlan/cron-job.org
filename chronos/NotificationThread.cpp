@@ -441,6 +441,7 @@ void NotificationThread::processNotification(const Notification &notification)
 	mail.assign("$scheduled", formatDate(userDetails.language, notification.datePlanned));
 	mail.assign("$attempts", std::to_string(notification.failCounter));
 	mail.assign("$status", formatStatus(userDetails.language, notification));
+	mail.assign("$certexpiry", formatDate(userDetails.language, notification.sslCertExpiry));
 
 	switch(notification.type)
 	{
@@ -457,6 +458,11 @@ void NotificationThread::processNotification(const Notification &notification)
 	case NOTIFICATION_TYPE_DISABLE:
 		mail.addHeader("Subject", getPhrase(userDetails.language, "notify.disable.mail.subject"), true);
 		mail.setText(getPhrase(userDetails.language, "notify.disable.mail.text"));
+		break;
+
+	case NOTIFICATION_TYPE_SSL_CERT_EXPIRY:
+		mail.addHeader("Subject", getPhrase(userDetails.language, "notify.sslcertexpiry.mail.subject"), true);
+		mail.setText(getPhrase(userDetails.language, "notify.sslcertexpiry.mail.text"));
 		break;
 
 	default:

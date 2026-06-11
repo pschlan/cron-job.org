@@ -4,5 +4,6 @@
 
 ALTER TABLE `job`
     ADD COLUMN `ssl_cert_expiry` int(11) NOT NULL DEFAULT '0' AFTER `last_duration`,
+    ADD COLUMN `ssl_cert_expiry_notified` int(11) NOT NULL DEFAULT '0' AFTER `ssl_cert_expiry`,
     ADD COLUMN `notify_ssl_cert_expiry` tinyint(1) NOT NULL DEFAULT '0' AFTER `notify_disable`,
     ADD COLUMN `notify_ssl_cert_expiry_seconds` int(11) NOT NULL DEFAULT '604800' AFTER `notify_ssl_cert_expiry`;
