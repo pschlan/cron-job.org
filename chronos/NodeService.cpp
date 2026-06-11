@@ -884,6 +884,7 @@ public:
         _return.httpStatus          = status.httpStatus;
         _return.peerAddress         = status.peerAddress;
         _return.peerPort            = status.peerPort;
+        _return.sslCertExpiry       = status.sslCertExpiry;
         _return.headers             = status.headers;
         _return.body                = status.body;
         _return.stats.nameLookup    = status.timeNameLookup;

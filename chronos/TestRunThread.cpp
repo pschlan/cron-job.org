@@ -194,6 +194,7 @@ void TestRunThread::processQueue(bool wait)
                         testRun->status.statusText          = testRun->request->result->statusText;
                         testRun->status.peerAddress         = testRun->request->result->peerAddress;
                         testRun->status.peerPort            = testRun->request->result->peerPort;
+                        testRun->status.sslCertExpiry       = testRun->request->result->sslCertExpiry;
                         testRun->status.duration            = testRun->request->result->duration;
                         testRun->status.headers             = testRun->request->result->responseHeaders;
                         testRun->status.body                = testRun->request->result->responseBody;

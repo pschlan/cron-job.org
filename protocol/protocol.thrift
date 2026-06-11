@@ -241,6 +241,7 @@ struct TestRunStatus
     12: string peerAddress;
     13: i16 peerPort;
     14: JobLogStatsEntry stats;
+    15: i64 sslCertExpiry; // in s, 0 = not available (plain HTTP or no TLS)
 }
 
 struct WAFValidatorResult
