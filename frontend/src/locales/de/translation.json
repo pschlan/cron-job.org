@@ -279,6 +279,24 @@
     "failedToCreate": "Der Cronjob konnte nicht erstellt werden. Bitte versuchen Sie es später erneut.",
     "created": "Der Cronjob wurde erfolgreich erstellt.",
     "cantDeleteMonitorJob": "Dieser Job wird für einen oder mehrere Status-Monitore verwendet und kann daher nicht gelöscht werden. Bitte entfernen Sie zuerst den zugehörigen Status-Monitor.",
+    "curlImport": {
+      "button": "cURL-Befehl importieren",
+      "title": "cURL-Befehl importieren",
+      "help": "Fügen Sie einen cURL-Befehl ein. Wir füllen daraus die Felder für URL, Anfrage-Methode, Header, Anfrage-Body und Authentifizierung aus.",
+      "command": "cURL-Befehl",
+      "import": "Importieren",
+      "parseError": "Wir konnten in Ihrer Eingabe keinen cURL-Befehl erkennen. Bitte stellen Sie sicher, dass er mit 'curl' beginnt und eine URL enthält.",
+      "unsupportedMethod": "Die Anfrage-Methode '{{method}}' wird nicht unterstützt. Bitte wählen Sie eine unterstützte Methode manuell aus.",
+      "applied": "Aus cURL importiert: {{parts}}.",
+      "appliedParts": {
+        "url": "URL",
+        "method": "Anfrage-Methode",
+        "headers": "{{count}} Header",
+        "headers_plural": "{{count}} Header",
+        "body": "Anfrage-Body",
+        "auth": "Authentifizierung"
+      }
+    },
     "testRun": {
       "testRun": "Testlauf",
       "performTestRun": "Testlauf durchführen: {{jobTitle}}",
