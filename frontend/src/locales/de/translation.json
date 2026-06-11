@@ -297,6 +297,11 @@
         "auth": "Authentifizierung"
       }
     },
+    "commandImport": {
+      "title": "Das sieht nach einem cURL- oder wget-Befehl aus",
+      "text": "Statt ihn als URL zu verwenden, können wir daraus die URL, die Anfrage-Methode, Header, den Anfrage-Body und die Authentifizierung auslesen.",
+      "import": "Befehl importieren"
+    },
     "testRun": {
       "testRun": "Testlauf",
       "performTestRun": "Testlauf durchführen: {{jobTitle}}",
