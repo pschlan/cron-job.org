@@ -63,6 +63,7 @@ namespace Chronos
 		int oldUnfilteredFailCounter = 0;
 		std::string peerAddress;
 		int peerPort = 0;
+		uint64_t sslCertExpiry = 0;	// in s, 0 = not available (plain HTTP or no TLS)
 
 		int timeNameLookup = 0;		// in us
 		int timeConnect = 0;		// in us
