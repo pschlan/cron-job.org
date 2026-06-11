@@ -146,6 +146,7 @@ struct JobLogEntry
     13: optional string headers;
     14: optional string body;
     15: optional JobLogStatsEntry stats;
+    16: optional i64 sslCertExpiry; // in s, 0 = not available (plain HTTP or no TLS)
 }
 
 struct UserDetails

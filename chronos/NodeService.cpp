@@ -449,6 +449,7 @@ public:
             auto stmt = userDB->prepare("SELECT * FROM \"joblog\" "
                 "LEFT JOIN \"joblog_response\" ON \"joblog_response\".\"joblogid\"=\"joblog\".\"joblogid\" "
                 "LEFT JOIN \"joblog_stats\" ON \"joblog_stats\".\"joblogid\"=\"joblog\".\"joblogid\" "
+                "LEFT JOIN \"joblog_ssl\" ON \"joblog_ssl\".\"joblogid\"=\"joblog\".\"joblogid\" "
                 "WHERE \"joblog\".\"joblogid\"=:joblogid");
             stmt->bind(":joblogid", jobLogId);
 
@@ -1145,8 +1146,9 @@ private:
             return;
         }
 
-        std::string query = "SELECT \"joblog\".\"joblogid\",\"joblog\".\"jobid\",\"joblog\".\"date\",\"date_planned\",\"jitter\",\"url\",\"duration\",\"joblog\".\"status\",\"status_text\",\"http_status\",\"name_lookup\",\"connect\",\"app_connect\",\"pre_transfer\",\"start_transfer\",\"total\" FROM \"joblog\" "
-            "LEFT JOIN \"joblog_stats\" ON \"joblog_stats\".\"joblogid\"=\"joblog\".\"joblogid\" ";
+        std::string query = "SELECT \"joblog\".\"joblogid\",\"joblog\".\"jobid\",\"joblog\".\"date\",\"date_planned\",\"jitter\",\"url\",\"duration\",\"joblog\".\"status\",\"status_text\",\"http_status\",\"name_lookup\",\"connect\",\"app_connect\",\"pre_transfer\",\"start_transfer\",\"total\",\"ssl_cert_expiry\" FROM \"joblog\" "
+            "LEFT JOIN \"joblog_stats\" ON \"joblog_stats\".\"joblogid\"=\"joblog\".\"joblogid\" "
+            "LEFT JOIN \"joblog_ssl\" ON \"joblog_ssl\".\"joblogid\"=\"joblog\".\"joblogid\" ";
         if(identifier.jobId > 0)
         {
             query += "WHERE \"joblog\".\"jobid\"=:jobid ";
@@ -1195,6 +1197,12 @@ private:
             entry.stats.startTransfer   = stmt->intValue("start_transfer");
             entry.stats.total           = stmt->intValue("total");
             entry.__isset.stats         = true;
+        }
+
+        if(stmt->hasField("ssl_cert_expiry") && !stmt->isNull("ssl_cert_expiry"))
+        {
+            entry.sslCertExpiry         = stmt->intValue("ssl_cert_expiry");
+            entry.__isset.sslCertExpiry = true;
         }
 
         return entry;
