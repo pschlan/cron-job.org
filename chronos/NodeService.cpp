@@ -154,7 +154,7 @@ public:
             auto res = db->query("SELECT `jobid`,`userid`,`enabled`,`title`,`save_responses`,`last_status`,`last_fetch`,"
                     "`last_duration`,`fail_counter`,`url`,`request_method`,`auth_enable`,`auth_user`,`auth_pass`,"
                     "`notify_failure`,`notify_success`,`notify_disable`,`timezone`,`type`,`usergroupid`,`request_timeout`, "
-                    "`redirect_success`,`expires_at`,`folderid`,`notify_failure_count`,`unfiltered_fail_counter`,`ssl_cert_expiry` "
+                    "`redirect_success`,`expires_at`,`folderid`,`notify_failure_count`,`unfiltered_fail_counter`,`ssl_cert_expiry`,`notify_ssl_cert_expiry`,`notify_ssl_cert_expiry_seconds` "
                     "FROM `job` WHERE `jobid`=%v AND `userid`=%v",
                 identifier.jobId,
                 identifier.userId);
@@ -204,6 +204,8 @@ public:
                 _return.notification.onFailureCount = std::stoi(row[24]);
                 _return.notification.onSuccess = std::strcmp(row[15], "1") == 0;
                 _return.notification.onDisable = std::strcmp(row[16], "1") == 0;
+                _return.notification.onSslCertExpiry = std::strcmp(row[27], "1") == 0;
+                _return.notification.onSslCertExpirySeconds = std::stoi(row[28]);
                 _return.__isset.notification = true;
 
                 _return.schedule.timezone = row[17];
@@ -322,11 +324,13 @@ public:
 
             if(job.__isset.notification)
             {
-                db->query("UPDATE `job` SET `notify_failure`=%d, `notify_failure_count`=%d, `notify_success`=%d, `notify_disable`=%d WHERE `jobid`=%v",
+                db->query("UPDATE `job` SET `notify_failure`=%d, `notify_failure_count`=%d, `notify_success`=%d, `notify_disable`=%d, `notify_ssl_cert_expiry`=%d, `notify_ssl_cert_expiry_seconds`=%d WHERE `jobid`=%v",
                     job.notification.onFailure ? 1 : 0,
                     std::max(1, job.notification.onFailureCount),
                     job.notification.onSuccess ? 1 : 0,
                     job.notification.onDisable ? 1 : 0,
+                    job.notification.onSslCertExpiry ? 1 : 0,
+                    std::max(0, job.notification.onSslCertExpirySeconds),
                     job.identifier.jobId);
             }
 

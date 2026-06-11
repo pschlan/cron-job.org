@@ -30,6 +30,8 @@ class JobNotification {
   public $onFailureCount = 1;
   public $onSuccess = false;
   public $onDisable = false;
+  public $onSslCertExpiry = false;
+  public $onSslCertExpirySeconds = 604800;
 }
 
 class JobAuthentication {
@@ -109,6 +111,8 @@ class Job {
       $result->notification->onFailure  = $job->notification->onFailure;
       $result->notification->onFailureCount = $job->notification->onFailureCount;
       $result->notification->onDisable  = $job->notification->onDisable;
+      $result->notification->onSslCertExpiry = $job->notification->onSslCertExpiry;
+      $result->notification->onSslCertExpirySeconds = $job->notification->onSslCertExpirySeconds;
     } else {
       unset($result->notification);
     }
@@ -180,6 +184,8 @@ class Job {
     $job->notification->onSuccess   = $this->notification->onSuccess;
     $job->notification->onFailure   = $this->notification->onFailure;
     $job->notification->onFailureCount = $this->notification->onFailureCount;
+    $job->notification->onSslCertExpiry = $this->notification->onSslCertExpiry;
+    $job->notification->onSslCertExpirySeconds = max(0, $this->notification->onSslCertExpirySeconds);
 
     $job->schedule                  = new \chronos\JobSchedule;
     $job->schedule->hours           = $this->toThriftSet($this->schedule->hours,    0,  23);
@@ -224,6 +230,10 @@ class Job {
     }
     $this->notification->onSuccess    = !!$request->job->notification->onSuccess;
     $this->notification->onDisable    = !!$request->job->notification->onDisable;
+    $this->notification->onSslCertExpiry = !!$request->job->notification->onSslCertExpiry;
+    if (isset($request->job->notification->onSslCertExpirySeconds)) {
+      $this->notification->onSslCertExpirySeconds = max(0, intval($request->job->notification->onSslCertExpirySeconds));
+    }
 
     $this->url                        = trim($request->job->url);
     $this->requestMethod              = (int)$request->job->requestMethod;
@@ -308,6 +318,14 @@ class Job {
 
     if (isset($request->job->notification) && isset($request->job->notification->onDisable)) {
       $this->notification->onDisable    = !!$request->job->notification->onDisable;
+    }
+
+    if (isset($request->job->notification) && isset($request->job->notification->onSslCertExpiry)) {
+      $this->notification->onSslCertExpiry = !!$request->job->notification->onSslCertExpiry;
+    }
+
+    if (isset($request->job->notification) && isset($request->job->notification->onSslCertExpirySeconds)) {
+      $this->notification->onSslCertExpirySeconds = max(0, intval($request->job->notification->onSslCertExpirySeconds));
     }
 
     if (isset($request->job->url)) {

@@ -58,6 +58,8 @@ namespace Chronos
 		int notifyFailureCount = 1;
 		bool notifySuccess = false;
 		bool notifyDisable = false;
+		bool notifySslCertExpiry = false;
+		int notifySslCertExpirySeconds = 604800; // in s, default 7 days
 		bool saveResponses = false;
 		int oldFailCounter = 0;
 		int oldUnfilteredFailCounter = 0;

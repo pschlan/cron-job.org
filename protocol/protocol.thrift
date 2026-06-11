@@ -95,6 +95,8 @@ struct JobNotification
     2: bool onSuccess;
     3: bool onDisable;
     4: i32 onFailureCount;
+    5: bool onSslCertExpiry;
+    6: i32 onSslCertExpirySeconds; // in s before certificate expiry
 }
 
 struct Job
