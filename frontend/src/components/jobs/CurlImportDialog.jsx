@@ -82,7 +82,7 @@ export default function CurlImportDialog({ open, onClose, onImport }) {
     </DialogContent>
     <DialogActions>
       <Button onClick={close}>{t('common.cancel')}</Button>
-      <Button onClick={doImport} color='primary' variant='contained' disabled={!command.trim()}>
+      <Button onClick={doImport} color='primary' disabled={!command.trim()}>
         {t('jobs.curlImport.import')}
       </Button>
     </DialogActions>
