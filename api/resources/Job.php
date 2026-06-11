@@ -52,6 +52,7 @@ class Job {
   public $lastStatus;
   public $lastDuration;
   public $lastExecution;
+  public $sslCertExpiry;
   public $nextExecution;
 
   public $auth;
@@ -90,6 +91,9 @@ class Job {
       $result->lastStatus     = $job->executionInfo->lastStatus;
       $result->lastDuration   = $job->executionInfo->lastDuration;
       $result->lastExecution  = $job->executionInfo->lastFetch;
+      if (isset($job->executionInfo->sslCertExpiry) && $job->executionInfo->sslCertExpiry > 0) {
+        $result->sslCertExpiry = $job->executionInfo->sslCertExpiry;
+      }
     }
 
     if (isset($job->authentication)) {
@@ -466,7 +470,7 @@ class JobManager {
       try {
         $client = $node->connect();
         $jobDetails = $client->getJobDetails(Job::createIdentifier($jobId, intval($jobMeta->userId)));
-        return (object)[
+        $status = (object)[
           'enabled'       => boolval($jobDetails->metaData->enabled),
           'lastStatus'    => $jobDetails->executionInfo->lastStatus,
           'lastDuration'  => $jobDetails->executionInfo->lastDuration,
@@ -474,6 +478,10 @@ class JobManager {
           'timezone'      => $jobDetails->schedule->timezone,
           'title'         => $jobDetails->metaData->title
         ];
+        if (isset($jobDetails->executionInfo->sslCertExpiry) && $jobDetails->executionInfo->sslCertExpiry > 0) {
+          $status->sslCertExpiry = $jobDetails->executionInfo->sslCertExpiry;
+        }
+        return $status;
 
       } catch (Exception $ex) {
         return false;

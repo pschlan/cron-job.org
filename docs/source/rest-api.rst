@@ -145,6 +145,7 @@ someFailed          boolean                                 ``true`` in case som
                 "lastStatus": 0,
                 "lastDuration": 0,
                 "lastExecution": 0,
+                "sslCertExpiry": 1788039686,
                 "nextExecution": 1640187240,
                 "type": 0,
                 "requestTimeout": 300,
@@ -225,6 +226,7 @@ jobDetails          array of :ref:`DetailedJob`             Job details
             "lastStatus": 0,
             "lastDuration": 0,
             "lastExecution": 0,
+            "sslCertExpiry": 1788039686,
             "nextExecution": 1640189160,
             "auth": {
                 "enable": false,
@@ -446,13 +448,14 @@ In order to retrieve headers and body, see :ref:`Retrieving Job Execution Histor
                 "date": 1640189711,
                 "datePlanned": 1640189700,
                 "jitter": 11257,
-                "url": "http:\/\/example.com\/",
+                "url": "https:\/\/example.com\/",
                 "duration": 239,
                 "status": 1,
                 "statusText": "OK",
                 "httpStatus": 200,
                 "headers": null,
                 "body": null,
+                "sslCertExpiry": 1788039686,
                 "stats": {
                     "nameLookup": 1003,
                     "connect": 85516,
@@ -515,13 +518,14 @@ jobHistoryDetails   :ref:`HistoryItem`                      History item
             "date": 1640189711,
             "datePlanned": 1640189700,
             "jitter": 11257,
-            "url": "http:\/\/example.com\/",
+            "url": "https:\/\/example.com\/",
             "duration": 239,
             "status": 1,
             "statusText": "OK",
             "httpStatus": 200,
             "headers": "Accept-Ranges: bytes\r\nCache-Control: max-age=604800\r\nContent-Type: text\/html; charset=UTF-8...\r\n\r\n",
             "body": "<!doctype html>\n<html>\n<head>\n    <title>Example Domain<\/title>...\n",
+            "sslCertExpiry": 1788039686,
             "stats": {
                 "nameLookup": 1003,
                 "connect": 85516,
@@ -557,6 +561,7 @@ url                 string                                  Job URL             
 lastStatus          :ref:`JobStatus`                        Last execution status (read only)                                                                                    ``0`` (Unknown / not executed yet)
 lastDuration        int                                     Last execution duration in milliseconds (read only)                                                                  \-
 lastExecution       int                                     Unix timestamp of last execution (in seconds; read only)                                                             \-
+sslCertExpiry       int                                     Unix timestamp of the server TLS certificate expiry (in seconds; read only; only present for HTTPS jobs)             \-
 nextExecution       int                                     Unix timestamp of predicted next execution (in seconds), ``null`` if no prediction available (read only)             \-
 type                :ref:`JobType`                          Job type (read only)                                                                                                 ``0`` (Default job)
 requestTimeout      int                                     Job timeout in seconds                                                                                               ``-1`` (i.e. use default timeout)
@@ -703,6 +708,7 @@ httpStatus          int                                     HTTP status code ret
 headers             string or ``null``                      Raw response headers returned by the host (``null`` if unavailable)
 body                string or ``null``                      Raw response body returned by the host (``null`` if unavailable)
 stats               :ref:`HistoryItemStats`                 Additional timing information for this request
+sslCertExpiry       int                                     Unix timestamp of the server TLS certificate expiry (in seconds; only present for HTTPS executions)
 =================== ======================================= ======================================
 
 HistoryItemStats
