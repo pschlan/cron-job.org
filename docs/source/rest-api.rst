@@ -237,7 +237,9 @@ jobDetails          array of :ref:`DetailedJob`             Job details
                 "onFailure": false,
                 "onFailureCount": 1,
                 "onSuccess": false,
-                "onDisable": false
+                "onDisable": false,
+                "onSslCertExpiry": true,
+                "onSslCertExpirySeconds": 604800
             },
             "extendedData": {
                 "headers": {
@@ -611,6 +613,8 @@ onFailure           boolean                                 Whether to send a no
 onFailureCount      int                                     How many failures are required before a notification is sent (min 1).                   ``1``
 onSuccess           boolean                                 Whether to send a notification when the job succeeds after a prior failure or not.      ``false``
 onDisable           boolean                                 Whether to send a notification when the job has been disabled automatically or not.     ``false``
+onSslCertExpiry     boolean                                 Whether to send a notification when the server TLS certificate is about to expire.        ``false``
+onSslCertExpirySeconds int                                  How many seconds before certificate expiry to send the notification (min 0).            ``604800`` (7 days)
 =================== ======================================= ======================================================================================= ===========
 
 `* Value when field is omitted while creating a job.`
