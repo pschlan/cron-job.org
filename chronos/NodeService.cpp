@@ -98,8 +98,8 @@ public:
                 job.executionInfo.unfilteredFailCounter = std::stoi(row[18]);
                 if(std::stoll(row[19]) > 0)
                 {
-                    job.executionInfo.sslCertExpiryDate = std::stoll(row[19]);
-                    job.executionInfo.__isset.sslCertExpiryDate = true;
+                    job.executionInfo.sslCertExpiry = std::stoll(row[19]);
+                    job.executionInfo.__isset.sslCertExpiry = true;
                 }
                 job.__isset.executionInfo = true;
 
@@ -173,8 +173,8 @@ public:
                 _return.executionInfo.unfilteredFailCounter = std::stoi(row[25]);
                 if(std::stoll(row[26]) > 0)
                 {
-                    _return.executionInfo.sslCertExpiryDate = std::stoll(row[26]);
-                    _return.executionInfo.__isset.sslCertExpiryDate = true;
+                    _return.executionInfo.sslCertExpiry = std::stoll(row[26]);
+                    _return.executionInfo.__isset.sslCertExpiry = true;
                 }
                 _return.__isset.executionInfo = true;
 

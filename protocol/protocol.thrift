@@ -56,7 +56,7 @@ struct JobExecutionInfo
     3: i32 lastDuration;
     4: i32 failCounter;
     5: i32 unfilteredFailCounter;
-    6: optional i64 sslCertExpiryDate; // in s, 0 = not available (plain HTTP or no TLS)
+    6: optional i64 sslCertExpiry; // in s, 0 = not available (plain HTTP or no TLS)
 }
 
 struct JobData
