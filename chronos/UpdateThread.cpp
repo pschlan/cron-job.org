@@ -225,20 +225,21 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 	std::string query;
 	if(result->status == JOBSTATUS_OK)
 	{
-		query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`fail_counter`=0,`unfiltered_fail_counter`=0 WHERE `jobid`=%d";
+		query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`ssl_cert_expiry`=%d,`fail_counter`=0,`unfiltered_fail_counter`=0 WHERE `jobid`=%d";
 	}
 	else if(result->status == JOBSTATUS_FAILED_TIMEOUT)
 	{
-		query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`fail_counter`=GREATEST(`fail_counter`,1),`unfiltered_fail_counter`=`unfiltered_fail_counter`+1 WHERE `jobid`=%d";
+		query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`ssl_cert_expiry`=%d,`fail_counter`=GREATEST(`fail_counter`,1),`unfiltered_fail_counter`=`unfiltered_fail_counter`+1 WHERE `jobid`=%d";
 	}
 	else
 	{
-		query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`fail_counter`=`fail_counter`+1,`unfiltered_fail_counter`=`unfiltered_fail_counter`+1 WHERE `jobid`=%d";
+		query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`ssl_cert_expiry`=%d,`fail_counter`=`fail_counter`+1,`unfiltered_fail_counter`=`unfiltered_fail_counter`+1 WHERE `jobid`=%d";
 	}
 	db->query(query.c_str(),
 		static_cast<int>(result->status),
 		static_cast<int>(result->dateStarted / 1000),
 		static_cast<int>(result->duration),
+		static_cast<int>(result->sslCertExpiry),
 		result->jobID);
 
 	// get (new) fail counter and latest enabled status
