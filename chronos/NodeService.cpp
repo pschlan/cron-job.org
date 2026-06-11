@@ -37,6 +37,19 @@ using namespace ::apache::thrift::server;
 namespace {
 
 constexpr const int TIME_ONE_DAY = 86400;
+//! @note Keep in sync with DB_SCHEMA_VERSION in UpdateThread.cpp
+constexpr const int USER_DB_SCHEMA_SSL = 3;
+
+int getUserDbSchemaVersion(Chronos::SQLite_DB &userDB)
+{
+	auto stmt = userDB.prepare("PRAGMA user_version");
+	while(stmt->execute())
+	{
+		return stmt->intValue(0);
+	}
+
+	return 0;
+}
 
 }
 
@@ -456,11 +469,18 @@ public:
         {
             userDB = std::make_unique<SQLite_DB>(dbFilePath.c_str(), true /* read only */);
 
-            auto stmt = userDB->prepare("SELECT * FROM \"joblog\" "
+            const int schemaVersion = getUserDbSchemaVersion(*userDB);
+
+            std::string query = "SELECT * FROM \"joblog\" "
                 "LEFT JOIN \"joblog_response\" ON \"joblog_response\".\"joblogid\"=\"joblog\".\"joblogid\" "
-                "LEFT JOIN \"joblog_stats\" ON \"joblog_stats\".\"joblogid\"=\"joblog\".\"joblogid\" "
-                "LEFT JOIN \"joblog_ssl\" ON \"joblog_ssl\".\"joblogid\"=\"joblog\".\"joblogid\" "
-                "WHERE \"joblog\".\"joblogid\"=:joblogid");
+                "LEFT JOIN \"joblog_stats\" ON \"joblog_stats\".\"joblogid\"=\"joblog\".\"joblogid\" ";
+            if(schemaVersion >= USER_DB_SCHEMA_SSL)
+            {
+                query += "LEFT JOIN \"joblog_ssl\" ON \"joblog_ssl\".\"joblogid\"=\"joblog\".\"joblogid\" ";
+            }
+            query += "WHERE \"joblog\".\"joblogid\"=:joblogid";
+
+            auto stmt = userDB->prepare(query);
             stmt->bind(":joblogid", jobLogId);
 
             while(stmt->execute())
@@ -1156,9 +1176,19 @@ private:
             return;
         }
 
-        std::string query = "SELECT \"joblog\".\"joblogid\",\"joblog\".\"jobid\",\"joblog\".\"date\",\"date_planned\",\"jitter\",\"url\",\"duration\",\"joblog\".\"status\",\"status_text\",\"http_status\",\"name_lookup\",\"connect\",\"app_connect\",\"pre_transfer\",\"start_transfer\",\"total\",\"ssl_cert_expiry\" FROM \"joblog\" "
-            "LEFT JOIN \"joblog_stats\" ON \"joblog_stats\".\"joblogid\"=\"joblog\".\"joblogid\" "
-            "LEFT JOIN \"joblog_ssl\" ON \"joblog_ssl\".\"joblogid\"=\"joblog\".\"joblogid\" ";
+        const int schemaVersion = getUserDbSchemaVersion(*userDB);
+
+        std::string query = "SELECT \"joblog\".\"joblogid\",\"joblog\".\"jobid\",\"joblog\".\"date\",\"date_planned\",\"jitter\",\"url\",\"duration\",\"joblog\".\"status\",\"status_text\",\"http_status\",\"name_lookup\",\"connect\",\"app_connect\",\"pre_transfer\",\"start_transfer\",\"total\"";
+        if(schemaVersion >= USER_DB_SCHEMA_SSL)
+        {
+            query += ",\"ssl_cert_expiry\"";
+        }
+        query += " FROM \"joblog\" "
+            "LEFT JOIN \"joblog_stats\" ON \"joblog_stats\".\"joblogid\"=\"joblog\".\"joblogid\" ";
+        if(schemaVersion >= USER_DB_SCHEMA_SSL)
+        {
+            query += "LEFT JOIN \"joblog_ssl\" ON \"joblog_ssl\".\"joblogid\"=\"joblog\".\"joblogid\" ";
+        }
         if(identifier.jobId > 0)
         {
             query += "WHERE \"joblog\".\"jobid\"=:jobid ";
