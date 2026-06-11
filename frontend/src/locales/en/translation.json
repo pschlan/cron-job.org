@@ -145,7 +145,8 @@
     "notifications": {
       "FAILURE": "Execution failed",
       "SUCCESS": "Execution successful",
-      "DISABLE": "Cronjob disabled"
+      "DISABLE": "Cronjob disabled",
+      "SSL_CERT_EXPIRY": "SSL certificate expiring"
     }
   },
   "units": {
@@ -199,11 +200,15 @@
     "notifyOn": {
       "onFailure": "execution of the cronjob fails",
       "onSuccess": "execution of the cronjob succeeds after it failed before",
-      "onDisable": "the cronjob will be disabled because of too many failures"
+      "onDisable": "the cronjob will be disabled because of too many failures",
+      "onSslCertExpiry": "the server TLS certificate is about to expire"
     },
     "notifyOnFailureRequiredTimes": "Notify after",
     "notifyOnFailureFailures": "failure",
     "notifyOnFailureFailures_plural": "subsequent failures",
+    "notifyOnSslCertExpiryLeadTime": "Notify before expiry",
+    "notifyOnSslCertExpiryDays": "day",
+    "notifyOnSslCertExpiryDays_plural": "days",
     "requireshttpauth": "Requires HTTP authentication",
     "username": "Username",
     "password": "Password",

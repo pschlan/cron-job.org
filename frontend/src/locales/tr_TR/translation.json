@@ -161,7 +161,8 @@
     "notifications": {
       "FAILURE": "Yürütme başarısız",
       "SUCCESS": "Yürütme başarılı",
-      "DISABLE": "Cron görevi devre dışı bırakıldı"
+      "DISABLE": "Cron görevi devre dışı bırakıldı",
+      "SSL_CERT_EXPIRY": "SSL sertifikası süresi doluyor"
     }
   },
   "units": {
@@ -209,7 +210,8 @@
     "notifyOn": {
       "onFailure": "cronjob yürütmesi başarısız olduğunda",
       "onSuccess": "cronjob yürütmesi önceki başarısızlıktan sonra başarılı olduğunda",
-      "onDisable": "çok fazla başarısızlık nedeniyle cronjob devre dışı bırakıldığında"
+      "onDisable": "çok fazla başarısızlık nedeniyle cronjob devre dışı bırakıldığında",
+      "onSslCertExpiry": "sunucunun TLS sertifikası süresi dolmak üzere"
     },
     "requireshttpauth": "HTTP kimlik doğrulaması gerektirir",
     "username": "Kullanıcı adı",
@@ -339,7 +341,10 @@
     },
     "move": "Taşı",
     "moveText": "Seçilen öğeyi şuraya taşı:",
-    "moveText_plural": "{{count}} seçili öğeyi şuraya taşı:"
+    "moveText_plural": "{{count}} seçili öğeyi şuraya taşı:",
+    "notifyOnSslCertExpiryLeadTime": "Süre dolmadan bildir",
+    "notifyOnSslCertExpiryDays": "gün",
+    "notifyOnSslCertExpiryDays_plural": "gün"
   },
   "statuspages": {
     "title": "Başlık",

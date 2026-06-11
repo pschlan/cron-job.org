@@ -1,4 +1,4 @@
-﻿{
+{
   "paddleLocale": "hu",
   "landingLocale": "en",
   "common": {
@@ -43,8 +43,29 @@
     "note": "Megjegyzés",
     "error": "Hiba",
     "success": "Siker",
-    "weekDays": ["Vasárnap", "Hétfő", "Kedd", "Szerda", "Csütörtök", "Péntek", "Szombat"],
-    "months": ["Január", "Február", "Március", "Április", "Május", "Június", "Július", "Augusztus", "Szeptember", "Október", "November", "December"],
+    "weekDays": [
+      "Vasárnap",
+      "Hétfő",
+      "Kedd",
+      "Szerda",
+      "Csütörtök",
+      "Péntek",
+      "Szombat"
+    ],
+    "months": [
+      "Január",
+      "Február",
+      "Március",
+      "Április",
+      "Május",
+      "Június",
+      "Július",
+      "Augusztus",
+      "Szeptember",
+      "Október",
+      "November",
+      "December"
+    ],
     "calendarFormat": {
       "lastDay": "[Tegnap] LTS",
       "sameDay": "[Ma] LTS",
@@ -140,7 +161,8 @@
     "notifications": {
       "FAILURE": "Végrehajtás meghiúsult",
       "SUCCESS": "Végrehajtás sikeres",
-      "DISABLE": "Cron feladat letiltva"
+      "DISABLE": "Cron feladat letiltva",
+      "SSL_CERT_EXPIRY": "SSL-tanúsítvány lejár"
     }
   },
   "units": {
@@ -188,7 +210,8 @@
     "notifyOn": {
       "onFailure": "a cron feladat végrehajtása meghiúsul",
       "onSuccess": "a cron feladat végrehajtása sikeres lesz, miután korábban meghiúsult",
-      "onDisable": "a cron feladat le lesz tiltva a túl sok hiba miatt"
+      "onDisable": "a cron feladat le lesz tiltva a túl sok hiba miatt",
+      "onSslCertExpiry": "a szerver TLS-tanúsítványa hamarosan lejár"
     },
     "requireshttpauth": "HTTP hitelesítés szükséges",
     "username": "Felhasználónév",
@@ -318,7 +341,10 @@
     },
     "move": "Áthelyezés",
     "moveText": "Kiválasztott elem áthelyezése ide:",
-    "moveText_plural": "Kiválasztott {{count}} elem áthelyezése ide:"
+    "moveText_plural": "Kiválasztott {{count}} elem áthelyezése ide:",
+    "notifyOnSslCertExpiryLeadTime": "Értesítés lejárat előtt",
+    "notifyOnSslCertExpiryDays": "nap",
+    "notifyOnSslCertExpiryDays_plural": "nap"
   },
   "statuspages": {
     "title": "Cím",

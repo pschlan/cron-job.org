@@ -43,15 +43,36 @@
     "note": "Nota",
     "error": "Error",
     "success": "Éxito",
-    "weekDays": ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"],
-    "months": ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"],
+    "weekDays": [
+      "Domingo",
+      "Lunes",
+      "Martes",
+      "Miércoles",
+      "Jueves",
+      "Viernes",
+      "Sábado"
+    ],
+    "months": [
+      "Enero",
+      "Febrero",
+      "Marzo",
+      "Abril",
+      "Mayo",
+      "Junio",
+      "Julio",
+      "Agosto",
+      "Septiembre",
+      "Octubre",
+      "Noviembre",
+      "Diciembre"
+    ],
     "calendarFormat": {
-      "lastDay" : "[Ayer a] LTS",
-      "sameDay" : "[Hoy a] LTS",
-      "nextDay" : "[Mañana a] LTS",
-      "lastWeek" : "[el] dddd [pasado a] LTS",
-      "nextWeek" : "dddd [a las] LTS",
-      "sameElse" : "L"
+      "lastDay": "[Ayer a] LTS",
+      "sameDay": "[Hoy a] LTS",
+      "nextDay": "[Mañana a] LTS",
+      "lastWeek": "[el] dddd [pasado a] LTS",
+      "nextWeek": "dddd [a las] LTS",
+      "sameElse": "L"
     },
     "quotaIndicator": "Cuota: {{cur}} / {{max}}",
     "selectedItems": "{{count}} elemento seleccionado",
@@ -145,7 +166,8 @@
     "notifications": {
       "FAILURE": "Ejecución fallida",
       "SUCCESS": "Ejecución exitosa",
-      "DISABLE": "Cronjob deshabilitado"
+      "DISABLE": "Cronjob deshabilitado",
+      "SSL_CERT_EXPIRY": "Certificado SSL por expirar"
     }
   },
   "units": {
@@ -199,7 +221,8 @@
     "notifyOn": {
       "onFailure": "cuando la ejecución del cronjob falle",
       "onSuccess": "cuando la ejecución del cronjob tenga éxito después de haber fallado antes",
-      "onDisable": "cuando el cronjob se deshabilite por demasiados fallos"
+      "onDisable": "cuando el cronjob se deshabilite por demasiados fallos",
+      "onSslCertExpiry": "el certificado TLS del servidor está a punto de expirar"
     },
     "notifyOnFailureRequiredTimes": "Notificar después de",
     "notifyOnFailureFailures": "fallo",
@@ -346,7 +369,10 @@
     "statusBadgeURL": "URL de la insignia",
     "statusBadgeMarkdown": "Ejemplo en Markdown",
     "statusBadgeURLNote": "Al compartir la URL de la insignia de estado, ten en cuenta que cualquier persona que tenga la URL puede ver el estado de tu job y la información seleccionada.",
-    "someFailed": "No pudimos recuperar algunos de tus jobs en este momento debido a un problema técnico. Nuestro personal ha sido notificado. Por favor, inténtalo más tarde. Si el problema persiste, contacta a nuestro equipo de soporte."
+    "someFailed": "No pudimos recuperar algunos de tus jobs en este momento debido a un problema técnico. Nuestro personal ha sido notificado. Por favor, inténtalo más tarde. Si el problema persiste, contacta a nuestro equipo de soporte.",
+    "notifyOnSslCertExpiryLeadTime": "Notificar antes del vencimiento",
+    "notifyOnSslCertExpiryDays": "día",
+    "notifyOnSslCertExpiryDays_plural": "días"
   },
   "statuspages": {
     "title": "Título",

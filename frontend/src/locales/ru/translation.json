@@ -41,15 +41,36 @@
     "note": "Заметка",
     "error": "Ошибка",
     "success": "Успех",
-    "weekDays": [ "Воскресение", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота" ],
-    "months": [ "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь" ],
-    "calendarFormat" : {
-      "lastDay" : "[Вчера в] LTS",
-      "sameDay" : "[Сегодня в] LTS",
-      "nextDay" : "[Завтра в] LTS",
-      "lastWeek" : "[последний раз] dddd [в] LTS",
-      "nextWeek" : "dddd [в] LTS",
-      "sameElse" : "L"
+    "weekDays": [
+      "Воскресение",
+      "Понедельник",
+      "Вторник",
+      "Среда",
+      "Четверг",
+      "Пятница",
+      "Суббота"
+    ],
+    "months": [
+      "Январь",
+      "Февраль",
+      "Март",
+      "Апрель",
+      "Май",
+      "Июнь",
+      "Июль",
+      "Август",
+      "Сентябрь",
+      "Октябрь",
+      "Ноябрь",
+      "Декабрь"
+    ],
+    "calendarFormat": {
+      "lastDay": "[Вчера в] LTS",
+      "sameDay": "[Сегодня в] LTS",
+      "nextDay": "[Завтра в] LTS",
+      "lastWeek": "[последний раз] dddd [в] LTS",
+      "nextWeek": "dddd [в] LTS",
+      "sameElse": "L"
     },
     "quotaIndicator": "Квота: {{cur}} / {{max}}",
     "selectedItems": "{{count}} элемент выбран",
@@ -128,7 +149,8 @@
     "notifications": {
       "FAILURE": "Запуск не удался",
       "SUCCESS": "Успешно запущено",
-      "DISABLE": "Cron задание отключено"
+      "DISABLE": "Cron задание отключено",
+      "SSL_CERT_EXPIRY": "Истекает SSL-сертификат"
     }
   },
   "units": {
@@ -176,7 +198,8 @@
     "notifyOn": {
       "onFailure": "запуск cron задания провален",
       "onSuccess": "запуск cron задания успешен после предыдущено провала",
-      "onDisable": "cron задание будет отключена по причине слишком большого количества провалов"
+      "onDisable": "cron задание будет отключена по причине слишком большого количества провалов",
+      "onSslCertExpiry": "срок действия TLS-сертификата сервера скоро истечёт"
     },
     "requireshttpauth": "Требует HTTP аутентификации",
     "username": "Имя пользователя",
@@ -275,7 +298,10 @@
     "format": {
       "cronTabCurl": "Crontab + curl"
     },
-    "exportData": "Экспортировать данные"
+    "exportData": "Экспортировать данные",
+    "notifyOnSslCertExpiryLeadTime": "Уведомить до истечения",
+    "notifyOnSslCertExpiryDays": "день",
+    "notifyOnSslCertExpiryDays_plural": "дней"
   },
   "statuspages": {
     "title": "Название",

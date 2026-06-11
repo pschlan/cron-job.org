@@ -41,8 +41,29 @@
     "note": "注意",
     "error": "錯誤",
     "success": "成功",
-    "weekDays": ["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],
-    "months": ["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月"," 十二月"],
+    "weekDays": [
+      "星期日",
+      "星期一",
+      "星期二",
+      "星期三",
+      "星期四",
+      "星期五",
+      "星期六"
+    ],
+    "months": [
+      "一月",
+      "二月",
+      "三月",
+      "四月",
+      "五月",
+      "六月",
+      "七月",
+      "八月",
+      "九月",
+      "十月",
+      "十一月",
+      " 十二月"
+    ],
     "calendarFormat": {
       "lastDay": "[昨天] LTS",
       "sameDay": "[今天] LTS",
@@ -136,7 +157,8 @@
     "notifications": {
       "FAILURE": "執行失敗",
       "SUCCESS": "執行成功",
-      "DISABLE": "定時工作已停用"
+      "DISABLE": "定時工作已停用",
+      "SSL_CERT_EXPIRY": "SSL 憑證即將到期"
     }
   },
   "units": {
@@ -184,7 +206,8 @@
     "notifyOn": {
       "onFailure": "定時工作執行失敗",
       "onSuccess": "之前失敗的定時工作執行成功",
-      "onDisable": "由於失敗次數太多，定時工作將被停用"
+      "onDisable": "由於失敗次數太多，定時工作將被停用",
+      "onSslCertExpiry": "伺服器 TLS 憑證即將到期"
     },
     "requireshttpauth": "需要 HTTP 身份驗證",
     "username": "使用者名稱",
@@ -311,7 +334,10 @@
     },
     "move": "移動",
     "moveText": "將所選項目移動至：",
-    "moveText_plural": "將所選的 {{count}} 個項目移動至："
+    "moveText_plural": "將所選的 {{count}} 個項目移動至：",
+    "notifyOnSslCertExpiryLeadTime": "到期前通知",
+    "notifyOnSslCertExpiryDays": "天",
+    "notifyOnSslCertExpiryDays_plural": "天"
   },
   "statuspages": {
     "title": "標題",
