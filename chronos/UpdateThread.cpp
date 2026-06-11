@@ -61,7 +61,7 @@ void UpdateThread::addResult(std::unique_ptr<JobResult> result)
 
 void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 {
-	const int DB_SCHEMA_VERSION = 2;
+	const int DB_SCHEMA_VERSION = 3;
 	const int TIMEDB_SCHEMA_VERSION = 1;
 
 	struct tm tmStruct = { 0 };
@@ -131,6 +131,17 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 			userDB->prepare("CREATE INDEX IF NOT EXISTS \"idx_stats_jobid\" ON \"joblog_stats\" (\"jobid\")")->execute();
 		}
 
+		if(currentSchemaVersion < 3)
+		{
+			userDB->prepare("CREATE TABLE IF NOT EXISTS \"joblog_ssl\"("
+				"	\"joblogid\" INTEGER PRIMARY KEY,"
+				"	\"jobid\" INTEGER NOT NULL,"
+				"	\"date\" INTEGER NOT NULL,"
+				"	\"ssl_cert_expiry\" INTEGER NOT NULL"
+				")")->execute();
+			userDB->prepare("CREATE INDEX IF NOT EXISTS \"idx_ssl_jobid\" ON \"joblog_ssl\" (\"jobid\")")->execute();
+		}
+
 		if(currentSchemaVersion != DB_SCHEMA_VERSION)
 		{
 			std::string pragmaQuery = "PRAGMA user_version = " + std::to_string(DB_SCHEMA_VERSION);
@@ -177,6 +188,17 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 		stmt->bind(":start_transfer",	result->timeStartTransfer);
 		stmt->bind(":total",			result->timeTotal);
 		stmt->execute();
+
+		if(result->sslCertExpiry > 0)
+		{
+			stmt = userDB->prepare("INSERT INTO \"joblog_ssl\"(\"joblogid\",\"jobid\",\"date\",\"ssl_cert_expiry\") "
+				"VALUES(:joblogid,:jobid,:date,:ssl_cert_expiry)");
+			stmt->bind(":joblogid", 		jobLogID);
+			stmt->bind(":jobid", 			result->jobID);
+			stmt->bind(":date", 			static_cast<int>(result->dateStarted / 1000));
+			stmt->bind(":ssl_cert_expiry",	static_cast<int>(result->sslCertExpiry));
+			stmt->execute();
+		}
 	}
 	catch(const std::exception &ex)
 	{
