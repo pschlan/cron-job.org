@@ -208,7 +208,7 @@
     "notifyOnFailureFailures_plural": "aufeinanderfolgenden Fehlschlägen",
     "notifyOnSslCertExpiryLeadTime": "Benachrichtigung vor Ablauf",
     "notifyOnSslCertExpiryDays": "Tag",
-    "notifyOnSslCertExpiryDays_plural": "Tagen",
+    "notifyOnSslCertExpiryDays_plural": "Tage",
     "requireshttpauth": "Erfordert HTTP-Authentifizierung",
     "username": "Benutzername",
     "password": "Passwort",
