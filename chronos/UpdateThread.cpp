@@ -61,7 +61,7 @@ void UpdateThread::addResult(std::unique_ptr<JobResult> result)
 
 void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 {
-	const int DB_SCHEMA_VERSION = 2;
+	const int DB_SCHEMA_VERSION = 3;
 	const int TIMEDB_SCHEMA_VERSION = 1;
 
 	struct tm tmStruct = { 0 };
@@ -131,6 +131,17 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 			userDB->prepare("CREATE INDEX IF NOT EXISTS \"idx_stats_jobid\" ON \"joblog_stats\" (\"jobid\")")->execute();
 		}
 
+		if(currentSchemaVersion < 3)
+		{
+			userDB->prepare("CREATE TABLE IF NOT EXISTS \"joblog_ssl\"("
+				"	\"joblogid\" INTEGER PRIMARY KEY,"
+				"	\"jobid\" INTEGER NOT NULL,"
+				"	\"date\" INTEGER NOT NULL,"
+				"	\"ssl_cert_expiry\" INTEGER NOT NULL"
+				")")->execute();
+			userDB->prepare("CREATE INDEX IF NOT EXISTS \"idx_ssl_jobid\" ON \"joblog_ssl\" (\"jobid\")")->execute();
+		}
+
 		if(currentSchemaVersion != DB_SCHEMA_VERSION)
 		{
 			std::string pragmaQuery = "PRAGMA user_version = " + std::to_string(DB_SCHEMA_VERSION);
@@ -177,6 +188,17 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 		stmt->bind(":start_transfer",	result->timeStartTransfer);
 		stmt->bind(":total",			result->timeTotal);
 		stmt->execute();
+
+		if(result->sslCertExpiry > 0)
+		{
+			stmt = userDB->prepare("INSERT INTO \"joblog_ssl\"(\"joblogid\",\"jobid\",\"date\",\"ssl_cert_expiry\") "
+				"VALUES(:joblogid,:jobid,:date,:ssl_cert_expiry)");
+			stmt->bind(":joblogid", 		jobLogID);
+			stmt->bind(":jobid", 			result->jobID);
+			stmt->bind(":date", 			static_cast<int>(result->dateStarted / 1000));
+			stmt->bind(":ssl_cert_expiry",	static_cast<int>(result->sslCertExpiry));
+			stmt->execute();
+		}
 	}
 	catch(const std::exception &ex)
 	{
@@ -203,36 +225,72 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 	std::string query;
 	if(result->status == JOBSTATUS_OK)
 	{
-		query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`fail_counter`=0,`unfiltered_fail_counter`=0 WHERE `jobid`=%d";
+		query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`ssl_cert_expiry`=%d,`fail_counter`=0,`unfiltered_fail_counter`=0 WHERE `jobid`=%d";
 	}
 	else if(result->status == JOBSTATUS_FAILED_TIMEOUT)
 	{
-		query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`fail_counter`=GREATEST(`fail_counter`,1),`unfiltered_fail_counter`=`unfiltered_fail_counter`+1 WHERE `jobid`=%d";
+		query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`ssl_cert_expiry`=%d,`fail_counter`=GREATEST(`fail_counter`,1),`unfiltered_fail_counter`=`unfiltered_fail_counter`+1 WHERE `jobid`=%d";
 	}
 	else
 	{
-		query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`fail_counter`=`fail_counter`+1,`unfiltered_fail_counter`=`unfiltered_fail_counter`+1 WHERE `jobid`=%d";
+		query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`ssl_cert_expiry`=%d,`fail_counter`=`fail_counter`+1,`unfiltered_fail_counter`=`unfiltered_fail_counter`+1 WHERE `jobid`=%d";
 	}
 	db->query(query.c_str(),
 		static_cast<int>(result->status),
 		static_cast<int>(result->dateStarted / 1000),
 		static_cast<int>(result->duration),
+		static_cast<int>(result->sslCertExpiry),
 		result->jobID);
 
 	// get (new) fail counter and latest enabled status
 	int failCounter = 0;
 	int unfilteredFailCounter = 0;
 	bool isEnabled = false;
+	int sslCertExpiryNotified = 0;
 	MYSQL_ROW row;
-	auto res = db->query("SELECT `fail_counter`,`unfiltered_fail_counter`,`enabled` FROM `job` WHERE `jobid`=%d",
+	auto res = db->query("SELECT `fail_counter`,`unfiltered_fail_counter`,`enabled`,`ssl_cert_expiry_notified` FROM `job` WHERE `jobid`=%d",
 		result->jobID);
 	while((row = res->fetchRow()) != NULL)
 	{
 		failCounter = atoi(row[0]);
 		unfilteredFailCounter = atoi(row[1]);
 		isEnabled = atoi(row[2]) != 0;
+		sslCertExpiryNotified = atoi(row[3]);
 	}
 	res.reset();
+
+	const auto queueNotification = [&](NotificationType_t type, int notificationFailCounter, uint64_t sslCertExpiry = 0)
+	{
+		Notification n;
+		n.userID = result->userID;
+		n.jobID = result->jobID;
+		n.date = time(NULL);
+		n.dateStarted = result->dateStarted / 1000;
+		n.datePlanned = result->datePlanned / 1000;
+		n.type = type;
+		n.url = result->url;
+		n.title = result->title;
+		n.status = result->status;
+		n.statusText = result->statusText;
+		n.httpStatus = result->httpStatus;
+		n.failCounter = notificationFailCounter;
+		n.sslCertExpiry = sslCertExpiry;
+
+		db->query("INSERT INTO `notification`(`jobid`,`joblogid`,`date`,`type`,`date_started`,`date_planned`,`url`,`execution_status`,`execution_status_text`,`execution_http_status`) "
+			"VALUES(%d,%d,%u,%u,%u,%u,'%q',%u,'%q',%u)",
+			result->jobID,
+			jobLogID,
+			static_cast<unsigned long>(time(NULL)),
+			static_cast<unsigned long>(n.type),
+			static_cast<unsigned long>(n.dateStarted),
+			static_cast<unsigned long>(n.datePlanned),
+			n.url.c_str(),
+			static_cast<unsigned long>(n.status),
+			n.statusText.c_str(),
+			static_cast<unsigned long>(n.httpStatus));
+
+		NotificationThread::getInstance()->addNotification(std::move(n));
+	};
 
 	bool createNotification = false;
 	NotificationType_t notificationType;
@@ -274,34 +332,21 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 
 	if(createNotification && isEnabled)
 	{
-		Notification n;
-		n.userID = result->userID;
-		n.jobID = result->jobID;
-		n.date = time(NULL);
-		n.dateStarted = result->dateStarted / 1000;
-		n.datePlanned = result->datePlanned / 1000;
-		n.type = notificationType;
-		n.url = result->url;
-		n.title = result->title;
-		n.status = result->status;
-		n.statusText = result->statusText;
-		n.httpStatus = result->httpStatus;
-		n.failCounter = std::max(unfilteredFailCounter, failCounter);
+		queueNotification(notificationType, std::max(unfilteredFailCounter, failCounter));
+	}
 
-		db->query("INSERT INTO `notification`(`jobid`,`joblogid`,`date`,`type`,`date_started`,`date_planned`,`url`,`execution_status`,`execution_status_text`,`execution_http_status`) "
-			"VALUES(%d,%d,%u,%u,%u,%u,'%q',%u,'%q',%u)",
-			result->jobID,
-			jobLogID,
-			static_cast<unsigned long>(time(NULL)),
-			static_cast<unsigned long>(n.type),
-			static_cast<unsigned long>(n.dateStarted),
-			static_cast<unsigned long>(n.datePlanned),
-			n.url.c_str(),
-			static_cast<unsigned long>(n.status),
-			n.statusText.c_str(),
-			static_cast<unsigned long>(n.httpStatus));
+	const time_t now = time(nullptr);
+	if(result->notifySslCertExpiry
+		&& result->sslCertExpiry > 0
+		&& isEnabled
+		&& static_cast<uint64_t>(now) + static_cast<uint64_t>(result->notifySslCertExpirySeconds) >= result->sslCertExpiry
+		&& sslCertExpiryNotified != static_cast<int>(result->sslCertExpiry))
+	{
+		queueNotification(NOTIFICATION_TYPE_SSL_CERT_EXPIRY, std::max(unfilteredFailCounter, failCounter), result->sslCertExpiry);
 
-		NotificationThread::getInstance()->addNotification(std::move(n));
+		db->query("UPDATE `job` SET `ssl_cert_expiry_notified`=%d WHERE `jobid`=%d",
+			static_cast<int>(result->sslCertExpiry),
+			result->jobID);
 	}
 
 	if(result->jobType == JobType_t::MONITORING)

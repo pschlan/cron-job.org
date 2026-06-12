@@ -42,15 +42,36 @@
     "note": "Note",
     "error": "Errore",
     "success": "Successo",
-    "weekDays": [ "Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato" ],
-    "months": [ "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre" ],
-    "calendarFormat" : {
-      "lastDay" : "[Ieri alle] LTS",
-      "sameDay" : "[Oggi alle] LTS",
-      "nextDay" : "[Domani alle] LTS",
-      "lastWeek" : "dddd [scorso/a alle] LTS",
-      "nextWeek" : "dddd [alle] LTS",
-      "sameElse" : "L"
+    "weekDays": [
+      "Domenica",
+      "Lunedì",
+      "Martedì",
+      "Mercoledì",
+      "Giovedì",
+      "Venerdì",
+      "Sabato"
+    ],
+    "months": [
+      "Gennaio",
+      "Febbraio",
+      "Marzo",
+      "Aprile",
+      "Maggio",
+      "Giugno",
+      "Luglio",
+      "Agosto",
+      "Settembre",
+      "Ottobre",
+      "Novembre",
+      "Dicembre"
+    ],
+    "calendarFormat": {
+      "lastDay": "[Ieri alle] LTS",
+      "sameDay": "[Oggi alle] LTS",
+      "nextDay": "[Domani alle] LTS",
+      "lastWeek": "dddd [scorso/a alle] LTS",
+      "nextWeek": "dddd [alle] LTS",
+      "sameElse": "L"
     },
     "quotaIndicator": "Quota: {{cur}} / {{max}}",
     "selectedItems": "{{count}} oggetto selezionato",
@@ -137,7 +158,8 @@
     "notifications": {
       "FAILURE": "Esecuzione fallita",
       "SUCCESS": "Esecuzione completata",
-      "DISABLE": "Cronjob disabilitato"
+      "DISABLE": "Cronjob disabilitato",
+      "SSL_CERT_EXPIRY": "Certificato SSL in scadenza"
     }
   },
   "units": {
@@ -159,6 +181,7 @@
     "history": "Cronologia",
     "nohistory": "Nessun elemento trovato nella cronologia.",
     "status": "Stato",
+    "sslCertExpiry": "Il certificato TLS scade il {{expiryDate}}",
     "executed": "Eseguito",
     "scheduled": "Programmato",
     "jitter": "Jitter",
@@ -185,7 +208,8 @@
     "notifyOn": {
       "onFailure": "l'esecuzione del cronjob fallisce",
       "onSuccess": "l'esecuzione del cronjob va a buon fine dopo essere fallita",
-      "onDisable": "il cronjob sarà disabilitato a causa di troppo fallimenti"
+      "onDisable": "il cronjob sarà disabilitato a causa di troppo fallimenti",
+      "onSslCertExpiry": "il certificato TLS del server sta per scadere"
     },
     "requireshttpauth": "Richiede autenticazione HTTP",
     "username": "Username",
@@ -315,7 +339,10 @@
     },
     "move": "Sposta",
     "moveText": "Sposta l'elemento selezionato in:",
-    "moveText_plural": "Sposta {{count}} elementi selezionati in:"
+    "moveText_plural": "Sposta {{count}} elementi selezionati in:",
+    "notifyOnSslCertExpiryLeadTime": "Notifica prima della scadenza",
+    "notifyOnSslCertExpiryDays": "giorno",
+    "notifyOnSslCertExpiryDays_plural": "giorni"
   },
   "statuspages": {
     "title": "Titolo",

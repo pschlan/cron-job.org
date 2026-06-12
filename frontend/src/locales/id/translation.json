@@ -43,15 +43,36 @@
     "note": "Catatan",
     "error": "Error",
     "success": "Sukses",
-    "weekDays": [ "Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu" ],
-    "months": [ "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember" ],
-    "calendarFormat" : {
-      "lastDay" : "[Kemarin pukul] LTS",
-      "sameDay" : "[Hari ini pukul] LTS",
-      "nextDay" : "[Besok pukul] LTS",
-      "lastWeek" : "dddd [lalu pukul] LTS",
-      "nextWeek" : "dddd [pukul] LTS",
-      "sameElse" : "L"
+    "weekDays": [
+      "Minggu",
+      "Senin",
+      "Selasa",
+      "Rabu",
+      "Kamis",
+      "Jumat",
+      "Sabtu"
+    ],
+    "months": [
+      "Januari",
+      "Februari",
+      "Maret",
+      "April",
+      "Mei",
+      "Juni",
+      "Juli",
+      "Agustus",
+      "September",
+      "Oktober",
+      "November",
+      "Desember"
+    ],
+    "calendarFormat": {
+      "lastDay": "[Kemarin pukul] LTS",
+      "sameDay": "[Hari ini pukul] LTS",
+      "nextDay": "[Besok pukul] LTS",
+      "lastWeek": "dddd [lalu pukul] LTS",
+      "nextWeek": "dddd [pukul] LTS",
+      "sameElse": "L"
     },
     "quotaIndicator": "Kuota: {{cur}} / {{max}}",
     "selectedItems": "{{count}} item terpilih",
@@ -145,7 +166,8 @@
     "notifications": {
       "FAILURE": "Eksekusi gagal",
       "SUCCESS": "Eksekusi berhasil",
-      "DISABLE": "Cronjob dinonaktifkan"
+      "DISABLE": "Cronjob dinonaktifkan",
+      "SSL_CERT_EXPIRY": "Sertifikat SSL akan kedaluwarsa"
     }
   },
   "units": {
@@ -168,6 +190,7 @@
     "history": "Riwayat",
     "nohistory": "Tidak ada riwayat item yang ditemukan.",
     "status": "Status",
+    "sslCertExpiry": "Sertifikat TLS kedaluwarsa pada {{expiryDate}}",
     "executed": "Dieksekusi",
     "scheduled": "Dijadwalkan",
     "jitter": "Jitter",
@@ -199,7 +222,8 @@
     "notifyOn": {
       "onFailure": "eksekusi cronjob gagal",
       "onSuccess": "eksekusi cronjob berhasil setelah sebelumnya gagal",
-      "onDisable": "cronjob akan dinonaktifkan karena terlalu banyak kegagalan"
+      "onDisable": "cronjob akan dinonaktifkan karena terlalu banyak kegagalan",
+      "onSslCertExpiry": "sertifikat TLS server akan segera kedaluwarsa"
     },
     "notifyOnFailureRequiredTimes": "Beri tahu setelah",
     "notifyOnFailureFailures": "kegagalan",
@@ -346,7 +370,10 @@
     "statusBadgeURL": "URL Badge",
     "statusBadgeMarkdown": "Contoh Markdown",
     "statusBadgeURLNote": "Saat membagikan URL Badge status, perlu diingat bahwa siapa pun yang memiliki URL tersebut dapat melihat status job Anda dan informasi lain yang dipilih.",
-    "someFailed": "Kami tidak dapat mengambil beberapa job Anda saat ini karena masalah teknis. Tim kami telah diberi tahu. Silakan coba lagi nanti. Jika masalah ini berlanjut, silakan hubungi tim dukungan kami."
+    "someFailed": "Kami tidak dapat mengambil beberapa job Anda saat ini karena masalah teknis. Tim kami telah diberi tahu. Silakan coba lagi nanti. Jika masalah ini berlanjut, silakan hubungi tim dukungan kami.",
+    "notifyOnSslCertExpiryLeadTime": "Beri tahu sebelum kedaluwarsa",
+    "notifyOnSslCertExpiryDays": "hari",
+    "notifyOnSslCertExpiryDays_plural": "hari"
   },
   "statuspages": {
     "title": "Judul",

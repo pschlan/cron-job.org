@@ -37,6 +37,19 @@ using namespace ::apache::thrift::server;
 namespace {
 
 constexpr const int TIME_ONE_DAY = 86400;
+//! @note Keep in sync with DB_SCHEMA_VERSION in UpdateThread.cpp
+constexpr const int USER_DB_SCHEMA_SSL = 3;
+
+int getUserDbSchemaVersion(Chronos::SQLite_DB &userDB)
+{
+	auto stmt = userDB.prepare("PRAGMA user_version");
+	while(stmt->execute())
+	{
+		return stmt->intValue(0);
+	}
+
+	return 0;
+}
 
 }
 
@@ -67,7 +80,7 @@ public:
             std::unique_ptr<Chronos::MySQL_DB> db(Chronos::App::getInstance()->createMySQLConnection());
 
 	        MYSQL_ROW row;
-            auto res = db->query("SELECT `jobid`,`userid`,`enabled`,`title`,`save_responses`,`last_status`,`last_fetch`,`last_duration`,`fail_counter`,`url`,`request_method`,`timezone`,`type`,`usergroupid`,`request_timeout`,`redirect_success`,`expires_at`,`folderid`,`unfiltered_fail_counter` FROM `job` WHERE `userid`=%v",
+            auto res = db->query("SELECT `jobid`,`userid`,`enabled`,`title`,`save_responses`,`last_status`,`last_fetch`,`last_duration`,`fail_counter`,`url`,`request_method`,`timezone`,`type`,`usergroupid`,`request_timeout`,`redirect_success`,`expires_at`,`folderid`,`unfiltered_fail_counter`,`ssl_cert_expiry` FROM `job` WHERE `userid`=%v",
                 userId);
             _return.reserve(res->numRows());
             while((row = res->fetchRow()))
@@ -96,6 +109,11 @@ public:
                 job.executionInfo.lastDuration = std::stoi(row[7]);
                 job.executionInfo.failCounter = std::stoi(row[8]);
                 job.executionInfo.unfilteredFailCounter = std::stoi(row[18]);
+                if(std::stoll(row[19]) > 0)
+                {
+                    job.executionInfo.sslCertExpiry = std::stoll(row[19]);
+                    job.executionInfo.__isset.sslCertExpiry = true;
+                }
                 job.__isset.executionInfo = true;
 
                 job.data.url = row[9];
@@ -136,7 +154,7 @@ public:
             auto res = db->query("SELECT `jobid`,`userid`,`enabled`,`title`,`save_responses`,`last_status`,`last_fetch`,"
                     "`last_duration`,`fail_counter`,`url`,`request_method`,`auth_enable`,`auth_user`,`auth_pass`,"
                     "`notify_failure`,`notify_success`,`notify_disable`,`timezone`,`type`,`usergroupid`,`request_timeout`, "
-                    "`redirect_success`,`expires_at`,`folderid`,`notify_failure_count`,`unfiltered_fail_counter` "
+                    "`redirect_success`,`expires_at`,`folderid`,`notify_failure_count`,`unfiltered_fail_counter`,`ssl_cert_expiry`,`notify_ssl_cert_expiry`,`notify_ssl_cert_expiry_seconds` "
                     "FROM `job` WHERE `jobid`=%v AND `userid`=%v",
                 identifier.jobId,
                 identifier.userId);
@@ -166,6 +184,11 @@ public:
                 _return.executionInfo.lastDuration = std::stoi(row[7]);
                 _return.executionInfo.failCounter = std::stoi(row[8]);
                 _return.executionInfo.unfilteredFailCounter = std::stoi(row[25]);
+                if(std::stoll(row[26]) > 0)
+                {
+                    _return.executionInfo.sslCertExpiry = std::stoll(row[26]);
+                    _return.executionInfo.__isset.sslCertExpiry = true;
+                }
                 _return.__isset.executionInfo = true;
 
                 _return.data.url = row[9];
@@ -181,6 +204,8 @@ public:
                 _return.notification.onFailureCount = std::stoi(row[24]);
                 _return.notification.onSuccess = std::strcmp(row[15], "1") == 0;
                 _return.notification.onDisable = std::strcmp(row[16], "1") == 0;
+                _return.notification.onSslCertExpiry = std::strcmp(row[27], "1") == 0;
+                _return.notification.onSslCertExpirySeconds = std::stoi(row[28]);
                 _return.__isset.notification = true;
 
                 _return.schedule.timezone = row[17];
@@ -299,11 +324,13 @@ public:
 
             if(job.__isset.notification)
             {
-                db->query("UPDATE `job` SET `notify_failure`=%d, `notify_failure_count`=%d, `notify_success`=%d, `notify_disable`=%d WHERE `jobid`=%v",
+                db->query("UPDATE `job` SET `notify_failure`=%d, `notify_failure_count`=%d, `notify_success`=%d, `notify_disable`=%d, `notify_ssl_cert_expiry`=%d, `notify_ssl_cert_expiry_seconds`=%d WHERE `jobid`=%v",
                     job.notification.onFailure ? 1 : 0,
                     std::max(1, job.notification.onFailureCount),
                     job.notification.onSuccess ? 1 : 0,
                     job.notification.onDisable ? 1 : 0,
+                    job.notification.onSslCertExpiry ? 1 : 0,
+                    std::max(0, job.notification.onSslCertExpirySeconds),
                     job.identifier.jobId);
             }
 
@@ -446,10 +473,18 @@ public:
         {
             userDB = std::make_unique<SQLite_DB>(dbFilePath.c_str(), true /* read only */);
 
-            auto stmt = userDB->prepare("SELECT * FROM \"joblog\" "
+            const int schemaVersion = getUserDbSchemaVersion(*userDB);
+
+            std::string query = "SELECT * FROM \"joblog\" "
                 "LEFT JOIN \"joblog_response\" ON \"joblog_response\".\"joblogid\"=\"joblog\".\"joblogid\" "
-                "LEFT JOIN \"joblog_stats\" ON \"joblog_stats\".\"joblogid\"=\"joblog\".\"joblogid\" "
-                "WHERE \"joblog\".\"joblogid\"=:joblogid");
+                "LEFT JOIN \"joblog_stats\" ON \"joblog_stats\".\"joblogid\"=\"joblog\".\"joblogid\" ";
+            if(schemaVersion >= USER_DB_SCHEMA_SSL)
+            {
+                query += "LEFT JOIN \"joblog_ssl\" ON \"joblog_ssl\".\"joblogid\"=\"joblog\".\"joblogid\" ";
+            }
+            query += "WHERE \"joblog\".\"joblogid\"=:joblogid";
+
+            auto stmt = userDB->prepare(query);
             stmt->bind(":joblogid", jobLogId);
 
             while(stmt->execute())
@@ -884,6 +919,7 @@ public:
         _return.httpStatus          = status.httpStatus;
         _return.peerAddress         = status.peerAddress;
         _return.peerPort            = status.peerPort;
+        _return.sslCertExpiry       = status.sslCertExpiry;
         _return.headers             = status.headers;
         _return.body                = status.body;
         _return.stats.nameLookup    = status.timeNameLookup;
@@ -1144,8 +1180,19 @@ private:
             return;
         }
 
-        std::string query = "SELECT \"joblog\".\"joblogid\",\"joblog\".\"jobid\",\"joblog\".\"date\",\"date_planned\",\"jitter\",\"url\",\"duration\",\"joblog\".\"status\",\"status_text\",\"http_status\",\"name_lookup\",\"connect\",\"app_connect\",\"pre_transfer\",\"start_transfer\",\"total\" FROM \"joblog\" "
+        const int schemaVersion = getUserDbSchemaVersion(*userDB);
+
+        std::string query = "SELECT \"joblog\".\"joblogid\",\"joblog\".\"jobid\",\"joblog\".\"date\",\"date_planned\",\"jitter\",\"url\",\"duration\",\"joblog\".\"status\",\"status_text\",\"http_status\",\"name_lookup\",\"connect\",\"app_connect\",\"pre_transfer\",\"start_transfer\",\"total\"";
+        if(schemaVersion >= USER_DB_SCHEMA_SSL)
+        {
+            query += ",\"ssl_cert_expiry\"";
+        }
+        query += " FROM \"joblog\" "
             "LEFT JOIN \"joblog_stats\" ON \"joblog_stats\".\"joblogid\"=\"joblog\".\"joblogid\" ";
+        if(schemaVersion >= USER_DB_SCHEMA_SSL)
+        {
+            query += "LEFT JOIN \"joblog_ssl\" ON \"joblog_ssl\".\"joblogid\"=\"joblog\".\"joblogid\" ";
+        }
         if(identifier.jobId > 0)
         {
             query += "WHERE \"joblog\".\"jobid\"=:jobid ";
@@ -1194,6 +1241,12 @@ private:
             entry.stats.startTransfer   = stmt->intValue("start_transfer");
             entry.stats.total           = stmt->intValue("total");
             entry.__isset.stats         = true;
+        }
+
+        if(stmt->hasField("ssl_cert_expiry") && !stmt->isNull("ssl_cert_expiry"))
+        {
+            entry.sslCertExpiry         = stmt->intValue("ssl_cert_expiry");
+            entry.__isset.sslCertExpiry = true;
         }
 
         return entry;

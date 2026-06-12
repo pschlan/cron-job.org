@@ -42,6 +42,11 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
+function jobHistoryLink(jobFolderId, jobId) {
+  const folderId = jobFolderId || 0;
+  return '/jobs' + (folderId === 0 ? '' : '/folders/' + folderId) + '/' + jobId + '/history';
+}
+
 function EventDescription({ type, details }) {
   const { t } = useTranslation();
 
@@ -152,7 +157,7 @@ export default function Dashboard() {
           startIcon={<DetailsIcon />}
           className={classes.actionButton}
           component={RouterLink}
-          to={'/jobs' + (event.details.jobFolderId === 0 ? '' : '/folders/' + event.details.jobFolderId) + '/' + event.details.jobId + '/history'}
+          to={jobHistoryLink(event.details.jobFolderId, event.details.jobId)}
           >
           {t('common.details')}
         </Button>

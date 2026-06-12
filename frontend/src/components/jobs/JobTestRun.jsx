@@ -16,6 +16,7 @@ import { green, red } from '@material-ui/core/colors';
 import Timing from './Timing';
 import Code from '../misc/Code';
 import Headers from '../misc/Headers';
+import SslCertExpiryIcon from '../misc/SslCertExpiryIcon';
 import { formatMs } from '../../utils/Units';
 
 const REFRESH_STATUS_INTERVAL_MS = 500;
@@ -225,6 +226,7 @@ export default function JobTestRun({ job, jobId, onClose, onUpdateUrl = () => nu
               <Typography variant='overline'>{t('jobs.testRun.peer')}</Typography>
               <Typography component='div' gutterBottom className={classes.hAlign}>
                 <PeerIcon fontSize='small' /> {status.peerAddress}:{status.peerPort}
+                <SslCertExpiryIcon sslCertExpiry={status.sslCertExpiry} />
               </Typography>
             </Grid>
           </Grid>

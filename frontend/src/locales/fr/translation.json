@@ -41,15 +41,36 @@
     "note": "Note",
     "error": "Erreur",
     "success": "Succès",
-    "weekDays": [ "Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi" ],
-    "months": [ "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "August", "Septembre", "Octobre", "Novembre", "Décembre" ],
-    "calendarFormat" : {
-      "lastDay" : "[Hier à] LTS",
-      "sameDay" : "[Aujourd'hui à] LTS",
-      "nextDay" : "[Demain à] LTS",
-      "lastWeek" : "[dernier] dddd [à] LTS",
-      "nextWeek" : "dddd [à] LTS",
-      "sameElse" : "L"
+    "weekDays": [
+      "Dimanche",
+      "Lundi",
+      "Mardi",
+      "Mercredi",
+      "Jeudi",
+      "Vendredi",
+      "Samedi"
+    ],
+    "months": [
+      "Janvier",
+      "Février",
+      "Mars",
+      "Avril",
+      "Mai",
+      "Juin",
+      "Juillet",
+      "August",
+      "Septembre",
+      "Octobre",
+      "Novembre",
+      "Décembre"
+    ],
+    "calendarFormat": {
+      "lastDay": "[Hier à] LTS",
+      "sameDay": "[Aujourd'hui à] LTS",
+      "nextDay": "[Demain à] LTS",
+      "lastWeek": "[dernier] dddd [à] LTS",
+      "nextWeek": "dddd [à] LTS",
+      "sameElse": "L"
     },
     "quotaIndicator": "Quota : {{cur}} / {{max}}",
     "selectedItems": "{{count}} article choisi",
@@ -128,7 +149,8 @@
     "notifications": {
       "FAILURE": "Exécution échoué",
       "SUCCESS": "Exécution réussie",
-      "DISABLE": "Cronjob désactivé"
+      "DISABLE": "Cronjob désactivé",
+      "SSL_CERT_EXPIRY": "Certificat SSL en expiration"
     }
   },
   "units": {
@@ -150,6 +172,7 @@
     "history": "Historique",
     "nohistory": "Aucun élément historique trouvé.",
     "status": "Statut",
+    "sslCertExpiry": "Le certificat TLS expire le {{expiryDate}}",
     "executed": "Exécuté",
     "scheduled": "Programmé",
     "jitter": "Jitter",
@@ -176,7 +199,8 @@
     "notifyOn": {
       "onFailure": "l'exécution du cronjob échoue.",
       "onSuccess": "l'exécution du cronjob réussit après avoir échoué auparavant. ",
-      "onDisable": "le cronjob sera désactivé en raison d'un trop grand nombre d'échecs."
+      "onDisable": "le cronjob sera désactivé en raison d'un trop grand nombre d'échecs.",
+      "onSslCertExpiry": "le certificat TLS du serveur est sur le point d'expirer"
     },
     "requireshttpauth": "Nécessite une authentification HTTP",
     "username": "Utilisateur",
@@ -278,7 +302,10 @@
     "format": {
       "cronTabCurl": "Crontab + curl"
     },
-    "exportData": "Exportation des données"
+    "exportData": "Exportation des données",
+    "notifyOnSslCertExpiryLeadTime": "Notifier avant l'expiration",
+    "notifyOnSslCertExpiryDays": "jour",
+    "notifyOnSslCertExpiryDays_plural": "jours"
   },
   "statuspages": {
     "title": "Titre",

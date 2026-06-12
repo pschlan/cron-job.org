@@ -132,7 +132,14 @@ export default function JobEditor({ match }) {
   const [ authEnable, setAuthEnable ] = useState(false);
   const [ authUser, setAuthUser ] = useState('');
   const [ authPassword, setAuthPassword ] = useState('');
-  const [ notification, setNotification ] = useState({ onSuccess: false, onFailure: false, onFailureCount: 1, onDisable: true });
+  const [ notification, setNotification ] = useState({
+    onSuccess: false,
+    onFailure: false,
+    onFailureCount: 1,
+    onDisable: true,
+    onSslCertExpiry: false,
+    onSslCertExpirySeconds: 604800
+  });
   const [ requestMethod, setRequestMethod ] = useState(RequestMethod.GET);
   const [ requestBody, setRequestBody ] = useState('');
   const [ jobHeaders, setJobHeaders ] = useState([]);
@@ -197,7 +204,9 @@ export default function JobEditor({ match }) {
           onSuccess: false,
           onDisable: true,
           onFailure: false,
-          onFailureCount: 1
+          onFailureCount: 1,
+          onSslCertExpiry: false,
+          onSslCertExpirySeconds: 604800
         },
         requestMethod: RequestMethod.GET,
         folderId
@@ -229,7 +238,11 @@ export default function JobEditor({ match }) {
       setAuthEnable(!!job.auth.enable);
       setAuthUser(job.auth.user);
       setAuthPassword(job.auth.password);
-      setNotification(job.notification);
+      setNotification({
+        onSslCertExpiry: false,
+        onSslCertExpirySeconds: 604800,
+        ...job.notification
+      });
       setRequestMethod(job.requestMethod);
       setRequestBody(job.extendedData.body);
       analyzeBody(job.extendedData.body);
@@ -617,6 +630,31 @@ export default function JobEditor({ match }) {
                 />}
               label={t('jobs.notifyOn.onDisable')}
               />
+            <FormControlLabel
+              control={<Switch
+                checked={notification.onSslCertExpiry}
+                onChange={({target}) => setNotification(x => ({...x, onSslCertExpiry: target.checked}))}
+                />}
+              label={t('jobs.notifyOn.onSslCertExpiry')}
+              />
+            <Box ml={'3rem'} mb={1}>
+              <ValidatingTextField
+                key={`ssl-cert-expiry-days-${jobId}`}
+                label={t('jobs.notifyOnSslCertExpiryLeadTime')}
+                defaultValue={Math.round(notification.onSslCertExpirySeconds / 86400)}
+                onChange={({target}) => setNotification(x => ({
+                  ...x,
+                  onSslCertExpirySeconds: Math.max(0, parseInt(target.value, 10) || 0) * 86400
+                }))}
+                validator={val => parseInt(val, 10) >= 0}
+                InputLabelProps={{shrink: true}}
+                inputProps={{min: 0, type: 'number'}}
+                InputProps={{
+                  endAdornment: <InputAdornment position='end'>{t('jobs.notifyOnSslCertExpiryDays', { count: Math.round(notification.onSslCertExpirySeconds / 86400) })}</InputAdornment>
+                }}
+                size='small'
+                />
+            </Box>
           </FormGroup>
         </fieldset>
       </Paper>

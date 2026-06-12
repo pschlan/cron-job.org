@@ -41,8 +41,29 @@
     "note": "注意",
     "error": "错误",
     "success": "成功",
-    "weekDays": ["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],
-    "months": ["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月"," 十二月"],
+    "weekDays": [
+      "星期日",
+      "星期一",
+      "星期二",
+      "星期三",
+      "星期四",
+      "星期五",
+      "星期六"
+    ],
+    "months": [
+      "一月",
+      "二月",
+      "三月",
+      "四月",
+      "五月",
+      "六月",
+      "七月",
+      "八月",
+      "九月",
+      "十月",
+      "十一月",
+      " 十二月"
+    ],
     "calendarFormat": {
       "lastDay": "[昨天] LTS",
       "sameDay": "[今天] LTS",
@@ -136,7 +157,8 @@
     "notifications": {
       "FAILURE": "运行失败",
       "SUCCESS": "运行成功",
-      "DISABLE": "计划任务已停用"
+      "DISABLE": "计划任务已停用",
+      "SSL_CERT_EXPIRY": "SSL 证书即将过期"
     }
   },
   "units": {
@@ -158,6 +180,7 @@
     "history": "历史",
     "nohistory": "没有找到历史项目。",
     "status": "状态",
+    "sslCertExpiry": "TLS 证书将于 {{expiryDate}} 到期",
     "executed": "已运行",
     "scheduled": "预定",
     "jitter": "抖动",
@@ -184,7 +207,8 @@
     "notifyOn": {
       "onFailure": "计划任务运行失败",
       "onSuccess": "之前失败的计划任务运行成功",
-      "onDisable": "由于失败次数太多，计划任务将被停用"
+      "onDisable": "由于失败次数太多，计划任务将被停用",
+      "onSslCertExpiry": "服务器 TLS 证书即将过期"
     },
     "requireshttpauth": "需要 HTTP 身份验证",
     "username": "用户名",
@@ -311,7 +335,10 @@
     },
     "move": "移动",
     "moveText": "将所选项目移动至：",
-    "moveText_plural": "将所选的 {{count}} 个项目移动至："
+    "moveText_plural": "将所选的 {{count}} 个项目移动至：",
+    "notifyOnSslCertExpiryLeadTime": "到期前通知",
+    "notifyOnSslCertExpiryDays": "天",
+    "notifyOnSslCertExpiryDays_plural": "天"
   },
   "statuspages": {
     "title": "标题",

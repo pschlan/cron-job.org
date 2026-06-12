@@ -40,7 +40,7 @@ class GetDashboard extends AbstractAPIMethod {
       $event->type = get_class($item);
       $event->details = $item;
 
-      if ($event->type === 'HistoryItem') {
+      if ($event->type === 'HistoryItem' || $event->type === 'NotificationItem') {
         $event->details->jobFolderId = isset($jobIdToFolderId[$item->jobId])
           ? $jobIdToFolderId[$item->jobId]
           : 0;

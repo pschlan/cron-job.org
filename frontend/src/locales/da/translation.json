@@ -43,8 +43,29 @@
     "note": "Bemærk",
     "error": "Fejl",
     "success": "Succes",
-    "weekDays": [ "Søndag", "Mandag", "Tirsdag", "Onsdag", "Torsdag", "Fredag", "Lørdag" ],
-    "months": [ "Januar", "Februar", "Marts", "April", "Maj", "Juni", "Juli", "August", "September", "Oktober", "November", "December" ],
+    "weekDays": [
+      "Søndag",
+      "Mandag",
+      "Tirsdag",
+      "Onsdag",
+      "Torsdag",
+      "Fredag",
+      "Lørdag"
+    ],
+    "months": [
+      "Januar",
+      "Februar",
+      "Marts",
+      "April",
+      "Maj",
+      "Juni",
+      "Juli",
+      "August",
+      "September",
+      "Oktober",
+      "November",
+      "December"
+    ],
     "calendarFormat": {
       "lastDay": "[I går kl.] LTS",
       "sameDay": "[I dag kl.] LTS",
@@ -141,7 +162,8 @@
     "notifications": {
       "FAILURE": "Kørsel mislykkedes",
       "SUCCESS": "Kørsel lykkedes",
-      "DISABLE": "Cronjob deaktiveret"
+      "DISABLE": "Cronjob deaktiveret",
+      "SSL_CERT_EXPIRY": "SSL-certifikat udløber"
     }
   },
   "units": {
@@ -163,6 +185,7 @@
     "history": "Historik",
     "nohistory": "Ingen historikpunkter fundet.",
     "status": "Status",
+    "sslCertExpiry": "TLS-certifikat udløber {{expiryDate}}",
     "executed": "Udført",
     "scheduled": "Planlagt",
     "jitter": "Jitter",
@@ -194,7 +217,8 @@
     "notifyOn": {
       "onFailure": "når cronjob-kørslen fejler",
       "onSuccess": "når cronjob-kørslen lykkes efter en fejl",
-      "onDisable": "når cronjob’et deaktiveres efter for mange fejl"
+      "onDisable": "når cronjob’et deaktiveres efter for mange fejl",
+      "onSslCertExpiry": "serverens TLS-certifikat er ved at udløbe"
     },
     "requireshttpauth": "Kræver HTTP-godkendelse",
     "username": "Brugernavn",
@@ -323,7 +347,10 @@
     },
     "move": "Flyt",
     "moveText": "Flyt valgte element til:",
-    "moveText_plural": "Flyt {{count}} valgte elementer til:"
+    "moveText_plural": "Flyt {{count}} valgte elementer til:",
+    "notifyOnSslCertExpiryLeadTime": "Giv besked før udløb",
+    "notifyOnSslCertExpiryDays": "dag",
+    "notifyOnSslCertExpiryDays_plural": "dage"
   },
   "statuspages": {
     "title": "Titel",

@@ -42,7 +42,15 @@
     "note": "Notă",
     "error": "Eroare",
     "success": "Succes",
-    "weekDays": ["Duminică", "Luni", "Marți", "Miercuri", "Joi", "Vineri", "Sâmbătă"],
+    "weekDays": [
+      "Duminică",
+      "Luni",
+      "Marți",
+      "Miercuri",
+      "Joi",
+      "Vineri",
+      "Sâmbătă"
+    ],
     "months": [
       "Ianuarie",
       "Februarie",
@@ -150,7 +158,8 @@
     "notifications": {
       "FAILURE": "Execuție eșuată",
       "SUCCESS": "Execuție reușită",
-      "DISABLE": "Cronjob dezactivat"
+      "DISABLE": "Cronjob dezactivat",
+      "SSL_CERT_EXPIRY": "Certificat SSL expiră"
     }
   },
   "units": {
@@ -172,6 +181,7 @@
     "history": "Istoric",
     "nohistory": "Nu s-au găsit elemente din istoric.",
     "status": "Stare",
+    "sslCertExpiry": "Certificatul TLS expiră la {{expiryDate}}",
     "executed": "Executat",
     "scheduled": "Programat",
     "jitter": "Fluctuație",
@@ -198,7 +208,8 @@
     "notifyOn": {
       "onFailure": "execuția cronjob-ului eșuează",
       "onSuccess": "execuția cronjob-ului reușește după ce a eșuat înainte",
-      "onDisable": "cronjob-ul va fi dezactivat din cauza prea multor eșecuri"
+      "onDisable": "cronjob-ul va fi dezactivat din cauza prea multor eșecuri",
+      "onSslCertExpiry": "certificatul TLS al serverului este pe cale să expire"
     },
     "requireshttpauth": "Necesită autentificare HTTP",
     "username": "Nume de utilizator",
@@ -328,7 +339,10 @@
     },
     "move": "Mută",
     "moveText": "Mută elementul selectat în:",
-    "moveText_plural": "Mută {{count}} elemente selectate în:"
+    "moveText_plural": "Mută {{count}} elemente selectate în:",
+    "notifyOnSslCertExpiryLeadTime": "Notificare înainte de expirare",
+    "notifyOnSslCertExpiryDays": "zi",
+    "notifyOnSslCertExpiryDays_plural": "zile"
   },
   "statuspages": {
     "title": "Titlu",

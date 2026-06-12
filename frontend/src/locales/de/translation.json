@@ -145,7 +145,8 @@
     "notifications": {
       "FAILURE": "Ausführung fehlgeschlagen",
       "SUCCESS": "Ausführung erfolgreich",
-      "DISABLE": "Cronjob deaktiviert"
+      "DISABLE": "Cronjob deaktiviert",
+      "SSL_CERT_EXPIRY": "SSL-Zertifikat läuft ab"
     }
   },
   "units": {
@@ -168,6 +169,7 @@
     "history": "Verlauf",
     "nohistory": "Keine Verlaufs-Einträge gefunden.",
     "status": "Status",
+    "sslCertExpiry": "TLS-Zertifikat läuft ab am {{expiryDate}}",
     "executed": "Ausgeführt",
     "scheduled": "Geplant",
     "jitter": "Jitter",
@@ -199,11 +201,15 @@
     "notifyOn": {
       "onFailure": "die Ausführung des Cronjobs fehlschlägt",
       "onSuccess": "die Ausführung des Cronjobs erfolgreich ist nachdem sie zuvor fehlschlug",
-      "onDisable": "der Cronjob automatisch wegen zu vieler Fehlschläge deaktiviert wird"
+      "onDisable": "der Cronjob automatisch wegen zu vieler Fehlschläge deaktiviert wird",
+      "onSslCertExpiry": "das TLS-Zertifikat des Servers bald abläuft"
     },
     "notifyOnFailureRequiredTimes": "Benachrichtigung nach",
     "notifyOnFailureFailures": "Fehlschlag",
     "notifyOnFailureFailures_plural": "aufeinanderfolgenden Fehlschlägen",
+    "notifyOnSslCertExpiryLeadTime": "Benachrichtigung vor Ablauf",
+    "notifyOnSslCertExpiryDays": "Tag",
+    "notifyOnSslCertExpiryDays_plural": "Tage",
     "requireshttpauth": "Erfordert HTTP-Authentifizierung",
     "username": "Benutzername",
     "password": "Passwort",

@@ -19,6 +19,7 @@ class HistoryItem {
   public $headers;
   public $body;
   public $stats;
+  public $sslCertExpiry;
 
   public static function fromThriftJobLogEntry($log) {
     $result = new HistoryItem;
@@ -37,6 +38,9 @@ class HistoryItem {
     $result->headers        = isset($log->headers) ? $log->headers  : false;
     $result->body           = isset($log->body)    ? $log->body     : false;
     $result->stats          = isset($log->stats)   ? $log->stats    : null;
+    if (isset($log->sslCertExpiry) && $log->sslCertExpiry > 0) {
+      $result->sslCertExpiry = $log->sslCertExpiry;
+    }
 
     return $result;
   }

@@ -56,6 +56,7 @@ struct JobExecutionInfo
     3: i32 lastDuration;
     4: i32 failCounter;
     5: i32 unfilteredFailCounter;
+    6: optional i64 sslCertExpiry; // in s, 0 = not available (plain HTTP or no TLS)
 }
 
 struct JobData
@@ -94,6 +95,8 @@ struct JobNotification
     2: bool onSuccess;
     3: bool onDisable;
     4: i32 onFailureCount;
+    5: bool onSslCertExpiry;
+    6: i32 onSslCertExpirySeconds; // in s before certificate expiry
 }
 
 struct Job
@@ -146,6 +149,7 @@ struct JobLogEntry
     13: optional string headers;
     14: optional string body;
     15: optional JobLogStatsEntry stats;
+    16: optional i64 sslCertExpiry; // in s, 0 = not available (plain HTTP or no TLS)
 }
 
 struct UserDetails
@@ -177,7 +181,8 @@ enum NotificationType
 {
     FAILURE             = 0,
     SUCCESS             = 1,
-    DISABLE             = 2
+    DISABLE             = 2,
+    SSL_CERT_EXPIRY     = 3
 }
 
 struct NotificationEntry
@@ -241,6 +246,7 @@ struct TestRunStatus
     12: string peerAddress;
     13: i16 peerPort;
     14: JobLogStatsEntry stats;
+    15: i64 sslCertExpiry; // in s, 0 = not available (plain HTTP or no TLS)
 }
 
 struct WAFValidatorResult

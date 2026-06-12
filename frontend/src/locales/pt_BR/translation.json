@@ -158,7 +158,8 @@
     "notifications": {
       "FAILURE": "Falha na execução",
       "SUCCESS": "Execução bem-sucedida",
-      "DISABLE": "Cronjob desativado"
+      "DISABLE": "Cronjob desativado",
+      "SSL_CERT_EXPIRY": "Certificado SSL expirando"
     }
   },
   "units": {
@@ -180,6 +181,7 @@
     "history": "Histórico",
     "nohistory": "Nenhum item de histórico encontrado",
     "status": "Status",
+    "sslCertExpiry": "Certificado TLS expira em {{expiryDate}}",
     "executed": "Executado",
     "scheduled": "Agendado",
     "jitter": "Jitter",
@@ -206,7 +208,8 @@
     "notifyOn": {
       "onFailure": "falhas de execução do cronjob",
       "onSuccess": "a execução do cronjob é bem-sucedida depois de falhar antes",
-      "onDisable": "o cronjob será desativado devido a muitas falhas"
+      "onDisable": "o cronjob será desativado devido a muitas falhas",
+      "onSslCertExpiry": "o certificado TLS do servidor está prestes a expirar"
     },
     "requireshttpauth": "Requer autenticação HTTP",
     "username": "Nome de usuário",
@@ -336,7 +339,10 @@
     },
     "move": "Mover",
     "moveText": "Mover item selecionado para:",
-    "moveText_plural": "Mova {{count}} itens selecionados para:"
+    "moveText_plural": "Mova {{count}} itens selecionados para:",
+    "notifyOnSslCertExpiryLeadTime": "Notificar antes do vencimento",
+    "notifyOnSslCertExpiryDays": "dia",
+    "notifyOnSslCertExpiryDays_plural": "dias"
   },
   "statuspages": {
     "title": "Título",

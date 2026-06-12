@@ -58,11 +58,14 @@ namespace Chronos
 		int notifyFailureCount = 1;
 		bool notifySuccess = false;
 		bool notifyDisable = false;
+		bool notifySslCertExpiry = false;
+		int notifySslCertExpirySeconds = 604800; // in s, default 7 days
 		bool saveResponses = false;
 		int oldFailCounter = 0;
 		int oldUnfilteredFailCounter = 0;
 		std::string peerAddress;
 		int peerPort = 0;
+		uint64_t sslCertExpiry = 0;	// in s, 0 = not available (plain HTTP or no TLS)
 
 		int timeNameLookup = 0;		// in us
 		int timeConnect = 0;		// in us

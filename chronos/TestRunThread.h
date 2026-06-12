@@ -54,6 +54,7 @@ namespace Chronos
             std::string statusText;
             std::string peerAddress;
             int peerPort = 0;
+            uint64_t sslCertExpiry = 0;  // in s, 0 = not available (plain HTTP or no TLS)
             int duration = 0;            // in ms
             int timeNameLookup = 0;      // in us
             int timeConnect = 0;         // in us

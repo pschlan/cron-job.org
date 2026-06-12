@@ -30,6 +30,8 @@ class JobNotification {
   public $onFailureCount = 1;
   public $onSuccess = false;
   public $onDisable = false;
+  public $onSslCertExpiry = false;
+  public $onSslCertExpirySeconds = 604800;
 }
 
 class JobAuthentication {
@@ -52,6 +54,7 @@ class Job {
   public $lastStatus;
   public $lastDuration;
   public $lastExecution;
+  public $sslCertExpiry;
   public $nextExecution;
 
   public $auth;
@@ -90,6 +93,9 @@ class Job {
       $result->lastStatus     = $job->executionInfo->lastStatus;
       $result->lastDuration   = $job->executionInfo->lastDuration;
       $result->lastExecution  = $job->executionInfo->lastFetch;
+      if (isset($job->executionInfo->sslCertExpiry) && $job->executionInfo->sslCertExpiry > 0) {
+        $result->sslCertExpiry = $job->executionInfo->sslCertExpiry;
+      }
     }
 
     if (isset($job->authentication)) {
@@ -105,6 +111,8 @@ class Job {
       $result->notification->onFailure  = $job->notification->onFailure;
       $result->notification->onFailureCount = $job->notification->onFailureCount;
       $result->notification->onDisable  = $job->notification->onDisable;
+      $result->notification->onSslCertExpiry = $job->notification->onSslCertExpiry;
+      $result->notification->onSslCertExpirySeconds = $job->notification->onSslCertExpirySeconds;
     } else {
       unset($result->notification);
     }
@@ -176,6 +184,8 @@ class Job {
     $job->notification->onSuccess   = $this->notification->onSuccess;
     $job->notification->onFailure   = $this->notification->onFailure;
     $job->notification->onFailureCount = $this->notification->onFailureCount;
+    $job->notification->onSslCertExpiry = $this->notification->onSslCertExpiry;
+    $job->notification->onSslCertExpirySeconds = max(0, $this->notification->onSslCertExpirySeconds);
 
     $job->schedule                  = new \chronos\JobSchedule;
     $job->schedule->hours           = $this->toThriftSet($this->schedule->hours,    0,  23);
@@ -220,6 +230,10 @@ class Job {
     }
     $this->notification->onSuccess    = !!$request->job->notification->onSuccess;
     $this->notification->onDisable    = !!$request->job->notification->onDisable;
+    $this->notification->onSslCertExpiry = !!$request->job->notification->onSslCertExpiry;
+    if (isset($request->job->notification->onSslCertExpirySeconds)) {
+      $this->notification->onSslCertExpirySeconds = max(0, intval($request->job->notification->onSslCertExpirySeconds));
+    }
 
     $this->url                        = trim($request->job->url);
     $this->requestMethod              = (int)$request->job->requestMethod;
@@ -304,6 +318,14 @@ class Job {
 
     if (isset($request->job->notification) && isset($request->job->notification->onDisable)) {
       $this->notification->onDisable    = !!$request->job->notification->onDisable;
+    }
+
+    if (isset($request->job->notification) && isset($request->job->notification->onSslCertExpiry)) {
+      $this->notification->onSslCertExpiry = !!$request->job->notification->onSslCertExpiry;
+    }
+
+    if (isset($request->job->notification) && isset($request->job->notification->onSslCertExpirySeconds)) {
+      $this->notification->onSslCertExpirySeconds = max(0, intval($request->job->notification->onSslCertExpirySeconds));
     }
 
     if (isset($request->job->url)) {
@@ -466,7 +488,7 @@ class JobManager {
       try {
         $client = $node->connect();
         $jobDetails = $client->getJobDetails(Job::createIdentifier($jobId, intval($jobMeta->userId)));
-        return (object)[
+        $status = (object)[
           'enabled'       => boolval($jobDetails->metaData->enabled),
           'lastStatus'    => $jobDetails->executionInfo->lastStatus,
           'lastDuration'  => $jobDetails->executionInfo->lastDuration,
@@ -474,6 +496,10 @@ class JobManager {
           'timezone'      => $jobDetails->schedule->timezone,
           'title'         => $jobDetails->metaData->title
         ];
+        if (isset($jobDetails->executionInfo->sslCertExpiry) && $jobDetails->executionInfo->sslCertExpiry > 0) {
+          $status->sslCertExpiry = $jobDetails->executionInfo->sslCertExpiry;
+        }
+        return $status;
 
       } catch (Exception $ex) {
         return false;

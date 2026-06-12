@@ -12,11 +12,15 @@
 #include "HTTPRequest.h"
 
 #include <algorithm>
+#include <cctype>
+#include <ctime>
 #include <iostream>
+#include <string>
 #include <unordered_set>
 
 #include <errno.h>
 #include <string.h>
+#include <strings.h>
 
 #include <netinet/in.h>
 
@@ -44,6 +48,83 @@ size_t curlHeaderFunction(char *buffer, size_t size, size_t nitems, void *userda
 	if(!static_cast<HTTPRequest *>(userdata)->processHeaders(buffer, realSize))
 		return 0;
 	return realSize;
+}
+
+bool isExpireDateLabel(const char *line)
+{
+	return strncasecmp(line, "Expire date:", 12) == 0;
+}
+
+void stripFractionalSeconds(std::string &date)
+{
+	for(size_t i = 1; i + 1 < date.size(); ++i)
+	{
+		if(date[i] != '.' || !std::isdigit(static_cast<unsigned char>(date[i - 1])))
+			continue;
+
+		size_t j = i + 1;
+		while(j < date.size() && std::isdigit(static_cast<unsigned char>(date[j])))
+			++j;
+
+		if(j > i + 1)
+		{
+			date.erase(i, j - i);
+			return;
+		}
+	}
+}
+
+uint64_t parseCertExpiryDate(const char *dateStr)
+{
+	std::string normalized(dateStr);
+	stripFractionalSeconds(normalized);
+
+	static const char *formats[] = {
+		"%b %d %H:%M:%S %Y GMT",
+		"%b %d %H:%M:%S %Y",
+		"%Y-%m-%d %H:%M:%S GMT",
+		"%Y-%m-%d %H:%M:%S",
+	};
+
+	struct tm tm = {};
+	for(const char *fmt : formats)
+	{
+		memset(&tm, 0, sizeof(tm));
+		if(strptime(normalized.c_str(), fmt, &tm) == nullptr)
+			continue;
+
+		const time_t expiry = timegm(&tm);
+		if(expiry >= 0)
+			return static_cast<uint64_t>(expiry);
+	}
+
+	return 0;
+}
+
+uint64_t extractSslCertExpiry(CURL *easy)
+{
+	struct curl_certinfo *certinfo = nullptr;
+	if(curl_easy_getinfo(easy, CURLINFO_CERTINFO, &certinfo) != CURLE_OK
+		|| certinfo == nullptr || certinfo->num_of_certs < 1)
+	{
+		return 0;
+	}
+
+	static const size_t prefixLen = 12;
+
+	for(struct curl_slist *info = certinfo->certinfo[0]; info != nullptr; info = info->next)
+	{
+		if(!isExpireDateLabel(info->data))
+			continue;
+
+		const char *dateStr = info->data + prefixLen;
+		while(*dateStr == ' ' || *dateStr == '\t')
+			++dateStr;
+
+		return parseCertExpiryDate(dateStr);
+	}
+
+	return 0;
 }
 
 curl_socket_t curlOpenSocketFunction(void *userdata, curlsocktype purpose, struct curl_sockaddr *address)
@@ -324,6 +405,7 @@ void HTTPRequest::done(CURLcode res)
 	if (getRes != CURLE_OK)
 		timeTotal = 0;
 	result->timeTotal = timeTotal;
+	result->sslCertExpiry = extractSslCertExpiry(easy);
 
 	switch(res)
 	{
@@ -420,6 +502,7 @@ void HTTPRequest::setupEasyHandle()
 	curl_easy_setopt(easy, CURLOPT_SSL_VERIFYPEER,		0);
 	curl_easy_setopt(easy, CURLOPT_SSL_VERIFYHOST,		0);
 	curl_easy_setopt(easy, CURLOPT_CAINFO,				NULL);
+	curl_easy_setopt(easy, CURLOPT_CERTINFO,			1L);
 	curl_easy_setopt(easy, CURLOPT_IPRESOLVE,			CURL_IPRESOLVE_V4);
 }
 
