@@ -289,7 +289,8 @@
       "response": "Ответ",
       "rawRequest": "Исходный запрос",
       "rawResponse": "Исходный ответ",
-      "peer": "peer"
+      "peer": "peer",
+      "sslCertExpiry": "Срок действия TLS-сертификата истекает {{expiryDate}}"
     },
     "requestTimeout": "Тайм-аут",
     "redirectSuccess": "Обрабатывать перенаправления с кодом состояния HTTP 3xx как успешные",

@@ -325,6 +325,7 @@
       "rawRequest": "Permintaan raw",
       "rawResponse": "Respons raw",
       "peer": "Peer",
+      "sslCertExpiry": "Sertifikat TLS kedaluwarsa pada {{expiryDate}}",
       "redirectNote": {
         "title": "Pengalihan terdeteksi",
         "text": "Sepertinya URL Anda dialihkan ke URL lain. {{serviceName}} tidak secara otomatis mengikuti pengalihan. Dalam kebanyakan kasus, memperbarui URL job ke target pengalihan akan menyelesaikan masalah ini.",

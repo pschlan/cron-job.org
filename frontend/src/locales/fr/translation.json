@@ -292,7 +292,8 @@
       "response": "Réponse",
       "rawRequest": "Requête brute",
       "rawResponse": "Réponse brut",
-      "peer": "Pair"
+      "peer": "Pair",
+      "sslCertExpiry": "Le certificat TLS expire le {{expiryDate}}"
     },
     "requestTimeout": "Délai d'attente",
     "redirectSuccess": "Traiter les redirections avec le code d'état HTTP 3xx comme un succès",

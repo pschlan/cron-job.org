@@ -308,6 +308,7 @@
       "rawRequest": "Nyers kérés",
       "rawResponse": "Nyers válasz",
       "peer": "Kép",
+      "sslCertExpiry": "A TLS-tanúsítvány lejár: {{expiryDate}}",
       "redirectNote": {
         "title": "Átirányítás észlelve",
         "text": "Úgy tűnik, hogy az URL-je átirányít egy másik URL-re. A {{serviceName}} nem követi automatikusan az átirányításokat. A legtöbb esetben az a probléma megoldásához elegendő, ha a feladat URL-jét az átirányítás céljára frissítik.",

@@ -306,6 +306,7 @@
       "rawRequest": "Niesformatowane żądanie",
       "rawResponse": "Niesformatowana odpowiedź",
       "peer": "Węzeł",
+      "sslCertExpiry": "Certyfikat TLS wygasa {{expiryDate}}",
       "redirectNote": {
         "title": "Wykryto przekierowanie",
         "text": "Wygląda na to, że Twój URL przekierowuje na inny URL. {{serviceName}} nie śledzi przekierowań automatycznie. W większości przypadków aktualizacja adresu URL zadania na cel przekierowania rozwiązuje ten problem.",

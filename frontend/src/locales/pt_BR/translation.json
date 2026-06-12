@@ -305,6 +305,7 @@
       "rawRequest": "Solicitação bruta",
       "rawResponse": "Resposta bruta",
       "peer": "Par",
+      "sslCertExpiry": "Certificado TLS expira em {{expiryDate}}",
       "redirectNote": {
         "title": "Redirecionamento detectado",
         "text": "Parece que seu URL redireciona para outro URL. {{nome do serviço}} não segue redirecionamentos automaticamente. Na maioria dos casos, atualizar o URL do trabalho para o destino de redirecionamento resolve esse problema.",

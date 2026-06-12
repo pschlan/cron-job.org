@@ -325,6 +325,7 @@
       "rawRequest": "Raw request",
       "rawResponse": "Raw response",
       "peer": "Peer",
+      "sslCertExpiry": "TLS certificate expires on {{expiryDate}}",
       "redirectNote": {
         "title": "Redirection detected",
         "text": "It looks like your URL redirects to another URL. {{serviceName}} does not automatically follow redirections. In most cases, updating the job URL to the redirection target resolves this issue.",

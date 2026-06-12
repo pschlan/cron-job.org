@@ -308,6 +308,7 @@
       "rawRequest": "Ham istek",
       "rawResponse": "Ham yanıt",
       "peer": "Karşı taraf",
+      "sslCertExpiry": "TLS sertifikası {{expiryDate}} tarihinde sona eriyor",
       "redirectNote": {
         "title": "Yönlendirme tespit edildi",
         "text": "Görünüşe göre URL'niz başka bir URL'ye yönlendiriyor. {{serviceName}} yönlendirmeleri otomatik olarak takip etmez. Çoğu durumda, iş URL'sini yönlendirme hedefine güncellemek bu sorunu çözer.",

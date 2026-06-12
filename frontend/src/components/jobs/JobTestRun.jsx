@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, CircularProgress, Typography, Tabs, Tab, Grid, Box, useTheme } from '@material-ui/core';
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, CircularProgress, Typography, Tabs, Tab, Grid, Box, useTheme, Tooltip } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import Turnstile, { useTurnstile } from 'react-turnstile';
@@ -10,7 +10,9 @@ import { JobStatus, jobStatusText, JobTestRunState } from '../../utils/Constants
 import SuccessIcon from '@material-ui/icons/Check';
 import FailureIcon from '@material-ui/icons/ErrorOutline';
 import PeerIcon from '@material-ui/icons/Dns';
+import LockIcon from '@material-ui/icons/Lock';
 import UrlIcon from '@material-ui/icons/Link';
+import moment from 'moment';
 import { makeStyles } from '@material-ui/styles';
 import { green, red } from '@material-ui/core/colors';
 import Timing from './Timing';
@@ -36,6 +38,11 @@ const useStyles = makeStyles(theme => ({
   },
   tabPanel: {
     padding: theme.spacing(0)
+  },
+  sslCertIcon: {
+    marginLeft: theme.spacing(0.5),
+    display: 'inline-flex',
+    verticalAlign: 'middle'
   }
 }));
 
@@ -225,6 +232,13 @@ export default function JobTestRun({ job, jobId, onClose, onUpdateUrl = () => nu
               <Typography variant='overline'>{t('jobs.testRun.peer')}</Typography>
               <Typography component='div' gutterBottom className={classes.hAlign}>
                 <PeerIcon fontSize='small' /> {status.peerAddress}:{status.peerPort}
+                {status.sslCertExpiry > 0 && <Tooltip
+                  title={t('jobs.testRun.sslCertExpiry', { expiryDate: moment(status.sslCertExpiry * 1000).format('LL') })}
+                  arrow>
+                  <span className={classes.sslCertIcon}>
+                    <LockIcon fontSize='small' />
+                  </span>
+                </Tooltip>}
               </Typography>
             </Grid>
           </Grid>
