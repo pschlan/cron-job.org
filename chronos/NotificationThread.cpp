@@ -11,6 +11,7 @@
 
 #include "NotificationThread.h"
 
+#include <algorithm>
 #include <chrono>
 #include <iomanip>
 #include <iostream>
@@ -39,6 +40,130 @@
 namespace {
 
 constexpr int PHRASE_SYNC_INTERVAL_SECONDS = 300;
+
+constexpr size_t MIME_ENCODED_WORD_MAX_LEN = 75;
+constexpr size_t MIME_ENCODED_WORD_PREFIX_LEN = 10; // =?UTF-8?Q?
+constexpr size_t MIME_ENCODED_WORD_SUFFIX_LEN = 2;  // ?=
+constexpr size_t MIME_ENCODED_TEXT_MAX_LEN =
+	MIME_ENCODED_WORD_MAX_LEN - MIME_ENCODED_WORD_PREFIX_LEN - MIME_ENCODED_WORD_SUFFIX_LEN;
+
+bool needsMimeHeaderEncoding(const std::string &value)
+{
+	for (unsigned char c : value)
+	{
+		if (c < 0x20 || c > 0x7E)
+			return true;
+	}
+	return false;
+}
+
+size_t utf8CharLen(unsigned char c)
+{
+	if ((c & 0x80) == 0)
+		return 1;
+	if ((c & 0xE0) == 0xC0)
+		return 2;
+	if ((c & 0xF0) == 0xE0)
+		return 3;
+	if ((c & 0xF8) == 0xF0)
+		return 4;
+	return 1;
+}
+
+std::string qpEncodeMimeQ(const unsigned char *data, const size_t len)
+{
+	static const char hex[] = "0123456789ABCDEF";
+	std::string result;
+	result.reserve(len * 3);
+
+	for (size_t i = 0; i < len; ++i)
+	{
+		const unsigned char c = data[i];
+		if (c == ' ')
+		{
+			result += '_';
+		}
+		else if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')
+			|| c == '!' || c == '*' || c == '+' || c == '-' || c == '/')
+		{
+			result += static_cast<char>(c);
+		}
+		else
+		{
+			result += '=';
+			result += hex[c >> 4];
+			result += hex[c & 0x0F];
+		}
+	}
+
+	return result;
+}
+
+std::string encodeMimeWords(const std::string &utf8)
+{
+	std::string result;
+	std::string currentChunk;
+
+	auto flush = [&]() {
+		if (currentChunk.empty())
+			return;
+
+		if (!result.empty())
+			result += ' ';
+
+		result += "=?UTF-8?Q?";
+		result += currentChunk;
+		result += "?=";
+		currentChunk.clear();
+	};
+
+	for (size_t i = 0; i < utf8.size(); )
+	{
+		const size_t charLen = std::min(utf8CharLen(static_cast<unsigned char>(utf8[i])), utf8.size() - i);
+		const std::string encoded = qpEncodeMimeQ(
+			reinterpret_cast<const unsigned char *>(utf8.data() + i), charLen);
+
+		if (!currentChunk.empty() && currentChunk.size() + encoded.size() > MIME_ENCODED_TEXT_MAX_LEN)
+			flush();
+
+		currentChunk += encoded;
+		i += charLen;
+	}
+
+	flush();
+	return result;
+}
+
+std::string encodeHeaderValue(std::string value)
+{
+	const std::string forbidden = "\r\n";
+
+	std::size_t pos;
+	while ((pos = value.find_first_of(forbidden)) != std::string::npos)
+		value.erase(value.begin() + static_cast<std::ptrdiff_t>(pos));
+
+	if (value.size() >= 5 && value[0] == '"')
+	{
+		const std::size_t closeQuote = value.find('"', 1);
+		if (closeQuote != std::string::npos && closeQuote + 2 < value.size()
+			&& value[closeQuote + 1] == ' ' && value[closeQuote + 2] == '<'
+			&& value.back() == '>')
+		{
+			const std::string displayName = value.substr(1, closeQuote - 1);
+			const std::string addressPart = value.substr(closeQuote);
+
+			if (needsMimeHeaderEncoding(displayName))
+				return '"' + encodeMimeWords(displayName) + '"' + addressPart;
+
+			return value;
+		}
+	}
+
+	if (needsMimeHeaderEncoding(value))
+		return encodeMimeWords(value);
+
+	return value;
+}
 
 } // anon ns
 
@@ -149,14 +274,7 @@ private:
 
 	std::string sanitizeHeader(const std::string &in) const
 	{
-		std::string result = in;
-		const std::string forbidden = "\r\n";
-
-		std::size_t pos;
-		while ((pos = result.find_first_of(forbidden)) != std::string::npos)
-			result.erase(result.begin() + pos);
-
-		return result;
+		return encodeHeaderValue(in);
 	}
 
 private:
