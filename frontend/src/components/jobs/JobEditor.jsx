@@ -637,7 +637,7 @@ export default function JobEditor({ match }) {
                 />}
               label={t('jobs.notifyOn.onSslCertExpiry')}
               />
-            {notification.onSslCertExpiry && <Box ml={'3rem'} mb={1}>
+            <Box ml={'3rem'} mb={1}>
               <ValidatingTextField
                 key={`ssl-cert-expiry-days-${jobId}`}
                 label={t('jobs.notifyOnSslCertExpiryLeadTime')}
@@ -654,7 +654,7 @@ export default function JobEditor({ match }) {
                 }}
                 size='small'
                 />
-            </Box>}
+            </Box>
           </FormGroup>
         </fieldset>
       </Paper>
