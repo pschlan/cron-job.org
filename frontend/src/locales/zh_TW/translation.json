@@ -180,6 +180,7 @@
     "history": "歷史",
     "nohistory": "沒有找到歷史項目。",
     "status": "狀態",
+    "sslCertExpiry": "TLS 憑證將於 {{expiryDate}} 到期",
     "executed": "已執行",
     "scheduled": "預定",
     "jitter": "抖動",
@@ -301,7 +302,6 @@
       "rawRequest": "原始請求",
       "rawResponse": "原始回應",
       "peer": "同行",
-      "sslCertExpiry": "TLS 憑證將於 {{expiryDate}} 到期",
       "redirectNote": {
         "title": "偵測到重新導向",
         "text": "您的網址似乎重新導向到了另一個網址。{{serviceName}} 不會自動跟隨重新導向。 在多數情況下，將工作網址更新為重新導向的目標即可解決問題。",

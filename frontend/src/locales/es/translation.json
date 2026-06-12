@@ -190,6 +190,7 @@
     "history": "Historial",
     "nohistory": "No se encontraron elementos en el historial.",
     "status": "Estado",
+    "sslCertExpiry": "El certificado TLS expira el {{expiryDate}}",
     "executed": "Ejecutado",
     "scheduled": "Programado",
     "jitter": "Variación",
@@ -325,7 +326,6 @@
       "rawRequest": "Solicitud sin procesar",
       "rawResponse": "Respuesta sin procesar",
       "peer": "Peer",
-      "sslCertExpiry": "El certificado TLS expira el {{expiryDate}}",
       "redirectNote": {
         "title": "Redirección detectada",
         "text": "Parece que tu URL redirige a otra URL. {{serviceName}} no sigue automáticamente redirecciones. En la mayoría de los casos, actualizar la URL del job al destino de la redirección resuelve este problema.",

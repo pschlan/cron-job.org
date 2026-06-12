@@ -181,6 +181,7 @@
     "history": "Istoric",
     "nohistory": "Nu s-au găsit elemente din istoric.",
     "status": "Stare",
+    "sslCertExpiry": "Certificatul TLS expiră la {{expiryDate}}",
     "executed": "Executat",
     "scheduled": "Programat",
     "jitter": "Fluctuație",
@@ -305,7 +306,6 @@
       "rawRequest": "Cerere brută",
       "rawResponse": "Răspuns brut",
       "peer": "Peer",
-      "sslCertExpiry": "Certificatul TLS expiră la {{expiryDate}}",
       "redirectNote": {
         "title": "Redirecționare detectată",
         "text": "Se pare că adresa URL redirecționează către o altă adresă URL. {{serviceName}} nu urmărește automat redirecționările. În majoritatea cazurilor, actualizarea adresei URL a sarcinii la ținta de redirecționare rezolvă această problemă.",

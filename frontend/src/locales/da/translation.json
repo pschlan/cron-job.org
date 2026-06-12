@@ -185,6 +185,7 @@
     "history": "Historik",
     "nohistory": "Ingen historikpunkter fundet.",
     "status": "Status",
+    "sslCertExpiry": "TLS-certifikat udløber {{expiryDate}}",
     "executed": "Udført",
     "scheduled": "Planlagt",
     "jitter": "Jitter",
@@ -313,7 +314,6 @@
       "rawRequest": "Rå anmodning",
       "rawResponse": "Rå respons",
       "peer": "Peer",
-      "sslCertExpiry": "TLS-certifikat udløber {{expiryDate}}",
       "redirectNote": {
         "title": "Omdirigering opdaget",
         "text": "Det ser ud til, at din URL omdirigerer. {{serviceName}} følger ikke automatisk omdirigeringer. Opdater URL’en til målet for at løse det.",

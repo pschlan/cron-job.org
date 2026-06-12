@@ -1,14 +1,23 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography, LinearProgress } from '@material-ui/core';
+import { Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography, LinearProgress, makeStyles } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
 import { JobStatus, jobStatusText } from '../../utils/Constants';
 import { getJobHistoryDetails } from '../../utils/API';
 import Timing from './Timing';
 import Code from '../misc/Code';
 import Headers from '../misc/Headers';
+import SslCertExpiryIcon from '../misc/SslCertExpiryIcon';
+
+const useStyles = makeStyles(() => ({
+  statusRow: {
+    display: 'flex',
+    alignItems: 'center'
+  }
+}));
 
 export default function HistoryDetails({ log, open, onClose, moment }) {
   const { t } = useTranslation();
+  const classes = useStyles();
   const [ isLoading, setIsLoading ] = useState(true);
   const onCloseHook = useRef(onClose, []);
   const [ details, setDetails ] = useState({});
@@ -31,9 +40,12 @@ export default function HistoryDetails({ log, open, onClose, moment }) {
 
         <Typography variant='overline'>{t('jobs.status')}</Typography>
         <Typography component='div' gutterBottom>
-          {[JobStatus.OK, JobStatus.FAILED_HTTPERROR].includes(log.status) ? <div>
-              {log.httpStatus} {log.statusText}
-            </div> : <div>{t('jobs.statuses.' + jobStatusText(log.status))}</div>}
+          <div className={classes.statusRow}>
+            {[JobStatus.OK, JobStatus.FAILED_HTTPERROR].includes(log.status) ?
+              <>{log.httpStatus} {log.statusText}</> :
+              <>{t('jobs.statuses.' + jobStatusText(log.status))}</>}
+            <SslCertExpiryIcon sslCertExpiry={details.sslCertExpiry || log.sslCertExpiry} />
+          </div>
         </Typography>
 
         <Timing stats={details && details.stats} header={<Typography variant='overline'>{t('jobs.timing')}</Typography>} />

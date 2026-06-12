@@ -181,6 +181,7 @@
     "history": "Cronologia",
     "nohistory": "Nessun elemento trovato nella cronologia.",
     "status": "Stato",
+    "sslCertExpiry": "Il certificato TLS scade il {{expiryDate}}",
     "executed": "Eseguito",
     "scheduled": "Programmato",
     "jitter": "Jitter",
@@ -305,7 +306,6 @@
       "rawRequest": "Dati richiesta non elaborati",
       "rawResponse": "Dati risposta non elaborati",
       "peer": "Peer",
-      "sslCertExpiry": "Il certificato TLS scade il {{expiryDate}}",
       "redirectNote": {
         "title": "Reindirizzamento rilevato",
         "text": "Sembra che il tuo URL reindirizzi a un altro URL. {{serviceName}} non segue automaticamente i reindirizzamenti. Nella maggior parte dei casi, l'aggiornamento dell'URL del processo alla destinazione del reindirizzamento risolve questo problema.",

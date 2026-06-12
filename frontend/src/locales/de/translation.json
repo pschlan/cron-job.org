@@ -169,6 +169,7 @@
     "history": "Verlauf",
     "nohistory": "Keine Verlaufs-Einträge gefunden.",
     "status": "Status",
+    "sslCertExpiry": "TLS-Zertifikat läuft ab am {{expiryDate}}",
     "executed": "Ausgeführt",
     "scheduled": "Geplant",
     "jitter": "Jitter",
@@ -325,7 +326,6 @@
       "rawRequest": "Anfrage-Rohdaten",
       "rawResponse": "Antwort-Rohdaten",
       "peer": "Gegenstelle",
-      "sslCertExpiry": "TLS-Zertifikat läuft ab am {{expiryDate}}",
       "redirectNote": {
         "title": "Weiterleitung erkannt",
         "text": "Ihre URL scheint auf eine andere URL weiterzuleiten. {{serviceName}} folgt Weiterleitungen nicht automatisch. In den meisten Fällen kann dieses Problem einfach gelöst werden, indem die URL des Jobs auf die Ziel-URL der Weiterleitung aktualisiert wird.",

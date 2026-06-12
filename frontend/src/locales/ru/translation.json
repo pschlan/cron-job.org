@@ -172,6 +172,7 @@
     "history": "History",
     "nohistory": "Элементы в архиве не найдены.",
     "status": "Статус",
+    "sslCertExpiry": "Срок действия TLS-сертификата истекает {{expiryDate}}",
     "executed": "Запущено",
     "scheduled": "В очереди",
     "jitter": "Трепещет",
@@ -289,8 +290,7 @@
       "response": "Ответ",
       "rawRequest": "Исходный запрос",
       "rawResponse": "Исходный ответ",
-      "peer": "peer",
-      "sslCertExpiry": "Срок действия TLS-сертификата истекает {{expiryDate}}"
+      "peer": "peer"
     },
     "requestTimeout": "Тайм-аут",
     "redirectSuccess": "Обрабатывать перенаправления с кодом состояния HTTP 3xx как успешные",

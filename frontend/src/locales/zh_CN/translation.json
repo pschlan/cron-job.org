@@ -180,6 +180,7 @@
     "history": "历史",
     "nohistory": "没有找到历史项目。",
     "status": "状态",
+    "sslCertExpiry": "TLS 证书将于 {{expiryDate}} 到期",
     "executed": "已运行",
     "scheduled": "预定",
     "jitter": "抖动",
@@ -301,7 +302,6 @@
       "rawRequest": "原始请求",
       "rawResponse": "原始响应",
       "peer": "同行",
-      "sslCertExpiry": "TLS 证书将于 {{expiryDate}} 到期",
       "redirectNote": {
         "title": "侦测到重定向",
         "text": "您的网址似乎重定向到了另一个网址。{{serviceName}} 不会自动跟随重定向。 在多数情况下，将任务网址更新为重定向的目标即可解决问题。",

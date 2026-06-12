@@ -172,6 +172,7 @@
     "history": "Historique",
     "nohistory": "Aucun élément historique trouvé.",
     "status": "Statut",
+    "sslCertExpiry": "Le certificat TLS expire le {{expiryDate}}",
     "executed": "Exécuté",
     "scheduled": "Programmé",
     "jitter": "Jitter",
@@ -292,8 +293,7 @@
       "response": "Réponse",
       "rawRequest": "Requête brute",
       "rawResponse": "Réponse brut",
-      "peer": "Pair",
-      "sslCertExpiry": "Le certificat TLS expire le {{expiryDate}}"
+      "peer": "Pair"
     },
     "requestTimeout": "Délai d'attente",
     "redirectSuccess": "Traiter les redirections avec le code d'état HTTP 3xx comme un succès",
