@@ -35,6 +35,12 @@
 #include "TestRunThread.h"
 #include "MasterService.h"
 #include "Config.h"
+#include "Metrics.h"
+#include "MetricsExposer.h"
+#include "MasterClientMetrics.h"
+#include "ScheduleMetricsBatch.h"
+
+#include <chrono>
 
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/transport/TSocket.h>
@@ -174,6 +180,8 @@ App::~App()
 	stopNotificationThread();
 	stopNodeServiceThread();
 	stopMasterServiceThread();
+	stopMetricsExposer();
+	Metrics::shutdown();
 
 	App::instance		= nullptr;
 }
@@ -197,6 +205,8 @@ bool App::isIpAddressBlocked(in_addr_t ipAddress) const
 
 void App::processJobs(time_t forTime, time_t plannedTime)
 {
+	const auto tickStart = std::chrono::steady_clock::now();
+
 	std::cout 	<< "App::processJobs(): Called for "
 				<< "forTime = " << forTime << ", "
 				<< "plannedTime = " << plannedTime
@@ -222,6 +232,7 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 	}
 
 	std::map<uint8_t, std::vector<std::unique_ptr<HTTPRequest>>> requestsByPriority;
+	ScheduleMetricsBatch scheduleBatch;
 	MYSQL_ROW row;
 	auto res = db->query("SELECT DISTINCT(`timezone`) FROM `job` WHERE `enabled`=1");
 	while((row = res->fetchRow()) != nullptr)
@@ -232,6 +243,7 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 		if(!cctz::load_time_zone(timeZone, &tz))
 		{
 			std::cout << "App::processJobs(): Failed to load time zone: " << timeZone << ", skipping" << std::endl;
+			Metrics::instance().incrementScheduleTimezonesSkipped();
 			continue;
 		}
 
@@ -251,7 +263,7 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 		}
 
 		processJobsForTimeZone(civilTime.hour(), civilTime.minute(), civilTime.month(), civilTime.day(), wday, civilTime.year(),
-			plannedTime, timeZone, requestsByPriority);
+			plannedTime, timeZone, requestsByPriority, scheduleBatch);
 	}
 
 	// Add jobs to worker threads
@@ -292,7 +304,9 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 
 		if(!wt->empty())
 		{
+			const JobType_t jobType = i >= numThreads ? JobType_t::MONITORING : JobType_t::DEFAULT;
 			std::cout << "App::processJobs(): Starting worker thread " << i << " with " << wt->numJobs() << " jobs" << std::endl;
+			Metrics::instance().incrementWorkerThreadsStarted(jobType);
 			wt->run();
 		}
 		else
@@ -300,10 +314,15 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 			std::cout << "App::processJobs(): No jobs for worker thread " << i << std::endl;
 		}
 	}
+
+	Metrics::instance().mergeScheduleBatch(scheduleBatch);
+
+	const std::chrono::duration<double> tickElapsed = std::chrono::steady_clock::now() - tickStart;
+	Metrics::instance().observeScheduleTickDurationSeconds(tickElapsed.count());
 }
 
 void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int wday, int year, time_t timestamp, const std::string &timeZone,
-	std::map<uint8_t, std::vector<std::unique_ptr<HTTPRequest>>> &requestsByPriority)
+	std::map<uint8_t, std::vector<std::unique_ptr<HTTPRequest>>> &requestsByPriority, ScheduleMetricsBatch &scheduleBatch)
 {
 	std::cout 	<< "App::processJobsForTimeZone(): Called for "
 				<< "hour = " << hour << ", "
@@ -417,6 +436,7 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 			req->result->title		= row[14];
 			req->result->jobType  	= static_cast<JobType_t>(atoi(row[15]));
 
+			scheduleBatch.add(req->result->jobType, executionPriority);
 			requestsByPriority[executionPriority].push_back(std::move(req));
 		}
 	}
@@ -449,7 +469,9 @@ void App::syncUserGroups()
 		masterTransport->open();
 
 		std::vector<UserGroup> userGroups;
-		masterClient->getUserGroups(userGroups);
+		callMaster("getUserGroups", [&]() {
+			masterClient->getUserGroups(userGroups);
+		});
 
 		std::unordered_map<int64_t, UserGroup> userGroupsById;
 		for(const auto &group : userGroups)
@@ -495,6 +517,23 @@ int App::run()
 
 	signal(SIGINT, App::signalHandler);
 
+	std::string metricsMode;
+	if(config->getInt("job_executor_enable"))
+		metricsMode = metricsMode.empty() ? "executor" : metricsMode + ",executor";
+	if(config->getInt("node_service_enable"))
+		metricsMode = metricsMode.empty() ? "node_service" : metricsMode + ",node_service";
+	if(config->getInt("master_service_enable"))
+		metricsMode = metricsMode.empty() ? "master" : metricsMode + ",master";
+	if(metricsMode.empty())
+		metricsMode = "none";
+
+	Metrics::init(metricsMode, config->getInt("node_id", 0));
+
+	if(config->getInt("metrics_enable", 1))
+	{
+		startMetricsExposer();
+	}
+
 	if(config->getInt("master_service_enable"))
 	{
 		startMasterServiceThread();
@@ -529,8 +568,11 @@ int App::run()
 				// update last time
 				memcpy(&lastTime, &t, sizeof(struct tm));
 
+				const time_t plannedTime = currentTime + 60 - t.tm_sec;
+				Metrics::instance().setSchedulerLoopLagSeconds(static_cast<double>(currentTime - plannedTime));
+
 				syncUserGroups();
-				processJobs(currentTime + 60, currentTime + 60 - t.tm_sec);
+				processJobs(currentTime + 60, plannedTime);
 				cleanUpNotifications();
 			}
 			else
@@ -560,6 +602,8 @@ int App::run()
 	{
 		stopMasterServiceThread();
 	}
+
+	stopMetricsExposer();
 
 	uninitSSLLocks();
 	MySQL_DB::libCleanup();
@@ -724,6 +768,23 @@ void App::stopMasterServiceThread()
 	}
 	masterServiceObj->stop();
 	masterServiceThread.join();
+}
+
+void App::startMetricsExposer()
+{
+	metricsExposerObj = std::make_unique<MetricsExposer>(
+		config->get("metrics_interface", "127.0.0.1"),
+		config->getInt("metrics_port", 9098));
+	metricsExposerObj->run();
+}
+
+void App::stopMetricsExposer()
+{
+	if(metricsExposerObj)
+	{
+		metricsExposerObj->stop();
+		metricsExposerObj.reset();
+	}
 }
 
 std::unique_ptr<MySQL_DB> App::createMySQLConnection()

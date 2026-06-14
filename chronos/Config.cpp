@@ -57,9 +57,27 @@ std::string Config::get(const std::string &key)
 	return this->data[key];
 }
 
+std::string Config::get(const std::string &key, const std::string &defaultValue)
+{
+	std::lock_guard<std::mutex> lg(this->lock);
+	const auto it = this->data.find(key);
+	if(it == this->data.end() || it->second.empty())
+		return defaultValue;
+	return it->second;
+}
+
 int Config::getInt(const std::string &key)
 {
 	return std::stoi(get(key));
+}
+
+int Config::getInt(const std::string &key, int defaultValue)
+{
+	std::lock_guard<std::mutex> lg(this->lock);
+	const auto it = this->data.find(key);
+	if(it == this->data.end() || it->second.empty())
+		return defaultValue;
+	return std::stoi(it->second);
 }
 
 unsigned int Config::getUInt(const std::string &key)

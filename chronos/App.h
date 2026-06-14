@@ -23,6 +23,8 @@
 #include "Config.h"
 #include "Utils.h"
 
+#include "ScheduleMetricsBatch.h"
+
 class UserGroup;
 
 namespace Chronos
@@ -34,6 +36,7 @@ namespace Chronos
 	class NodeService;
 	class TestRunThread;
 	class MasterService;
+	class MetricsExposer;
 	class HTTPRequest;
 
 	class App
@@ -74,9 +77,12 @@ namespace Chronos
 		void stopTestRunThread();
 		void startMasterServiceThread();
 		void stopMasterServiceThread();
+		void startMetricsExposer();
+		void stopMetricsExposer();
 		void processJobs(time_t forTime, time_t plannedTime);
 		void processJobsForTimeZone(int hour, int minute, int month, int mday, int wday, int year, time_t timestamp, const std::string &timeZone,
-									std::map<uint8_t, std::vector<std::unique_ptr<HTTPRequest>>> &requestsByPriority);
+									std::map<uint8_t, std::vector<std::unique_ptr<HTTPRequest>>> &requestsByPriority,
+									ScheduleMetricsBatch &scheduleBatch);
 		void cleanUpNotifications();
 		void syncUserGroups();
 
@@ -99,6 +105,7 @@ namespace Chronos
 		std::unique_ptr<NodeService> nodeServiceObj;
 		std::unique_ptr<TestRunThread> testRunThreadObj;
 		std::unique_ptr<MasterService> masterServiceObj;
+		std::unique_ptr<MetricsExposer> metricsExposerObj;
 		std::vector<Utils::Subnet> blockedSubnets;
 	};
 };

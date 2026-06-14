@@ -13,6 +13,7 @@
 #define _WORKERTHREAD_H_
 
 #include "HTTPRequest.h"
+#include "WorkerMetricsBatch.h"
 
 #include <memory>
 #include <queue>
@@ -70,6 +71,7 @@ namespace Chronos
 		int hour;
 		int minute;
 		bool inRunJobs = false;
+		WorkerMetricsBatch metricsBatch;
 	};
 };
 

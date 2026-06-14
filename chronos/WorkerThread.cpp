@@ -20,6 +20,8 @@
 #include "CurlWorker.h"
 #include "UpdateThread.h"
 #include "App.h"
+#include "Metrics.h"
+#include "MasterClientMetrics.h"
 
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/transport/TSocket.h>
@@ -77,6 +79,8 @@ void WorkerThread::runJobs()
 
 		runningJobs.emplace(request, std::move(job));
 
+		Metrics::instance().adjustWorkerInflight(request->result->jobType, 1);
+
 		request->onDone = std::bind(&WorkerThread::jobDone, this, request);
 		request->submit(curlWorker.get());
 	}
@@ -115,6 +119,9 @@ void WorkerThread::jobDone(HTTPRequest *req)
 	{
 		++failedJobs;
 	}
+
+	metricsBatch.record(*req->result);
+	Metrics::instance().adjustWorkerInflight(req->result->jobType, -1);
 
 	// push result to result queue
 	UpdateThread::getInstance()->addResult(std::move(req->result));
@@ -168,8 +175,9 @@ void WorkerThread::addStat()
 		stats.jobs = jobCount;
 		stats.jitter = jitterAvg;
 
-		masterClient->reportNodeStats(App::getInstance()->config->getInt("node_id"),
-			stats);
+		callMaster("reportNodeStats", [&]() {
+			masterClient->reportNodeStats(App::getInstance()->config->getInt("node_id"), stats);
+		});
 
 		masterTransport->close();
 
@@ -216,6 +224,8 @@ void WorkerThread::threadMain()
 
 		// clean up
 		curlWorker.reset();
+
+		Metrics::instance().mergeWorkerBatch(metricsBatch);
 
 		addStat();
 

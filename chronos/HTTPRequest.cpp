@@ -28,6 +28,7 @@
 #include "CurlWorker.h"
 #include "JobResult.h"
 #include "Utils.h"
+#include "Metrics.h"
 #include "App.h"
 
 using namespace Chronos;
@@ -149,13 +150,16 @@ curl_socket_t curlOpenSocketFunction(void *userdata, curlsocktype purpose, struc
 		{
 		case EMFILE:
 			std::cerr << "ALERT! curlOpenSocketFunction(): socket() returned EMFILE - check thread/request count in config!" << std::endl;
+			Metrics::instance().incrementSocketExhaustion("emfile");
 			break;
 		case ENFILE:
 			std::cerr << "ALERT! curlOpenSocketFunction(): socket() returned ENFILE - check thread/request count in config!" << std::endl;
+			Metrics::instance().incrementSocketExhaustion("enfile");
 			break;
 		case ENOBUFS:
 		case ENOMEM:
 			std::cerr << "ALERT! curlOpenSocketFunction(): socket() returned ENOBUFS/ENOMEM - check thread/request count in config!" << std::endl;
+			Metrics::instance().incrementSocketExhaustion("enobufs");
 			break;
 		default:
 			break;
