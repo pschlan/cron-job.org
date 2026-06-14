@@ -84,8 +84,8 @@
             "mode": "absolute",
             "steps": [
               { "color": "red", "value": null },
-              { "color": "yellow", "value": 95 },
-              { "color": "green", "value": 99 }
+              { "color": "yellow", "value": 80 },
+              { "color": "green", "value": 95 }
             ]
           },
           "unit": "percent"

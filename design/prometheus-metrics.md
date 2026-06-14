@@ -255,6 +255,8 @@ Same metrics as Node service with `service=master`.
 | Hung worker threads | `chronos_worker_inflight_jobs` > 0 or `chronos_worker_threads` > 0 long after the last `chronos_schedule_jobs_selected_total` increase |
 | Misconfigured time zones | `rate(chronos_schedule_timezones_skipped_total[1h])` > 0 |
 
+Implemented alert rules: [`prometheus/alerts/chronos.yml`](../prometheus/alerts/chronos.yml) (see [`prometheus/README.md`](../prometheus/README.md)).
+
 ## Performance at scale
 
 Production fleet: **~100M executions/day on 5 executor nodes** (~20M/node/day, ~13.9k jobs/minute/node, bursts of 500–1,500 completions/sec per node). Per-job prometheus-cpp mutex operations on the job-completion path are not acceptable at this scale.

@@ -35,4 +35,8 @@ The dashboard filters by `instance` (scrape target) and `node_id` (from `chronos
 | RPC & master client | Inbound RPC rate/latency/errors, outbound master client |
 | Test runs & nodes | Test run activity, node inventory table |
 
-See [design/prometheus-metrics.md](../design/prometheus-metrics.md) for metric definitions and alerting suggestions.
+See [design/prometheus-metrics.md](../design/prometheus-metrics.md) for metric definitions.
+
+## Alerting
+
+Prometheus alert rules are in [`prometheus/alerts/chronos.yml`](../prometheus/alerts/chronos.yml). See [`prometheus/README.md`](../prometheus/README.md) for scrape config, rule loading, and Alertmanager routing notes.

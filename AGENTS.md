@@ -98,6 +98,7 @@ These run at lower frequency; direct `Metrics::instance()` calls are fine.
 3. Instrument at a natural boundary (see design doc).
 4. Update `design/prometheus-metrics.md`.
 5. Add or extend panels in `grafana/dashboards/chronos.json`.
+6. Add or update alerts in `prometheus/alerts/chronos.yml` when the change affects operability or SLOs.
 
 Config keys: `metrics_enable`, `metrics_port`, `metrics_interface` in `chronos/chronos.cfg` and `docker/chronos/chronos.cfg`. Use `Config::get(key, default)` / `getInt(key, default)` for optional keys.
 
@@ -110,4 +111,4 @@ Build: prometheus-cpp is vendored via CMake `FetchContent` in `chronos/CMakeList
 - [ ] Thrift throw sites use `Chronos::RpcThrow::`, not raw `throw X()`.
 - [ ] Outbound master calls use `callMaster()`.
 - [ ] Durations exported in seconds; bounded labels only.
-- [ ] Design doc and Grafana dashboard updated if metric names, labels, or semantics changed.
+- [ ] Design doc, Grafana dashboard, and Prometheus alerts updated if metric names, labels, or semantics changed.
