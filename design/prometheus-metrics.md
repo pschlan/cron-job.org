@@ -23,7 +23,6 @@ Follow [Prometheus naming conventions](https://prometheus.io/docs/practices/nami
 - Prefix all metrics with `chronos_`.
 - Counters end with `_total`.
 - Durations use `_seconds` (convert from ms/µs at instrumentation time).
-- Sizes use `_bytes`.
 - Histograms expose `_bucket`, `_sum`, and `_count` suffixes automatically.
 
 ### Metric types
@@ -32,7 +31,7 @@ Follow [Prometheus naming conventions](https://prometheus.io/docs/practices/nami
 |---|---|
 | Counter | Monotonically increasing events (jobs executed, errors, RPC calls) |
 | Gauge | Point-in-time values (queue depth, in-flight jobs) |
-| Histogram | Distributions (durations, sizes, batch processing time) |
+| Histogram | Distributions (durations, batch processing time) |
 
 ### Labels and cardinality
 
@@ -43,8 +42,6 @@ Keep label cardinality low. Avoid unbounded labels such as `job_id`, `user_id`, 
 | `job_type` | `default`, `monitoring` | From `JobType_t` |
 | `status` | `ok`, `failed_dns`, `failed_connect`, `failed_httperror`, `failed_timeout`, `failed_size`, `failed_url`, `failed_internal`, `failed_others`, `unknown` | Maps to `JOBSTATUS_*`; omit `http_status` here |
 | `type` | `failure`, `success`, `disable`, `ssl_cert_expiry` | Notification type |
-| `phase` | `name_lookup`, `connect`, `app_connect`, `pre_transfer`, `start_transfer`, `total` | cURL timing phases |
-| `part` | `header`, `body`, `total` | Response size histogram |
 | `service` | `node`, `master` | Inbound Thrift service |
 | `method` | Thrift RPC method name | Bounded by service definition (~20 methods total) |
 | `result` | `ok`, `error` | RPC outcome |
@@ -63,14 +60,11 @@ Suggested defaults (adjust after observing production data):
 | Metric | Buckets |
 |---|---|
 | `chronos_job_duration_seconds` | 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10, 30, 60, 120, 300 |
-| `chronos_job_curl_phase_seconds` | 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10, 30 |
-| `chronos_job_response_bytes` | 256, 1K, 4K, 16K, 64K, 256K, 1M, 4M, 16M |
+| `chronos_worker_jitter_seconds` | 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10, 30, 60, 120, 300 |
 | `chronos_schedule_tick_duration_seconds` | 0.1, 0.5, 1, 2, 5, 10, 30, 60, 120, 300 |
 | `chronos_update_batch_duration_seconds` | 0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10, 30, 60 |
 | `chronos_notification_batch_duration_seconds` | 0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10, 30, 60 |
 | `chronos_rpc_request_duration_seconds` | 0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5 |
-
-**Duration vs cURL phase timing:** `chronos_job_duration_seconds` uses `JobResult::duration` (`dateDone − dateStarted`, in ms). `chronos_job_curl_phase_seconds{phase="total"}` uses `JobResult::timeTotal` (cURL wall time, in µs). They can differ when jobs wait inside a worker thread before cURL starts (e.g. monitoring defer, parallel-request queueing).
 
 ### Role-aware exposure
 
@@ -99,7 +93,7 @@ Worker threads are started with `detach()` — `processJobs()` returns once work
 
 | Metric | Type | Labels | Description |
 |---|---|---|---|
-| `chronos_schedule_jobs_selected_total` | Counter | `job_type`, `priority` | Jobs fetched from MySQL and assigned to worker threads per tick |
+| `chronos_schedule_jobs_selected_total` | Counter | `job_type`, `priority` | Jobs fetched from MySQL and assigned to worker threads per tick. Accumulate locally during `processJobsForTimeZone()`, flush once after `processJobs()` (~6 counter increments per tick, not one per job) |
 | `chronos_schedule_tick_duration_seconds` | Histogram | — | Wall-clock duration of `processJobs()` from entry until worker threads are started (MySQL fetch, queue assignment, wait until `plannedTime`; **excludes** HTTP execution) |
 | `chronos_scheduler_loop_lag_seconds` | Gauge | — | Delay from the minute boundary (`plannedTime`) to when `processJobs()` is invoked. Non-zero means the main loop detected the new minute late (poll interval is 100 ms) |
 | `chronos_schedule_timezones_skipped_total` | Counter | — | Time zones that failed to load (`cctz::load_time_zone`) |
@@ -111,10 +105,8 @@ Per-job execution delay relative to the planned time is captured by `chronos_wor
 
 | Metric | Type | Labels | Description |
 |---|---|---|---|
-| `chronos_jobs_executed_total` | Counter | `job_type`, `status` | Completed HTTP requests, one increment per job in `WorkerThread::jobDone()` |
-| `chronos_job_duration_seconds` | Histogram | `job_type` | End-to-end job duration (`JobResult::duration`, converted from ms) |
-| `chronos_job_curl_phase_seconds` | Histogram | `phase` | cURL timing breakdown (`timeNameLookup`, `timeConnect`, etc., converted from µs) |
-| `chronos_job_response_bytes` | Histogram | `part` | Response size (`header`, `body`, or `total`) |
+| `chronos_jobs_executed_total` | Counter | `job_type`, `status` | Completed HTTP requests, one increment per job. Accumulated in `WorkerMetricsBatch` during `jobDone()`, flushed at end of `WorkerThread::threadMain()` |
+| `chronos_job_duration_seconds` | Histogram | `job_type` | End-to-end job duration (`JobResult::duration`, converted from ms). Bucket counts accumulated in batch, flushed once per worker per tick |
 | `chronos_socket_exhaustion_total` | Counter | `reason` | `socket()` failures in `curlOpenSocketFunction()`. `reason`: `emfile`, `enfile`, `enobufs` |
 
 For `status=failed_httperror`, optionally add label `http_status_class` (`2xx`/`3xx`/`4xx`/`5xx`).
@@ -123,20 +115,20 @@ Blocked-subnet rejections happen during cURL socket open (`verifyPeerAddress()`)
 
 ## Worker threads
 
-Worker threads are created per minute tick and exit when their batch finishes. Gauges should be updated at instrumentation points within the tick lifecycle.
+Worker threads are created per minute tick and exit when their batch finishes.
 
 | Metric | Type | Labels | Description |
 |---|---|---|---|
 | `chronos_worker_threads_started_total` | Counter | `job_type` | Worker threads started per tick (non-empty batches only) |
-| `chronos_worker_inflight_jobs` | Gauge | `job_type` | Currently running HTTP requests across all worker threads (increment in `runJobs()`, decrement in `jobDone()`) |
-| `chronos_worker_jitter_seconds` | Histogram | `job_type` | Scheduling jitter (`JobResult::jitter` = `dateStarted − datePlanned`, converted from ms) |
+| `chronos_worker_inflight_jobs` | Gauge | `job_type` | Currently running HTTP requests across all worker threads. Use `std::atomic` inc/dec in `runJobs()` / `jobDone()` for sub-minute visibility (hung-worker alerting) |
+| `chronos_worker_jitter_seconds` | Histogram | `job_type` | Scheduling jitter (`JobResult::jitter` = `dateStarted − datePlanned`, converted from ms). Accumulated in batch, flushed once per worker per tick |
 
 ## UpdateThread
 
 | Metric | Type | Labels | Description |
 |---|---|---|---|
 | `chronos_update_results_total` | Counter | — | Job results fully persisted (SQLite joblog written **and** MySQL job row updated). Increment only on success |
-| `chronos_update_queue_depth` | Gauge | — | Pending results in the UpdateThread queue. Update on `addResult()` and after each queue swap |
+| `chronos_update_queue_depth` | Gauge | — | Pending results in the UpdateThread queue. Set from `tempQueue.size()` on batch swap before processing; set to 0 after drain. Do **not** update on `addResult()` |
 | `chronos_update_batch_duration_seconds` | Histogram | — | Time to process one swapped batch (use sub-second precision, e.g. `std::chrono`) |
 | `chronos_sqlite_write_errors_total` | Counter | `operation` | SQLite write failures. `operation`: `joblog_insert`, `joblog_stats_insert`, `joblog_ssl_insert`, `histogram_update` |
 | `chronos_mysql_write_errors_total` | Counter | `operation` | MySQL write failures. `operation`: `job_update`, `job_disable`, `notification_insert`, `ssl_cert_expiry_update` |
@@ -211,7 +203,22 @@ Executor nodes call `ChronosMaster` over Thrift for stats reporting, user detail
 
 Failed requests appear in both `chronos_rpc_requests_total{result="error"}` and `chronos_rpc_errors_total`. Use `chronos_rpc_errors_total` for alerting; `chronos_rpc_requests_total` provides the denominator for error rates.
 
-Implement via a single wrapper around the Thrift handler rather than instrumenting each method individually.
+### RPC instrumentation approach
+
+Use Apache Thrift's `TProcessorEventHandler` (not `TServerEventHandler`, which is connection-level and has no method name). Register on the generated processor:
+
+```cpp
+auto processor = std::make_shared<ChronosNodeProcessor>(handler);
+processor->setEventHandler(std::make_shared<RpcMetricsProcessorEventHandler>("node"));
+```
+
+- `getContext(fn_name, …)` — start latency timer
+- `postWrite(fn_name, …)` — record request count, duration, and outcome
+- `handlerError(fn_name, …)` — undeclared `std::exception`; record `result=error`, `exception=internal_error`
+
+**Declared Thrift exceptions** (`ResourceNotFound`, `Forbidden`, etc.) are caught by the generated processor, serialized as normal replies, and still call `postWrite` — not `handlerError`. To label them correctly, use `RpcThrow` helpers at existing throw sites that set a `thread_local` exception label before throwing; `postWrite` reads and clears it. Replace `throw ResourceNotFound()` with `RpcThrow::resourceNotFound()`, etc. (~29 sites across NodeService and MasterService). Undeclared exceptions (e.g. `std::runtime_error`) correctly reach `handlerError` without changes.
+
+Do **not** wrap handlers in a per-method decorator implementing `ChronosNodeIf` / `ChronosMasterIf`.
 
 ## Master service (inbound RPC)
 
@@ -238,18 +245,39 @@ Same metrics as Node service with `service=master`.
 | Notification backlog growing | `chronos_notification_queue_depth` sustained above threshold |
 | Email delivery broken | `rate(chronos_email_send_errors_total[5m])` > 0, or `rate(chronos_master_client_errors_total{method="getUserDetails"}[5m])` > 0 |
 | DNS problems fleet-wide | `rate(chronos_jobs_executed_total{status="failed_dns"}[5m])` spike |
-| Connect/timeout problems | High rate on `failed_connect` / `failed_timeout`, or elevated p95 on `chronos_job_curl_phase_seconds{phase="connect"}` |
+| Connect/timeout problems | High rate on `failed_connect` / `failed_timeout`, or elevated p95 on `chronos_job_duration_seconds` |
 | SQLite/disk issues | `rate(chronos_sqlite_write_errors_total[5m])` > 0 |
 | Master unreachable from executors | `rate(chronos_master_client_errors_total[5m])` > 0 |
 | Socket/file-descriptor exhaustion | `rate(chronos_socket_exhaustion_total[5m])` > 0 |
 | Hung worker threads | `chronos_worker_inflight_jobs` > 0 long after the last `chronos_schedule_jobs_selected_total` increase |
 | Misconfigured time zones | `rate(chronos_schedule_timezones_skipped_total[1h])` > 0 |
 
+## Performance at scale
+
+Production fleet: **~100M executions/day on 5 executor nodes** (~20M/node/day, ~13.9k jobs/minute/node, bursts of 500–1,500 completions/sec per node). Per-job prometheus-cpp mutex operations on the job-completion path are not acceptable at this scale.
+
+### Hot path: batch and flush
+
+| Path | Strategy |
+|---|---|
+| `WorkerThread::jobDone()` | Update local `WorkerMetricsBatch` only (status counts + duration/jitter histogram buckets). **No prometheus-cpp calls.** |
+| End of `WorkerThread::threadMain()` | `Metrics::mergeWorkerBatch()` — merge counter deltas and histogram bucket counts under one lock per metric family |
+| `processJobsForTimeZone()` | Accumulate into local `ScheduleMetricsBatch`; flush once after `processJobs()` |
+| `UpdateThread`, RPC, notifications | Direct prometheus-cpp writes at low frequency — no batching needed |
+
+Pre-create and cache all bounded metric label combinations at init. Never call `.Add({labels})` on the hot path.
+
+Histogram merge at flush should add bucket deltas directly (lock once per family), not replay individual `Observe()` per job.
+
+### Load testing
+
+Before production deploy, benchmark `jobDone()` with metrics enabled vs disabled at ≥1,000 completions/sec per worker thread. Target: < 5% p99 latency increase; no increase in `chronos_update_queue_depth` backlog vs baseline.
+
 ## Implementation notes
 
-- Instrument at natural boundaries: after queue swaps in UpdateThread/NotificationThread, in `WorkerThread::jobDone()`, at the end of `processJobs()`, and in a Thrift handler wrapper.
-- Metrics are updated from multiple threads (worker threads, UpdateThread, NotificationThread, Thrift handlers). Use prometheus-cpp's thread-safe registry mode or a metrics singleton with internal locking.
+- Instrument at natural boundaries: queue swaps in UpdateThread/NotificationThread, `WorkerMetricsBatch` flush at end of `WorkerThread::threadMain()`, end of `processJobs()`, and `TProcessorEventHandler` on inbound RPC processors.
+- Metrics are updated from multiple threads. Use prometheus-cpp's thread-safe registry mode or a metrics singleton with internal locking.
 - Batch duration histograms should use sub-second timestamps (`std::chrono` or `Utils::getTimestampMS()`), not `time(nullptr)`.
 - The `/metrics` endpoint should be bound to localhost or a restricted interface by default (`metrics_interface` in `chronos.cfg`).
 - Use `metrics_enable` to disable the endpoint on nodes where it is not wanted.
-- Dockerfiles might need to be updated to install the `prometheus-cpp` dependency.
+- Add prometheus-cpp via CMake `FetchContent` (pin a stable tag). Dockerfiles may need updating if not using FetchContent.
