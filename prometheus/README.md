@@ -47,7 +47,7 @@ Reload or restart Prometheus after deploying the file.
 | `ChronosSocketExhaustion` | critical | `socket()` exhaustion in curl |
 | `ChronosHungWorkerThreads` | warning | Active workers but no scheduling for 25m |
 | `ChronosWorkerLifetimeHigh` | warning | p95 worker thread lifetime >10m |
-| `ChronosUpdateQueueBacklog` | warning | Update queue depth >500 for 10m |
+| `ChronosUpdateQueueBacklog` | warning | Queue depth >500 with persist gap >0.1/s for 10m |
 | `ChronosPersistGap` | critical | Executed rate exceeds persisted rate |
 | `ChronosSqliteWriteErrors` | critical | SQLite joblog write failures |
 | `ChronosMysqlWriteErrors` | critical | MySQL job update failures |

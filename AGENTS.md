@@ -69,7 +69,7 @@ These run at lower frequency; direct `Metrics::instance()` calls are fine.
 **UpdateThread**
 
 - Set `chronos_update_queue_depth` from `tempQueue.size()` after the queue **swap**, not in `addResult()`.
-- Observe batch duration around the drain loop; reset depth to 0 after processing.
+- After the drain loop, set depth to `queue.size()` (pending results waiting for the next swap), not 0.
 - Increment `chronos_update_results_total` only after full success (SQLite + MySQL).
 - Wrap MySQL writes in try/catch; increment `chronos_mysql_write_errors_total{operation=...}` and return — do not let exceptions kill the thread.
 - SQLite failures: increment `chronos_sqlite_write_errors_total{operation=...}` with a bounded operation name.

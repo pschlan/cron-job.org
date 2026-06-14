@@ -177,15 +177,18 @@ groups:
     interval: 1m
     rules:
       - alert: ChronosUpdateQueueBacklog
-        expr: chronos_update_queue_depth > 500
+        expr: |
+          chronos_update_queue_depth > 500
+          and chronos:persist_gap:rate5m > 0.1
+          and chronos:jobs_executed:rate5m > 0.5
         for: 10m
         labels:
           severity: warning
         annotations:
           summary: UpdateThread backlog on {{ $labels.instance }}
           description: |
-            chronos_update_queue_depth={{ $value }} for 10 minutes.
-            Result persistence may be falling behind execution.
+            chronos_update_queue_depth={{ $value }} with executed jobs outpacing persistence
+            for 10 minutes. Check chronos:persist_gap:rate5m on the instance.
 
       - alert: ChronosPersistGap
         expr: chronos:persist_gap:rate5m > 0.5

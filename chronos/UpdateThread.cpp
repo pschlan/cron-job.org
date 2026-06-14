@@ -539,7 +539,10 @@ void UpdateThread::run()
 		}
 		const std::chrono::duration<double> batchElapsed = std::chrono::steady_clock::now() - batchStart;
 		Metrics::instance().observeUpdateBatchDurationSeconds(batchElapsed.count());
-		Metrics::instance().setUpdateQueueDepth(0);
+		{
+			std::lock_guard<std::mutex> lg(queueMutex);
+			Metrics::instance().setUpdateQueueDepth(static_cast<double>(queue.size()));
+		}
 
 		if(numJobs > 100)
 			std::cout << "UpdateThread::run(): Processing " << numJobs << " took " << batchElapsed.count() << " seconds" << std::endl;
