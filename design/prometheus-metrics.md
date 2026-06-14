@@ -145,7 +145,7 @@ MySQL errors in `storeResult()` are not caught today; instrumentation should wra
 | Metric | Type | Labels | Description |
 |---|---|---|---|
 | `chronos_notifications_processed_total` | Counter | `type` | Notifications entered `processNotification()`. `type`: `failure`, `success`, `disable`, `ssl_cert_expiry` |
-| `chronos_notification_queue_depth` | Gauge | — | Pending notifications in the NotificationThread queue. Update on `addNotification()` and after each queue swap |
+| `chronos_notification_queue_depth` | Gauge | — | Pending notifications in the NotificationThread queue. Update on `addNotification()` and after each queue swap; after drain, set to `queue.size()` (not 0) |
 | `chronos_notification_batch_duration_seconds` | Histogram | — | Time to process one swapped batch (use sub-second precision) |
 | `chronos_emails_sent_total` | Counter | `type` | Emails accepted by SMTP (`curl_easy_perform` == `CURLE_OK`) |
 | `chronos_emails_suppressed_total` | Counter | `type` | Notifications skipped because `userDetails.suppressNotifications` is set |
@@ -172,7 +172,7 @@ Executor nodes call `ChronosMaster` over Thrift for stats reporting, user detail
 | `chronos_testrun_submitted_total` | Counter | — | Test runs submitted via NodeService |
 | `chronos_testrun_completed_total` | Counter | `status` | Test runs finished. `status` uses same values as job `status` label |
 | `chronos_testrun_active` | Gauge | — | Currently running test runs |
-| `chronos_testrun_queue_depth` | Gauge | — | Pending test runs in the TestRunThread queue |
+| `chronos_testrun_queue_depth` | Gauge | — | Pending test runs in the TestRunThread queue. Update on `submit()` and after each queue swap; after drain, set to `queue.size()` (not 0) |
 
 ## Node service (inbound RPC)
 

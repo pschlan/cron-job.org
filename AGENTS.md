@@ -76,7 +76,7 @@ These run at lower frequency; direct `Metrics::instance()` calls are fine.
 
 **NotificationThread**
 
-- Queue depth on `addNotification()` and after batch swap (see design doc for exact semantics).
+- Queue depth on `addNotification()` and after batch swap; after the drain loop, set depth to `queue.size()` (not 0).
 - Pass notification `type` into email metrics (`incrementEmailsSent`, `incrementEmailsSuppressed`).
 - Use `callMaster()` for `getUserDetails` / `getPhrases`.
 
@@ -89,7 +89,7 @@ These run at lower frequency; direct `Metrics::instance()` calls are fine.
 
 **TestRunThread**
 
-- Update queue/active gauges when queue is swapped or test runs start/complete.
+- Queue depth on `submit()` and after queue swap; after drain, set depth to `queue.size()` (not 0). Update `chronos_testrun_active` when test runs start/complete.
 
 ### Adding a new metric family
 

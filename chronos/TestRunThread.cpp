@@ -224,7 +224,10 @@ void TestRunThread::processQueue(bool wait)
                 testRun->request->submit(curlWorker.get());
             }
         }
-        Metrics::instance().setTestrunQueueDepth(0);
+        {
+            std::unique_lock<std::mutex> lock(queueMutex);
+            Metrics::instance().setTestrunQueueDepth(static_cast<double>(queue.size()));
+        }
     }
 }
 

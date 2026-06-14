@@ -422,7 +422,10 @@ void NotificationThread::run()
 		}
 		const std::chrono::duration<double> batchElapsed = std::chrono::steady_clock::now() - batchStart;
 		Metrics::instance().observeNotificationBatchDurationSeconds(batchElapsed.count());
-		Metrics::instance().setNotificationQueueDepth(0);
+		{
+			std::lock_guard<std::mutex> lg(queueMutex);
+			Metrics::instance().setNotificationQueueDepth(static_cast<double>(queue.size()));
+		}
 
 		if(numNotifications > 100)
 			std::cout << "NotificationThread::run(): Processing " << numNotifications << " took " << batchElapsed.count() << " seconds" << std::endl;
