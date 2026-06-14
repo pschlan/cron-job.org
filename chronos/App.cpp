@@ -240,6 +240,11 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 	{
 		std::string timeZone(row[0]);
 
+		if (timeZone.empty())
+		{
+			continue;
+		}
+
 		cctz::time_zone tz;
 		if(!cctz::load_time_zone(timeZone, &tz))
 		{
