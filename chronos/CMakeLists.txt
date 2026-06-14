@@ -59,6 +59,7 @@ set(CCTZ_SOURCES
 	cctz/src/time_zone_libc.cc
 	cctz/src/time_zone_lookup.cc
 	cctz/src/time_zone_posix.cc
+	cctz/src/zone_info_source.cc
 )
 
 add_executable(${NAME} ${SOURCES} ${CCTZ_SOURCES})
