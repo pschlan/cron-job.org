@@ -40,7 +40,7 @@ Reload or restart Prometheus after deploying the file.
 | `ChronosTimezoneSkipped` | warning | Invalid timezone skipped during scheduling |
 | `ChronosJobSuccessRateLow` | warning | Success ratio <80% with sustained throughput |
 | `ChronosJobDurationHigh` | warning | p95 job duration >30s |
-| `ChronosWorkerJitterHigh` | warning | p95 scheduling jitter >5s |
+| `ChronosWorkerJitterHigh` | warning | p95 scheduling jitter >45s |
 | `ChronosDnsFailureSpike` | warning | >5% jobs failing with `failed_dns` |
 | `ChronosConnectFailureSpike` | warning | >5% jobs failing with `failed_connect` |
 | `ChronosTimeoutFailureSpike` | warning | >5% jobs failing with `failed_timeout` |
@@ -51,7 +51,6 @@ Reload or restart Prometheus after deploying the file.
 | `ChronosPersistGap` | critical | Executed rate exceeds persisted rate |
 | `ChronosSqliteWriteErrors` | critical | SQLite joblog write failures |
 | `ChronosMysqlWriteErrors` | critical | MySQL job update failures |
-| `ChronosJobsAutoDisabled` | info | Jobs auto-disabled after max failures |
 | `ChronosNotificationQueueBacklog` | warning | Notification queue depth >50 for 10m |
 | `ChronosEmailSendErrors` | warning | SMTP send failures |
 | `ChronosPhraseSyncErrors` | warning | Phrase cache sync failures |

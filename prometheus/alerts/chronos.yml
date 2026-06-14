@@ -86,7 +86,7 @@ groups:
             p95 end-to-end job duration is {{ $value | humanizeDuration }}.
 
       - alert: ChronosWorkerJitterHigh
-        expr: chronos:worker_jitter:p95_5m > 5
+        expr: chronos:worker_jitter:p95_5m > 45
         for: 15m
         labels:
           severity: warning
@@ -219,16 +219,6 @@ groups:
           summary: MySQL write errors on {{ $labels.instance }}
           description: |
             UpdateThread is failing to update MySQL after SQLite writes.
-
-      - alert: ChronosJobsAutoDisabled
-        expr: sum by (instance) (rate(chronos_jobs_auto_disabled_total[15m])) > 0
-        for: 15m
-        labels:
-          severity: info
-        annotations:
-          summary: Jobs being auto-disabled on {{ $labels.instance }}
-          description: |
-            Jobs are exceeding maxFailures and being disabled automatically.
 
   - name: chronos.notifications
     interval: 1m
