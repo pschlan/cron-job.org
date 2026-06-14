@@ -31,6 +31,8 @@ function sanitizeArg(str) {
     const c = str[i];
     if (c === '\n') {
       result += '\\n';
+    } else if (c === '\r') {
+      result += '\\r';
     } else if (c === '\\') {
       result += '\\\\\\';
     } else if (c === '"' || c === '`' || c === '$' || c === '\\') {
