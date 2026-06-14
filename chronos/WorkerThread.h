@@ -27,7 +27,7 @@ namespace Chronos
 	class WorkerThread : public std::enable_shared_from_this<WorkerThread>
 	{
 	public:
-		WorkerThread(int mday, int month, int year, int hour, int minute, std::size_t parallelJobs, std::size_t deferMs);
+		WorkerThread(int mday, int month, int year, int hour, int minute, std::size_t parallelJobs, std::size_t deferMs, JobType_t jobType);
 		~WorkerThread();
 
 	private:
@@ -70,6 +70,7 @@ namespace Chronos
 		int year;
 		int hour;
 		int minute;
+		JobType_t jobType;
 		bool inRunJobs = false;
 		WorkerMetricsBatch metricsBatch;
 	};

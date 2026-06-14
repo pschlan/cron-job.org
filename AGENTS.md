@@ -80,6 +80,12 @@ These run at lower frequency; direct `Metrics::instance()` calls are fine.
 - Pass notification `type` into email metrics (`incrementEmailsSent`, `incrementEmailsSuppressed`).
 - Use `callMaster()` for `getUserDetails` / `getPhrases`.
 
+**Workers**
+
+- Increment/decrement `chronos_worker_threads` via `Metrics::adjustWorkerThreads()` in `WorkerThread::run()` / end of `threadMain()` (not from `App`).
+- Inflight jobs use `Metrics::adjustWorkerInflight()` in `runJobs()` / `jobDone()`.
+- Each `WorkerThread` is constructed with a fixed `job_type` (default vs monitoring slot).
+
 **TestRunThread**
 
 - Update queue/active gauges when queue is swapped or test runs start/complete.

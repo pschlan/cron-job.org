@@ -32,8 +32,8 @@
 
 using namespace Chronos;
 
-WorkerThread::WorkerThread(int mday, int month, int year, int hour, int minute, std::size_t parallelJobs, std::size_t deferMs)
-	: mday(mday), month(month), year(year), hour(hour), minute(minute), parallelJobs(parallelJobs), deferMs(deferMs)
+WorkerThread::WorkerThread(int mday, int month, int year, int hour, int minute, std::size_t parallelJobs, std::size_t deferMs, JobType_t jobType)
+	: mday(mday), month(month), year(year), hour(hour), minute(minute), parallelJobs(parallelJobs), deferMs(deferMs), jobType(jobType)
 {
 	runningJobs.reserve(parallelJobs);
 }
@@ -58,6 +58,8 @@ void WorkerThread::run()
 		return;
 
 	keepAlive = shared_from_this();
+
+	Metrics::instance().adjustWorkerThreads(jobType, 1);
 
 	workerThread = std::thread(std::bind(&WorkerThread::threadMain, this));
 	workerThread.detach();
@@ -236,5 +238,6 @@ void WorkerThread::threadMain()
 		std::cout << "WorkerThread::threadEntry(): Exception: " << ex.what() << std::endl;
 	}
 
+	Metrics::instance().adjustWorkerThreads(jobType, -1);
 	keepAlive.reset();
 }

@@ -120,6 +120,7 @@ Worker threads are created per minute tick and exit when their batch finishes.
 | Metric | Type | Labels | Description |
 |---|---|---|---|
 | `chronos_worker_threads_started_total` | Counter | `job_type` | Worker threads started per tick (non-empty batches only) |
+| `chronos_worker_threads` | Gauge | `job_type` | Currently active worker threads (from `WorkerThread::run()` until `threadMain()` exits). Use `std::atomic` inc/dec for sub-minute visibility (hung-thread alerting) |
 | `chronos_worker_inflight_jobs` | Gauge | `job_type` | Currently running HTTP requests across all worker threads. Use `std::atomic` inc/dec in `runJobs()` / `jobDone()` for sub-minute visibility (hung-worker alerting) |
 | `chronos_worker_jitter_seconds` | Histogram | `job_type` | Scheduling jitter (`JobResult::jitter` = `dateStarted − datePlanned`, converted from ms). Accumulated in batch, flushed once per worker per tick |
 
@@ -249,7 +250,7 @@ Same metrics as Node service with `service=master`.
 | SQLite/disk issues | `rate(chronos_sqlite_write_errors_total[5m])` > 0 |
 | Master unreachable from executors | `rate(chronos_master_client_errors_total[5m])` > 0 |
 | Socket/file-descriptor exhaustion | `rate(chronos_socket_exhaustion_total[5m])` > 0 |
-| Hung worker threads | `chronos_worker_inflight_jobs` > 0 long after the last `chronos_schedule_jobs_selected_total` increase |
+| Hung worker threads | `chronos_worker_inflight_jobs` > 0 or `chronos_worker_threads` > 0 long after the last `chronos_schedule_jobs_selected_total` increase |
 | Misconfigured time zones | `rate(chronos_schedule_timezones_skipped_total[1h])` > 0 |
 
 ## Performance at scale

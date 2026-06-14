@@ -218,12 +218,17 @@
       },
       "targets": [
         {
+          "expr": "sum(chronos_worker_threads{instance=~\"$instance\"})",
+          "legendFormat": "threads",
+          "refId": "A"
+        },
+        {
           "expr": "sum(chronos_worker_inflight_jobs{instance=~\"$instance\"})",
           "legendFormat": "inflight",
-          "refId": "A"
+          "refId": "B"
         }
       ],
-      "title": "Inflight jobs",
+      "title": "Worker threads & inflight",
       "type": "stat"
     },
     {
@@ -510,12 +515,17 @@
       },
       "targets": [
         {
-          "expr": "chronos_worker_inflight_jobs{instance=~\"$instance\", job_type=~\"$job_type\"}",
-          "legendFormat": "{{job_type}}",
+          "expr": "chronos_worker_threads{instance=~\"$instance\", job_type=~\"$job_type\"}",
+          "legendFormat": "threads {{job_type}}",
           "refId": "A"
+        },
+        {
+          "expr": "chronos_worker_inflight_jobs{instance=~\"$instance\", job_type=~\"$job_type\"}",
+          "legendFormat": "inflight {{job_type}}",
+          "refId": "B"
         }
       ],
-      "title": "Inflight jobs by type",
+      "title": "Worker threads & inflight jobs",
       "type": "timeseries"
     },
     {
@@ -531,7 +541,17 @@
           },
           "unit": "short"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": { "id": "byRegexp", "options": "/^active /" },
+            "properties": [
+              { "id": "custom.drawStyle", "value": "line" },
+              { "id": "custom.fillOpacity", "value": 0 },
+              { "id": "custom.lineWidth", "value": 2 },
+              { "id": "custom.stacking", "value": { "group": "A", "mode": "none" } }
+            ]
+          }
+        ]
       },
       "gridPos": { "h": 7, "w": 8, "x": 8, "y": 22 },
       "id": 13,
@@ -542,11 +562,16 @@
       "targets": [
         {
           "expr": "sum by (job_type) (increase(chronos_worker_threads_started_total{instance=~\"$instance\", job_type=~\"$job_type\"}[$__rate_interval]))",
-          "legendFormat": "{{job_type}}",
+          "legendFormat": "started {{job_type}}",
           "refId": "A"
+        },
+        {
+          "expr": "chronos_worker_threads{instance=~\"$instance\", job_type=~\"$job_type\"}",
+          "legendFormat": "active {{job_type}}",
+          "refId": "B"
         }
       ],
-      "title": "Worker threads started",
+      "title": "Worker thread activity",
       "type": "timeseries"
     },
     {
@@ -1190,6 +1215,6 @@
   "timezone": "browser",
   "title": "Chronos",
   "uid": "chronos-metrics",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }

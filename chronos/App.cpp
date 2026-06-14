@@ -228,7 +228,8 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 		workerThreads.push_back(std::make_shared<WorkerThread>(
 			t.tm_mday, t.tm_mon+1, t.tm_year+1900, t.tm_hour, t.tm_min,
 			i >= numThreads ? parallelMonitoringRequests : parallelRequests,
-			i >= numThreads ? deferMonitorJobsMs : 0));
+			i >= numThreads ? deferMonitorJobsMs : 0,
+			i >= numThreads ? JobType_t::MONITORING : JobType_t::DEFAULT));
 	}
 
 	std::map<uint8_t, std::vector<std::unique_ptr<HTTPRequest>>> requestsByPriority;

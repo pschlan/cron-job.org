@@ -83,7 +83,10 @@ Metrics::Metrics(const std::string &mode, int nodeId)
 	: registry_(std::make_shared<prometheus::Registry>())
 {
 	for(int i = 0; i < WorkerMetricsBatch::NUM_JOB_TYPES; ++i)
+	{
+		workerThreads_[i] = 0;
 		workerInflight_[i] = 0;
+	}
 
 	auto &infoFamily = prometheus::BuildGauge()
 		.Name("chronos_info")
@@ -152,6 +155,17 @@ Metrics::Metrics(const std::string &mode, int nodeId)
 	for(int jt = 0; jt < WorkerMetricsBatch::NUM_JOB_TYPES; ++jt)
 	{
 		workerThreadsStarted_[jt] = &workerThreadsStartedFamily_->Add({
+			{"job_type", kJobTypeLabels[jt]}
+		});
+	}
+
+	workerThreadsFamily_ = &prometheus::BuildGauge()
+		.Name("chronos_worker_threads")
+		.Help("Currently active worker threads (from run() until threadMain exits)")
+		.Register(*registry_);
+	for(int jt = 0; jt < WorkerMetricsBatch::NUM_JOB_TYPES; ++jt)
+	{
+		workerThreadsGauge_[jt] = &workerThreadsFamily_->Add({
 			{"job_type", kJobTypeLabels[jt]}
 		});
 	}
@@ -358,6 +372,13 @@ void Metrics::mergeScheduleBatch(const ScheduleMetricsBatch &batch)
 void Metrics::incrementWorkerThreadsStarted(JobType_t jobType)
 {
 	workerThreadsStarted_[MetricsLabels::jobTypeIndex(jobType)]->Increment();
+}
+
+void Metrics::adjustWorkerThreads(JobType_t jobType, int delta)
+{
+	const int idx = MetricsLabels::jobTypeIndex(jobType);
+	workerThreads_[idx] += delta;
+	workerThreadsGauge_[idx]->Set(static_cast<double>(workerThreads_[idx].load()));
 }
 
 void Metrics::adjustWorkerInflight(JobType_t jobType, int delta)

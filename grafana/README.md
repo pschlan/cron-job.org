@@ -27,9 +27,9 @@ The dashboard filters by `instance` (scrape target) and `node_id` (from `chronos
 
 | Row | What it shows |
 |---|---|
-| Overview | Throughput, success rate, scheduler lag, update backlog, inflight jobs, persist gap |
+| Overview | Throughput, success rate, scheduler lag, update backlog, worker threads & inflight, persist gap |
 | Scheduling | Jobs selected per minute, tick duration, jitter |
-| Workers & resources | Inflight by type, threads started, socket exhaustion, auto-disable |
+| Workers & resources | Active threads & inflight by type, thread activity (started vs active), socket exhaustion, auto-disable |
 | Persistence | Update queue, batch duration, executed vs persisted, SQLite/MySQL errors |
 | Notifications | Queue depth, flow by type, email/phrase errors |
 | RPC & master client | Inbound RPC rate/latency/errors, outbound master client |

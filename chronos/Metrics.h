@@ -37,6 +37,7 @@ namespace Chronos
 		void mergeScheduleBatch(const ScheduleMetricsBatch &batch);
 
 		void incrementWorkerThreadsStarted(JobType_t jobType);
+		void adjustWorkerThreads(JobType_t jobType, int delta);
 		void adjustWorkerInflight(JobType_t jobType, int delta);
 
 		void setSchedulerLoopLagSeconds(double seconds);
@@ -99,7 +100,10 @@ namespace Chronos
 		prometheus::Family<prometheus::Counter> *workerThreadsStartedFamily_ = nullptr;
 		prometheus::Counter *workerThreadsStarted_[WorkerMetricsBatch::NUM_JOB_TYPES] = {};
 
+		std::atomic<int> workerThreads_[WorkerMetricsBatch::NUM_JOB_TYPES];
 		std::atomic<int> workerInflight_[WorkerMetricsBatch::NUM_JOB_TYPES];
+		prometheus::Family<prometheus::Gauge> *workerThreadsFamily_ = nullptr;
+		prometheus::Gauge *workerThreadsGauge_[WorkerMetricsBatch::NUM_JOB_TYPES] = {};
 		prometheus::Family<prometheus::Gauge> *workerInflightFamily_ = nullptr;
 		prometheus::Gauge *workerInflightGauge_[WorkerMetricsBatch::NUM_JOB_TYPES] = {};
 
