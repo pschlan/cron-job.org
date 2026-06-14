@@ -303,6 +303,11 @@
         "auth": "authentication"
       }
     },
+    "commandImport": {
+      "title": "This looks like a cURL or wget command",
+      "text": "Instead of using it as the URL, we can read the URL, request method, headers, body and authentication from it.",
+      "import": "Import command"
+    },
     "testRun": {
       "testRun": "Test run",
       "performTestRun": "Perform test run: {{jobTitle}}",

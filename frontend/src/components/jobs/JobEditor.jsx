@@ -23,6 +23,7 @@ import {
   RequestMethod,
   RequestMethodsSupportingCustomBody
 } from '../../utils/Constants';
+import { looksLikeHttpCommand, parseHttpCommand } from '../../utils/CommandParser';
 import useTimezones from '../../hooks/useTimezones';
 import NotFound from '../misc/NotFound';
 import Breadcrumbs from '../misc/Breadcrumbs';
@@ -121,6 +122,8 @@ export default function JobEditor({ match }) {
   const [ jobTitle, setJobTitle ] = useState('');
   const [ jobURL, setJobURL ] = useState('');
   const jobURLRef = useRef();
+  const [ urlFieldKey, setUrlFieldKey ] = useState(0);
+  const [ detectedCommand, setDetectedCommand ] = useState(null);
   const requestTimeoutRef = useRef();
   const requestBodyRef = useRef();
   const authUserRef = useRef();
@@ -391,7 +394,47 @@ export default function JobEditor({ match }) {
     if (jobURLRef.current) {
       jobURLRef.current.value = url;
     }
+    // The URL field manages its own value internally (see ValidatingTextField),
+    // so bump its key to remount it and pick up the new value when we set the
+    // URL programmatically (test-run redirect, cURL/wget import, ...).
+    setUrlFieldKey(key => key + 1);
     setShowTestRun(false);
+  }
+
+  // Detect a curl/wget command pasted into the URL field and remember the parsed
+  // result so we can offer a one-click import (GitHub issue #103).
+  function detectCommandInUrl(value) {
+    if (looksLikeHttpCommand(value)) {
+      const parsed = parseHttpCommand(value);
+      setDetectedCommand(parsed && parsed.url ? parsed : null);
+    } else {
+      setDetectedCommand(null);
+    }
+  }
+
+  function importDetectedCommand() {
+    if (!detectedCommand) {
+      return;
+    }
+
+    let method = null;
+    if (detectedCommand.method !== null && detectedCommand.method !== undefined) {
+      if (Object.prototype.hasOwnProperty.call(RequestMethod, detectedCommand.method)) {
+        method = RequestMethod[detectedCommand.method];
+      } else {
+        enqueueSnackbar(t('jobs.curlImport.unsupportedMethod', { method: detectedCommand.method }), { variant: 'error' });
+        return;
+      }
+    }
+
+    applyImportedCommand({
+      url: detectedCommand.url,
+      method,
+      headers: detectedCommand.headers,
+      body: detectedCommand.body,
+      auth: detectedCommand.auth,
+    });
+    setDetectedCommand(null);
   }
 
   function urlMutator(url) {
@@ -403,7 +446,7 @@ export default function JobEditor({ match }) {
     return url;
   }
 
-  function applyImportedCurl({ url, method, headers, body, auth }) {
+  function applyImportedCommand({ url, method, headers, body, auth }) {
     if (url) updateUrl(url);
     if (method !== null && method !== undefined) setRequestMethod(method);
     setJobHeaders(headers || []);
@@ -541,11 +584,13 @@ export default function JobEditor({ match }) {
             fullWidth
             />
           <ValidatingTextField
+            key={urlFieldKey}
             label={t('jobs.url')}
             mutator={urlMutator}
             defaultValue={jobURL}
             pattern={RegexPatterns.url}
             patternErrorText={t('jobs.invalidUrl')}
+            onChange={({target}) => detectCommandInUrl(target.value)}
             onBlur={({target}) => setJobURL(target.value.trim())}
             inputRef={jobURLRef}
             InputLabelProps={{shrink: true}}
@@ -556,6 +601,24 @@ export default function JobEditor({ match }) {
             fullWidth
             required
             />
+          {detectedCommand && <Box mb={2}>
+            <Alert severity='info'>
+              <AlertTitle>{t('jobs.commandImport.title')}</AlertTitle>
+              <div>
+                {t('jobs.commandImport.text')}
+              </div>
+              <Box mt={1}>
+                <Button
+                  variant='contained'
+                  size='small'
+                  color='default'
+                  startIcon={<CodeIcon />}
+                  onClick={() => importDetectedCommand()}>
+                  {t('jobs.commandImport.import')}
+                </Button>
+              </Box>
+            </Alert>
+          </Box>}
           {folders && folders.length > 0 && <div>
             <InputLabel shrink id='folder-label'>
               {t('jobs.folder')}
@@ -850,7 +913,7 @@ export default function JobEditor({ match }) {
     <CurlImportDialog
       open={showCurlImport}
       onClose={() => setShowCurlImport(false)}
-      onImport={applyImportedCurl}
+      onImport={applyImportedCommand}
       />
 
     {showStatusBadgeDialog && <JobStatusBadgeDialog onClose={() => setShowStatusBadgeDialog(false)} jobId={jobId} job={updatedJob} />}
