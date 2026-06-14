@@ -41,9 +41,9 @@ Reload or restart Prometheus after deploying the file.
 | `ChronosJobSuccessRateLow` | warning | Success ratio <80% with sustained throughput |
 | `ChronosJobDurationHigh` | warning | p95 job duration >30s |
 | `ChronosWorkerJitterHigh` | warning | p95 scheduling jitter >45s |
-| `ChronosDnsFailureSpike` | warning | >5% jobs failing with `failed_dns` |
-| `ChronosConnectFailureSpike` | warning | >5% jobs failing with `failed_connect` |
-| `ChronosTimeoutFailureSpike` | warning | >5% jobs failing with `failed_timeout` |
+| `ChronosDnsFailureSpike` | warning | >10% jobs failing with `failed_dns` |
+| `ChronosConnectFailureSpike` | warning | >10% jobs failing with `failed_connect` |
+| `ChronosTimeoutFailureSpike` | warning | >10% jobs failing with `failed_timeout` |
 | `ChronosSocketExhaustion` | critical | `socket()` exhaustion in curl |
 | `ChronosHungWorkerThreads` | warning | Active workers but no scheduling for 25m |
 | `ChronosWorkerLifetimeHigh` | warning | p95 worker thread lifetime >10m |

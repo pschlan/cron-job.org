@@ -98,7 +98,7 @@ groups:
       - alert: ChronosDnsFailureSpike
         expr: |
           sum by (instance) (rate(chronos_jobs_executed_total{status="failed_dns"}[5m]))
-          / clamp_min(sum by (instance) (rate(chronos_jobs_executed_total[5m])), 1e-9) > 0.05
+          / clamp_min(sum by (instance) (rate(chronos_jobs_executed_total[5m])), 1e-9) > 0.10
           and sum by (instance) (rate(chronos_jobs_executed_total[5m])) > 0.1
         for: 10m
         labels:
@@ -106,12 +106,12 @@ groups:
         annotations:
           summary: Elevated DNS failure rate on {{ $labels.instance }}
           description: |
-            More than 5% of completed jobs failed with failed_dns for 10 minutes.
+            More than 10% of completed jobs failed with failed_dns for 10 minutes.
 
       - alert: ChronosConnectFailureSpike
         expr: |
           sum by (instance) (rate(chronos_jobs_executed_total{status="failed_connect"}[5m]))
-          / clamp_min(sum by (instance) (rate(chronos_jobs_executed_total[5m])), 1e-9) > 0.05
+          / clamp_min(sum by (instance) (rate(chronos_jobs_executed_total[5m])), 1e-9) > 0.10
           and sum by (instance) (rate(chronos_jobs_executed_total[5m])) > 0.1
         for: 10m
         labels:
@@ -119,12 +119,12 @@ groups:
         annotations:
           summary: Elevated connect failure rate on {{ $labels.instance }}
           description: |
-            More than 5% of completed jobs failed with failed_connect for 10 minutes.
+            More than 10% of completed jobs failed with failed_connect for 10 minutes.
 
       - alert: ChronosTimeoutFailureSpike
         expr: |
           sum by (instance) (rate(chronos_jobs_executed_total{status="failed_timeout"}[5m]))
-          / clamp_min(sum by (instance) (rate(chronos_jobs_executed_total[5m])), 1e-9) > 0.05
+          / clamp_min(sum by (instance) (rate(chronos_jobs_executed_total[5m])), 1e-9) > 0.10
           and sum by (instance) (rate(chronos_jobs_executed_total[5m])) > 0.1
         for: 10m
         labels:
@@ -132,7 +132,7 @@ groups:
         annotations:
           summary: Elevated timeout failure rate on {{ $labels.instance }}
           description: |
-            More than 5% of completed jobs failed with failed_timeout for 10 minutes.
+            More than 10% of completed jobs failed with failed_timeout for 10 minutes.
 
       - alert: ChronosSocketExhaustion
         expr: sum by (instance) (rate(chronos_socket_exhaustion_total[5m])) > 0
