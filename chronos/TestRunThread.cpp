@@ -18,6 +18,8 @@
 #include "App.h"
 #include "CurlWorker.h"
 #include "Utils.h"
+#include "Metrics.h"
+#include "MetricsLabels.h"
 
 using namespace Chronos;
 
@@ -143,10 +145,12 @@ void TestRunThread::processQueue(bool wait)
         if(stop)
             return;
         queue.swap(tempQueue);
+        Metrics::instance().setTestrunQueueDepth(static_cast<double>(queue.size()));
     }
 
     if(!tempQueue.empty())
     {
+        Metrics::instance().setTestrunQueueDepth(static_cast<double>(tempQueue.size()));
         while(!tempQueue.empty())
         {
             std::shared_ptr<TestRun> testRun = std::move(tempQueue.front());
@@ -207,6 +211,8 @@ void TestRunThread::processQueue(bool wait)
                         testRun->expiresAt                  = std::time(nullptr) + TESTRUN_RESULT_EXPIRY_SECONDS;
 
                         runningTestRuns.erase(testRun);
+                        Metrics::instance().incrementTestrunCompleted(MetricsLabels::statusLabel(testRun->status.result));
+                        Metrics::instance().setTestrunActive(static_cast<double>(runningTestRuns.size()));
                     }
                 };
                 {
@@ -214,9 +220,11 @@ void TestRunThread::processQueue(bool wait)
                     testRun->status.state = TestRun::Status::State::Connecting;
                 }
                 runningTestRuns.insert(testRun);
+                Metrics::instance().setTestrunActive(static_cast<double>(runningTestRuns.size()));
                 testRun->request->submit(curlWorker.get());
             }
         }
+        Metrics::instance().setTestrunQueueDepth(0);
     }
 }
 
@@ -236,7 +244,10 @@ TestRunThread::Handle TestRunThread::submit(std::unique_ptr<HTTPRequest> &&reque
     {
         std::unique_lock<std::mutex> lock(queueMutex);
         queue.push(testRun);
+        Metrics::instance().setTestrunQueueDepth(static_cast<double>(queue.size()));
     }
+
+    Metrics::instance().incrementTestrunSubmitted();
 
     queueProcessingTrigger->fire();
 

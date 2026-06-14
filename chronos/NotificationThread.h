@@ -64,7 +64,7 @@ namespace Chronos
 		std::string formatDate(const std::string &lang, const uint64_t date) const;
 		std::string formatStatus(const std::string &lang, const Notification &notification) const;
         void processNotification(const Notification &notification);
-		void sendMail(const Mail &mail) const;
+		void sendMail(const Mail &mail, NotificationType_t type) const;
 
 	private:
 		std::atomic<bool> stop{false};

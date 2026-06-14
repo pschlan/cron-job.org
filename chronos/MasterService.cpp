@@ -21,6 +21,8 @@
 #include "ChronosMaster.h"
 #include "App.h"
 #include "Utils.h"
+#include "RpcMetricsProcessorEventHandler.h"
+#include "RpcThrow.h"
 
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
@@ -64,7 +66,7 @@ public:
         catch(const std::exception &ex)
         {
             std::cout << "ChronosMasterHandler::reportNodeStats(): Exception: "  << ex.what() << std::endl;
-            throw InternalError();
+            Chronos::RpcThrow::internalError();
         }
     }
 
@@ -83,7 +85,7 @@ public:
                     "FROM `user` WHERE `userid`=%v",
                 userId);
             if(res->numRows() == 0)
-                throw ResourceNotFound();
+                Chronos::RpcThrow::resourceNotFound();
             while((row = res->fetchRow()))
             {
                 _return.userId      = std::stoll(row[0]);
@@ -99,7 +101,7 @@ public:
         catch(const std::exception &ex)
         {
             std::cout << "ChronosMasterHandler::getUserDetails(): Exception: "  << ex.what() << std::endl;
-            throw InternalError();
+            Chronos::RpcThrow::internalError();
         }
     }
 
@@ -123,7 +125,7 @@ public:
         catch(const std::exception &ex)
         {
             std::cout << "ChronosMasterHandler::getPhrases(): Exception: "  << ex.what() << std::endl;
-            throw InternalError();
+            Chronos::RpcThrow::internalError();
         }
     }
 
@@ -154,7 +156,7 @@ public:
         catch(const std::exception &ex)
         {
             std::cout << "ChronosMasterHandler::getUserGroups(): Exception: "  << ex.what() << std::endl;
-            throw InternalError();
+            Chronos::RpcThrow::internalError();
         }
     }
 };
@@ -164,13 +166,16 @@ public:
 namespace Chronos {
 
 MasterService::MasterService(const std::string &interface, int port)
-    : server(std::make_shared<TThreadedServer>(
-        std::make_shared<ChronosMasterProcessor>(std::make_shared<ChronosMasterHandler>()),
+{
+    auto handler = std::make_shared<ChronosMasterHandler>();
+    auto processor = std::make_shared<ChronosMasterProcessor>(handler);
+    processor->setEventHandler(std::make_shared<RpcMetricsProcessorEventHandler>("master"));
+    server = std::make_shared<TThreadedServer>(
+        processor,
         std::make_shared<TServerSocket>(interface, port),
         std::make_shared<TBufferedTransportFactory>(),
         std::make_shared<TBinaryProtocolFactory>()
-    ))
-{
+    );
 }
 
 void MasterService::run()
