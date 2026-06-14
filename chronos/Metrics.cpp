@@ -40,6 +40,10 @@ const std::vector<double> kScheduleTickBuckets = {
 	0.1, 0.5, 1, 2, 5, 10, 30, 60, 120, 300
 };
 
+const std::vector<double> kWorkerThreadLifetimeBuckets = {
+	0.5, 1, 2, 5, 10, 30, 60, 120, 300, 600, 900
+};
+
 const std::vector<double> kBatchDurationBuckets = {
 	0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10, 30, 60
 };
@@ -179,6 +183,16 @@ Metrics::Metrics(const std::string &mode, int nodeId)
 		workerInflightGauge_[jt] = &workerInflightFamily_->Add({
 			{"job_type", kJobTypeLabels[jt]}
 		});
+	}
+
+	workerThreadLifetimeFamily_ = &prometheus::BuildHistogram()
+		.Name("chronos_worker_thread_lifetime_seconds")
+		.Help("Wall-clock time from WorkerThread::threadMain() entry until exit")
+		.Register(*registry_);
+	for(int jt = 0; jt < WorkerMetricsBatch::NUM_JOB_TYPES; ++jt)
+	{
+		workerThreadLifetime_[jt] = &workerThreadLifetimeFamily_->Add(
+			{{"job_type", kJobTypeLabels[jt]}}, kWorkerThreadLifetimeBuckets);
 	}
 
 	auto &schedulerLagFamily = prometheus::BuildGauge()
@@ -379,6 +393,11 @@ void Metrics::adjustWorkerThreads(JobType_t jobType, int delta)
 	const int idx = MetricsLabels::jobTypeIndex(jobType);
 	workerThreads_[idx] += delta;
 	workerThreadsGauge_[idx]->Set(static_cast<double>(workerThreads_[idx].load()));
+}
+
+void Metrics::observeWorkerThreadLifetimeSeconds(JobType_t jobType, double seconds)
+{
+	workerThreadLifetime_[MetricsLabels::jobTypeIndex(jobType)]->Observe(seconds);
 }
 
 void Metrics::adjustWorkerInflight(JobType_t jobType, int delta)

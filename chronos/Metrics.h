@@ -38,6 +38,7 @@ namespace Chronos
 
 		void incrementWorkerThreadsStarted(JobType_t jobType);
 		void adjustWorkerThreads(JobType_t jobType, int delta);
+		void observeWorkerThreadLifetimeSeconds(JobType_t jobType, double seconds);
 		void adjustWorkerInflight(JobType_t jobType, int delta);
 
 		void setSchedulerLoopLagSeconds(double seconds);
@@ -106,6 +107,9 @@ namespace Chronos
 		prometheus::Gauge *workerThreadsGauge_[WorkerMetricsBatch::NUM_JOB_TYPES] = {};
 		prometheus::Family<prometheus::Gauge> *workerInflightFamily_ = nullptr;
 		prometheus::Gauge *workerInflightGauge_[WorkerMetricsBatch::NUM_JOB_TYPES] = {};
+
+		prometheus::Family<prometheus::Histogram> *workerThreadLifetimeFamily_ = nullptr;
+		prometheus::Histogram *workerThreadLifetime_[WorkerMetricsBatch::NUM_JOB_TYPES] = {};
 
 		prometheus::Gauge *schedulerLoopLagGauge_ = nullptr;
 		prometheus::Family<prometheus::Histogram> *scheduleTickDurationFamily_ = nullptr;

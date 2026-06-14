@@ -62,6 +62,7 @@ Suggested defaults (adjust after observing production data):
 | `chronos_job_duration_seconds` | 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10, 30, 60, 120, 300 |
 | `chronos_worker_jitter_seconds` | 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10, 30, 60, 120, 300 |
 | `chronos_schedule_tick_duration_seconds` | 0.1, 0.5, 1, 2, 5, 10, 30, 60, 120, 300 |
+| `chronos_worker_thread_lifetime_seconds` | 0.5, 1, 2, 5, 10, 30, 60, 120, 300, 600, 900 |
 | `chronos_update_batch_duration_seconds` | 0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10, 30, 60 |
 | `chronos_notification_batch_duration_seconds` | 0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10, 30, 60 |
 | `chronos_rpc_request_duration_seconds` | 0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5 |
@@ -121,6 +122,7 @@ Worker threads are created per minute tick and exit when their batch finishes.
 |---|---|---|---|
 | `chronos_worker_threads_started_total` | Counter | `job_type` | Worker threads started per tick (non-empty batches only) |
 | `chronos_worker_threads` | Gauge | `job_type` | Currently active worker threads (from `WorkerThread::run()` until `threadMain()` exits). Use `std::atomic` inc/dec for sub-minute visibility (hung-thread alerting) |
+| `chronos_worker_thread_lifetime_seconds` | Histogram | `job_type` | Wall-clock time from `threadMain()` entry until exit (includes defer, all HTTP execution, and stats reporting). One observation per worker thread per tick |
 | `chronos_worker_inflight_jobs` | Gauge | `job_type` | Currently running HTTP requests across all worker threads. Use `std::atomic` inc/dec in `runJobs()` / `jobDone()` for sub-minute visibility (hung-worker alerting) |
 | `chronos_worker_jitter_seconds` | Histogram | `job_type` | Scheduling jitter (`JobResult::jitter` = `dateStarted − datePlanned`, converted from ms). Accumulated in batch, flushed once per worker per tick |
 

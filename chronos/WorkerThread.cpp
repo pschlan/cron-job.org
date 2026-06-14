@@ -14,6 +14,7 @@
 #include <iostream>
 #include <memory>
 #include <stdexcept>
+#include <chrono>
 
 #include <unistd.h>
 
@@ -197,6 +198,8 @@ void WorkerThread::addStat()
 
 void WorkerThread::threadMain()
 {
+	const auto threadStart = std::chrono::steady_clock::now();
+
 	try
 	{
 		std::cout << "WorkerThread::threadMain(): Entered" << std::endl;
@@ -238,6 +241,8 @@ void WorkerThread::threadMain()
 		std::cout << "WorkerThread::threadEntry(): Exception: " << ex.what() << std::endl;
 	}
 
+	const std::chrono::duration<double> lifetime = std::chrono::steady_clock::now() - threadStart;
+	Metrics::instance().observeWorkerThreadLifetimeSeconds(jobType, lifetime.count());
 	Metrics::instance().adjustWorkerThreads(jobType, -1);
 	keepAlive.reset();
 }

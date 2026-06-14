@@ -83,6 +83,7 @@ These run at lower frequency; direct `Metrics::instance()` calls are fine.
 **Workers**
 
 - Increment/decrement `chronos_worker_threads` via `Metrics::adjustWorkerThreads()` in `WorkerThread::run()` / end of `threadMain()` (not from `App`).
+- Observe `chronos_worker_thread_lifetime_seconds` once at end of `threadMain()` (one call per thread per tick — not on the per-job hot path).
 - Inflight jobs use `Metrics::adjustWorkerInflight()` in `runJobs()` / `jobDone()`.
 - Each `WorkerThread` is constructed with a fixed `job_type` (default vs monitoring slot).
 
