@@ -1,7 +1,17 @@
 FROM ubuntu:bionic AS build
+ARG TARGETARCH
 RUN apt-get update && \
-  apt-get install -y build-essential git cmake autoconf libtool pkg-config libmysqlclient-dev \
-  libev-dev libsqlite3-dev libboost-all-dev libssl-dev flex bison wget
+  apt-get install -y build-essential git autoconf libtool pkg-config libmysqlclient-dev \
+  libev-dev libsqlite3-dev libboost-all-dev libssl-dev flex bison wget && \
+  case "${TARGETARCH}" in \
+    amd64) CMAKE_ARCH=x86_64 ;; \
+    arm64) CMAKE_ARCH=aarch64 ;; \
+    *) CMAKE_ARCH=x86_64 ;; \
+  esac && \
+  wget -q "https://github.com/Kitware/CMake/releases/download/v3.28.3/cmake-3.28.3-linux-${CMAKE_ARCH}.tar.gz" && \
+  tar xzf "cmake-3.28.3-linux-${CMAKE_ARCH}.tar.gz" -C /opt && \
+  ln -sf "/opt/cmake-3.28.3-linux-${CMAKE_ARCH}/bin/cmake" /usr/local/bin/cmake && \
+  ln -sf "/opt/cmake-3.28.3-linux-${CMAKE_ARCH}/bin/ctest" /usr/local/bin/ctest
 
 WORKDIR /src/deps
 RUN wget https://github.com/c-ares/c-ares/releases/download/v1.34.5/c-ares-1.34.5.tar.gz

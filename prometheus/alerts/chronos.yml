@@ -1,0 +1,290 @@
+# Prometheus alerting and recording rules for chronos executor metrics.
+#
+# Load via prometheus.yml:
+#   rule_files:
+#     - /etc/prometheus/alerts/chronos.yml
+#
+# Thresholds are starting points — tune for your fleet size and SLOs.
+
+groups:
+  - name: chronos.recording
+    interval: 1m
+    rules:
+      - record: chronos:jobs_executed:rate5m
+        expr: sum by (instance) (rate(chronos_jobs_executed_total[5m]))
+
+      - record: chronos:update_results:rate5m
+        expr: sum by (instance) (rate(chronos_update_results_total[5m]))
+
+      - record: chronos:persist_gap:rate5m
+        expr: chronos:jobs_executed:rate5m - chronos:update_results:rate5m
+
+      - record: chronos:job_success_ratio:rate5m
+        expr: |
+          sum by (instance) (rate(chronos_jobs_executed_total{status="ok"}[5m]))
+          / clamp_min(sum by (instance) (rate(chronos_jobs_executed_total[5m])), 1e-9)
+
+      - record: chronos:job_duration:p95_5m
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le, instance) (rate(chronos_job_duration_seconds_bucket[5m])))
+
+      - record: chronos:worker_jitter:p95_5m
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le, instance) (rate(chronos_worker_jitter_seconds_bucket[5m])))
+
+  - name: chronos.scheduler
+    interval: 1m
+    rules:
+      - alert: ChronosSchedulerLagHigh
+        expr: chronos_scheduler_loop_lag_seconds > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Chronos scheduler is running late on {{ $labels.instance }}
+          description: |
+            The main loop detected the new minute more than 1s after the planned boundary
+            for 5 minutes. chronos_scheduler_loop_lag_seconds={{ $value | humanize }}s.
+
+      - alert: ChronosTimezoneSkipped
+        expr: increase(chronos_schedule_timezones_skipped_total[1h]) > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: Chronos failed to load a timezone on {{ $labels.instance }}
+          description: |
+            At least one timezone failed cctz::load_time_zone in the last hour.
+            Jobs in affected zones were skipped for that tick.
+
+  - name: chronos.execution
+    interval: 1m
+    rules:
+      - alert: ChronosJobSuccessRateLow
+        expr: |
+          chronos:job_success_ratio:rate5m < 0.80
+          and chronos:jobs_executed:rate5m > 1
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: Low job success rate on {{ $labels.instance }}
+          description: |
+            Success ratio is below 80% ({{ $value | humanizePercentage }}) over the last 15 minutes
+            with sustained job throughput (>1 job/s).
+
+      - alert: ChronosJobDurationHigh
+        expr: chronos:job_duration:p95_5m > 30
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: High job duration p95 on {{ $labels.instance }}
+          description: |
+            p95 end-to-end job duration is {{ $value | humanizeDuration }}.
+
+      - alert: ChronosWorkerJitterHigh
+        expr: chronos:worker_jitter:p95_5m > 45
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: High scheduling jitter on {{ $labels.instance }}
+          description: |
+            p95 scheduling jitter (dateStarted − datePlanned) is {{ $value | humanizeDuration }}.
+
+      - alert: ChronosDnsFailureSpike
+        expr: |
+          sum by (instance) (rate(chronos_jobs_executed_total{status="failed_dns"}[5m]))
+          / clamp_min(sum by (instance) (rate(chronos_jobs_executed_total[5m])), 1e-9) > 0.10
+          and sum by (instance) (rate(chronos_jobs_executed_total[5m])) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: Elevated DNS failure rate on {{ $labels.instance }}
+          description: |
+            More than 10% of completed jobs failed with failed_dns for 10 minutes.
+
+      - alert: ChronosConnectFailureSpike
+        expr: |
+          sum by (instance) (rate(chronos_jobs_executed_total{status="failed_connect"}[5m]))
+          / clamp_min(sum by (instance) (rate(chronos_jobs_executed_total[5m])), 1e-9) > 0.10
+          and sum by (instance) (rate(chronos_jobs_executed_total[5m])) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: Elevated connect failure rate on {{ $labels.instance }}
+          description: |
+            More than 10% of completed jobs failed with failed_connect for 10 minutes.
+
+      - alert: ChronosTimeoutFailureSpike
+        expr: |
+          sum by (instance) (rate(chronos_jobs_executed_total{status="failed_timeout"}[5m]))
+          / clamp_min(sum by (instance) (rate(chronos_jobs_executed_total[5m])), 1e-9) > 0.10
+          and sum by (instance) (rate(chronos_jobs_executed_total[5m])) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: Elevated timeout failure rate on {{ $labels.instance }}
+          description: |
+            More than 10% of completed jobs failed with failed_timeout for 10 minutes.
+
+      - alert: ChronosSocketExhaustion
+        expr: sum by (instance) (rate(chronos_socket_exhaustion_total[5m])) > 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: Socket exhaustion on {{ $labels.instance }}
+          description: |
+            curlOpenSocketFunction() is failing with EMFILE/ENFILE/ENOBUFS.
+            Check parallel_requests / num_threads configuration and ulimits.
+
+      - alert: ChronosHungWorkerThreads
+        expr: |
+          (
+            sum by (instance) (chronos_worker_threads) > 0
+            or sum by (instance) (chronos_worker_inflight_jobs) > 0
+          )
+          and sum by (instance) (increase(chronos_schedule_jobs_selected_total[25m])) == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Hung worker threads on {{ $labels.instance }}
+          description: |
+            Worker threads or inflight jobs remain active but no jobs were scheduled
+            in the last 25 minutes. A worker may be stuck.
+
+      - alert: ChronosWorkerLifetimeHigh
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le, instance) (rate(chronos_worker_thread_lifetime_seconds_bucket[15m]))) > 600
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: Worker threads running very long on {{ $labels.instance }}
+          description: |
+            p95 worker thread lifetime exceeds 10 minutes.
+
+  - name: chronos.persistence
+    interval: 1m
+    rules:
+      - alert: ChronosUpdateQueueBacklog
+        expr: |
+          chronos_update_queue_depth > 500
+          and chronos:persist_gap:rate5m > 0.1
+          and chronos:jobs_executed:rate5m > 0.5
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: UpdateThread backlog on {{ $labels.instance }}
+          description: |
+            chronos_update_queue_depth={{ $value }} with executed jobs outpacing persistence
+            for 10 minutes. Check chronos:persist_gap:rate5m on the instance.
+
+      - alert: ChronosPersistGap
+        expr: chronos:persist_gap:rate5m > 0.5
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: Jobs executed but not persisted on {{ $labels.instance }}
+          description: |
+            Executed job rate exceeds persisted result rate by {{ $value | humanize }}/s.
+            Possible SQLite/MySQL data loss — see chronos_sqlite_write_errors_total
+            and chronos_mysql_write_errors_total.
+
+      - alert: ChronosSqliteWriteErrors
+        expr: sum by (instance) (rate(chronos_sqlite_write_errors_total[5m])) > 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: SQLite write errors on {{ $labels.instance }}
+          description: |
+            UpdateThread is failing to write job logs to SQLite.
+            operation label on chronos_sqlite_write_errors_total indicates the failing step.
+
+      - alert: ChronosMysqlWriteErrors
+        expr: sum by (instance) (rate(chronos_mysql_write_errors_total[5m])) > 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: MySQL write errors on {{ $labels.instance }}
+          description: |
+            UpdateThread is failing to update MySQL after SQLite writes.
+
+  - name: chronos.notifications
+    interval: 1m
+    rules:
+      - alert: ChronosNotificationQueueBacklog
+        expr: chronos_notification_queue_depth > 50
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: Notification backlog on {{ $labels.instance }}
+          description: |
+            chronos_notification_queue_depth={{ $value }} for 10 minutes.
+
+      - alert: ChronosEmailSendErrors
+        expr: sum by (instance) (rate(chronos_email_send_errors_total[5m])) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Email send failures on {{ $labels.instance }}
+          description: |
+            SMTP delivery via curl_easy_perform is failing.
+
+      - alert: ChronosPhraseSyncErrors
+        expr: sum by (instance) (rate(chronos_phrase_sync_errors_total[5m])) > 0
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: Phrase sync failures on {{ $labels.instance }}
+          description: |
+            NotificationThread cannot refresh the phrase cache from the master service.
+
+  - name: chronos.rpc
+    interval: 1m
+    rules:
+      - alert: ChronosMasterClientErrors
+        expr: sum by (instance) (rate(chronos_master_client_errors_total[5m])) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Outbound master client errors on {{ $labels.instance }}
+          description: |
+            Thrift calls to ChronosMaster are failing (stats, user details, phrases, user groups).
+
+      - alert: ChronosMasterGetUserDetailsErrors
+        expr: sum by (instance) (rate(chronos_master_client_errors_total{method="getUserDetails"}[5m])) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: getUserDetails failures on {{ $labels.instance }}
+          description: |
+            NotificationThread cannot fetch user details; emails may be dropped.
+
+      - alert: ChronosRpcErrors
+        expr: sum by (instance, service) (rate(chronos_rpc_errors_total[5m])) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: Inbound RPC errors on {{ $labels.instance }} ({{ $labels.service }})
+          description: |
+            Thrift RPC error rate is elevated. Check chronos_rpc_errors_total exception labels.

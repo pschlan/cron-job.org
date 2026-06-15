@@ -26,7 +26,9 @@ namespace Chronos
 
 	public:
 		std::string get(const std::string &key);
+		std::string get(const std::string &key, const std::string &defaultValue);
 		int getInt(const std::string &key);
+		int getInt(const std::string &key, int defaultValue);
 		unsigned int getUInt(const std::string &key);
 
 	private:

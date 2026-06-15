@@ -29,6 +29,9 @@
 #include "NotificationThread.h"
 #include "SQLite.h"
 #include "Utils.h"
+#include "Metrics.h"
+#include "MetricsLabels.h"
+#include "MasterClientMetrics.h"
 
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/transport/TSocket.h>
@@ -350,6 +353,7 @@ void NotificationThread::addNotification(Notification &&notification)
 {
 	std::lock_guard<std::mutex> lg(queueMutex);
 	queue.push(std::move(notification));
+	Metrics::instance().setNotificationQueueDepth(static_cast<double>(queue.size()));
 	queueSignal.notify_one();
 }
 
@@ -384,7 +388,9 @@ void NotificationThread::run()
 		if(numNotifications > 100)
 			std::cout << "NotificationThread::run(): " << numNotifications << " notification jobs fetched" << std::endl;
 
-		time_t tStart = time(nullptr);
+		Metrics::instance().setNotificationQueueDepth(static_cast<double>(numNotifications));
+
+		const auto batchStart = std::chrono::steady_clock::now();
 		while(!tempQueue.empty())
 		{
 			try
@@ -414,10 +420,15 @@ void NotificationThread::run()
 				std::this_thread::sleep_for(std::chrono::milliseconds(250));
 			}
 		}
-		time_t tEnd = time(nullptr);
+		const std::chrono::duration<double> batchElapsed = std::chrono::steady_clock::now() - batchStart;
+		Metrics::instance().observeNotificationBatchDurationSeconds(batchElapsed.count());
+		{
+			std::lock_guard<std::mutex> lg(queueMutex);
+			Metrics::instance().setNotificationQueueDepth(static_cast<double>(queue.size()));
+		}
 
 		if(numNotifications > 100)
-			std::cout << "NotificationThread::run(): Processing " << numNotifications << " took " << (tEnd-tStart) << " seconds" << std::endl;
+			std::cout << "NotificationThread::run(): Processing " << numNotifications << " took " << batchElapsed.count() << " seconds" << std::endl;
 	}
 
 	std::cout << "NotificationThread::run(): Finished" << std::endl;
@@ -428,7 +439,9 @@ void NotificationThread::syncPhrases()
 	try
 	{
 		Phrases newPhrases;
-		masterClient->getPhrases(newPhrases);
+		callMaster("getPhrases", [&]() {
+			masterClient->getPhrases(newPhrases);
+		});
 
 		phrases.clear();
 		for (const auto &langItem : newPhrases.phrases) {
@@ -436,10 +449,12 @@ void NotificationThread::syncPhrases()
 				phrases[langItem.first][phraseItem.first] = phraseItem.second;
 			}
 		}
+		Metrics::instance().incrementPhraseSync();
 	}
 	catch (const apache::thrift::TException &ex)
 	{
 		std::cerr << "NotificationThread::syncPhrases(): Failed to sync phrases: " << ex.what() << std::endl;
+		Metrics::instance().incrementPhraseSyncError();
 	}
 }
 
@@ -516,21 +531,27 @@ std::string NotificationThread::formatStatus(const std::string &lang, const Noti
 
 void NotificationThread::processNotification(const Notification &notification)
 {
+	Metrics::instance().incrementNotificationsProcessed(MetricsLabels::notificationTypeLabel(notification.type));
+
 	UserDetails userDetails;
 
 	try
 	{
-		masterClient->getUserDetails(userDetails, notification.userID);
+		callMaster("getUserDetails", [&]() {
+			masterClient->getUserDetails(userDetails, notification.userID);
+		});
 	}
 	catch (const apache::thrift::TException &ex)
 	{
 		std::cerr << "NotificationThread::processNotification(): Failed to retrieve user details: " << ex.what() << std::endl;
+		Metrics::instance().incrementNotificationsDropped("user_details_failed");
 		return;
 	}
 
 	if (userDetails.__isset.suppressNotifications && userDetails.suppressNotifications)
 	{
 		std::cerr << "NotificationThread::processNotification(): Notifications suppressed for user " << userDetails.userId << std::endl;
+		Metrics::instance().incrementEmailsSuppressed(MetricsLabels::notificationTypeLabel(notification.type));
 		return;
 	}
 
@@ -585,13 +606,14 @@ void NotificationThread::processNotification(const Notification &notification)
 
 	default:
 		std::cerr << "NotificationThread::processNotification(): Unknown notification type!" << std::endl;
+		Metrics::instance().incrementNotificationsDropped("unknown_type");
 		return;
 	}
 
-	sendMail(mail);
+	sendMail(mail, notification.type);
 }
 
-void NotificationThread::sendMail(const Mail &mail) const
+void NotificationThread::sendMail(const Mail &mail, NotificationType_t type) const
 {
 	CURL *curl = curl_easy_init();
 	if(curl == nullptr)
@@ -614,7 +636,14 @@ void NotificationThread::sendMail(const Mail &mail) const
 
 	int res = curl_easy_perform(curl);
 	if(res != CURLE_OK)
+	{
 		std::cerr << "NotificationThread::sendMail(): Failed to send email: " << res << std::endl;
+		Metrics::instance().incrementEmailSendErrors();
+	}
+	else
+	{
+		Metrics::instance().incrementEmailsSent(MetricsLabels::notificationTypeLabel(type));
+	}
 
 	curl_slist_free_all(recipients);
 	curl_easy_cleanup(curl);

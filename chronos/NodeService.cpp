@@ -28,6 +28,8 @@
 #include "HTTPRequest.h"
 #include "JobResult.h"
 #include "TestRunThread.h"
+#include "RpcMetricsProcessorEventHandler.h"
+#include "RpcThrow.h"
 
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
@@ -138,7 +140,7 @@ public:
         catch(const std::exception &ex)
         {
             std::cout << "ChronosNodeHandler::getJobsForUser(): Exception: "  << ex.what() << std::endl;
-            throw InternalError();
+            Chronos::RpcThrow::internalError();
         }
     }
 
@@ -159,7 +161,7 @@ public:
                 identifier.jobId,
                 identifier.userId);
             if(res->numRows() == 0)
-                throw ResourceNotFound();
+                Chronos::RpcThrow::resourceNotFound();
             while((row = res->fetchRow()))
             {
                 _return.identifier.jobId = std::stoll(row[0]);
@@ -244,7 +246,7 @@ public:
         catch(const std::exception &ex)
         {
             std::cout << "ChronosNodeHandler::getJobDetails(): Exception: "  << ex.what() << std::endl;
-            throw InternalError();
+            Chronos::RpcThrow::internalError();
         }
     }
 
@@ -255,7 +257,7 @@ public:
         std::cout << "ChronosNodeHandler::createOrUpdateJob(" << job.identifier.jobId << ", " << job.identifier.userId << ")" << std::endl;
 
         if(job.identifier.userId <= 0 || job.identifier.jobId <= 0)
-            throw InvalidArguments();
+            Chronos::RpcThrow::invalidArguments();
 
         try
         {
@@ -272,7 +274,7 @@ public:
             }
             else if (jobUser != job.identifier.userId)
             {
-                throw Forbidden();
+                Chronos::RpcThrow::forbidden();
             }
 
             if(job.__isset.metaData)
@@ -396,7 +398,7 @@ public:
         catch(const std::exception &ex)
         {
             std::cout << "ChronosNodeHandler::createOrUpdateJob(): Exception: "  << ex.what() << std::endl;
-            throw InternalError();
+            Chronos::RpcThrow::internalError();
         }
     }
 
@@ -411,7 +413,7 @@ public:
             std::unique_ptr<MySQL_DB> db(App::getInstance()->createMySQLConnection());
 
             if(!jobExists(db, identifier))
-                throw ResourceNotFound();
+                Chronos::RpcThrow::resourceNotFound();
 
             db->query("BEGIN");
             db->query("DELETE FROM `notification` WHERE `jobid`=%v",    identifier.jobId);
@@ -428,7 +430,7 @@ public:
         catch(const std::exception &ex)
         {
             std::cout << "ChronosNodeHandler::deleteJob(): Exception: "  << ex.what() << std::endl;
-            throw InternalError();
+            Chronos::RpcThrow::internalError();
         }
     }
 
@@ -437,7 +439,7 @@ public:
         std::cout << "ChronosNodeHandler::getJobLog(" << identifier.jobId << ", " << identifier.userId << ", " << maxEntries << ")" << std::endl;
 
         if(maxEntries <= 0)
-            throw InvalidArguments();
+            Chronos::RpcThrow::invalidArguments();
 
         try
         {
@@ -456,7 +458,7 @@ public:
         catch(const std::exception &ex)
         {
             std::cout << "ChronosNodeHandler::getJobLog(): Exception: "  << ex.what() << std::endl;
-            throw InternalError();
+            Chronos::RpcThrow::internalError();
         }
     }
 
@@ -501,11 +503,11 @@ public:
                 return;
             }
 
-            throw ResourceNotFound();
+            Chronos::RpcThrow::resourceNotFound();
         }
         catch(const std::exception &ex)
         {
-            throw ResourceNotFound();
+            Chronos::RpcThrow::resourceNotFound();
         }
     }
 
@@ -516,7 +518,7 @@ public:
         std::cout << "ChronosNodeHandler::getNotifications(" << userId << ")" << std::endl;
 
         if(userId <= 0)
-            throw InvalidArguments();
+            Chronos::RpcThrow::invalidArguments();
 
         try
         {
@@ -559,7 +561,7 @@ public:
         catch(const std::exception &ex)
         {
             std::cout << "ChronosNodeHandler::getNotifications(): Exception: "  << ex.what() << std::endl;
-            throw InternalError();
+            Chronos::RpcThrow::internalError();
         }
     }
 
@@ -680,7 +682,7 @@ public:
         catch(const std::exception &ex)
         {
             std::cout << "ChronosNodeHandler::updateUserGroupId(): Exception: "  << ex.what() << std::endl;
-            throw InternalError();
+            Chronos::RpcThrow::internalError();
         }
     }
 
@@ -707,7 +709,7 @@ public:
         catch(const std::exception &ex)
         {
             std::cout << "ChronosNodeHandler::getUserScheduleLoad(): Exception: "  << ex.what() << std::endl;
-            throw InternalError();
+            Chronos::RpcThrow::internalError();
         }
 
         return result;
@@ -737,7 +739,7 @@ public:
         catch(const std::exception &ex)
         {
             std::cout << "ChronosNodeHandler::getUserInfoForAllUsers(): Exception: "  << ex.what() << std::endl;
-            throw InternalError();
+            Chronos::RpcThrow::internalError();
         }
     }
 
@@ -757,7 +759,7 @@ public:
         catch(const std::exception &ex)
         {
             std::cout << "ChronosNodeHandler::disableJobsForUser(): Exception: "  << ex.what() << std::endl;
-            throw InternalError();
+            Chronos::RpcThrow::internalError();
         }
     }
 
@@ -779,7 +781,7 @@ public:
         catch(const std::exception &ex)
         {
             std::cout << "ChronosNodeHandler::moveJobsFromUserFolder(): Exception: "  << ex.what() << std::endl;
-            throw InternalError();
+            Chronos::RpcThrow::internalError();
         }
     }
 
@@ -872,11 +874,11 @@ public:
 
         Chronos::TestRunThread *testRunThread = Chronos::TestRunThread::getInstance();
         if(testRunThread == nullptr)
-            throw FeatureNotAvailable();
+            Chronos::RpcThrow::featureNotAvailable();
 
         std::unique_ptr<Chronos::HTTPRequest> request = httpRequestFromJob(job);
         if(request == nullptr)
-            throw InvalidArguments();
+            Chronos::RpcThrow::invalidArguments();
 
         request->xForwardedFor = xForwardedFor;
 
@@ -889,11 +891,11 @@ public:
 
         Chronos::TestRunThread *testRunThread = Chronos::TestRunThread::getInstance();
         if(testRunThread == nullptr)
-            throw FeatureNotAvailable();
+            Chronos::RpcThrow::featureNotAvailable();
 
         Chronos::TestRun::Status status = testRunThread->getStatus(handle);
         if(!status)
-            throw InvalidArguments();
+            Chronos::RpcThrow::invalidArguments();
 
         using trs = Chronos::TestRun::Status::State;
         switch(status.state)
@@ -936,7 +938,7 @@ public:
 
         Chronos::TestRunThread *testRunThread = Chronos::TestRunThread::getInstance();
         if(testRunThread == nullptr)
-            throw FeatureNotAvailable();
+            Chronos::RpcThrow::featureNotAvailable();
 
         testRunThread->remove(handle);
     }
@@ -1262,13 +1264,16 @@ private:
 namespace Chronos {
 
 NodeService::NodeService(const std::string &interface, int port)
-    : server(std::make_shared<TThreadedServer>(
-        std::make_shared<ChronosNodeProcessor>(std::make_shared<ChronosNodeHandler>()),
+{
+    auto handler = std::make_shared<ChronosNodeHandler>();
+    auto processor = std::make_shared<ChronosNodeProcessor>(handler);
+    processor->setEventHandler(std::make_shared<RpcMetricsProcessorEventHandler>("node"));
+    server = std::make_shared<TThreadedServer>(
+        processor,
         std::make_shared<TServerSocket>(interface, port),
         std::make_shared<TBufferedTransportFactory>(),
         std::make_shared<TBinaryProtocolFactory>()
-    ))
-{
+    );
 }
 
 void NodeService::run()
