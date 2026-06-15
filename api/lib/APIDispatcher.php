@@ -5,6 +5,9 @@ require_once('RateLimiter.php');
 require_once('SessionToken.php');
 require_once('AbstractDispatcher.php');
 
+//! @todo Ugly architecture
+require_once('resources/PublicStatusPage.php');
+
 class APIDispatcher extends AbstractDispatcher {
   private $refreshTokenHandler = false;
   private $sessionTokenHandler = false;
@@ -72,11 +75,22 @@ class APIDispatcher extends AbstractDispatcher {
     if (in_array($origin, $config['allowCredentialsOrigins'])) {
       header('Access-Control-Allow-Origin: ' . $origin);
       header('Access-Control-Allow-Credentials: true');
-    } else {
-      //! @todo If we want to scope this down, we need to find a way to allow all the status page domains
-      //!       or alternatively proxy the GetPublicStatusPage API from the status page server, altering the
-      //!       Access-Control-Allow-Origin header.
-      header('Access-Control-Allow-Origin: *');
+
+    //! @todo Very ugly hack from an architectural point of view
+    } else if ($config['statusPageDomain'] !== null) {
+      $statusPageSuffix = '.' . $config['statusPageDomain'];
+      $allowCorsAccess = false;
+
+      if (PublicStatusPageManager::parseStatusPageSubdomain($origin) !== false) {
+        $allowCorsAccess = true;
+      } else if (substr($origin, 0, 8) === 'https://'
+          && (new PublicStatusPageManager())->mayRequestCertificate(substr($origin, 8))) {
+        $allowCorsAccess = true;
+      }
+
+      if ($allowCorsAccess) {
+        header('Access-Control-Allow-Origin: *');
+      }
     }
 
     if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {

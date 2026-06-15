@@ -45,6 +45,19 @@ class NodeManager {
     return $nodes;
   }
 
+  public static function getAllNodes() {
+    $nodes = [];
+
+    $stmt = Database::get()->prepare('SELECT `nodeid` AS `nodeId`, `ip`, `port` FROM `node` WHERE `enabled`=1');
+    $stmt->setFetchMode(PDO::FETCH_CLASS, Node::class);
+    $stmt->execute();
+    while ($node = $stmt->fetch()) {
+      $nodes[intval($node->nodeId)] = $node;
+    }
+
+    return $nodes;
+  }
+
   public function getNode($nodeId) {
     $stmt = Database::get()->prepare('SELECT `nodeid` AS `nodeId`, `ip`, `port` FROM `node` '
                                       . 'WHERE `enabled`=1 AND `nodeid`=:nodeId');

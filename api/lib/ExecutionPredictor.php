@@ -101,6 +101,9 @@ class ExecutionPredictor {
 
   function __construct($timezone, $months, $mdays, $wdays, $hours, $minutes, $expiresAt = 0) {
     $this->timezone   = $timezone;
+    if ($this->timezone === 'Europe/Kiev') {
+      $this->timezone = 'Europe/Kyiv';
+    }
     $this->months     = $months;
     $this->mdays      = $mdays;
     $this->wdays      = $wdays;
