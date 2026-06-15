@@ -46,6 +46,9 @@ class StatusPageDomain {
 }
 
 class StatusPageIncident {
+  public const STATUS_CLOSED = 0;
+  public const STATUS_ACTIVE = 1;
+
   public $incidentId;
   public $title;
   public $description;
@@ -55,7 +58,7 @@ class StatusPageIncident {
   function __construct() {
     $this->incidentId = intval($this->incidentId);
     $this->startDate = intval($this->startDate);
-    $this->status = boolval($this->status);
+    $this->status = intval($this->status);
   }
 }
 
@@ -448,7 +451,7 @@ class StatusPageManager {
     }
   }
 
-  public function createStatusPageIncident($statusPageId, $title, $description, $startDate, $status = true) {
+  public function createStatusPageIncident($statusPageId, $title, $description, $startDate, $status = StatusPageIncident::STATUS_ACTIVE) {
     $this->checkStatusPagePermission($statusPageId);
     self::validateIncidentFields((object) [
       'title'         => $title,
@@ -464,7 +467,7 @@ class StatusPageManager {
       ':title'          => $title,
       ':description'    => $description,
       ':startDate'      => (int)$startDate,
-      ':status'         => $status ? 1 : 0
+      ':status'         => (int)$status
     ]);
     return (int)Database::get()->insertId();
   }
@@ -481,7 +484,7 @@ class StatusPageManager {
       ':title'          => $incident->title,
       ':description'    => $incident->description,
       ':startDate'      => (int)$incident->startDate,
-      ':status'         => $incident->status ? 1 : 0
+      ':status'         => (int)$incident->status
     ]);
 
     return true;
@@ -512,7 +515,7 @@ class StatusPageManager {
       . 'FROM `statuspageincident` '
       . 'WHERE `statuspageid`=:statusPageId';
     if ($public) {
-      $sql .= ' AND (`status`=1 OR `start_date`>=:cutoff)';
+      $sql .= ' AND (`status`=' . StatusPageIncident::STATUS_ACTIVE . ' OR `start_date`>=:cutoff)';
     }
     $sql .= ' ORDER BY `status` DESC, `start_date` DESC';
 
@@ -530,7 +533,7 @@ class StatusPageManager {
           'title'         => $row->title,
           'description'   => $row->description,
           'startDate'     => (int)$row->startDate,
-          'status'        => (int)$row->status === 1 ? 'active' : 'closed'
+          'status'        => (int)$row->status === StatusPageIncident::STATUS_ACTIVE ? 'active' : 'closed'
         ];
       }
     } else {
@@ -556,7 +559,12 @@ class StatusPageManager {
       throw new InvalidArgumentsException();
     }
 
-    if (!property_exists($incident, 'status')) {
+    if (!property_exists($incident, 'status') || !is_numeric($incident->status)) {
+      throw new InvalidArgumentsException();
+    }
+
+    $status = (int)$incident->status;
+    if ($status !== StatusPageIncident::STATUS_ACTIVE && $status !== StatusPageIncident::STATUS_CLOSED) {
       throw new InvalidArgumentsException();
     }
   }

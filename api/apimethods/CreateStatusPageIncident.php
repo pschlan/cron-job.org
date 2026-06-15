@@ -35,7 +35,9 @@ class CreateStatusPageIncident extends AbstractAPIMethod {
     $statusPageManager = new StatusPageManager($sessionToken);
 
     try {
-      $status = isset($request->status) ? boolval($request->status) : true;
+      $status = isset($request->status)
+        ? intval($request->status)
+        : StatusPageIncident::STATUS_ACTIVE;
       return $statusPageManager->createStatusPageIncident(
         $request->statusPageId,
         $request->title,

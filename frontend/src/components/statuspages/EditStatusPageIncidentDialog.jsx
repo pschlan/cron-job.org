@@ -40,7 +40,7 @@ export default function EditStatusPageIncidentDialog({ incident, onClose }) {
   const [ title, setTitle ] = useState(incident.title);
   const [ description, setDescription ] = useState(incident.description);
   const [ startDate, setStartDate ] = useState(unixToDatetimeLocal(incident.startDate));
-  const [ status, setStatus ] = useState(incident.status ? 'ongoing' : 'resolved');
+  const [ status, setStatus ] = useState(incident.status === 1 ? 'ongoing' : 'resolved');
 
   function doSaveIncident() {
     if (!title.match(RegexPatterns.title)) {
@@ -51,7 +51,7 @@ export default function EditStatusPageIncidentDialog({ incident, onClose }) {
         title,
         description,
         startDate: datetimeLocalToUnix(startDate),
-        status: status === 'ongoing'
+        status: status === 'ongoing' ? 1 : 0
       })
       .then(() => {
         enqueueSnackbar(t('statuspages.incidents.updated'), { variant: 'success' });

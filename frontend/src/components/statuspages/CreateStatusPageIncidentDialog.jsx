@@ -43,7 +43,7 @@ export default function CreateStatusPageIncidentDialog({ statusPageId, onClose }
       return;
     }
     setIsLoading(true);
-    createStatusPageIncident(statusPageId, title, description, datetimeLocalToUnix(startDate), status === 'ongoing')
+    createStatusPageIncident(statusPageId, title, description, datetimeLocalToUnix(startDate), status === 'ongoing' ? 1 : 0)
       .then(() => {
         enqueueSnackbar(t('statuspages.incidents.created'), { variant: 'success' });
         onCloseHook.current(true);

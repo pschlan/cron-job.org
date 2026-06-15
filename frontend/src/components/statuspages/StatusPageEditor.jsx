@@ -398,7 +398,7 @@ export default function StatusPageEditor({ match }) {
     {
       head: t('statuspages.title'),
       cell: incident => <div style={{display: 'flex', alignItems: 'center'}}>
-        <IconAvatar icon={incident.status ? IncidentActiveIcon : IncidentClosedIcon} color={incident.status ? 'orange' : 'default'} />
+        <IconAvatar icon={incident.status === 1 ? IncidentActiveIcon : IncidentClosedIcon} color={incident.status === 1 ? 'orange' : 'default'} />
         <div>{incident.title}</div>
       </div>
     },
@@ -408,7 +408,7 @@ export default function StatusPageEditor({ match }) {
     },
     {
       head: t('statuspages.status'),
-      cell: incident => incident.status ? t('statuspages.incidents.ongoing') : t('statuspages.incidents.resolved')
+      cell: incident => incident.status === 1 ? t('statuspages.incidents.ongoing') : t('statuspages.incidents.resolved')
     },
     {
       head: t('common.actions'),
