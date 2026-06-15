@@ -548,7 +548,7 @@ class StatusPageManager {
       throw new InvalidArgumentsException();
     }
 
-    if (!isset($incident->description) || strlen($incident->description) === 0 || strlen($incident->description) > 10000) {
+    if (!isset($incident->description) || strlen($incident->description) > 10000) {
       throw new InvalidArgumentsException();
     }
 

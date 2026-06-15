@@ -58,6 +58,9 @@ const useStyles = makeStyles(theme => ({
       padding: theme.spacing(0.5)
     }
   },
+  hiddenExpandIcon: {
+    visibility: 'hidden'
+  },
   pastIncidentHeader: {
     display: 'flex',
     alignItems: 'baseline',
@@ -116,7 +119,7 @@ export default function IncidentList({ incidents, section }) {
           <Typography variant='caption' color='textSecondary' className={classes.incidentMeta}>
             {formatIncidentStartDate(incident.startDate, t)}
           </Typography>
-          <Typography variant='body2' className={classes.incidentDescription}>{incident.description}</Typography>
+          {incident.description && <Typography variant='body2' className={classes.incidentDescription}>{incident.description}</Typography>}
         </Paper>)}
     </div>}
 
@@ -126,9 +129,22 @@ export default function IncidentList({ incidents, section }) {
         {t('incidents.past')}
       </Typography>
       <Paper className={classes.pastPanel} elevation={0} square>
-        {pastIncidents.map((incident, index) =>
-          <Accordion key={`past-${index}`} className={classes.pastIncident} elevation={0} square>
-            <AccordionSummary className={classes.pastIncidentSummary} expandIcon={<ExpandMoreIcon fontSize='small' />}>
+        {pastIncidents.map((incident, index) => {
+          const hasDescription = Boolean(incident.description);
+          return <Accordion
+            key={`past-${index}`}
+            className={classes.pastIncident}
+            elevation={0}
+            square
+            {...(hasDescription ? {} : { expanded: false, onChange: () => {} })}>
+            <AccordionSummary
+              className={classes.pastIncidentSummary}
+              expandIcon={
+                <ExpandMoreIcon
+                  fontSize='small'
+                  className={hasDescription ? undefined : classes.hiddenExpandIcon}
+                />
+              }>
               <div className={classes.pastIncidentHeader}>
                 <Typography variant='body2' className={classes.pastIncidentTitle}>{incident.title}</Typography>
                 <Typography variant='caption' color='textSecondary' noWrap>
@@ -136,12 +152,13 @@ export default function IncidentList({ incidents, section }) {
                 </Typography>
               </div>
             </AccordionSummary>
-            <AccordionDetails className={classes.pastIncidentDetails}>
+            {hasDescription && <AccordionDetails className={classes.pastIncidentDetails}>
               <Typography variant='body2' color='textSecondary' className={classes.incidentDescription}>
                 {incident.description}
               </Typography>
-            </AccordionDetails>
-          </Accordion>)}
+            </AccordionDetails>}
+          </Accordion>;
+        })}
       </Paper>
     </div>}
   </>;

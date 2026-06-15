@@ -39,7 +39,7 @@ export default function CreateStatusPageIncidentDialog({ statusPageId, onClose }
   const [ status, setStatus ] = useState('ongoing');
 
   function doCreateIncident() {
-    if (!title.match(RegexPatterns.title) || !description.trim()) {
+    if (!title.match(RegexPatterns.title)) {
       return;
     }
     setIsLoading(true);
@@ -82,7 +82,6 @@ export default function CreateStatusPageIncidentDialog({ statusPageId, onClose }
           minRows={6}
           maxRows={6}
           fullWidth
-          required
           />
       </FormControl>
 
@@ -118,7 +117,6 @@ export default function CreateStatusPageIncidentDialog({ statusPageId, onClose }
       <Button color='primary' onClick={() => doCreateIncident()} disabled={
         isLoading ||
         title.length < 3 ||
-        !description.trim() ||
         !startDate}>
           {t('statuspages.incidents.create')}
       </Button>

@@ -26,7 +26,6 @@ class CreateStatusPageIncident extends AbstractAPIMethod {
          isset($request->statusPageId)
       && is_numeric($request->statusPageId)
       && isset($request->title)
-      && isset($request->description)
       && isset($request->startDate)
       && is_numeric($request->startDate)
     );
@@ -40,7 +39,7 @@ class CreateStatusPageIncident extends AbstractAPIMethod {
       return $statusPageManager->createStatusPageIncident(
         $request->statusPageId,
         $request->title,
-        $request->description,
+        isset($request->description) ? $request->description : '',
         $request->startDate,
         $status
       );

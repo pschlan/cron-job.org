@@ -43,7 +43,7 @@ export default function EditStatusPageIncidentDialog({ incident, onClose }) {
   const [ status, setStatus ] = useState(incident.status ? 'ongoing' : 'resolved');
 
   function doSaveIncident() {
-    if (!title.match(RegexPatterns.title) || !description.trim()) {
+    if (!title.match(RegexPatterns.title)) {
       return;
     }
     setIsLoading(true);
@@ -91,7 +91,6 @@ export default function EditStatusPageIncidentDialog({ incident, onClose }) {
           minRows={6}
           maxRows={6}
           fullWidth
-          required
           />
       </FormControl>
 
@@ -127,7 +126,6 @@ export default function EditStatusPageIncidentDialog({ incident, onClose }) {
       <Button color='primary' onClick={() => doSaveIncident()} disabled={
         isLoading ||
         title.length < 3 ||
-        !description.trim() ||
         !startDate}>
           {t('common.save')}
       </Button>
