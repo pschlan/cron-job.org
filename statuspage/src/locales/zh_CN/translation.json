@@ -10,6 +10,14 @@
     "1week": "1 周",
     "1day": "1 天"
   },
+  "incidents": {
+    "active": "进行中的事件",
+    "past": "历史事件",
+    "startedToday": "今天 {{time}} 开始",
+    "startedYesterday": "昨天 {{time}} 开始",
+    "startedWeekday": "{{weekday}} {{time}} 开始",
+    "startedOn": "{{date}} 开始"
+  },
   "status": {
     "availability": "可用性",
     "availabilityWarning": "可用性警告",

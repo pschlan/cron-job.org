@@ -10,6 +10,14 @@
     "1week": "1 uge",
     "1day": "1 dag"
   },
+  "incidents": {
+    "active": "Aktive hændelser",
+    "past": "Tidligere hændelser",
+    "startedToday": "Startet i dag kl. {{time}}",
+    "startedYesterday": "Startet i går kl. {{time}}",
+    "startedWeekday": "Startet {{weekday}} kl. {{time}}",
+    "startedOn": "Startet {{date}}"
+  },
   "status": {
     "availability": "Tilgængelighed",
     "availabilityWarning": "Advarsel om tilgængelighed",

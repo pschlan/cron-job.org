@@ -10,6 +10,14 @@
     "1week": "o săptămână",
     "1day": "o zi"
   },
+  "incidents": {
+    "active": "Incidente active",
+    "past": "Incidente trecute",
+    "startedToday": "Început astăzi la {{time}}",
+    "startedYesterday": "Început ieri la {{time}}",
+    "startedWeekday": "Început {{weekday}} la {{time}}",
+    "startedOn": "Început pe {{date}}"
+  },
   "status": {
     "availability": "Disponibilitate",
     "availabilityWarning": "Disponibilitate avertizare",

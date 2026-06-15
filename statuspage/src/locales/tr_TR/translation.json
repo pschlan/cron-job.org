@@ -10,6 +10,14 @@
     "1week": "1 hafta",
     "1day": "1 gün"
   },
+  "incidents": {
+    "active": "Aktif olaylar",
+    "past": "Geçmiş olaylar",
+    "startedToday": "Bugün {{time}}'de başladı",
+    "startedYesterday": "Dün {{time}}'de başladı",
+    "startedWeekday": "{{weekday}} günü {{time}}'de başladı",
+    "startedOn": "{{date}} tarihinde başladı"
+  },
   "status": {
     "availability": "Kullanılabilirlik",
     "availabilityWarning": "Kullanılabilirlik uyarısı",

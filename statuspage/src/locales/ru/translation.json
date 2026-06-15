@@ -10,6 +10,14 @@
     "1week": "1 неделя",
     "1day": "1 день"
   },
+  "incidents": {
+    "active": "Активные инциденты",
+    "past": "Прошлые инциденты",
+    "startedToday": "Начато сегодня в {{time}}",
+    "startedYesterday": "Начато вчера в {{time}}",
+    "startedWeekday": "Начато в {{weekday}} в {{time}}",
+    "startedOn": "Начато {{date}}"
+  },
   "status": {
     "availability": "Доступность",
     "availabilityWarning": "Предупреждение о доступности",
