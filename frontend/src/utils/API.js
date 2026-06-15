@@ -176,6 +176,30 @@ export function deleteStatusPageMonitor(monitorId) {
   });
 }
 
+export function createStatusPageIncident(statusPageId, title, description, startDate, status, closedAt = 0) {
+  return performRequest('CreateStatusPageIncident', {
+    statusPageId,
+    title,
+    description,
+    startDate,
+    status,
+    closedAt
+  });
+}
+
+export function updateStatusPageIncident(incidentId, incident) {
+  return performRequest('UpdateStatusPageIncident', {
+    incidentId,
+    incident
+  });
+}
+
+export function deleteStatusPageIncident(incidentId) {
+  return performRequest('DeleteStatusPageIncident', {
+    incidentId
+  });
+}
+
 export function createStatusPageDomain(statusPageId, domain) {
   return performRequest('CreateStatusPageDomain', {
     statusPageId,

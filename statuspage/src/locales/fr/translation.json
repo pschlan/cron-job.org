@@ -10,6 +10,18 @@
     "1week": "1 semaine",
     "1day": "1 jour"
   },
+  "incidents": {
+    "active": "Incidents en cours",
+    "past": "Incidents passés",
+    "startedToday": "Commencé aujourd'hui à {{time}}",
+    "startedYesterday": "Commencé hier à {{time}}",
+    "startedWeekday": "Commencé {{weekday}} à {{time}}",
+    "startedOn": "Commencé le {{date}}",
+    "endedToday": "Terminé aujourd'hui à {{time}}",
+    "endedYesterday": "Terminé hier à {{time}}",
+    "endedWeekday": "Terminé {{weekday}} à {{time}}",
+    "endedOn": "Terminé le {{date}}"
+  },
   "status": {
     "availability": "Disponibilité",
     "availabilityWarning": "Avertissement disponibilité",

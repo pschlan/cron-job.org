@@ -1,7 +1,7 @@
 import { Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, CircularProgress, InputLabel, LinearProgress, Link, makeStyles, Paper, TableContainer, Tooltip, Typography, Switch, FormControlLabel } from '@material-ui/core';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getStatusPage, deleteStatusPage, deleteStatusPageMonitor, updateStatusPage, deleteStatusPageDomain, updateStatusPageMonitorsOrder } from '../../utils/API';
+import { getStatusPage, deleteStatusPage, deleteStatusPageMonitor, updateStatusPage, deleteStatusPageDomain, updateStatusPageMonitorsOrder, deleteStatusPageIncident } from '../../utils/API';
 import { RegexPatterns } from '../../utils/Constants';
 import { formatMs, formatPercent, formatPercentile } from '../../utils/Units';
 import Breadcrumbs from '../misc/Breadcrumbs';
@@ -28,6 +28,11 @@ import { StatusPageConfigIcon } from './StatusPageConfigIcon';
 import { useSnackbar } from 'notistack';
 import CreateStatusPageMonitorDialog from './CreateStatusPageMonitorDialog';
 import CreateStatusPageDomainDialog from './CreateStatusPageDomainDialog';
+import CreateStatusPageIncidentDialog from './CreateStatusPageIncidentDialog';
+import EditStatusPageIncidentDialog from './EditStatusPageIncidentDialog';
+import IncidentActiveIcon from '@material-ui/icons/ReportProblem';
+import IncidentClosedIcon from '@material-ui/icons/CheckCircleOutline';
+import moment from 'moment';
 import { Config } from '../../utils/Config';
 import ActionMenu from '../misc/ActionMenu';
 import { useHistory } from 'react-router-dom';
@@ -102,6 +107,7 @@ export default function StatusPageEditor({ match }) {
   const [ statusPage, setStatusPage ] = useState();
   const [ monitors, setMonitors ] = useState([]);
   const [ domains, setDomains ] = useState([]);
+  const [ incidents, setIncidents ] = useState([]);
 
   const [ isSaving, setIsSaving ] = useState(false);
 
@@ -118,6 +124,10 @@ export default function StatusPageEditor({ match }) {
   const [ deleteDomain, setDeleteDomain ] = useState(null);
   const [ showCreateDomain, setShowCreateDomain ] = useState(false);
 
+  const [ editIncident, setEditIncident ] = useState(null);
+  const [ deleteIncident, setDeleteIncident ] = useState(null);
+  const [ showCreateIncident, setShowCreateIncident ] = useState(false);
+
   function loadStatusPage(statusPageId, childResourcesOnly, noLoading) {
     if (!childResourcesOnly && !noLoading) {
       setIsLoading(true);
@@ -127,6 +137,7 @@ export default function StatusPageEditor({ match }) {
         if (childResourcesOnly) {
           setMonitors(result.statusPage.monitors);
           setDomains(result.statusPage.domains);
+          setIncidents(result.statusPage.incidents || []);
         } else {
           setStatusPage(result.statusPage);
         }
@@ -156,6 +167,18 @@ export default function StatusPageEditor({ match }) {
       })
       .finally(() => loadStatusPage(statusPageId, true));
     setDeleteDomain(null);
+  }
+
+  function doDeleteIncident() {
+    deleteStatusPageIncident(deleteIncident.incidentId)
+      .then(() => {
+        enqueueSnackbar(t('statuspages.incidents.deleted'), { variant: 'success' });
+      })
+      .catch(() => {
+        enqueueSnackbar(t('statuspages.incidents.deleteFailed'), { variant: 'error' });
+      })
+      .finally(() => loadStatusPage(statusPageId, true));
+    setDeleteIncident(null);
   }
 
   function doSaveStatusPage() {
@@ -224,6 +247,7 @@ export default function StatusPageEditor({ match }) {
     if (statusPage) {
       setStatusPageTitle(statusPage.title);
       setMonitors(statusPage.monitors);
+      setIncidents(statusPage.incidents || []);
       setLogoDataUrl(statusPage.logo && statusPage.logoMimeType ? `data:${statusPage.logoMimeType};base64,${statusPage.logo}` : null);
       setDomains(statusPage.domains);
       setPublished(statusPage.enabled);
@@ -247,6 +271,20 @@ export default function StatusPageEditor({ match }) {
 
   const onCreateDomainClose = useCallback(doReload => {
     setShowCreateDomain(false);
+    if (doReload) {
+      loadStatusPage(statusPageId, true);
+    }
+  }, [statusPageId]);
+
+  const onCreateIncidentClose = useCallback(doReload => {
+    setShowCreateIncident(false);
+    if (doReload) {
+      loadStatusPage(statusPageId, true);
+    }
+  }, [statusPageId]);
+
+  const onEditIncidentClose = useCallback(doReload => {
+    setEditIncident(null);
     if (doReload) {
       loadStatusPage(statusPageId, true);
     }
@@ -356,6 +394,53 @@ export default function StatusPageEditor({ match }) {
     }
   ];
 
+  const INCIDENT_COLUMNS = [
+    {
+      head: t('statuspages.title'),
+      cell: incident => <div style={{display: 'flex', alignItems: 'center'}}>
+        <IconAvatar icon={incident.status === 1 ? IncidentActiveIcon : IncidentClosedIcon} color={incident.status === 1 ? 'orange' : 'default'} />
+        <div>{incident.title}</div>
+      </div>
+    },
+    {
+      head: t('statuspages.incidents.startDate'),
+      cell: incident => moment(incident.startDate * 1000).calendar()
+    },
+    {
+      head: t('statuspages.incidents.closedDate'),
+      cell: incident => incident.status === 1 || !incident.closedAt
+        ? '—'
+        : moment(incident.closedAt * 1000).calendar()
+    },
+    {
+      head: t('statuspages.status'),
+      cell: incident => incident.status === 1 ? t('statuspages.incidents.ongoing') : t('statuspages.incidents.resolved')
+    },
+    {
+      head: t('common.actions'),
+      cell: incident => <>
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<EditIcon />}
+          className={classes.actionButton}
+          onClick={() => setEditIncident(incident)}
+          >
+          {t('common.edit')}
+        </Button>
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<DeleteIcon />}
+          className={classes.actionButton}
+          onClick={() => setDeleteIncident(incident)}
+          >
+          {t('common.delete')}
+        </Button>
+      </>
+    }
+  ];
+
   return <>
     <Breadcrumbs items={[
         {
@@ -449,6 +534,24 @@ export default function StatusPageEditor({ match }) {
       </Paper>
 
       <TableContainer component={Paper} className={classes.domainsPaper}>
+        <Title actionButtons={<Button
+            variant='contained'
+            size='small'
+            startIcon={<AddIcon />}
+            onClick={() => setShowCreateIncident(true)}
+            >{t('statuspages.incidents.create')}</Button>}>
+          {t('statuspages.incidents.title')}
+        </Title>
+        <Table
+          columns={INCIDENT_COLUMNS}
+          items={incidents}
+          empty={<em>{t('statuspages.incidents.noIncidents')}</em>}
+          loading={isLoading}
+          rowIdentifier='incidentId'
+          />
+      </TableContainer>
+
+      <TableContainer component={Paper} className={classes.domainsPaper}>
         <Title actionButtons={<>
           <Typography variant='caption' className={classes.quotaIndicator}>
             {statusPage !== null && t('common.quotaIndicator', { cur: domains.length, max: statusPage.maxDomains})}
@@ -499,7 +602,9 @@ export default function StatusPageEditor({ match }) {
       </TableContainer>
     </>
     {showCreateMonitor && <CreateStatusPageMonitorDialog statusPageId={statusPageId} onClose={onCreateMonitorClose} />}
+    {showCreateIncident && <CreateStatusPageIncidentDialog statusPageId={statusPageId} onClose={onCreateIncidentClose} />}
     {editMonitor !== null && <EditStatusPageMonitorDialog monitor={editMonitor} onClose={onEditStatusPageMonitorClose} />}
+    {editIncident !== null && <EditStatusPageIncidentDialog incident={editIncident} onClose={onEditIncidentClose} />}
     {deleteMonitor && <Dialog open={true} onClose={() => setDeleteMonitor(null)}>
       <DialogTitle>
         {t('statuspages.deleteMonitor', { title: deleteMonitor.monitorTitle })}
@@ -514,6 +619,24 @@ export default function StatusPageEditor({ match }) {
           {t('common.cancel')}
         </Button>
         <Button color='primary' onClick={() => doDeleteMonitor()}>
+          {t('common.delete')}
+        </Button>
+      </DialogActions>
+    </Dialog>}
+    {deleteIncident && <Dialog open={true} onClose={() => setDeleteIncident(null)}>
+      <DialogTitle>
+        {t('statuspages.incidents.delete', { title: deleteIncident.title })}
+      </DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          {t('statuspages.incidents.confirmDelete')}
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button autoFocus onClick={() => setDeleteIncident(null)}>
+          {t('common.cancel')}
+        </Button>
+        <Button color='primary' onClick={() => doDeleteIncident()}>
           {t('common.delete')}
         </Button>
       </DialogActions>

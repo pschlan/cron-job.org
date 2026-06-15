@@ -10,6 +10,18 @@
     "1week": "1 hét",
     "1day": "1 nap"
   },
+  "incidents": {
+    "active": "Aktív incidensek",
+    "past": "Korábbi incidensek",
+    "startedToday": "Ma {{time}}-kor kezdődött",
+    "startedYesterday": "Tegnap {{time}}-kor kezdődött",
+    "startedWeekday": "{{weekday}} {{time}}-kor kezdődött",
+    "startedOn": "{{date}}-kor kezdődött",
+    "endedToday": "Ma {{time}}-kor véget ért",
+    "endedYesterday": "Tegnap {{time}}-kor véget ért",
+    "endedWeekday": "{{weekday}} {{time}}-kor véget ért",
+    "endedOn": "{{date}}-kor véget ért"
+  },
   "status": {
     "availability": "Elérhetőség",
     "availabilityWarning": "Elérhetőségi figyelmeztetés",

@@ -11,6 +11,7 @@ class StatusPageNotFoundException extends Exception {}
 class DomainNotFoundException extends Exception {}
 class DomainAlreadyExistsException extends Exception {}
 class StatusPagePublishedException extends Exception {}
+class StatusPageIncidentNotFoundException extends Exception {}
 
 class StatusPageMonitor {
   public $monitorId;
@@ -44,6 +45,25 @@ class StatusPageDomain {
   public $deletable = false;
 }
 
+class StatusPageIncident {
+  public const STATUS_CLOSED = 0;
+  public const STATUS_ACTIVE = 1;
+
+  public $incidentId;
+  public $title;
+  public $description;
+  public $startDate;
+  public $closedAt;
+  public $status;
+
+  function __construct() {
+    $this->incidentId = intval($this->incidentId);
+    $this->startDate = intval($this->startDate);
+    $this->closedAt = intval($this->closedAt);
+    $this->status = intval($this->status);
+  }
+}
+
 class StatusPage {
   public $statusPageId;
   public $title;
@@ -55,6 +75,7 @@ class StatusPage {
   public $logoMimeType;
   public $maxMonitors;
   public $maxDomains;
+  public $incidents;
 
   function __construct() {
     global $config;
@@ -85,6 +106,7 @@ class StatusPage {
     }
 
     $this->monitors = [];
+    $this->incidents = [];
   }
 }
 
@@ -185,6 +207,7 @@ class StatusPageManager {
 
     $statusPage->maxMonitors = $this->userManager->getGroup()->maxStatusPageMonitors;
     $statusPage->maxDomains = $this->userManager->getGroup()->maxStatusPageDomains;
+    $statusPage->incidents = self::loadIncidents($statusPageId, false);
 
     return $statusPage;
   }
@@ -379,10 +402,14 @@ class StatusPageManager {
     $stmt = Database::get()->prepare('DELETE FROM `statuspagelogo` WHERE `statuspageid`=:statusPageId');
     $stmt->execute(array(':statusPageId' => $statusPageId));
 
+    $stmt = Database::get()->prepare('DELETE FROM `statuspageincident` WHERE `statuspageid`=:statusPageId');
+    $stmt->execute(array(':statusPageId' => $statusPageId));
+
     $stmt = Database::get()->prepare('DELETE FROM `statuspage` WHERE `statuspageid`=:statusPageId AND `userid`=:userId '
       . 'AND (SELECT COUNT(*) FROM `statuspagejob` WHERE `statuspageid`=:statusPageId)=0 '
       . 'AND (SELECT COUNT(*) FROM `statuspagedomain` WHERE `statuspageid`=:statusPageId)=0 '
-      . 'AND (SELECT COUNT(*) FROM `statuspagelogo` WHERE `statuspageid`=:statusPageId)=0 ');
+      . 'AND (SELECT COUNT(*) FROM `statuspagelogo` WHERE `statuspageid`=:statusPageId)=0 '
+      . 'AND (SELECT COUNT(*) FROM `statuspageincident` WHERE `statuspageid`=:statusPageId)=0 ');
     $stmt->execute(array(':statusPageId' => $statusPageId, ':userId' => $this->authToken->userId));
 
     Database::get()->commitTransaction();
@@ -424,6 +451,151 @@ class StatusPageManager {
       }
       throw $ex;
     }
+  }
+
+  public function createStatusPageIncident($statusPageId, $title, $description, $startDate, $status = StatusPageIncident::STATUS_ACTIVE, $closedAt = 0) {
+    $incident = (object) [
+      'title'         => $title,
+      'description'   => $description,
+      'startDate'     => $startDate,
+      'status'        => $status,
+      'closedAt'      => $closedAt
+    ];
+    $this->checkStatusPagePermission($statusPageId);
+    self::validateIncidentFields($incident);
+    $closedAt = self::normalizeIncidentClosedAt($incident);
+
+    $stmt = Database::get()->prepare('INSERT INTO `statuspageincident`(`statuspageid`, `title`, `description`, `start_date`, `closed_at`, `status`) '
+      . 'VALUES(:statusPageId, :title, :description, :startDate, :closedAt, :status)');
+    $stmt->execute([
+      ':statusPageId'   => $statusPageId,
+      ':title'          => $title,
+      ':description'    => $description,
+      ':startDate'      => (int)$startDate,
+      ':closedAt'       => $closedAt,
+      ':status'         => (int)$status
+    ]);
+    return (int)Database::get()->insertId();
+  }
+
+  public function updateStatusPageIncident($incidentId, $incident) {
+    self::validateIncidentFields($incident);
+    $this->checkStatusPageIncidentPermission($incidentId);
+    $closedAt = self::normalizeIncidentClosedAt($incident);
+
+    $stmt = Database::get()->prepare('UPDATE `statuspageincident` SET '
+      . '`title`=:title, `description`=:description, `start_date`=:startDate, `closed_at`=:closedAt, `status`=:status '
+      . 'WHERE `statuspageincidentid`=:incidentId');
+    $stmt->execute([
+      ':incidentId'     => $incidentId,
+      ':title'          => $incident->title,
+      ':description'    => $incident->description,
+      ':startDate'      => (int)$incident->startDate,
+      ':closedAt'       => $closedAt,
+      ':status'         => (int)$incident->status
+    ]);
+
+    return true;
+  }
+
+  public function deleteStatusPageIncident($incidentId) {
+    $this->checkStatusPageIncidentPermission($incidentId);
+
+    $stmt = Database::get()->prepare('DELETE FROM `statuspageincident` WHERE `statuspageincidentid`=:incidentId');
+    $stmt->execute([':incidentId' => $incidentId]);
+
+    if ($stmt->rowCount() !== 1) {
+      throw new StatusPageIncidentNotFoundException();
+    }
+
+    return true;
+  }
+
+  public static function loadIncidents($statusPageId, $public = false) {
+    global $config;
+
+    $historyDays = isset($config['statusPageIncidentHistoryDays'])
+      ? (int)$config['statusPageIncidentHistoryDays']
+      : 30;
+    $cutoff = time() - ($historyDays * 86400);
+
+    $sql = 'SELECT `statuspageincidentid` AS `incidentId`, `title`, `description`, `start_date` AS `startDate`, `closed_at` AS `closedAt`, `status` '
+      . 'FROM `statuspageincident` '
+      . 'WHERE `statuspageid`=:statusPageId';
+    if ($public) {
+      $sql .= ' AND (`status`=' . StatusPageIncident::STATUS_ACTIVE . ' OR `start_date`>=:cutoff)';
+    }
+    $sql .= ' ORDER BY `status` DESC, `start_date` DESC';
+
+    $stmt = Database::get()->prepare($sql);
+    $params = [':statusPageId' => $statusPageId];
+    if ($public) {
+      $params[':cutoff'] = $cutoff;
+    }
+    $stmt->execute($params);
+
+    $incidents = [];
+    if ($public) {
+      while ($row = $stmt->fetch(PDO::FETCH_OBJ)) {
+        $incidents[] = (object) [
+          'title'         => $row->title,
+          'description'   => $row->description,
+          'startDate'     => (int)$row->startDate,
+          'closedAt'      => (int)$row->closedAt,
+          'status'        => (int)$row->status === StatusPageIncident::STATUS_ACTIVE ? 'active' : 'closed'
+        ];
+      }
+    } else {
+      $stmt->setFetchMode(PDO::FETCH_CLASS, StatusPageIncident::class);
+      while ($incident = $stmt->fetch()) {
+        $incidents[] = $incident;
+      }
+    }
+
+    return $incidents;
+  }
+
+  private static function validateIncidentFields($incident) {
+    if (!isset($incident->title) || strlen($incident->title) < 3) {
+      throw new InvalidArgumentsException();
+    }
+
+    if (!isset($incident->description) || strlen($incident->description) > 10000) {
+      throw new InvalidArgumentsException();
+    }
+
+    if (!isset($incident->startDate) || !is_numeric($incident->startDate) || (int)$incident->startDate <= 0) {
+      throw new InvalidArgumentsException();
+    }
+
+    if (!property_exists($incident, 'status') || !is_numeric($incident->status)) {
+      throw new InvalidArgumentsException();
+    }
+
+    $status = (int)$incident->status;
+    if ($status !== StatusPageIncident::STATUS_ACTIVE && $status !== StatusPageIncident::STATUS_CLOSED) {
+      throw new InvalidArgumentsException();
+    }
+
+    if (property_exists($incident, 'closedAt') && $incident->closedAt !== null && $incident->closedAt !== '') {
+      if (!is_numeric($incident->closedAt) || (int)$incident->closedAt < 0) {
+        throw new InvalidArgumentsException();
+      }
+    }
+  }
+
+  private static function normalizeIncidentClosedAt($incident) {
+    $status = (int)$incident->status;
+    if ($status === StatusPageIncident::STATUS_ACTIVE) {
+      return 0;
+    }
+
+    $closedAt = property_exists($incident, 'closedAt') ? (int)$incident->closedAt : 0;
+    if ($closedAt <= 0) {
+      return time();
+    }
+
+    return $closedAt;
   }
 
   public function deleteStatusPageDomain($statusPageId, $domain) {
@@ -502,6 +674,18 @@ class StatusPageManager {
 
   private function checkStatusPageMonitorPermission($monitorId) {
     $this->getStatusPageMonitorJobId($monitorId);
+  }
+
+  private function checkStatusPageIncidentPermission($incidentId) {
+    $stmt = Database::get()->prepare('SELECT COUNT(*) AS `count` FROM `statuspageincident` '
+      . 'INNER JOIN `statuspage` ON `statuspage`.`statuspageid`=`statuspageincident`.`statuspageid` '
+      . 'WHERE `statuspageincident`.`statuspageincidentid`=:incidentId '
+      . 'AND `statuspage`.`userid`=:userId');
+    $stmt->execute([':incidentId' => $incidentId, ':userId' => $this->authToken->userId]);
+    $result = $stmt->fetch(PDO::FETCH_OBJ);
+    if (!$result || intval($result->count) !== 1) {
+      throw new StatusPageIncidentNotFoundException();
+    }
   }
 
   private function getStatusPageMonitorJobId($monitorId) {

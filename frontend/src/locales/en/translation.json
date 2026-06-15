@@ -443,7 +443,27 @@
     "cannotDeletePublishedPage": "Published status pages cannot be deleted. Please unpublish your status page first.",
     "statusPageDeleteFailed": "Failed to delete the status page. Please try again later.",
     "statusPageDeleted": "The status page has been deleted successfully.",
-    "nostatuspages": "No status pages found."
+    "nostatuspages": "No status pages found.",
+    "incidents": {
+      "title": "Incidents",
+      "create": "Add Incident",
+      "edit": "Edit Incident: {{title}}",
+      "description": "Description",
+      "startDate": "Start date",
+      "closedDate": "End date",
+      "status": "Status",
+      "ongoing": "Ongoing",
+      "resolved": "Resolved",
+      "noIncidents": "This status page does not have incidents yet. Get started by clicking \"Add Incident\".",
+      "created": "The incident has been created successfully.",
+      "createFailed": "Failed to create the incident. Please try again later.",
+      "updated": "The incident has been updated successfully.",
+      "updateFailed": "Failed to update the incident. Please check your input and try again later.",
+      "delete": "Delete Incident: {{title}}",
+      "confirmDelete": "Do you really want to delete this incident? This action cannot be undone.",
+      "deleted": "The incident has been deleted successfully.",
+      "deleteFailed": "Failed to delete the incident. Please try again later."
+    }
   },
   "settings": {
     "profile": "Profile",
