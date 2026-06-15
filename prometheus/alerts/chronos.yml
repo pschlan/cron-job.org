@@ -38,15 +38,17 @@ groups:
     interval: 1m
     rules:
       - alert: ChronosSchedulerLagHigh
-        expr: chronos_scheduler_loop_lag_seconds > 1
+        expr: |
+          chronos_scheduler_loop_lag_seconds > -5
+          and on(instance) (chronos_info{mode=~".*executor.*"} == 1)
         for: 5m
         labels:
           severity: warning
         annotations:
           summary: Chronos scheduler is running late on {{ $labels.instance }}
           description: |
-            The main loop detected the new minute more than 1s after the planned boundary
-            for 5 minutes. chronos_scheduler_loop_lag_seconds={{ $value | humanize }}s.
+            The main loop detected the new minute late in the minute (lag > -5s; normal is ~-60s).
+            chronos_scheduler_loop_lag_seconds={{ $value | humanize }}s.
 
       - alert: ChronosTimezoneSkipped
         expr: increase(chronos_schedule_timezones_skipped_total[1h]) > 0

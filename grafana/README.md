@@ -21,7 +21,7 @@ scrape_configs:
       - targets: ['chronos-node-1:9098', 'chronos-node-2:9098']
 ```
 
-The dashboard filters by `instance` (scrape target) and `node_id` (from `chronos_info`).
+The dashboard filters by `instance` (scrape target) and `node_id` (from `chronos_info`). Scheduler panels exclude non-executor nodes (e.g. master-only) via `chronos_info{mode=~".*executor.*"}` — those nodes expose `chronos_scheduler_loop_lag_seconds` as 0 because the executor loop never runs.
 
 ### Sections
 

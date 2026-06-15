@@ -36,7 +36,7 @@ Reload or restart Prometheus after deploying the file.
 
 | Alert | Severity | What it detects |
 |---|---|---|
-| `ChronosSchedulerLagHigh` | warning | Main loop starts `processJobs()` >1s late |
+| `ChronosSchedulerLagHigh` | warning | Executor loop lag > −5s (normal ~−60s) |
 | `ChronosTimezoneSkipped` | warning | Invalid timezone skipped during scheduling |
 | `ChronosJobSuccessRateLow` | warning | Success ratio <80% with sustained throughput |
 | `ChronosJobDurationHigh` | warning | p95 job duration >30s |

@@ -96,7 +96,7 @@ Worker threads are started with `detach()` — `processJobs()` returns once work
 |---|---|---|---|
 | `chronos_schedule_jobs_selected_total` | Counter | `job_type`, `priority` | Jobs fetched from MySQL and assigned to worker threads per tick. Accumulate locally during `processJobsForTimeZone()`, flush once after `processJobs()` (~6 counter increments per tick, not one per job) |
 | `chronos_schedule_tick_duration_seconds` | Histogram | — | Wall-clock duration of `processJobs()` from entry until worker threads are started (MySQL fetch, queue assignment, wait until `plannedTime`; **excludes** HTTP execution) |
-| `chronos_scheduler_loop_lag_seconds` | Gauge | — | Delay from the minute boundary (`plannedTime`) to when `processJobs()` is invoked. Non-zero means the main loop detected the new minute late (poll interval is 100 ms) |
+| `chronos_scheduler_loop_lag_seconds` | Gauge | — | `tm_sec − 60` at each minute tick (always ≤ 0). ~−60 when the loop detects the boundary early; values closer to 0 mean later detection. Only updated when `job_executor_enable` is set |
 | `chronos_schedule_timezones_skipped_total` | Counter | — | Time zones that failed to load (`cctz::load_time_zone`) |
 | `chronos_jobs_auto_disabled_total` | Counter | — | Jobs automatically disabled after exceeding `maxFailures` (increment in `UpdateThread::storeResult()`) |
 
@@ -241,7 +241,7 @@ Same metrics as Node service with `service=master`.
 
 | Symptom | Metric / condition |
 |---|---|
-| Scheduler running late | `chronos_scheduler_loop_lag_seconds` > 1, or `rate(chronos_schedule_jobs_selected_total[5m])` drops unexpectedly |
+| Scheduler running late | `chronos_scheduler_loop_lag_seconds` > −5 on executor nodes (normal is ~−60), or `rate(chronos_schedule_jobs_selected_total[5m])` drops unexpectedly |
 | Per-job execution delay | Elevated p95 on `chronos_worker_jitter_seconds` |
 | Result backlog growing | `chronos_update_queue_depth` sustained above threshold |
 | Silent result data loss | `rate(chronos_jobs_executed_total[5m])` − `rate(chronos_update_results_total[5m])` > 0 sustained |

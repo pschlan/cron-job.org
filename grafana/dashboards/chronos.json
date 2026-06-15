@@ -124,8 +124,8 @@
             "mode": "absolute",
             "steps": [
               { "color": "green", "value": null },
-              { "color": "yellow", "value": 0.5 },
-              { "color": "red", "value": 1 }
+              { "color": "yellow", "value": -10 },
+              { "color": "red", "value": -3 }
             ]
           },
           "unit": "s"
@@ -146,7 +146,7 @@
       },
       "targets": [
         {
-          "expr": "max(chronos_scheduler_loop_lag_seconds{instance=~\"$instance\"})",
+          "expr": "max(chronos_scheduler_loop_lag_seconds{instance=~\"$instance\"} and on(instance) (chronos_info{mode=~\".*executor.*\", node_id=~\"$node_id\"} == 1))",
           "legendFormat": "lag",
           "refId": "A"
         }
@@ -438,12 +438,12 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum by (le) (rate(chronos_schedule_tick_duration_seconds_bucket{instance=~\"$instance\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(chronos_schedule_tick_duration_seconds_bucket{instance=~\"$instance\"}[$__rate_interval]) and on(instance) (chronos_info{mode=~\".*executor.*\", node_id=~\"$node_id\"} == 1)))",
           "legendFormat": "tick p95",
           "refId": "A"
         },
         {
-          "expr": "max(chronos_scheduler_loop_lag_seconds{instance=~\"$instance\"})",
+          "expr": "max(chronos_scheduler_loop_lag_seconds{instance=~\"$instance\"} and on(instance) (chronos_info{mode=~\".*executor.*\", node_id=~\"$node_id\"} == 1))",
           "legendFormat": "loop lag",
           "refId": "B"
         }
@@ -1252,6 +1252,6 @@
   "timezone": "browser",
   "title": "Chronos",
   "uid": "chronos-metrics",
-  "version": 3,
+  "version": 4,
   "weekStart": ""
 }
