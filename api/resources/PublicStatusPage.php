@@ -2,6 +2,7 @@
 require_once('lib/Database.php');
 require_once('resources/Job.php');
 require_once('resources/Node.php');
+require_once('resources/StatusPage.php');
 
 class PublicStatusPageManager {
   public function mayRequestCertificate($domain) {
@@ -104,6 +105,8 @@ class PublicStatusPageManager {
       ];
     }
 
+    $incidents = StatusPageManager::loadIncidents($statusPageMeta->statusPageId, true);
+
     unset($statusPageMeta->statusPageId);
 
     return (object) [
@@ -114,7 +117,8 @@ class PublicStatusPageManager {
           'mimeType'        => $statusPageMeta->logoMimeType
         ] : null
       ],
-      'statusPageMonitors'  => $statusPageMonitors
+      'statusPageMonitors'  => $statusPageMonitors,
+      'incidents'           => $incidents
     ];
   }
 

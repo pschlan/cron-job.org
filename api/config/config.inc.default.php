@@ -92,6 +92,9 @@ $config = array(
   //! @note This is the length of auto-generated unique IDs oft status pages.
   'statusPageUniqueIdLength'        => 8,
 
+  //! @note Number of days of closed incidents shown on public status pages.
+  'statusPageIncidentHistoryDays'   => 30,
+
   //! @note The allowed MIME typed for logos can be configured here. (Might need
   //!       changes in frontend code as well.)
   'allowdLogoMimeTypes'             => ['image/png'],

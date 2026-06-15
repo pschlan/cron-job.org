@@ -443,7 +443,26 @@
     "cannotDeletePublishedPage": "Veröffentlichte Status-Seiten können nicht gelöscht werden. Bitte deaktivieren Sie zuerst die Veröffentlichung der Status-Seite.",
     "statusPageDeleteFailed": "Die Status-Seite konnte nicht gelöscht werden. Bitte versuchen Sie es später erneut.",
     "statusPageDeleted": "Die Status-Seite wurde erfolgreich gelöscht.",
-    "nostatuspages": "Keine Status-Seiten gefunden."
+    "nostatuspages": "Keine Status-Seiten gefunden.",
+    "incidents": {
+      "title": "Ereignisse",
+      "create": "Ereignis hinzufügen",
+      "edit": "Ereignis bearbeiten: {{title}}",
+      "description": "Beschreibung",
+      "startDate": "Beginn",
+      "status": "Status",
+      "ongoing": "Laufend",
+      "resolved": "Behoben",
+      "noIncidents": "Diese Status-Seite hat noch keine Ereignisse. Um zu beginnen, klicken Sie auf \"Ereignis hinzufügen\".",
+      "created": "Das Ereignis wurde erfolgreich erstellt.",
+      "createFailed": "Das Ereignis konnte nicht erstellt werden. Bitte versuchen Sie es später erneut.",
+      "updated": "Das Ereignis wurde erfolgreich gespeichert.",
+      "updateFailed": "Das Ereignis konnte nicht gespeichert werden. Bitte prüfen Sie Ihre Eingaben und versuchen Sie es später erneut.",
+      "delete": "Ereignis löschen: {{title}}",
+      "confirmDelete": "Soll dieses Ereignis wirklich gelöscht werden? Diese Aktion kann nicht rückgängig gemacht werden.",
+      "deleted": "Das Ereignis wurde erfolgreich gelöscht.",
+      "deleteFailed": "Das Ereignis konnte nicht gelöscht werden. Bitte versuchen Sie es später erneut."
+    }
   },
   "settings": {
     "profile": "Profil",

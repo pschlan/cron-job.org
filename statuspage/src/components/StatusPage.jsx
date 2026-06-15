@@ -4,6 +4,7 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import { getPublicStatusPage } from '../utils/API';
 import Monitor from './Monitor';
 import MonitorSummary from './MonitorSummary';
+import IncidentList from './IncidentList';
 import TimespanSelector from './TimespanSelector';
 import ErrorPage from './ErrorPage';
 import Footer from './Footer';
@@ -93,6 +94,8 @@ export default function StatusPage() {
         </Box>
       </Box>
 
+      <IncidentList incidents={statusPage.incidents} section='active' />
+
       <div>
         {(statusPage.statusPageMonitors || []).map((monitor, index) =>
           <MonitorSummary key={index} monitor={monitor} timespan={timespan} />)}
@@ -118,6 +121,8 @@ export default function StatusPage() {
             <Monitor key={index} monitor={{...monitor, index}} timespan={timespan} />)}
         </Grid>
       </Grid>
+
+      <IncidentList incidents={statusPage.incidents} section='past' />
 
       <Footer />
     </div>;

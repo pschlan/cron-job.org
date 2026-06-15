@@ -10,6 +10,14 @@
     "1week": "1 Woche",
     "1day": "1 Tag"
   },
+  "incidents": {
+    "active": "Aktuelle Ereignisse",
+    "past": "Vergangene Ereignisse",
+    "startedToday": "Begonnen heute um {{time}} Uhr",
+    "startedYesterday": "Begonnen gestern um {{time}} Uhr",
+    "startedWeekday": "Begonnen am {{weekday}} um {{time}} Uhr",
+    "startedOn": "Begonnen am {{date}}"
+  },
   "status": {
     "availability": "Verfügbarkeit",
     "availabilityWarning": "Verfügbarkeits-Warnung",
