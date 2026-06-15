@@ -1,4 +1,4 @@
-FROM ubuntu:bionic AS build
+FROM ubuntu:noble AS build
 ARG TARGETARCH
 RUN apt-get update && \
   apt-get install -y build-essential git autoconf libtool pkg-config libmysqlclient-dev \
@@ -29,9 +29,9 @@ WORKDIR /src/cron-job.org/build/
 ENV PKG_CONFIG_PATH=/opt/chronos/lib/pkgconfig
 RUN cmake -DCMAKE_INSTALL_PREFIX=/opt/chronos .. && make -j && make install
 
-FROM ubuntu:bionic
+FROM ubuntu:noble
 RUN apt-get update && \
-  apt-get install -y libmysqlclient20 libev4 libsqlite3-0 libssl1.1 tzdata locales
+  apt-get install -y libmysqlclient21 libev4 libsqlite3-0 libssl3t64 tzdata locales
 
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
 
