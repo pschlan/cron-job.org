@@ -43,7 +43,8 @@ class CreateStatusPageIncident extends AbstractAPIMethod {
         $request->title,
         isset($request->description) ? $request->description : '',
         $request->startDate,
-        $status
+        $status,
+        isset($request->closedAt) ? $request->closedAt : 0
       );
     } catch (InvalidArgumentsException $ex) {
       throw new BadRequestAPIException();

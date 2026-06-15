@@ -176,13 +176,14 @@ export function deleteStatusPageMonitor(monitorId) {
   });
 }
 
-export function createStatusPageIncident(statusPageId, title, description, startDate, status) {
+export function createStatusPageIncident(statusPageId, title, description, startDate, status, closedAt = 0) {
   return performRequest('CreateStatusPageIncident', {
     statusPageId,
     title,
     description,
     startDate,
-    status
+    status,
+    closedAt
   });
 }
 

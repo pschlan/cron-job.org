@@ -53,11 +53,13 @@ class StatusPageIncident {
   public $title;
   public $description;
   public $startDate;
+  public $closedAt;
   public $status;
 
   function __construct() {
     $this->incidentId = intval($this->incidentId);
     $this->startDate = intval($this->startDate);
+    $this->closedAt = intval($this->closedAt);
     $this->status = intval($this->status);
   }
 }
@@ -451,22 +453,26 @@ class StatusPageManager {
     }
   }
 
-  public function createStatusPageIncident($statusPageId, $title, $description, $startDate, $status = StatusPageIncident::STATUS_ACTIVE) {
-    $this->checkStatusPagePermission($statusPageId);
-    self::validateIncidentFields((object) [
+  public function createStatusPageIncident($statusPageId, $title, $description, $startDate, $status = StatusPageIncident::STATUS_ACTIVE, $closedAt = 0) {
+    $incident = (object) [
       'title'         => $title,
       'description'   => $description,
       'startDate'     => $startDate,
-      'status'        => $status
-    ]);
+      'status'        => $status,
+      'closedAt'      => $closedAt
+    ];
+    $this->checkStatusPagePermission($statusPageId);
+    self::validateIncidentFields($incident);
+    $closedAt = self::normalizeIncidentClosedAt($incident);
 
-    $stmt = Database::get()->prepare('INSERT INTO `statuspageincident`(`statuspageid`, `title`, `description`, `start_date`, `status`) '
-      . 'VALUES(:statusPageId, :title, :description, :startDate, :status)');
+    $stmt = Database::get()->prepare('INSERT INTO `statuspageincident`(`statuspageid`, `title`, `description`, `start_date`, `closed_at`, `status`) '
+      . 'VALUES(:statusPageId, :title, :description, :startDate, :closedAt, :status)');
     $stmt->execute([
       ':statusPageId'   => $statusPageId,
       ':title'          => $title,
       ':description'    => $description,
       ':startDate'      => (int)$startDate,
+      ':closedAt'       => $closedAt,
       ':status'         => (int)$status
     ]);
     return (int)Database::get()->insertId();
@@ -475,15 +481,17 @@ class StatusPageManager {
   public function updateStatusPageIncident($incidentId, $incident) {
     self::validateIncidentFields($incident);
     $this->checkStatusPageIncidentPermission($incidentId);
+    $closedAt = self::normalizeIncidentClosedAt($incident);
 
     $stmt = Database::get()->prepare('UPDATE `statuspageincident` SET '
-      . '`title`=:title, `description`=:description, `start_date`=:startDate, `status`=:status '
+      . '`title`=:title, `description`=:description, `start_date`=:startDate, `closed_at`=:closedAt, `status`=:status '
       . 'WHERE `statuspageincidentid`=:incidentId');
     $stmt->execute([
       ':incidentId'     => $incidentId,
       ':title'          => $incident->title,
       ':description'    => $incident->description,
       ':startDate'      => (int)$incident->startDate,
+      ':closedAt'       => $closedAt,
       ':status'         => (int)$incident->status
     ]);
 
@@ -511,7 +519,7 @@ class StatusPageManager {
       : 30;
     $cutoff = time() - ($historyDays * 86400);
 
-    $sql = 'SELECT `statuspageincidentid` AS `incidentId`, `title`, `description`, `start_date` AS `startDate`, `status` '
+    $sql = 'SELECT `statuspageincidentid` AS `incidentId`, `title`, `description`, `start_date` AS `startDate`, `closed_at` AS `closedAt`, `status` '
       . 'FROM `statuspageincident` '
       . 'WHERE `statuspageid`=:statusPageId';
     if ($public) {
@@ -533,6 +541,7 @@ class StatusPageManager {
           'title'         => $row->title,
           'description'   => $row->description,
           'startDate'     => (int)$row->startDate,
+          'closedAt'      => (int)$row->closedAt,
           'status'        => (int)$row->status === StatusPageIncident::STATUS_ACTIVE ? 'active' : 'closed'
         ];
       }
@@ -567,6 +576,26 @@ class StatusPageManager {
     if ($status !== StatusPageIncident::STATUS_ACTIVE && $status !== StatusPageIncident::STATUS_CLOSED) {
       throw new InvalidArgumentsException();
     }
+
+    if (property_exists($incident, 'closedAt') && $incident->closedAt !== null && $incident->closedAt !== '') {
+      if (!is_numeric($incident->closedAt) || (int)$incident->closedAt < 0) {
+        throw new InvalidArgumentsException();
+      }
+    }
+  }
+
+  private static function normalizeIncidentClosedAt($incident) {
+    $status = (int)$incident->status;
+    if ($status === StatusPageIncident::STATUS_ACTIVE) {
+      return 0;
+    }
+
+    $closedAt = property_exists($incident, 'closedAt') ? (int)$incident->closedAt : 0;
+    if ($closedAt <= 0) {
+      return time();
+    }
+
+    return $closedAt;
   }
 
   public function deleteStatusPageDomain($statusPageId, $domain) {

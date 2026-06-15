@@ -16,7 +16,11 @@
     "startedToday": "Bugün {{time}}'de başladı",
     "startedYesterday": "Dün {{time}}'de başladı",
     "startedWeekday": "{{weekday}} günü {{time}}'de başladı",
-    "startedOn": "{{date}} tarihinde başladı"
+    "startedOn": "{{date}} tarihinde başladı",
+    "endedToday": "Bugün {{time}}'de sona erdi",
+    "endedYesterday": "Dün {{time}}'de sona erdi",
+    "endedWeekday": "{{weekday}} günü {{time}}'de sona erdi",
+    "endedOn": "{{date}} tarihinde sona erdi"
   },
   "status": {
     "availability": "Kullanılabilirlik",

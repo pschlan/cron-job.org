@@ -16,7 +16,11 @@
     "startedToday": "Rozpoczęto dziś o {{time}}",
     "startedYesterday": "Rozpoczęto wczoraj o {{time}}",
     "startedWeekday": "Rozpoczęto w {{weekday}} o {{time}}",
-    "startedOn": "Rozpoczęto {{date}}"
+    "startedOn": "Rozpoczęto {{date}}",
+    "endedToday": "Zakończono dziś o {{time}}",
+    "endedYesterday": "Zakończono wczoraj o {{time}}",
+    "endedWeekday": "Zakończono w {{weekday}} o {{time}}",
+    "endedOn": "Zakończono {{date}}"
   },
   "status": {
     "availability": "Dostępność",

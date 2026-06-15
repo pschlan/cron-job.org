@@ -16,7 +16,11 @@
     "startedToday": "Startet i dag kl. {{time}}",
     "startedYesterday": "Startet i går kl. {{time}}",
     "startedWeekday": "Startet {{weekday}} kl. {{time}}",
-    "startedOn": "Startet {{date}}"
+    "startedOn": "Startet {{date}}",
+    "endedToday": "Afsluttet i dag kl. {{time}}",
+    "endedYesterday": "Afsluttet i går kl. {{time}}",
+    "endedWeekday": "Afsluttet {{weekday}} kl. {{time}}",
+    "endedOn": "Afsluttet {{date}}"
   },
   "status": {
     "availability": "Tilgængelighed",

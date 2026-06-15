@@ -8,6 +8,7 @@ CREATE TABLE `statuspageincident` (
   `title` varchar(255) NOT NULL DEFAULT '',
   `description` text NOT NULL,
   `start_date` int(11) NOT NULL DEFAULT '0',
+  `closed_at` int(11) NOT NULL DEFAULT '0',
   `status` tinyint(4) NOT NULL DEFAULT '1',
   PRIMARY KEY (`statuspageincidentid`),
   KEY `statuspageid` (`statuspageid`)

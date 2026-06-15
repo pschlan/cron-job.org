@@ -16,7 +16,11 @@
     "startedToday": "Начато сегодня в {{time}}",
     "startedYesterday": "Начато вчера в {{time}}",
     "startedWeekday": "Начато в {{weekday}} в {{time}}",
-    "startedOn": "Начато {{date}}"
+    "startedOn": "Начато {{date}}",
+    "endedToday": "Завершено сегодня в {{time}}",
+    "endedYesterday": "Завершено вчера в {{time}}",
+    "endedWeekday": "Завершено в {{weekday}} в {{time}}",
+    "endedOn": "Завершено {{date}}"
   },
   "status": {
     "availability": "Доступность",

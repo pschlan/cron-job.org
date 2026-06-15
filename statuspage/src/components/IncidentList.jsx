@@ -5,6 +5,7 @@ import HistoryIcon from '@material-ui/icons/History';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { useTranslation } from 'react-i18next';
 import { formatIncidentStartDate } from '../utils/formatIncidentStartDate';
+import { formatIncidentClosedDate } from '../utils/formatIncidentClosedDate';
 
 const useStyles = makeStyles(theme => ({
   section: {
@@ -74,6 +75,9 @@ const useStyles = makeStyles(theme => ({
     lineHeight: 1.3,
     minWidth: 0
   },
+  pastIncidentDetailsMeta: {
+    marginBottom: theme.spacing(1)
+  },
   pastIncidentDetails: {
     paddingTop: 0,
     paddingLeft: theme.spacing(1.5),
@@ -131,31 +135,39 @@ export default function IncidentList({ incidents, section }) {
       <Paper className={classes.pastPanel} elevation={0} square>
         {pastIncidents.map((incident, index) => {
           const hasDescription = Boolean(incident.description);
+          const isExpandable = hasDescription || incident.closedAt > 0;
           return <Accordion
             key={`past-${index}`}
             className={classes.pastIncident}
             elevation={0}
             square
-            {...(hasDescription ? {} : { expanded: false, onChange: () => {} })}>
+            {...(isExpandable ? {} : { expanded: false, onChange: () => {} })}>
             <AccordionSummary
               className={classes.pastIncidentSummary}
               expandIcon={
                 <ExpandMoreIcon
                   fontSize='small'
-                  className={hasDescription ? undefined : classes.hiddenExpandIcon}
+                  className={isExpandable ? undefined : classes.hiddenExpandIcon}
                 />
               }>
               <div className={classes.pastIncidentHeader}>
                 <Typography variant='body2' className={classes.pastIncidentTitle}>{incident.title}</Typography>
                 <Typography variant='caption' color='textSecondary' noWrap>
-                  {formatIncidentStartDate(incident.startDate, t)}
+                  {incident.closedAt > 0
+                    ? formatIncidentClosedDate(incident.closedAt, t)
+                    : formatIncidentStartDate(incident.startDate, t)}
                 </Typography>
               </div>
             </AccordionSummary>
-            {hasDescription && <AccordionDetails className={classes.pastIncidentDetails}>
-              <Typography variant='body2' color='textSecondary' className={classes.incidentDescription}>
-                {incident.description}
-              </Typography>
+            {isExpandable && <AccordionDetails className={classes.pastIncidentDetails}>
+              <div>
+                <Typography variant='caption' color='textSecondary' className={classes.pastIncidentDetailsMeta}>
+                  {formatIncidentStartDate(incident.startDate, t)}
+                </Typography>
+                {hasDescription && <Typography variant='body2' color='textSecondary' className={classes.incidentDescription}>
+                  {incident.description}
+                </Typography>}
+              </div>
             </AccordionDetails>}
           </Accordion>;
         })}

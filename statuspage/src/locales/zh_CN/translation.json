@@ -16,7 +16,11 @@
     "startedToday": "今天 {{time}} 开始",
     "startedYesterday": "昨天 {{time}} 开始",
     "startedWeekday": "{{weekday}} {{time}} 开始",
-    "startedOn": "{{date}} 开始"
+    "startedOn": "{{date}} 开始",
+    "endedToday": "今天 {{time}} 结束",
+    "endedYesterday": "昨天 {{time}} 结束",
+    "endedWeekday": "{{weekday}} {{time}} 结束",
+    "endedOn": "{{date}} 结束"
   },
   "status": {
     "availability": "可用性",

@@ -16,7 +16,11 @@
     "startedToday": "Begonnen heute um {{time}} Uhr",
     "startedYesterday": "Begonnen gestern um {{time}} Uhr",
     "startedWeekday": "Begonnen am {{weekday}} um {{time}} Uhr",
-    "startedOn": "Begonnen am {{date}}"
+    "startedOn": "Begonnen am {{date}}",
+    "endedToday": "Beendet heute um {{time}} Uhr",
+    "endedYesterday": "Beendet gestern um {{time}} Uhr",
+    "endedWeekday": "Beendet am {{weekday}} um {{time}} Uhr",
+    "endedOn": "Beendet am {{date}}"
   },
   "status": {
     "availability": "Verfügbarkeit",

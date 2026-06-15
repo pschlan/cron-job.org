@@ -36,14 +36,38 @@ export default function CreateStatusPageIncidentDialog({ statusPageId, onClose }
   const [ title, setTitle ] = useState('');
   const [ description, setDescription ] = useState('');
   const [ startDate, setStartDate ] = useState(moment().format('YYYY-MM-DDTHH:mm'));
+  const [ closedDate, setClosedDate ] = useState('');
   const [ status, setStatus ] = useState('ongoing');
+
+  function handleStatusChange(newStatus) {
+    setStatus(newStatus);
+    if (newStatus === 'resolved' && !closedDate) {
+      setClosedDate(moment().format('YYYY-MM-DDTHH:mm'));
+    } else if (newStatus === 'ongoing') {
+      setClosedDate('');
+    }
+  }
+
+  function incidentClosedAt() {
+    if (status !== 'resolved') {
+      return 0;
+    }
+    return closedDate ? datetimeLocalToUnix(closedDate) : 0;
+  }
 
   function doCreateIncident() {
     if (!title.match(RegexPatterns.title)) {
       return;
     }
     setIsLoading(true);
-    createStatusPageIncident(statusPageId, title, description, datetimeLocalToUnix(startDate), status === 'ongoing' ? 1 : 0)
+    createStatusPageIncident(
+      statusPageId,
+      title,
+      description,
+      datetimeLocalToUnix(startDate),
+      status === 'ongoing' ? 1 : 0,
+      incidentClosedAt()
+    )
       .then(() => {
         enqueueSnackbar(t('statuspages.incidents.created'), { variant: 'success' });
         onCloseHook.current(true);
@@ -102,13 +126,24 @@ export default function CreateStatusPageIncidentDialog({ statusPageId, onClose }
         <Select
           labelId='incident-status-label'
           value={status}
-          onChange={({target}) => setStatus(target.value)}
+          onChange={({target}) => handleStatusChange(target.value)}
           fullWidth
           required>
           <MenuItem value='ongoing'>{t('statuspages.incidents.ongoing')}</MenuItem>
           <MenuItem value='resolved'>{t('statuspages.incidents.resolved')}</MenuItem>
         </Select>
       </FormControl>
+
+      {status === 'resolved' && <FormControl fullWidth>
+        <TextField
+          label={t('statuspages.incidents.closedDate')}
+          type='datetime-local'
+          value={closedDate}
+          onChange={({target}) => setClosedDate(target.value)}
+          InputLabelProps={{ shrink: true }}
+          fullWidth
+          />
+      </FormControl>}
     </DialogContent>
     <DialogActions>
       <Button autoFocus onClick={() => onCloseHook.current()} disabled={isLoading}>

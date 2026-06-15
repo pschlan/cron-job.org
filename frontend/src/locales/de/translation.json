@@ -450,6 +450,7 @@
       "edit": "Ereignis bearbeiten: {{title}}",
       "description": "Beschreibung",
       "startDate": "Beginn",
+      "closedDate": "Ende",
       "status": "Status",
       "ongoing": "Laufend",
       "resolved": "Behoben",

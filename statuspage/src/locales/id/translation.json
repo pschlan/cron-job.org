@@ -16,7 +16,11 @@
     "startedToday": "Dimulai hari ini pukul {{time}}",
     "startedYesterday": "Dimulai kemarin pukul {{time}}",
     "startedWeekday": "Dimulai pada {{weekday}} pukul {{time}}",
-    "startedOn": "Dimulai pada {{date}}"
+    "startedOn": "Dimulai pada {{date}}",
+    "endedToday": "Berakhir hari ini pukul {{time}}",
+    "endedYesterday": "Berakhir kemarin pukul {{time}}",
+    "endedWeekday": "Berakhir pada {{weekday}} pukul {{time}}",
+    "endedOn": "Berakhir pada {{date}}"
   },
   "status": {
     "availability": "Ketersediaan",

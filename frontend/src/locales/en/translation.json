@@ -450,6 +450,7 @@
       "edit": "Edit Incident: {{title}}",
       "description": "Description",
       "startDate": "Start date",
+      "closedDate": "End date",
       "status": "Status",
       "ongoing": "Ongoing",
       "resolved": "Resolved",

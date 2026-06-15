@@ -407,6 +407,12 @@ export default function StatusPageEditor({ match }) {
       cell: incident => moment(incident.startDate * 1000).calendar()
     },
     {
+      head: t('statuspages.incidents.closedDate'),
+      cell: incident => incident.status === 1 || !incident.closedAt
+        ? '—'
+        : moment(incident.closedAt * 1000).calendar()
+    },
+    {
       head: t('statuspages.status'),
       cell: incident => incident.status === 1 ? t('statuspages.incidents.ongoing') : t('statuspages.incidents.resolved')
     },
