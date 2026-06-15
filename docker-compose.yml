@@ -37,6 +37,12 @@ services:
       args:
         CJO_PROJECT_NAME: ${CJO_PROJECT_NAME}
         CJO_BASE_URL: ${CJO_BASE_URL}
+  statuspage:
+    build:
+      context: ./statuspage
+      args:
+        CJO_PROJECT_NAME: ${CJO_PROJECT_NAME}
+        CJO_BASE_URL: ${CJO_BASE_URL}
   api:
     build: ./api
     volumes:

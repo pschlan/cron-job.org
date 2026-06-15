@@ -23,8 +23,8 @@ export const Config = {
   'termsOfServiceURL': '#',
   'refundPolicyURL': '#',
   'maxLogoSize': 1024 * 128,
-  'enableStatusPages': false,
-  'statusPageDomain': null,
+  'enableStatusPages': true,
+  'statusPageDomain': 'status.cron-job.org.localhost',
   'enableYubicoOTP': false,
   'donationBox': {
     'enable': false
