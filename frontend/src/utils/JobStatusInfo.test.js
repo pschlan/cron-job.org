@@ -72,8 +72,9 @@ describe('statusExplanationToken', () => {
     expect(statusExplanationToken(JobStatus.FAILED_HTTPERROR, 302)).toBe('http.3xx');
   });
 
-  it('returns null for an HTTP error without a usable status code', () => {
-    expect(statusExplanationToken(JobStatus.FAILED_HTTPERROR, 0)).toBeNull();
-    expect(statusExplanationToken(JobStatus.FAILED_HTTPERROR, undefined)).toBeNull();
+  it('falls back to a generic HTTP-error explanation when no usable status code is available', () => {
+    // e.g. the job list carries the status but not the HTTP code.
+    expect(statusExplanationToken(JobStatus.FAILED_HTTPERROR, 0)).toBe('modes.FAILED_HTTPERROR');
+    expect(statusExplanationToken(JobStatus.FAILED_HTTPERROR, undefined)).toBe('modes.FAILED_HTTPERROR');
   });
 });

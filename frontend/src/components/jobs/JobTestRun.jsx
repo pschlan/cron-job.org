@@ -7,6 +7,7 @@ import { Config } from '../../utils/Config';
 import { useSnackbar } from 'notistack';
 import { deleteJobTestRun, getJobTestRunStatus, submitJobTestRun } from '../../utils/API';
 import { JobStatus, jobStatusText, JobTestRunState } from '../../utils/Constants';
+import { statusExplanationToken } from '../../utils/JobStatusInfo';
 import SuccessIcon from '@material-ui/icons/Check';
 import FailureIcon from '@material-ui/icons/ErrorOutline';
 import PeerIcon from '@material-ui/icons/Dns';
@@ -191,6 +192,17 @@ export default function JobTestRun({ job, jobId, onClose, onUpdateUrl = () => nu
               <>{t('jobs.statuses.' + jobStatusText(status.result))}</>}
           </div>}
         </Typography>
+
+        {status.state === JobTestRunState.DONE && !redirectTarget && (() => {
+          // The dedicated redirect note below already covers the 3xx case, so
+          // only show the generic explanation when it isn't shown.
+          const explanationToken = statusExplanationToken(status.result, status.httpStatus);
+          return explanationToken && <Box mt={2}>
+            <Alert severity='info'>
+              {t('jobs.statusExplanations.' + explanationToken)}
+            </Alert>
+          </Box>;
+        })()}
 
         {redirectTarget && <Box mt={2}>
           <Alert severity='warning'>

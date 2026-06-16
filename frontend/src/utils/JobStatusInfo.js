@@ -51,9 +51,13 @@ export function httpStatusExplanationToken(httpStatus) {
 
 // Returns an explanation token for a job execution result, or null when there
 // is nothing to explain (success or unknown status).
+//
+// For an HTTP error we prefer the explanation for the concrete status code, but
+// fall back to a generic message when the code isn't available (e.g. the job
+// list only carries the status, not the HTTP code).
 export function statusExplanationToken(status, httpStatus) {
   if (status === JobStatus.FAILED_HTTPERROR) {
-    return httpStatusExplanationToken(httpStatus);
+    return httpStatusExplanationToken(httpStatus) || 'modes.FAILED_HTTPERROR';
   }
   return FAILURE_MODE_TOKENS[status] || null;
 }

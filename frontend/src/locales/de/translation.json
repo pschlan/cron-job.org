@@ -193,6 +193,7 @@
     },
     "statusExplanations": {
       "modes": {
+        "FAILED_HTTPERROR": "Der Server hat mit einem HTTP-Fehler geantwortet. Öffnen Sie die Details der Ausführung, um den genauen Status-Code und dessen Bedeutung zu sehen.",
         "FAILED_DNS": "Der Hostname in der URL konnte nicht aufgelöst werden. Prüfen Sie, ob die Domain korrekt geschrieben ist und noch existiert.",
         "FAILED_CONNECT": "Es konnte keine Verbindung zum Server hergestellt werden. Der Server ist möglicherweise nicht erreichbar oder eine Firewall blockiert Anfragen von unseren Servern.",
         "FAILED_TIMEOUT": "Der Server hat nicht innerhalb des konfigurierten Timeouts vollständig geantwortet. Erhöhen Sie das Timeout in den erweiterten Einstellungen des Jobs oder prüfen Sie, warum der Endpunkt langsam ist.",

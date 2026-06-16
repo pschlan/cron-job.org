@@ -193,6 +193,7 @@
     },
     "statusExplanations": {
       "modes": {
+        "FAILED_HTTPERROR": "The server responded with an HTTP error. Open the execution's details to see the exact status code and what it means.",
         "FAILED_DNS": "The host name in the URL could not be resolved. Check that the domain is spelled correctly and still exists.",
         "FAILED_CONNECT": "A connection to the server could not be established. The server may be down or a firewall may be blocking requests from our servers.",
         "FAILED_TIMEOUT": "The server did not fully respond within the configured timeout. Try increasing the timeout in the job's advanced settings, or check why the endpoint is slow.",
