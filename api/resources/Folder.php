@@ -35,6 +35,22 @@ class FolderManager {
     return $result;
   }
 
+  public function getFolder($folderId) {
+    $stmt = Database::get()->prepare('SELECT `folderid` AS `folderId`, `title` FROM `folder` WHERE `userid`=:userId AND `folderid`=:folderId');
+    $stmt->setFetchMode(PDO::FETCH_CLASS, Folder::class);
+    $stmt->execute([
+      ':userId'   => $this->authToken->userId,
+      ':folderId' => $folderId
+    ]);
+
+    $folder = $stmt->fetch();
+    if (!$folder) {
+      return false;
+    }
+
+    return $folder;
+  }
+
   public function createFolder($title) {
     try {
       $stmt = Database::get()->prepare('INSERT INTO `folder`(`userid`, `title`) '

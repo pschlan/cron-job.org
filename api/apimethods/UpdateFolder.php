@@ -20,16 +20,24 @@ class UpdateFolder extends AbstractAPIMethod {
   public function validateRequest($request) {
     return (
          isset($request->folderId)
-      && isset($request->title)
-      && !empty(trim($request->title))
+      && is_numeric($request->folderId)
+      && isset($request->folder)
+      && is_object($request->folder)
+      && isset($request->folder->title)
+      && !empty(trim($request->folder->title))
     );
   }
 
   public function execute($request, $sessionToken, $language) {
+    $folderManager = new FolderManager($sessionToken);
+
+    if ($folderManager->getFolder($request->folderId) === false) {
+      throw new NotFoundAPIException();
+    }
+
     try {
-      (new FolderManager($sessionToken))
-        ->updateFolder($request->folderId, trim($request->title));
-      return true;
+      $folderManager->updateFolder($request->folderId, trim($request->folder->title));
+      return (object)[];
     } catch (FolderAlreadyExistsException $ex) {
       throw new ConflictAPIException();
     }

@@ -20,12 +20,18 @@ class DeleteFolder extends AbstractAPIMethod {
   public function validateRequest($request) {
     return (
          isset($request->folderId)
+      && is_numeric($request->folderId)
     );
   }
 
   public function execute($request, $sessionToken, $language) {
-    (new FolderManager($sessionToken))
-      ->deleteFolder($request->folderId);
-    return true;
+    $folderManager = new FolderManager($sessionToken);
+
+    if ($folderManager->getFolder($request->folderId) === false) {
+      throw new NotFoundAPIException();
+    }
+
+    $folderManager->deleteFolder($request->folderId);
+    return (object)[];
   }
 }

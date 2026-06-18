@@ -118,14 +118,18 @@ export function getFolders() {
 
 export function createFolder(title) {
   return performRequest('CreateFolder', {
-    title
+    folder: {
+      title
+    }
   });
 }
 
 export function updateFolder(folderId, title) {
   return performRequest('UpdateFolder', {
     folderId,
-    title
+    folder: {
+      title
+    }
   });
 }
 

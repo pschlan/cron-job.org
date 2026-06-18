@@ -20,15 +20,17 @@ class CreateFolder extends AbstractAPIMethod {
 
   public function validateRequest($request) {
     return (
-         isset($request->title)
-      && !empty(trim($request->title))
+         isset($request->folder)
+      && is_object($request->folder)
+      && isset($request->folder->title)
+      && !empty(trim($request->folder->title))
     );
   }
 
   public function execute($request, $sessionToken, $language) {
     try {
       $folderId = (new FolderManager($sessionToken))
-        ->createFolder(trim($request->title));
+        ->createFolder(trim($request->folder->title));
 
       if ($folderId === false) {
         throw new InternalErrorAPIException();
