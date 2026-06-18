@@ -1,0 +1,12 @@
+# Minimal image for running the React development server with live-mounted
+# sources. Used by docker-compose.dev.yml. The actual source code is
+# bind-mounted at runtime and dependencies are installed into an anonymous
+# node_modules volume, so this image only needs Node.js.
+FROM node:21
+WORKDIR /src/cron-job.org/frontend
+
+# Declared only to silence "unconsumed build args" warnings (the args are
+# inherited from the production build configuration). In dev mode the values
+# are passed via the runtime environment instead.
+ARG CJO_PROJECT_NAME
+ARG CJO_BASE_URL

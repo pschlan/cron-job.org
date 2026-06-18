@@ -98,6 +98,37 @@ To quickly start an example environment of most of the cron-job.org system, you 
 
 *Important:* The Docker environment contained in this repo is intended as an example / development environment and is not tailored for production usage, especially with regard to security.
 
+### Development mode (live reloading)
+
+The default `docker compose up` builds the `frontend` and `statuspage` as static
+production bundles served by nginx, which is not convenient while actively
+developing them. For development, a `docker-compose.dev.yml` override is provided
+that runs the frontend and status page via the React development server
+(`npm start`) with the source code live-mounted from the repository, so changes
+are reflected immediately (including hot module reloading). The PHP API source
+is live-mounted as well, so API changes take effect without rebuilding.
+
+Start the development environment with:
+
+```
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+```
+
+Then open `http://localhost:8010/` as usual.
+
+Notes:
+* The first start installs the npm dependencies inside the container and runs an
+  initial build; this can take a while. Until the dev servers report
+  `Compiled successfully!` (visible in the `frontend`/`statuspage` logs), the
+  web server will respond with a "Bad Gateway" error. Subsequent starts reuse
+  the cached dependencies and are much faster.
+* `src/utils/Config.js` for the frontend and status page is generated
+  automatically inside the container from the `.env` settings (it is gitignored
+  and your working tree is not modified).
+* All other services (databases, redis, chronos) behave exactly as in the
+  normal setup; only the `frontend`, `statuspage`, `api` and `www` services are
+  adjusted for development.
+
 The following containers will be started:
 * `mysql-master` for the master service database which also stores users, groups, job -> node associations etc.
 * `mysql-node` for the node service database. Used to store per-executor information like job details with their schedules, etc.

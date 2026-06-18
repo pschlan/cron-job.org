@@ -1,0 +1,23 @@
+#!/bin/bash
+set -e
+
+cd /src/cron-job.org/statuspage
+
+# Generate src/utils/Config.js from the docker template, substituting the
+# configured environment variables (same approach as the production build,
+# see update-statuspage-config). Config.js is gitignored, so this does not
+# dirty the working tree.
+cp docker/Config.js src/utils/Config.js
+
+VARS="CJO_PROJECT_NAME CJO_BASE_URL"
+for VAR in $VARS
+do
+  sed -i "s#\$${VAR}#${!VAR}#g" src/utils/Config.js
+done
+
+# Install dependencies into the (anonymous) node_modules volume. This is a
+# no-op on subsequent starts once the volume is populated.
+npm install
+
+# Run the CRA development server with hot reloading.
+exec npm start

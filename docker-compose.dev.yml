@@ -1,0 +1,59 @@
+# Development override for the docker compose setup.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# In this mode the frontend and status page are run via the React (CRA)
+# development server (`npm start`) instead of being built and served as static
+# files by nginx. The source code is live-mounted from the repository, so code
+# changes are picked up immediately with hot module reloading. The PHP API
+# source is live-mounted as well, so API changes take effect without rebuilding.
+#
+# All other services (databases, redis, chronos, www) are inherited unchanged
+# from docker-compose.yml; only the www reverse proxy configuration is swapped
+# for one that points at the dev servers and forwards the HMR WebSocket.
+services:
+  frontend:
+    build:
+      dockerfile: Dockerfile.dev
+    working_dir: /src/cron-job.org/frontend
+    command: bash docker/dev-entry
+    environment:
+      CJO_PROJECT_NAME: ${CJO_PROJECT_NAME}
+      CJO_BASE_URL: ${CJO_BASE_URL}
+      # Reliable file watching inside Docker (esp. on macOS/Windows bind mounts).
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+      # Served through the www reverse proxy under a different host/port, so let
+      # the HMR WebSocket connect via the page's own origin and skip host check.
+      WDS_SOCKET_PORT: "0"
+      DANGEROUSLY_DISABLE_HOST_CHECK: "true"
+    volumes:
+      - ./frontend:/src/cron-job.org/frontend
+      # Keep container-installed dependencies isolated from the host.
+      - /src/cron-job.org/frontend/node_modules
+  statuspage:
+    build:
+      dockerfile: Dockerfile.dev
+    working_dir: /src/cron-job.org/statuspage
+    command: bash docker/dev-entry
+    environment:
+      CJO_PROJECT_NAME: ${CJO_PROJECT_NAME}
+      CJO_BASE_URL: ${CJO_BASE_URL}
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+      WDS_SOCKET_PORT: "0"
+      DANGEROUSLY_DISABLE_HOST_CHECK: "true"
+    volumes:
+      - ./statuspage:/src/cron-job.org/statuspage
+      - /src/cron-job.org/statuspage/node_modules
+  api:
+    # Live-mount the API source so PHP changes are visible immediately. The
+    # config volume from docker-compose.yml is merged on top of this mount.
+    volumes:
+      - ./api:/var/www/html
+  www:
+    # Use the dev reverse proxy config (points at the CRA dev servers on :3000
+    # and forwards the HMR WebSocket upgrade).
+    volumes:
+      - ./docker/www/default.dev.conf:/etc/nginx/conf.d/default.conf:ro
