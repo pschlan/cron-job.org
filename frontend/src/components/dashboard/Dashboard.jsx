@@ -29,6 +29,7 @@ import LearnMoreIcon from '@material-ui/icons/Loyalty';
 import SubscribeDialog from '../settings/SubscribeDialog';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import EmailIcon from '@material-ui/icons/Email';
+import SslCertExpiryIcon from '../misc/SslCertExpiryIcon';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -87,6 +88,18 @@ function EventDescription({ type, details }) {
     </div>;
   }
   return <></>;
+}
+
+function JobSummary({ job, icon }) {
+  return <div style={{display: 'flex', alignItems: 'center'}}>
+    {icon}
+    <div>
+      <div>{job.title}</div>
+      <div>
+        <Typography variant="caption">{job.url}</Typography>
+      </div>
+    </div>
+  </div>;
 }
 
 const REFRESH_INTERVAL = 60000;
@@ -162,6 +175,67 @@ export default function Dashboard() {
           {t('common.details')}
         </Button>
       </>
+    }
+  ];
+
+  function jobDetailsButton(job) {
+    return <Button
+      variant='outlined'
+      size='small'
+      startIcon={<DetailsIcon />}
+      className={classes.actionButton}
+      component={RouterLink}
+      to={jobHistoryLink(job.folderId, job.jobId)}
+      >
+      {t('common.details')}
+    </Button>;
+  }
+
+  const UPCOMING_JOBS_COLUMNS = [
+    {
+      head: t('jobs.titleurl'),
+      cell: job => <JobSummary job={job} icon={<JobIcon enabled={true} status={JobStatus.OK} />} />
+    },
+    {
+      head: t('jobs.nextExecution'),
+      cell: job => job.nextExecution ? moment(job.nextExecution * 1000).calendar() : '-'
+    },
+    {
+      head: t('common.actions'),
+      cell: jobDetailsButton
+    }
+  ];
+
+  const EXPIRING_CERTS_COLUMNS = [
+    {
+      head: t('jobs.titleurl'),
+      cell: job => <JobSummary job={job} icon={<IconAvatar icon={NotificationsIcon} color='orange' />} />
+    },
+    {
+      head: t('dashboard.certExpiryDate'),
+      cell: job => <span style={{display: 'inline-flex', alignItems: 'center'}}>
+        {moment(job.sslCertExpiry * 1000).format('LL')}
+        <SslCertExpiryIcon sslCertExpiry={job.sslCertExpiry} />
+      </span>
+    },
+    {
+      head: t('common.actions'),
+      cell: jobDetailsButton
+    }
+  ];
+
+  const FAILED_JOBS_COLUMNS = [
+    {
+      head: t('jobs.titleurl'),
+      cell: job => <JobSummary job={job} icon={<JobIcon enabled={true} status={job.lastStatus} />} />
+    },
+    {
+      head: t('jobs.status'),
+      cell: job => t('jobs.statuses.' + jobStatusText(job.lastStatus))
+    },
+    {
+      head: t('common.actions'),
+      cell: jobDetailsButton
     }
   ];
 
@@ -303,6 +377,52 @@ export default function Dashboard() {
             </Box>
           </Paper>
         </Grid>}
+      {dashboardData && dashboardData.failedJobList && dashboardData.failedJobList.length > 0 && <Grid item xs={12}>
+        <Paper>
+          <Title>{t('dashboard.failedJobsList')}</Title>
+          <TableContainer>
+            <Table
+              size='small'
+              columns={FAILED_JOBS_COLUMNS}
+              items={dashboardData.failedJobList}
+              empty={<em>{t('dashboard.noFailedJobs')}</em>}
+              loading={isLoading}
+              perPage={5}
+              rowsPerPageOptions={[5, 10, 25]}
+              />
+          </TableContainer>
+        </Paper>
+      </Grid>}
+      <Grid item xs={12} md={6}>
+        <Paper>
+          <Title>{t('dashboard.nextRuns')}</Title>
+          <TableContainer>
+            <Table
+              size='small'
+              columns={UPCOMING_JOBS_COLUMNS}
+              items={(dashboardData && dashboardData.upcomingJobs) || []}
+              empty={<em>{t('dashboard.noUpcoming')}</em>}
+              loading={isLoading}
+              />
+          </TableContainer>
+        </Paper>
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <Paper>
+          <Title>{t('dashboard.expiringCerts')}</Title>
+          <TableContainer>
+            <Table
+              size='small'
+              columns={EXPIRING_CERTS_COLUMNS}
+              items={(dashboardData && dashboardData.expiringCerts) || []}
+              empty={<em>{t('dashboard.noExpiringCerts')}</em>}
+              loading={isLoading}
+              perPage={5}
+              rowsPerPageOptions={[5, 10, 25]}
+              />
+          </TableContainer>
+        </Paper>
+      </Grid>
       <Grid item xs={12}>
         <Paper>
           <Title>{t('dashboard.lastevents')}</Title>
