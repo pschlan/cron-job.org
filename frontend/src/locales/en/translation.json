@@ -191,6 +191,33 @@
       "FAILED_INTERNAL": "Failed (internal error)",
       "FAILED_OTHERS": "Failed"
     },
+    "statusExplanations": {
+      "modes": {
+        "FAILED_HTTPERROR": "The server responded with an HTTP error. Open the execution's details to see the exact status code and what it means.",
+        "FAILED_DNS": "The host name in the URL could not be resolved. Check that the domain is spelled correctly and still exists.",
+        "FAILED_CONNECT": "A connection to the server could not be established. The server may be down or a firewall may be blocking requests from our servers.",
+        "FAILED_TIMEOUT": "The server did not fully respond within the configured timeout. Try increasing the timeout in the job's advanced settings, or check why the endpoint is slow.",
+        "FAILED_SIZE": "The response was larger than the allowed limit and was aborted. Make the endpoint return less data.",
+        "FAILED_URL": "The URL could not be parsed. Please check it for typos and make sure it starts with http:// or https://.",
+        "FAILED_INTERNAL": "An internal error occurred while executing the job. If this keeps happening, please contact our support team.",
+        "FAILED_OTHERS": "The request failed for an unspecified reason. Please try a test run to get more details."
+      },
+      "http": {
+        "3xx": "The server returned a redirect. By default redirects are treated as a failure — you can enable \"Treat redirects as success\" in the job's advanced settings, or point the job directly at the redirect target.",
+        "4xx": "The server rejected the request (client error). Check the URL, request method, headers, body and any required authentication.",
+        "5xx": "The server encountered an error (server error). This is usually a problem on the destination server's side and often resolves itself.",
+        "400": "Bad request: the server could not understand the request. Check the request body, headers and method.",
+        "401": "Unauthorized: the endpoint requires authentication. Add the necessary credentials or an authorization header.",
+        "403": "Forbidden: the server refused the request. The endpoint may block automated requests or require authentication.",
+        "404": "Not found: the requested URL does not exist on the server. Check the URL for typos.",
+        "405": "Method not allowed: the endpoint does not accept this HTTP method. Try a different request method.",
+        "429": "Too many requests: the server is rate-limiting you. Consider reducing the job's execution frequency.",
+        "500": "Internal server error: something went wrong on the destination server while handling the request.",
+        "502": "Bad gateway: a server upstream of the destination returned an invalid response.",
+        "503": "Service unavailable: the server is temporarily unable to handle the request, e.g. because it is overloaded or under maintenance.",
+        "504": "Gateway timeout: a server upstream of the destination did not respond in time."
+      }
+    },
     "fetchedUrl": "Fetched URL",
     "responseHeaders": "Response headers",
     "responseBody": "Response body",

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Paper, makeStyles, TableContainer, Link, Typography, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, ButtonGroup, Select, MenuItem, InputAdornment, Box } from '@material-ui/core';
+import { Paper, makeStyles, TableContainer, Link, Typography, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, ButtonGroup, Select, MenuItem, InputAdornment, Box, Tooltip } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
 import Table from '../misc/Table';
 import moment from 'moment';
 import { jobStatusText } from '../../utils/Constants';
+import { statusExplanationToken } from '../../utils/JobStatusInfo';
 import AddIcon from '@material-ui/icons/AlarmAdd';
 import EditIcon from '@material-ui/icons/Edit';
 import HistoryIcon from '@material-ui/icons/History';
@@ -26,6 +27,11 @@ import { Alert, AlertTitle } from '@material-ui/lab';
 const useStyles = makeStyles((theme) => ({
   actionButton: {
     margin: theme.spacing(1)
+  },
+  statusWithHelp: {
+    textDecorationLine: 'underline',
+    textDecorationStyle: 'dotted',
+    cursor: 'help'
   }
 }));
 
@@ -75,13 +81,26 @@ export default function Jobs({ match }) {
     },
     {
       head: t('jobs.lastExecution'),
-      cell: job => job.lastExecution ? <>
+      cell: job => {
+        if (!job.lastExecution) {
+          return <>-</>;
+        }
+        const statusText = t('jobs.statuses.' + jobStatusText(job.lastStatus));
+        // The job list only carries the status, not the HTTP code, so HTTP
+        // errors fall back to a generic explanation pointing to the details.
+        const explanationToken = statusExplanationToken(job.lastStatus);
+        return <>
           <div>{moment(job.lastExecution * 1000).calendar()}</div>
           <div><Typography variant="caption">
-              {t('jobs.statuses.' + jobStatusText(job.lastStatus))}
+              {explanationToken ?
+                <Tooltip arrow title={t('jobs.statusExplanations.' + explanationToken)}>
+                  <span className={classes.statusWithHelp}>{statusText}</span>
+                </Tooltip> :
+                statusText}
               &nbsp;({formatMs(job.lastDuration, t)})
             </Typography></div>
-        </> : <>-</>
+        </>;
+      }
     },
     {
       head: t('jobs.nextExecution'),

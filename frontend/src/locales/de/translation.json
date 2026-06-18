@@ -191,6 +191,33 @@
       "FAILED_INTERNAL": "Fehlgeschlagen (interner Fehler)",
       "FAILED_OTHERS": "Fehlgeschlagen"
     },
+    "statusExplanations": {
+      "modes": {
+        "FAILED_HTTPERROR": "Der Server hat mit einem HTTP-Fehler geantwortet. Öffnen Sie die Details der Ausführung, um den genauen Status-Code und dessen Bedeutung zu sehen.",
+        "FAILED_DNS": "Der Hostname in der URL konnte nicht aufgelöst werden. Prüfen Sie, ob die Domain korrekt geschrieben ist und noch existiert.",
+        "FAILED_CONNECT": "Es konnte keine Verbindung zum Server hergestellt werden. Der Server ist möglicherweise nicht erreichbar oder eine Firewall blockiert Anfragen von unseren Servern.",
+        "FAILED_TIMEOUT": "Der Server hat nicht innerhalb des konfigurierten Timeouts vollständig geantwortet. Erhöhen Sie das Timeout in den erweiterten Einstellungen des Jobs oder prüfen Sie, warum der Endpunkt langsam ist.",
+        "FAILED_SIZE": "Die Antwort war größer als das erlaubte Limit und wurde abgebrochen. Lassen Sie den Endpunkt weniger Daten zurückgeben.",
+        "FAILED_URL": "Die URL konnte nicht verarbeitet werden. Bitte prüfen Sie sie auf Tippfehler und stellen Sie sicher, dass sie mit http:// oder https:// beginnt.",
+        "FAILED_INTERNAL": "Beim Ausführen des Jobs ist ein interner Fehler aufgetreten. Falls dies wiederholt auftritt, kontaktieren Sie bitte unser Support-Team.",
+        "FAILED_OTHERS": "Die Anfrage ist aus einem nicht näher bestimmten Grund fehlgeschlagen. Führen Sie einen Testlauf durch, um weitere Details zu erhalten."
+      },
+      "http": {
+        "3xx": "Der Server hat eine Weiterleitung zurückgegeben. Weiterleitungen werden standardmäßig als Fehler gewertet — Sie können in den erweiterten Einstellungen \"Weiterleitungen als Erfolg werten\" aktivieren oder den Job direkt auf das Weiterleitungsziel richten.",
+        "4xx": "Der Server hat die Anfrage abgelehnt (Client-Fehler). Prüfen Sie URL, Anfrage-Methode, Header, Body und eine eventuell erforderliche Authentifizierung.",
+        "5xx": "Auf dem Server ist ein Fehler aufgetreten (Server-Fehler). Dies liegt in der Regel am Zielserver und löst sich oft von selbst.",
+        "400": "Bad Request: Der Server konnte die Anfrage nicht verarbeiten. Prüfen Sie Body, Header und Methode der Anfrage.",
+        "401": "Unauthorized: Der Endpunkt erfordert eine Authentifizierung. Fügen Sie die nötigen Zugangsdaten oder einen Authorization-Header hinzu.",
+        "403": "Forbidden: Der Server hat die Anfrage abgelehnt. Der Endpunkt blockiert möglicherweise automatisierte Anfragen oder erfordert eine Authentifizierung.",
+        "404": "Not Found: Die angeforderte URL existiert auf dem Server nicht. Prüfen Sie die URL auf Tippfehler.",
+        "405": "Method Not Allowed: Der Endpunkt akzeptiert diese HTTP-Methode nicht. Versuchen Sie eine andere Anfrage-Methode.",
+        "429": "Too Many Requests: Der Server drosselt Ihre Anfragen. Reduzieren Sie ggf. die Ausführungshäufigkeit des Jobs.",
+        "500": "Internal Server Error: Auf dem Zielserver ist bei der Verarbeitung der Anfrage etwas schiefgelaufen.",
+        "502": "Bad Gateway: Ein dem Zielserver vorgelagerter Server hat eine ungültige Antwort zurückgegeben.",
+        "503": "Service Unavailable: Der Server kann die Anfrage vorübergehend nicht bearbeiten, z. B. wegen Überlastung oder Wartung.",
+        "504": "Gateway Timeout: Ein dem Zielserver vorgelagerter Server hat nicht rechtzeitig geantwortet."
+      }
+    },
     "fetchedUrl": "Abgerufene URL",
     "responseHeaders": "Antwort-Header",
     "responseBody": "Antwort-Body",

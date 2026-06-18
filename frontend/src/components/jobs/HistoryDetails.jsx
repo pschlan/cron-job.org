@@ -1,17 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography, LinearProgress, makeStyles } from '@material-ui/core';
+import { Alert } from '@material-ui/lab';
 import { useTranslation } from 'react-i18next';
 import { JobStatus, jobStatusText } from '../../utils/Constants';
+import { statusExplanationToken } from '../../utils/JobStatusInfo';
 import { getJobHistoryDetails } from '../../utils/API';
 import Timing from './Timing';
 import Code from '../misc/Code';
 import Headers from '../misc/Headers';
 import SslCertExpiryIcon from '../misc/SslCertExpiryIcon';
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
   statusRow: {
     display: 'flex',
     alignItems: 'center'
+  },
+  statusExplanation: {
+    marginBottom: theme.spacing(1)
   }
 }));
 
@@ -21,6 +26,8 @@ export default function HistoryDetails({ log, open, onClose, moment }) {
   const [ isLoading, setIsLoading ] = useState(true);
   const onCloseHook = useRef(onClose, []);
   const [ details, setDetails ] = useState({});
+
+  const explanationToken = statusExplanationToken(log.status, log.httpStatus);
 
   useEffect(() => {
     getJobHistoryDetails(log.identifier)
@@ -47,6 +54,10 @@ export default function HistoryDetails({ log, open, onClose, moment }) {
             <SslCertExpiryIcon sslCertExpiry={details.sslCertExpiry || log.sslCertExpiry} />
           </div>
         </Typography>
+
+        {explanationToken && <Alert severity='info' className={classes.statusExplanation}>
+          {t('jobs.statusExplanations.' + explanationToken)}
+        </Alert>}
 
         <Timing stats={details && details.stats} header={<Typography variant='overline'>{t('jobs.timing')}</Typography>} />
 
