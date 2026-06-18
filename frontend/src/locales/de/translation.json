@@ -125,6 +125,7 @@
     "noUpcoming": "Keine anstehenden Ausführungen.",
     "expiringCerts": "Bald ablaufende Zertifikate",
     "noExpiringCerts": "In den nächsten 14 Tagen läuft kein Zertifikat ab.",
+    "certExpiryDate": "Läuft ab am",
     "failedJobsList": "Fehlgeschlagene Cronjobs",
     "noFailedJobs": "Keine fehlgeschlagenen Cronjobs.",
     "likeService": "Finden Sie {{serviceName}} nützlich?",

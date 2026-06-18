@@ -125,6 +125,7 @@
     "noUpcoming": "No upcoming executions.",
     "expiringCerts": "Certificates Expiring Soon",
     "noExpiringCerts": "No certificates are expiring within the next 14 days.",
+    "certExpiryDate": "Expires on",
     "failedJobsList": "Failed Cronjobs",
     "noFailedJobs": "No failed cronjobs.",
     "likeService": "Do you find {{serviceName}} useful?",

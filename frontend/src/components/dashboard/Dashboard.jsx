@@ -212,7 +212,7 @@ export default function Dashboard() {
       cell: job => <JobSummary job={job} icon={<IconAvatar icon={NotificationsIcon} color='orange' />} />
     },
     {
-      head: t('jobs.status'),
+      head: t('dashboard.certExpiryDate'),
       cell: job => <span style={{display: 'inline-flex', alignItems: 'center'}}>
         {moment(job.sslCertExpiry * 1000).format('LL')}
         <SslCertExpiryIcon sslCertExpiry={job.sslCertExpiry} />
@@ -377,14 +377,14 @@ export default function Dashboard() {
             </Box>
           </Paper>
         </Grid>}
-      <Grid item xs={12}>
+      {dashboardData && dashboardData.failedJobList && dashboardData.failedJobList.length > 0 && <Grid item xs={12}>
         <Paper>
           <Title>{t('dashboard.failedJobsList')}</Title>
           <TableContainer>
             <Table
               size='small'
               columns={FAILED_JOBS_COLUMNS}
-              items={(dashboardData && dashboardData.failedJobList) || []}
+              items={dashboardData.failedJobList}
               empty={<em>{t('dashboard.noFailedJobs')}</em>}
               loading={isLoading}
               perPage={5}
@@ -392,7 +392,7 @@ export default function Dashboard() {
               />
           </TableContainer>
         </Paper>
-      </Grid>
+      </Grid>}
       <Grid item xs={12} md={6}>
         <Paper>
           <Title>{t('dashboard.nextRuns')}</Title>
