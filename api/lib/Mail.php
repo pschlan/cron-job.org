@@ -35,7 +35,7 @@ class Mail {
 
   public function setVerp($type, $id, $config) {
     $payload = $type . '-' . $id;
-    $encodedHash = substr(hash_hmac('sha256', $payload, $config['emailVerpSecret'], false), 0, 32);
+    $encodedHash = substr(hash_hmac('sha256', $payload, $config['emailVerpSecret'], false), 0, 16);
     $returnPath = sprintf($config['emailReturnPath'], $payload . '-' . $encodedHash);
     $this->setReturnPath($returnPath);
   }
