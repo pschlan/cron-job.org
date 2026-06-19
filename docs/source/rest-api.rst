@@ -545,6 +545,226 @@ jobHistoryDetails   :ref:`HistoryItem`                      History item
 Max. 5 requests per second.
 
 
+Listing Folders
+^^^^^^^^^^^^^^^
+List all folders in this account::
+
+    GET /folders
+
+**Input Object**
+
+None.
+
+**Output Object**
+
+=================== ======================================= ======================================
+Key                 Type                                    Description
+=================== ======================================= ======================================
+folders             array of :ref:`Folder`                  List of folders present in the account
+=================== ======================================= ======================================
+
+**curl Example**
+
+.. code-block:: console
+
+    curl -X GET \
+         -H 'Content-Type: application/json' \
+         -H 'Authorization: Bearer zaX78aqKJuIH4l4RX6njoqADn77MQNJJ' \
+         https://api.cron-job.org/folders
+
+**Response Example**
+
+.. code-block:: json
+
+    {
+        "folders": [
+            {
+                "folderId": 9876,
+                "title": "Backups"
+            }
+        ]
+    }
+
+
+**Rate Limit**
+
+Max. 5 requests per second.
+
+
+Retrieving Folder Details
+^^^^^^^^^^^^^^^^^^^^^^^^^
+Retrieve information for a specific folder identified by its `folderId`::
+
+    GET /folders/<folderId>
+
+**Input Object**
+
+None.
+
+**Output Object**
+
+=================== ======================================= ======================================
+Key                 Type                                    Description
+=================== ======================================= ======================================
+folderDetails       :ref:`Folder`                           Folder details
+=================== ======================================= ======================================
+
+**curl Example**
+
+.. code-block:: console
+
+    curl -X GET \
+         -H 'Content-Type: application/json' \
+         -H 'Authorization: Bearer zaX78aqKJuIH4l4RX6njoqADn77MQNJJ' \
+         https://api.cron-job.org/folders/9876
+
+**Response Example**
+
+.. code-block:: json
+
+    {
+        "folderDetails": {
+            "folderId": 9876,
+            "title": "Backups"
+        }
+    }
+
+
+**Rate Limit**
+
+Max. 5 requests per second.
+
+
+Creating a Folder
+^^^^^^^^^^^^^^^^^
+Creating a new folder::
+
+    PUT /folders
+
+**Input Object**
+
+=================== ======================================= ======================================
+Key                 Type                                    Description
+=================== ======================================= ======================================
+folder              :ref:`Folder`                           Folder (only the ``title`` field is mandatory)
+=================== ======================================= ======================================
+
+**Output Object**
+
+=================== ======================================= ======================================
+Key                 Type                                    Description
+=================== ======================================= ======================================
+folderId            int                                     Identifier of the created folder
+=================== ======================================= ======================================
+
+Folder titles must be unique within an account. In case a folder with the same title already exists,
+the API responds with an HTTP status code of ``409``.
+
+**curl Example**
+
+.. code-block:: console
+
+    curl -X PUT \
+         -H 'Content-Type: application/json' \
+         -H 'Authorization: Bearer zaX78aqKJuIH4l4RX6njoqADn77MQNJJ' \
+         -d '{"folder":{"title":"Backups"}}' \
+         https://api.cron-job.org/folders
+
+**Response Example**
+
+.. code-block:: json
+
+    {
+        "folderId": 9876
+    }
+
+
+**Rate Limit**
+
+Max. 1 request per second and 10 requests per minute.
+
+
+Updating a Folder
+^^^^^^^^^^^^^^^^^
+Updating a folder identified by its `folderId`::
+
+    PATCH /folders/<folderId>
+
+**Input Object**
+
+=================== ======================================= ======================================
+Key                 Type                                    Description
+=================== ======================================= ======================================
+folder              :ref:`Folder`                           Folder delta (only include changed fields - unchanged fields can be left out)
+=================== ======================================= ======================================
+
+**Output Object**
+
+Empty object.
+
+Folder titles must be unique within an account. In case a folder with the same title already exists,
+the API responds with an HTTP status code of ``409``.
+
+**curl Example**
+
+.. code-block:: console
+
+    curl -X PATCH \
+         -H 'Content-Type: application/json' \
+         -H 'Authorization: Bearer zaX78aqKJuIH4l4RX6njoqADn77MQNJJ' \
+         -d '{"folder":{"title":"Daily Backups"}}' \
+         https://api.cron-job.org/folders/9876
+
+**Response Example**
+
+.. code-block:: json
+
+    {}
+
+
+**Rate Limit**
+
+Max. 1 request per second.
+
+
+Deleting a Folder
+^^^^^^^^^^^^^^^^^
+Deleting a folder identified by its `folderId`::
+
+    DELETE /folders/<folderId>
+
+**Input Object**
+
+None.
+
+**Output Object**
+
+Empty object.
+
+Deleting a folder does not delete the cron jobs it contains. Any jobs residing in the folder are moved
+to the root folder (``folderId`` ``0``) before the folder is removed.
+
+**curl Example**
+
+.. code-block:: console
+
+    curl -X DELETE \
+         -H 'Content-Type: application/json' \
+         -H 'Authorization: Bearer zaX78aqKJuIH4l4RX6njoqADn77MQNJJ' \
+         https://api.cron-job.org/folders/9876
+
+**Response Example**
+
+.. code-block:: json
+
+    {}
+
+
+**Rate Limit**
+
+Max. 1 request per second.
+
+
 Data Types
 ----------
 
@@ -631,6 +851,20 @@ body                string                                  Request body data   
 =================== ======================================= ======================================= ===========
 
 `* Value when field is omitted while creating a job.`
+
+Folder
+^^^^^^
+The Folder object represents a folder used to organize cron jobs. The folder a job resides in is
+referenced via the ``folderId`` field of the :ref:`Job` object.
+
+=================== ======================================= ===================================================================================================================  =======================================
+Key                 Type                                    Description                                                                                                          Default *
+=================== ======================================= ===================================================================================================================  =======================================
+folderId            int                                     Folder identifier (read only; ignored during folder creation or update)                                              (auto-assigned)
+title               string                                  Folder title (max. 128 characters; must be unique within the account)                                                (mandatory)
+=================== ======================================= ===================================================================================================================  =======================================
+
+`* Value when field is omitted while creating a folder.`
 
 JobStatus
 ^^^^^^^^^

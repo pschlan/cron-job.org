@@ -68,6 +68,13 @@ try {
 
     $dispatcher->registerURI('GET', '/jobs/(?<jobId>[0-9]+)/history', 'GetJobHistory');
     $dispatcher->registerURI('GET', '/jobs/(?<jobId>[0-9]+)/history/(?<identifier>[0-9-]+)', 'GetJobHistoryDetails');
+
+    $dispatcher->registerURI('GET', '/folders', 'GetFolders');
+    $dispatcher->registerURI('PUT', '/folders', 'CreateFolder');
+
+    $dispatcher->registerURI('GET', '/folders/(?<folderId>[0-9]+)', 'GetFolderDetails');
+    $dispatcher->registerURI('PATCH', '/folders/(?<folderId>[0-9]+)', 'UpdateFolder');
+    $dispatcher->registerURI('DELETE', '/folders/(?<folderId>[0-9]+)', 'DeleteFolder');
   }
 
   $dispatcher->registerDirectory('./apimethods/');
