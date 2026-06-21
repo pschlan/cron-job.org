@@ -15,6 +15,8 @@
 #include <chrono>
 #include <iomanip>
 #include <iostream>
+#include <random>
+#include <regex>
 #include <sstream>
 
 #include <stdlib.h>
@@ -168,6 +170,78 @@ std::string encodeHeaderValue(std::string value)
 	return value;
 }
 
+// Mirrors PHP htmlentities($value, ENT_COMPAT, 'UTF-8') for the characters that
+// matter inside HTML text/attributes. Non-ASCII bytes are left as UTF-8, which
+// renders identically since the HTML part is sent as UTF-8.
+std::string htmlEscape(const std::string &in)
+{
+	std::string out;
+	out.reserve(in.size());
+	for (const char c : in)
+	{
+		switch (c)
+		{
+		case '&': out += "&amp;"; break;
+		case '<': out += "&lt;"; break;
+		case '>': out += "&gt;"; break;
+		case '"': out += "&quot;"; break;
+		default:  out += c; break;
+		}
+	}
+	return out;
+}
+
+// Mirrors PHP nl2br(): inserts <br /> before each line break while keeping the
+// original newline characters.
+std::string nl2br(const std::string &in)
+{
+	std::string out;
+	out.reserve(in.size() + 16);
+	for (size_t i = 0; i < in.size(); ++i)
+	{
+		const char c = in[i];
+		if (c == '\r')
+		{
+			out += "<br />";
+			out += '\r';
+			if (i + 1 < in.size() && in[i + 1] == '\n')
+			{
+				out += '\n';
+				++i;
+			}
+		}
+		else if (c == '\n')
+		{
+			out += "<br />";
+			out += '\n';
+			if (i + 1 < in.size() && in[i + 1] == '\r')
+			{
+				out += '\r';
+				++i;
+			}
+		}
+		else
+		{
+			out += c;
+		}
+	}
+	return out;
+}
+
+std::string currentYear()
+{
+	const time_t now = time(nullptr);
+	struct tm parsedTime;
+	if(gmtime_r(&now, &parsedTime) == nullptr)
+		return "";
+
+	char buffer[8];
+	if(std::strftime(buffer, sizeof(buffer), "%Y", &parsedTime) == 0)
+		return "";
+
+	return buffer;
+}
+
 } // anon ns
 
 class Mail
@@ -179,6 +253,17 @@ class Mail
 	};
 
 public:
+	Mail()
+	{
+		std::random_device rd;
+		std::mt19937_64 gen(static_cast<uint64_t>(rd())
+			^ static_cast<uint64_t>(std::chrono::steady_clock::now().time_since_epoch().count()));
+
+		std::stringstream ss;
+		ss << "==_boundary_" << std::hex << std::setfill('0') << std::setw(16) << gen();
+		m_boundary = ss.str();
+	}
+
 	void addHeader(const std::string &key, const std::string &value, bool placeholders = false)
 	{
 		m_headers.emplace(key, HeaderItem{value, placeholders});
@@ -186,12 +271,17 @@ public:
 
 	void assign(const std::string &key, const std::string &value)
 	{
-		m_placeholders.emplace(key, value);
+		m_vars[key] = value;
 	}
 
-	void setText(const std::string &mailText)
+	void setPlainText(const std::string &plainText)
 	{
-		m_text = mailText;
+		m_plainText = plainText;
+	}
+
+	void setHtmlText(const std::string &htmlText)
+	{
+		m_htmlText = htmlText;
 	}
 
 	void setMailFrom(const std::string &address)
@@ -258,21 +348,112 @@ private:
 		{
 			out << headerItem.first << ": "
 				<< sanitizeHeader(headerItem.second.placeholders
-					? replacePlaceholders(headerItem.second.value)
+					? prepareText(headerItem.second.value, false)
 					: headerItem.second.value)
 				<< CRLF;
 		}
+
+		out << "Mime-Version: 1.0" << CRLF;
+		out << "Content-Type: multipart/alternative; boundary=\"" << m_boundary << "\"; charset=UTF-8" << CRLF;
 		out << CRLF;
 
-		out << replacePlaceholders(m_text);
+		// Plain text part first (least preferred), HTML part last, as in the PHP API.
+		out << "--" << m_boundary << CRLF;
+		out << "Content-Type: text/plain; charset=UTF-8" << CRLF;
+		out << "Content-Transfer-Encoding: 8bit" << CRLF;
+		out << CRLF;
+		out << prepareText(m_plainText, false) << CRLF;
+
+		out << "--" << m_boundary << CRLF;
+		out << "Content-Type: text/html; charset=UTF-8" << CRLF;
+		out << "Content-Transfer-Encoding: 8bit" << CRLF;
+		out << CRLF;
+		out << prepareText(m_htmlText, true) << CRLF;
+
+		out << "--" << m_boundary << "--" << CRLF;
 	}
 
-	std::string replacePlaceholders(const std::string &in) const
+	// Mirrors PHP Mail::prepareText() in api/lib/Mail.php: a variable pass
+	// ($var / $.var with recursive expansion for the leading dot) followed by a
+	// link pass ({link|url|text}).
+	std::string prepareText(const std::string &text, bool isHtml) const
 	{
-		std::string result = in;
-		for(const auto &item : m_placeholders)
-			Chronos::Utils::replace(result, item.first, item.second);
-		return result;
+		return renderLinks(renderVars(text, isHtml), isHtml);
+	}
+
+	std::string renderVars(const std::string &text, bool isHtml) const
+	{
+		static const std::regex re(R"(\$(\.?[A-Za-z0-9]+))");
+
+		std::string out;
+		auto it = std::sregex_iterator(text.begin(), text.end(), re);
+		const auto end = std::sregex_iterator();
+		std::size_t lastPos = 0;
+
+		for(; it != end; ++it)
+		{
+			const std::smatch &m = *it;
+			const std::size_t matchPos = static_cast<std::size_t>(m.position(0));
+			out.append(text, lastPos, matchPos - lastPos);
+
+			std::string key = m[1].str();
+			bool expand = false;
+			if(!key.empty() && key[0] == '.')
+			{
+				expand = true;
+				key = key.substr(1);
+			}
+
+			const auto vit = m_vars.find(key);
+			if(vit != m_vars.end())
+			{
+				std::string value = vit->second;
+				if(isHtml)
+					value = nl2br(htmlEscape(value));
+				if(expand)
+					value = prepareText(value, isHtml);
+				out += value;
+			}
+			else
+			{
+				out += "UNKNOWN_VARIABLE:" + key;
+			}
+
+			lastPos = matchPos + static_cast<std::size_t>(m.length(0));
+		}
+
+		out.append(text, lastPos, std::string::npos);
+		return out;
+	}
+
+	std::string renderLinks(const std::string &text, bool isHtml) const
+	{
+		static const std::regex re(R"(\{([A-Za-z]+)\|([^|]+)\|([^}]+)\})");
+
+		std::string out;
+		auto it = std::sregex_iterator(text.begin(), text.end(), re);
+		const auto end = std::sregex_iterator();
+		std::size_t lastPos = 0;
+
+		for(; it != end; ++it)
+		{
+			const std::smatch &m = *it;
+			const std::size_t matchPos = static_cast<std::size_t>(m.position(0));
+			out.append(text, lastPos, matchPos - lastPos);
+
+			if(m[1].str() == "link")
+			{
+				if(isHtml)
+					out += "<a href=\"" + m[2].str() + "\" target=\"_blank\">" + m[3].str() + "</a>";
+				else
+					out += m[2].str();
+			}
+
+			lastPos = matchPos + static_cast<std::size_t>(m.length(0));
+		}
+
+		out.append(text, lastPos, std::string::npos);
+		return out;
 	}
 
 	std::string sanitizeHeader(const std::string &in) const
@@ -283,9 +464,11 @@ private:
 private:
 	std::string m_mailFrom;
 	std::string m_rcptTo;
+	std::string m_boundary;
 	std::unordered_map<std::string, HeaderItem> m_headers;
-	std::unordered_map<std::string, std::string> m_placeholders;
-	std::string m_text;
+	std::unordered_map<std::string, std::string> m_vars;
+	std::string m_plainText;
+	std::string m_htmlText;
 };
 
 namespace {
@@ -334,6 +517,8 @@ NotificationThread::NotificationThread()
 	mailFrom = App::getInstance()->config->get("notification_mail_from");
 	mailVerpSecret = App::getInstance()->config->get("notification_mail_verp_secret");
 	mailSender = App::getInstance()->config->get("notification_mail_sender");
+	mailProjectName = App::getInstance()->config->get("notification_mail_project_name");
+	mailLogoURL = App::getInstance()->config->get("notification_mail_logo_url");
 	smtpServer = App::getInstance()->config->get("smtp_server");
 }
 
@@ -568,40 +753,51 @@ void NotificationThread::processNotification(const Notification &notification)
 	mail.setRcptTo(userDetails.email);
 	mail.addHeader("From", mailSender);
 	mail.addHeader("To", std::string("<") + userDetails.email + std::string(">"));
-	mail.addHeader("Content-Type", "text/plain; charset=UTF-8");
-	mail.addHeader("Content-Transfer-Encoding", "8bit");
 	mail.addHeader("Auto-Submitted", "auto-generated");
 
-	mail.assign("$firstname", userDetails.firstName);
-	mail.assign("$lastname", userDetails.lastName);
-	mail.assign("$title", !notification.title.empty() ? notification.title : url);
-	mail.assign("$url", url);
-	mail.assign("$executed", formatDate(userDetails.language, notification.dateStarted));
-	mail.assign("$scheduled", formatDate(userDetails.language, notification.datePlanned));
-	mail.assign("$attempts", std::to_string(notification.failCounter));
-	mail.assign("$status", formatStatus(userDetails.language, notification));
-	mail.assign("$certexpiry", formatDate(userDetails.language, notification.sslCertExpiry));
+	// Shared branded wrapper (stored language-independently under the sentinel
+	// language '*' in the master phrases table). The notification body is slotted
+	// into $.body and the localized subject into $.subject.
+	mail.setHtmlText(getPhrase("*", "mail.template.html"));
+	mail.setPlainText(getPhrase("*", "mail.template.text"));
 
+	mail.assign("projectName", mailProjectName);
+	mail.assign("logoURL", mailLogoURL);
+	mail.assign("year", currentYear());
+	mail.assign("unsubscribeFooter", getPhrase(userDetails.language, "notify.mail.footer"));
+
+	mail.assign("firstname", userDetails.firstName);
+	mail.assign("lastname", userDetails.lastName);
+	mail.assign("title", !notification.title.empty() ? notification.title : url);
+	mail.assign("url", url);
+	mail.assign("executed", formatDate(userDetails.language, notification.dateStarted));
+	mail.assign("scheduled", formatDate(userDetails.language, notification.datePlanned));
+	mail.assign("attempts", std::to_string(notification.failCounter));
+	mail.assign("status", formatStatus(userDetails.language, notification));
+	mail.assign("certexpiry", formatDate(userDetails.language, notification.sslCertExpiry));
+
+	std::string subjectKey;
+	std::string bodyKey;
 	switch(notification.type)
 	{
 	case NOTIFICATION_TYPE_FAILURE:
-		mail.addHeader("Subject", getPhrase(userDetails.language, "notify.failure.mail.subject"), true);
-		mail.setText(getPhrase(userDetails.language, "notify.failure.mail.text"));
+		subjectKey = "notify.failure.mail.subject";
+		bodyKey = "notify.failure.mail.text";
 		break;
 
 	case NOTIFICATION_TYPE_SUCCESS:
-		mail.addHeader("Subject", getPhrase(userDetails.language, "notify.success.mail.subject"), true);
-		mail.setText(getPhrase(userDetails.language, "notify.success.mail.text"));
+		subjectKey = "notify.success.mail.subject";
+		bodyKey = "notify.success.mail.text";
 		break;
 
 	case NOTIFICATION_TYPE_DISABLE:
-		mail.addHeader("Subject", getPhrase(userDetails.language, "notify.disable.mail.subject"), true);
-		mail.setText(getPhrase(userDetails.language, "notify.disable.mail.text"));
+		subjectKey = "notify.disable.mail.subject";
+		bodyKey = "notify.disable.mail.text";
 		break;
 
 	case NOTIFICATION_TYPE_SSL_CERT_EXPIRY:
-		mail.addHeader("Subject", getPhrase(userDetails.language, "notify.sslcertexpiry.mail.subject"), true);
-		mail.setText(getPhrase(userDetails.language, "notify.sslcertexpiry.mail.text"));
+		subjectKey = "notify.sslcertexpiry.mail.subject";
+		bodyKey = "notify.sslcertexpiry.mail.text";
 		break;
 
 	default:
@@ -609,6 +805,11 @@ void NotificationThread::processNotification(const Notification &notification)
 		Metrics::instance().incrementNotificationsDropped("unknown_type");
 		return;
 	}
+
+	const std::string subject = getPhrase(userDetails.language, subjectKey);
+	mail.assign("subject", subject);
+	mail.assign("body", getPhrase(userDetails.language, bodyKey));
+	mail.addHeader("Subject", subject, true);
 
 	sendMail(mail, notification.type);
 }

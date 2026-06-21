@@ -1,9 +1,0 @@
-***********
-$.subject
-***********
-
-$.body
-
-$unsubscribeFooter
-
-© $year $projectName

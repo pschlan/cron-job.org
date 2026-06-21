@@ -146,8 +146,8 @@ class SubscriptionManager {
       $mail->setVerp('subscription', $this->userId, $config);
       $mail->setSender($config['emailSender']);
       $mail->setRecipient($userRow->email);
-      $mail->setPlainText(file_get_contents('./config/EmailTemplate.txt'));
-      $mail->setHtmlText(file_get_contents('./config/EmailTemplate.html'));
+      $mail->setPlainText(Mail::loadTemplate('text'));
+      $mail->setHtmlText(Mail::loadTemplate('html'));
       $mail->setSubject(Language::getPhrase($mailName . '.subject', $userRow->language));
 
       $mail->assign('projectName', $config['projectName']);

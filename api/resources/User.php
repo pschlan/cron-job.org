@@ -387,8 +387,8 @@ class UserManager {
     $mail->setVerp('changeemail', $this->authToken->userId, $config);
     $mail->setSender($config['emailSender']);
     $mail->setRecipient($newEmail);
-    $mail->setPlainText(file_get_contents('./config/EmailTemplate.txt'));
-    $mail->setHtmlText(file_get_contents('./config/EmailTemplate.html'));
+    $mail->setPlainText(Mail::loadTemplate('text'));
+    $mail->setHtmlText(Mail::loadTemplate('html'));
     $mail->setSubject(Language::getPhrase('changeEmail.subject', $language));
 
     $mail->assign('projectName', $config['projectName']);
@@ -489,8 +489,8 @@ class UserManager {
     $mail->setVerp('pwreset', $userId, $config);
     $mail->setSender($config['emailSender']);
     $mail->setRecipient($email);
-    $mail->setPlainText(file_get_contents('./config/EmailTemplate.txt'));
-    $mail->setHtmlText(file_get_contents('./config/EmailTemplate.html'));
+    $mail->setPlainText(Mail::loadTemplate('text'));
+    $mail->setHtmlText(Mail::loadTemplate('html'));
     $mail->setSubject(Language::getPhrase('lostPasswordEmail.subject', $language));
 
     $mail->assign('projectName', $config['projectName']);
@@ -595,8 +595,8 @@ class UserManager {
     $mail->setVerp('signup', $userId, $config);
     $mail->setSender($config['emailSender']);
     $mail->setRecipient($email);
-    $mail->setPlainText(file_get_contents('./config/EmailTemplate.txt'));
-    $mail->setHtmlText(file_get_contents('./config/EmailTemplate.html'));
+    $mail->setPlainText(Mail::loadTemplate('text'));
+    $mail->setHtmlText(Mail::loadTemplate('html'));
     $mail->setSubject(Language::getPhrase('signupEmail.subject', $language));
 
     $mail->assign('projectName', $config['projectName']);
