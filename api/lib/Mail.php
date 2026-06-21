@@ -9,8 +9,29 @@ class Mail {
   private $returnPath;
   private $vars = [];
 
+  private static $templateCache = [];
+
   function __construct() {
     $this->boundary = '--==_boundary_' . md5(uniqid('mimeBoundary'));
+  }
+
+  // Loads the shared, language-independent email wrapper template from the
+  // master `phrases` table (sentinel language '*'). The same rows are used by
+  // chronos so both services render visually identical emails.
+  public static function loadTemplate($type) {
+    if (isset(self::$templateCache[$type])) {
+      return self::$templateCache[$type];
+    }
+
+    $stmt = Database::get()->prepare('SELECT `value` FROM `phrases` WHERE `lang` = \'*\' AND `key` = :key');
+    $stmt->execute([':key' => 'mail.template.' . $type]);
+    $value = $stmt->fetchColumn();
+    if ($value === false) {
+      $value = '';
+    }
+
+    self::$templateCache[$type] = $value;
+    return $value;
   }
 
   public function setPlainText($plainText) {

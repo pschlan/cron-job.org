@@ -80,6 +80,8 @@ namespace Chronos
 		std::string mailFrom;
 		std::string mailVerpSecret;
 		std::string mailSender;
+		std::string mailProjectName;
+		std::string mailLogoURL;
 		std::string smtpServer;
 		std::unordered_map<std::string, std::unordered_map<std::string, std::string>> phrases;
 	};
