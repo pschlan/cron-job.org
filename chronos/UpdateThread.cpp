@@ -336,7 +336,9 @@ void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
 		if(result->notifySuccess
 			&& result->status == JOBSTATUS_OK
 			&& oldFailCounter > 0
-			&& failCounter == 0)
+			&& failCounter == 0
+			&& (!result->notifyFailure || 
+				oldUnfilteredFailCounter >= result->notifyFailureCount)
 		{
 			createNotification 			= true;
 			notificationType 			= NOTIFICATION_TYPE_SUCCESS;
