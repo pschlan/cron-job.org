@@ -105,6 +105,48 @@ function isWildcard(array) {
   return array.length === 1 && array[0] === -1;
 }
 
+/** Returns the smallest value in sortedArr that is >= current, or null if none (wrap to next period). */
+function nextInSorted(sortedArr, current) {
+  for (let i = 0; i < sortedArr.length; i++) {
+    if (sortedArr[i] >= current) {
+      return sortedArr[i];
+    }
+  }
+  return null;
+}
+
+/** Build lookup sets and precomputed flags once before the main loop. */
+function prepareSchedule(schedule) {
+  const monthWild = isWildcard(schedule.months);
+  const mdayWild = isWildcard(schedule.mdays);
+  const wdayWild = isWildcard(schedule.wdays);
+  const hourWild = isWildcard(schedule.hours);
+  const minuteWild = isWildcard(schedule.minutes);
+
+  const monthSet = monthWild ? null : new Set(schedule.months);
+  const mdaySet = mdayWild ? null : new Set(schedule.mdays);
+  const wdaySet = wdayWild ? null : new Set(schedule.wdays);
+  const hourSet = hourWild ? null : new Set(schedule.hours);
+  const minuteSet = minuteWild ? null : new Set(schedule.minutes);
+
+  const sortedMonths = monthWild ? [] : [...schedule.months].sort((a, b) => a - b);
+  const sortedMdays = mdayWild ? [] : [...schedule.mdays].sort((a, b) => a - b);
+  const sortedWdays = wdayWild ? [] : [...schedule.wdays].sort((a, b) => a - b);
+  const sortedHours = hourWild ? [] : [...schedule.hours].sort((a, b) => a - b);
+  const sortedMinutes = minuteWild ? [] : [...schedule.minutes].sort((a, b) => a - b);
+
+  return {
+    monthWild, mdayWild, wdayWild, hourWild, minuteWild,
+    monthSet, mdaySet, wdaySet, hourSet, minuteSet,
+    sortedMonths, sortedMdays, sortedWdays, sortedHours, sortedMinutes,
+    firstMonth: sortedMonths[0],
+    firstMday: sortedMdays[0],
+    firstWday: sortedWdays[0],
+    firstHour: sortedHours[0],
+    firstMinute: sortedMinutes[0]
+  };
+}
+
 export function predictNextExecution(schedule, now) {
   const MAX_ITERATIONS = 2048;
 
@@ -134,6 +176,7 @@ export function predictNextExecution(schedule, now) {
     }
   }
 
+  const s = prepareSchedule(schedule);
   const next = now.clone();
   next.setSecond(0);
   next.addMinutes(1);
@@ -144,43 +187,70 @@ export function predictNextExecution(schedule, now) {
       return null;
     }
 
-    if (!isWildcard(schedule.months) && !schedule.months.includes(next.month())) {
-      next.addMonths(1);
-      next.setDay(1);
-      next.setHour(0);
-      next.setMinute(0);
+    if (!s.monthWild && !s.monthSet.has(next.month())) {
+      const n = nextInSorted(s.sortedMonths, next.month());
+      if (n !== null) {
+        next.setDay(1);
+        next.setHour(0);
+        next.setMinute(0);
+        next.addMonths(n - next.month());
+      } else {
+        next.addMonths(1);
+        next.setDay(1);
+        next.setHour(0);
+        next.setMinute(0);
+        const delta = (s.firstMonth - next.month() + 12) % 12;
+        if (delta > 0) {
+          next.addMonths(delta);
+        }
+      }
       continue;
     }
 
-    if ((!isWildcard(schedule.mdays) && !isWildcard(schedule.wdays)) && (!schedule.mdays.includes(next.day()) && !schedule.wdays.includes(next.weekDay()))) {
+    const mdayOk = s.mdayWild || s.mdaySet.has(next.day());
+    const wdayOk = s.wdayWild || s.wdaySet.has(next.weekDay());
+    if (!s.mdayWild && !s.wdayWild && !mdayOk && !wdayOk) {
       next.addDays(1);
       next.setHour(0);
       next.setMinute(0);
       continue;
     }
 
-    if (!isWildcard(schedule.mdays) && isWildcard(schedule.wdays) && !schedule.mdays.includes(next.day())) {
+    if (!s.mdayWild && s.wdayWild && !mdayOk) {
       next.addDays(1);
       next.setHour(0);
       next.setMinute(0);
       continue;
     }
 
-    if (!isWildcard(schedule.wdays) && isWildcard(schedule.mdays) && !schedule.wdays.includes(next.weekDay())) {
+    if (!s.wdayWild && s.mdayWild && !wdayOk) {
       next.addDays(1);
       next.setHour(0);
       next.setMinute(0);
       continue;
     }
 
-    if (!isWildcard(schedule.hours) && !schedule.hours.includes(next.hour())) {
-      next.setMinute(0);
-      next.addHours(1);
+    if (!s.hourWild && !s.hourSet.has(next.hour())) {
+      const n = nextInSorted(s.sortedHours, next.hour());
+      if (n !== null) {
+        next.setMinute(0);
+        next.addHours(n - next.hour());
+      } else {
+        next.addDays(1);
+        next.setHour(s.firstHour);
+        next.setMinute(0);
+      }
       continue;
     }
 
-    if (!isWildcard(schedule.minutes) && !schedule.minutes.includes(next.minute())) {
-      next.addMinutes(1);
+    if (!s.minuteWild && !s.minuteSet.has(next.minute())) {
+      const n = nextInSorted(s.sortedMinutes, next.minute());
+      if (n !== null) {
+        next.addMinutes(n - next.minute());
+      } else {
+        next.addHours(1);
+        next.setMinute(s.firstMinute);
+      }
       continue;
     }
 
