@@ -1,4 +1,4 @@
-import { looksLikeHttpCommand, parseWget, parseHttpCommand } from './CommandParser';
+import { looksLikeHttpCommand, parseWget, parseHttpCommand, looksLikeCrontabLine, parseCrontabLine } from './CommandParser';
 import { RequestMethod } from './Constants';
 
 describe('looksLikeHttpCommand', () => {
@@ -168,5 +168,121 @@ describe('parseHttpCommand', () => {
     const r = parseHttpCommand('wget --method=PATCH https://example.com');
     expect(Object.prototype.hasOwnProperty.call(RequestMethod, r.method)).toBe(true);
     expect(RequestMethod[r.method]).toBe(RequestMethod.PATCH);
+  });
+});
+
+describe('looksLikeCrontabLine', () => {
+  it('detects a crontab line with curl', () => {
+    expect(looksLikeCrontabLine('*/5 * * * * curl https://example.com')).toBe(true);
+  });
+
+  it('detects a crontab line with wget', () => {
+    expect(looksLikeCrontabLine('0 3 * * * wget -q https://example.com/backup')).toBe(true);
+  });
+
+  it('detects complex schedule expressions', () => {
+    expect(looksLikeCrontabLine('0,30 1-5 */2 1,6,12 0-4 curl https://example.com')).toBe(true);
+  });
+
+  it('does not flag a plain curl/wget command (no schedule prefix)', () => {
+    expect(looksLikeCrontabLine('curl https://example.com')).toBe(false);
+    expect(looksLikeCrontabLine('wget https://example.com')).toBe(false);
+  });
+
+  it('does not flag a bare crontab expression without a command', () => {
+    expect(looksLikeCrontabLine('*/5 * * * *')).toBe(false);
+  });
+
+  it('does not flag a crontab line whose command is not curl/wget', () => {
+    expect(looksLikeCrontabLine('*/5 * * * * /usr/bin/python script.py')).toBe(false);
+  });
+
+  it('does not flag empty or non-string input', () => {
+    expect(looksLikeCrontabLine('')).toBe(false);
+    expect(looksLikeCrontabLine(null)).toBe(false);
+    expect(looksLikeCrontabLine(42)).toBe(false);
+  });
+});
+
+describe('parseCrontabLine', () => {
+  it('parses a simple crontab line with curl', () => {
+    const r = parseCrontabLine('*/5 * * * * curl https://example.com/api');
+    expect(r).not.toBeNull();
+    expect(r.schedule.minutes).toEqual([0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]);
+    expect(r.schedule.hours).toEqual([-1]);
+    expect(r.schedule.mdays).toEqual([-1]);
+    expect(r.schedule.months).toEqual([-1]);
+    expect(r.schedule.wdays).toEqual([-1]);
+    expect(r.command.url).toBe('https://example.com/api');
+  });
+
+  it('parses a daily-at-3am crontab line with wget', () => {
+    const r = parseCrontabLine('0 3 * * * wget -q -O /dev/null https://example.com/backup');
+    expect(r.schedule.minutes).toEqual([0]);
+    expect(r.schedule.hours).toEqual([3]);
+    expect(r.command.url).toBe('https://example.com/backup');
+  });
+
+  it('parses a complex schedule with curl flags', () => {
+    const r = parseCrontabLine("0,30 9-17 * * 1-5 curl -X POST -H 'Content-Type: application/json' -d '{\"ping\":true}' https://example.com/api");
+    expect(r.schedule.minutes).toEqual([0, 30]);
+    expect(r.schedule.hours).toEqual(expect.arrayContaining([9, 10, 11, 12, 13, 14, 15, 16, 17]));
+    expect(r.schedule.hours).toHaveLength(9);
+    expect(r.schedule.wdays).toEqual([1, 2, 3, 4, 5]);
+    expect(r.command.url).toBe('https://example.com/api');
+    expect(r.command.method).toBe('POST');
+    expect(r.command.body).toBe('{"ping":true}');
+  });
+
+  it('parses a monthly schedule', () => {
+    const r = parseCrontabLine('0 0 1 * * curl https://example.com/monthly');
+    expect(r.schedule.minutes).toEqual([0]);
+    expect(r.schedule.hours).toEqual([0]);
+    expect(r.schedule.mdays).toEqual([1]);
+    expect(r.command.url).toBe('https://example.com/monthly');
+  });
+
+  it('handles step expressions in all fields', () => {
+    const r = parseCrontabLine('*/10 */2 */5 */3 * curl https://example.com');
+    expect(r.schedule.minutes).toEqual([0, 10, 20, 30, 40, 50]);
+    expect(r.schedule.hours).toEqual([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]);
+  });
+
+  it('handles curl with path prefix', () => {
+    const r = parseCrontabLine('0 * * * * /usr/bin/curl https://example.com');
+    expect(r).not.toBeNull();
+    expect(r.command.url).toBe('https://example.com');
+  });
+
+  it('handles extra whitespace between fields', () => {
+    const r = parseCrontabLine('0  3   *  *  *   curl https://example.com');
+    expect(r.schedule.minutes).toEqual([0]);
+    expect(r.schedule.hours).toEqual([3]);
+    expect(r.command.url).toBe('https://example.com');
+  });
+
+  it('returns null for an invalid cron expression', () => {
+    expect(parseCrontabLine('99 * * * * curl https://example.com')).toBeNull();
+  });
+
+  it('returns null for a crontab line with a non-HTTP command', () => {
+    expect(parseCrontabLine('*/5 * * * * /bin/bash script.sh')).toBeNull();
+  });
+
+  it('returns null for a crontab line where curl has no URL', () => {
+    expect(parseCrontabLine('*/5 * * * * curl -X POST')).toBeNull();
+  });
+
+  it('returns null for non-string input', () => {
+    expect(parseCrontabLine(null)).toBeNull();
+    expect(parseCrontabLine(42)).toBeNull();
+  });
+
+  it('round-trips: schedule matches crontabExpressionToSchedule for the same expression', () => {
+    const { crontabExpressionToSchedule } = require('./CrontabExpression');
+    const cronExpr = '30 2 15 1,7 *';
+    const r = parseCrontabLine(cronExpr + ' curl https://example.com');
+    const direct = crontabExpressionToSchedule(cronExpr);
+    expect(r.schedule).toEqual(direct);
   });
 });

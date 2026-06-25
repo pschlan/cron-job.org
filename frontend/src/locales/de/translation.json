@@ -322,25 +322,30 @@
     "curlImport": {
       "button": "cURL-Befehl importieren",
       "title": "cURL-Befehl importieren",
-      "help": "Fügen Sie einen cURL-Befehl ein. Wir füllen daraus die Felder für URL, Anfrage-Methode, Header, Anfrage-Body und Authentifizierung aus.",
-      "command": "cURL-Befehl",
+      "help": "Fügen Sie einen cURL- oder wget-Befehl oder eine vollständige Crontab-Zeile ein. Wir füllen daraus die Felder für URL, Anfrage-Methode, Header, Anfrage-Body, Authentifizierung und Ausführungsplan aus.",
+      "command": "Befehl oder Crontab-Zeile",
       "import": "Importieren",
-      "parseError": "Wir konnten in Ihrer Eingabe keinen cURL-Befehl erkennen. Bitte stellen Sie sicher, dass er mit 'curl' beginnt und eine URL enthält.",
+      "parseError": "Wir konnten in Ihrer Eingabe keinen cURL-/wget-Befehl oder keine Crontab-Zeile erkennen. Bitte stellen Sie sicher, dass er mit 'curl' oder 'wget' beginnt (optional mit Cron-Zeitplan davor) und eine URL enthält.",
       "unsupportedMethod": "Die Anfrage-Methode '{{method}}' wird nicht unterstützt. Bitte wählen Sie eine unterstützte Methode manuell aus.",
-      "applied": "Aus cURL importiert: {{parts}}.",
+      "applied": "Importiert: {{parts}}.",
       "appliedParts": {
         "url": "URL",
         "method": "Anfrage-Methode",
         "headers": "{{count}} Header",
         "headers_plural": "{{count}} Header",
         "body": "Anfrage-Body",
-        "auth": "Authentifizierung"
+        "auth": "Authentifizierung",
+        "schedule": "Ausführungsplan"
       }
     },
     "commandImport": {
       "title": "Das sieht nach einem cURL- oder wget-Befehl aus",
       "text": "Statt ihn als URL zu verwenden, können wir daraus die URL, die Anfrage-Methode, Header, den Anfrage-Body und die Authentifizierung auslesen.",
       "import": "Befehl importieren"
+    },
+    "crontabImport": {
+      "title": "Das sieht nach einer Crontab-Zeile aus",
+      "text": "Wir können daraus den Ausführungsplan sowie die URL, die Anfrage-Methode, Header, den Anfrage-Body und die Authentifizierung auslesen."
     },
     "testRun": {
       "testRun": "Testlauf",

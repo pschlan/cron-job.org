@@ -23,7 +23,7 @@ import {
   RequestMethod,
   RequestMethodsSupportingCustomBody
 } from '../../utils/Constants';
-import { looksLikeHttpCommand, parseHttpCommand } from '../../utils/CommandParser';
+import { looksLikeHttpCommand, parseHttpCommand, looksLikeCrontabLine, parseCrontabLine } from '../../utils/CommandParser';
 import useTimezones from '../../hooks/useTimezones';
 import NotFound from '../misc/NotFound';
 import Breadcrumbs from '../misc/Breadcrumbs';
@@ -147,6 +147,8 @@ export default function JobEditor({ match }) {
   const [ requestBody, setRequestBody ] = useState('');
   const [ jobHeaders, setJobHeaders ] = useState([]);
   const [ schedule, setSchedule ] = useState({});
+  const [ scheduleOverride, setScheduleOverride ] = useState(null);
+  const [ scheduleKey, setScheduleKey ] = useState(0);
   const [ timezone, setTimezone ] = useState();
   const [ jobFolderId, setJobFolderId ] = useState();
   const [ tabValue, setTabValue ] = useState('common');
@@ -404,7 +406,14 @@ export default function JobEditor({ match }) {
   // Detect a curl/wget command pasted into the URL field and remember the parsed
   // result so we can offer a one-click import (GitHub issue #103).
   function detectCommandInUrl(value) {
-    if (looksLikeHttpCommand(value)) {
+    if (looksLikeCrontabLine(value)) {
+      const parsed = parseCrontabLine(value);
+      if (parsed && parsed.command && parsed.command.url) {
+        setDetectedCommand({ ...parsed.command, _schedule: parsed.schedule });
+      } else {
+        setDetectedCommand(null);
+      }
+    } else if (looksLikeHttpCommand(value)) {
       const parsed = parseHttpCommand(value);
       setDetectedCommand(parsed && parsed.url ? parsed : null);
     } else {
@@ -433,6 +442,7 @@ export default function JobEditor({ match }) {
       headers: detectedCommand.headers,
       body: detectedCommand.body,
       auth: detectedCommand.auth,
+      schedule: detectedCommand._schedule || null,
     });
     setDetectedCommand(null);
   }
@@ -446,7 +456,7 @@ export default function JobEditor({ match }) {
     return url;
   }
 
-  function applyImportedCommand({ url, method, headers, body, auth }) {
+  function applyImportedCommand({ url, method, headers, body, auth, schedule: importedSchedule }) {
     if (url) updateUrl(url);
     if (method !== null && method !== undefined) setRequestMethod(method);
     setJobHeaders(headers || []);
@@ -464,6 +474,11 @@ export default function JobEditor({ match }) {
       if (authPasswordRef.current) authPasswordRef.current.value = auth.password || '';
     }
 
+    if (importedSchedule) {
+      setScheduleOverride(importedSchedule);
+      setScheduleKey(k => k + 1);
+    }
+
     setTabValue('common');
     setShowCurlImport(false);
 
@@ -473,6 +488,7 @@ export default function JobEditor({ match }) {
     if (headers && headers.length > 0) parts.push(t('jobs.curlImport.appliedParts.headers', { count: headers.length }));
     if (body) parts.push(t('jobs.curlImport.appliedParts.body'));
     if (auth) parts.push(t('jobs.curlImport.appliedParts.auth'));
+    if (importedSchedule) parts.push(t('jobs.curlImport.appliedParts.schedule'));
     enqueueSnackbar(t('jobs.curlImport.applied', { parts: parts.join(', ') }), { variant: 'success' });
   }
 
@@ -603,9 +619,9 @@ export default function JobEditor({ match }) {
             />
           {detectedCommand && <Box mb={2}>
             <Alert severity='info'>
-              <AlertTitle>{t('jobs.commandImport.title')}</AlertTitle>
+              <AlertTitle>{t(detectedCommand._schedule ? 'jobs.crontabImport.title' : 'jobs.commandImport.title')}</AlertTitle>
               <div>
-                {t('jobs.commandImport.text')}
+                {t(detectedCommand._schedule ? 'jobs.crontabImport.text' : 'jobs.commandImport.text')}
               </div>
               <Box mt={1}>
                 <Button
@@ -652,7 +668,7 @@ export default function JobEditor({ match }) {
 
         <fieldset className={classes.fieldSet}>
           <FormLabel component='legend'>{t('jobs.executionSchedule')}</FormLabel>
-          <JobSchedule initialSchedule={job.schedule || {}} timezone={timezone} onChange={sched => setSchedule(sched)} />
+          <JobSchedule key={scheduleKey} initialSchedule={scheduleOverride || job.schedule || {}} timezone={timezone} onChange={sched => setSchedule(sched)} />
         </fieldset>
 
         <fieldset className={classes.fieldSet}>
