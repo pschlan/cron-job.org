@@ -7,6 +7,7 @@ import {
 import { Alert } from '@material-ui/lab';
 
 import { parseCurl } from '../../utils/CurlParser';
+import { parseHttpCommand, parseCrontabLine } from '../../utils/CommandParser';
 import { RequestMethod } from '../../utils/Constants';
 
 const useStyles = makeStyles(() => ({
@@ -33,7 +34,17 @@ export default function CurlImportDialog({ open, onClose, onImport }) {
   }
 
   function doImport() {
-    const parsed = parseCurl(command);
+    let parsed = null;
+    let schedule = null;
+
+    const crontabResult = parseCrontabLine(command);
+    if (crontabResult) {
+      parsed = crontabResult.command;
+      schedule = crontabResult.schedule;
+    } else {
+      parsed = parseHttpCommand(command) || parseCurl(command);
+    }
+
     if (!parsed) {
       setError(t('jobs.curlImport.parseError'));
       return;
@@ -55,6 +66,7 @@ export default function CurlImportDialog({ open, onClose, onImport }) {
       headers: parsed.headers,
       body: parsed.body,
       auth: parsed.auth,
+      schedule,
     });
     setCommand('');
     setError(null);
@@ -69,7 +81,7 @@ export default function CurlImportDialog({ open, onClose, onImport }) {
         label={t('jobs.curlImport.command')}
         value={command}
         onChange={({target}) => { setCommand(target.value); setError(null); }}
-        placeholder={"curl -X POST 'https://example.com/api' -H 'Accept: application/json' -d 'name=ada'"}
+        placeholder={"curl -X POST 'https://example.com/api' -H 'Accept: application/json' -d 'name=ada'\n\n# or a crontab line:\n*/5 * * * * curl https://example.com/api"}
         multiline
         minRows={8}
         maxRows={16}

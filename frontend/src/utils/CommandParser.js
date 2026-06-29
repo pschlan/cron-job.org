@@ -15,6 +15,7 @@
 //   }
 
 import { tokenize, parseCurl } from './CurlParser';
+import { crontabExpressionToSchedule } from './CrontabExpression';
 
 // Cheap check used by the UI to decide whether to offer an import. Matches a
 // leading `curl`/`wget` command word, tolerating a `$ `/`# ` prompt, a `sudo`
@@ -240,8 +241,47 @@ export function parseWget(input) {
   return result;
 }
 
-// Parse an HTTP command line, auto-detecting whether it is curl or wget.
-// Returns the unified shape or null when nothing usable could be extracted.
+const CRON_FIELD_RE = /^(?:\*(?:\/\d+)?|\d+(?:-\d+)?(?:,\d+(?:-\d+)?)*)$/;
+
+export function looksLikeCrontabLine(input) {
+  if (typeof input !== 'string') return false;
+  const parts = input.trim().split(/\s+/);
+  if (parts.length < 6) return false;
+  for (let i = 0; i < 5; i++) {
+    if (!CRON_FIELD_RE.test(parts[i])) return false;
+  }
+  let idx = 0;
+  const trimmed = input.trim();
+  for (let i = 0; i < 5; i++) {
+    idx = trimmed.indexOf(parts[i], idx) + parts[i].length;
+    while (idx < trimmed.length && /\s/.test(trimmed[idx])) idx++;
+  }
+  return looksLikeHttpCommand(trimmed.substring(idx));
+}
+
+export function parseCrontabLine(input) {
+  if (typeof input !== 'string') return null;
+  const trimmed = input.trim();
+  const parts = trimmed.split(/\s+/);
+  if (parts.length < 6) return null;
+
+  const cronExpr = parts.slice(0, 5).join(' ');
+  const schedule = crontabExpressionToSchedule(cronExpr);
+  if (!schedule) return null;
+
+  let idx = 0;
+  for (let i = 0; i < 5; i++) {
+    idx = trimmed.indexOf(parts[i], idx) + parts[i].length;
+    while (idx < trimmed.length && /\s/.test(trimmed[idx])) idx++;
+  }
+  const commandStr = trimmed.substring(idx);
+
+  const command = parseHttpCommand(commandStr);
+  if (!command || !command.url) return null;
+
+  return { schedule, command };
+}
+
 export function parseHttpCommand(input) {
   if (typeof input !== 'string') return null;
 

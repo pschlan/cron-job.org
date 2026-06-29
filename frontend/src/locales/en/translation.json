@@ -322,25 +322,30 @@
     "curlImport": {
       "button": "Import from cURL",
       "title": "Import from cURL",
-      "help": "Paste a cURL command. We will populate the URL, request method, headers, body and authentication fields from it.",
-      "command": "cURL command",
+      "help": "Paste a cURL or wget command, or a full crontab line. We will populate the URL, request method, headers, body, authentication and schedule fields from it.",
+      "command": "Command or crontab line",
       "import": "Import",
-      "parseError": "We couldn't recognize a cURL command in your input. Please make sure it starts with 'curl' and contains a URL.",
+      "parseError": "We couldn't recognize a cURL/wget command or crontab line in your input. Please make sure it starts with 'curl' or 'wget' (optionally preceded by a cron schedule) and contains a URL.",
       "unsupportedMethod": "The request method '{{method}}' is not supported. Please pick a supported method manually.",
-      "applied": "Imported from cURL: {{parts}}.",
+      "applied": "Imported: {{parts}}.",
       "appliedParts": {
         "url": "URL",
         "method": "request method",
         "headers": "{{count}} header",
         "headers_plural": "{{count}} headers",
         "body": "request body",
-        "auth": "authentication"
+        "auth": "authentication",
+        "schedule": "execution schedule"
       }
     },
     "commandImport": {
       "title": "This looks like a cURL or wget command",
       "text": "Instead of using it as the URL, we can read the URL, request method, headers, body and authentication from it.",
       "import": "Import command"
+    },
+    "crontabImport": {
+      "title": "This looks like a crontab line",
+      "text": "We can read the execution schedule and the URL, request method, headers, body and authentication from it."
     },
     "testRun": {
       "testRun": "Test run",
