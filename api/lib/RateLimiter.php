@@ -1,7 +1,7 @@
 <?php
-require_once('config/limits.inc.php');
-require_once('RedisConnection.php');
-require_once('SessionToken.php');
+require_once(__DIR__ . '/../config/limits.inc.php');
+require_once(__DIR__ . '/RedisConnection.php');
+require_once(__DIR__ . '/SessionToken.php');
 
 class RateLimiter {
   public static function check($apiMethod, $request, $sessionToken) {
@@ -48,6 +48,13 @@ class RateLimiter {
       ->incr($key)
       ->expire($key, $expire)
       ->exec();
+
+    if ($res === false) {
+      // If the transaction fails, we cannot guarantee rate limiting constraints,
+      // so we log this and allow the request to proceed to favor availability.
+      error_log('Redis RateLimiter transaction failed for key: ' . $key);
+      return true;
+    }
 
     return true;
   }
