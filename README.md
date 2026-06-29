@@ -111,17 +111,26 @@ is live-mounted as well, so API changes take effect without rebuilding.
 Start the development environment with:
 
 ```
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 ```
+
+Or use the helper script: `./dev.sh`
 
 Then open `http://localhost:8010/` as usual.
 
 Notes:
+* Dev mode uses separate Docker image tags (`cron-joborg-frontend-dev`,
+  `cron-joborg-statuspage-dev`) so it does not reuse the production nginx
+  images from a plain `docker compose up`.
 * The first start installs the npm dependencies inside the container and runs an
   initial build; this can take a while. Until the dev servers report
   `Compiled successfully!` (visible in the `frontend`/`statuspage` logs), the
   web server will respond with a "Bad Gateway" error. Subsequent starts reuse
   the cached dependencies and are much faster.
+* If you see `npm: command not found` in the `frontend` or `statuspage` logs,
+  the containers are running stale production images. Rebuild with
+  `docker compose -f docker-compose.yml -f docker-compose.dev.yml build frontend statuspage`
+  or add `--build` to your `up` command.
 * `src/utils/Config.js` for the frontend and status page is generated
   automatically inside the container from the `.env` settings (it is gitignored
   and your working tree is not modified).

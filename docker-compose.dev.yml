@@ -1,7 +1,7 @@
 # Development override for the docker compose setup.
 #
 # Usage:
-#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 #
 # In this mode the frontend and status page are run via the React (CRA)
 # development server (`npm start`) instead of being built and served as static
@@ -14,7 +14,9 @@
 # for one that points at the dev servers and forwards the HMR WebSocket.
 services:
   frontend:
+    image: cron-joborg-frontend-dev
     build:
+      context: ./frontend
       dockerfile: Dockerfile.dev
     working_dir: /src/cron-job.org/frontend
     command: bash docker/dev-entry
@@ -33,7 +35,9 @@ services:
       # Keep container-installed dependencies isolated from the host.
       - /src/cron-job.org/frontend/node_modules
   statuspage:
+    image: cron-joborg-statuspage-dev
     build:
+      context: ./statuspage
       dockerfile: Dockerfile.dev
     working_dir: /src/cron-job.org/statuspage
     command: bash docker/dev-entry
