@@ -417,6 +417,8 @@
     "addLogo": "Tambahkan Logo",
     "replaceLogo": "Ganti Logo",
     "removeLogo": "Hapus Logo",
+    "customHeaders": "Header kustom",
+    "customHeadersHelp": "HTML yang dimasukkan ke <head> halaman status publik, mis. Google Tag Manager atau aset CDN. {{count}}/{{max}} karakter.",
     "common": "Umum",
     "noLogo": "Belum ada logo yang ditambahkan. Klik \"Tambahkan Logo\" untuk menambahkan logo khusus ke halaman status Anda.",
     "publish": "Terbitkan halaman status",

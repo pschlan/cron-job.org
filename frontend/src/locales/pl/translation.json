@@ -387,6 +387,8 @@
     "addLogo": "Dodaj logo",
     "replaceLogo": "Zastąp logo",
     "removeLogo": "Usuń logo",
+    "customHeaders": "Niestandardowe nagłówki",
+    "customHeadersHelp": "HTML wstawiony do <head> publicznej strony statusu, np. Google Tag Manager lub zasoby CDN. {{count}}/{{max}} znaków.",
     "common": "Wspólne",
     "noLogo": "Nie dodano jeszcze logo. Kliknij „Dodaj logo”, aby dodać niestandardowe logo do swojej strony statusu.",
     "publish": "Opublikuj stronę statusu",

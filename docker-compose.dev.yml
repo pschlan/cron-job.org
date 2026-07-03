@@ -52,8 +52,8 @@ services:
       - ./statuspage:/src/cron-job.org/statuspage
       - /src/cron-job.org/statuspage/node_modules
   api:
-    # Live-mount the API source so PHP changes are visible immediately. The
-    # config volume from docker-compose.yml is merged on top of this mount.
+    # Live-mount the API source so PHP changes are visible immediately.
+    # In dev mode, the config.inc.php from ./api is used directly.
     volumes:
       - ./api:/var/www/html
   www:

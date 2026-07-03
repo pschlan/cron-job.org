@@ -417,6 +417,8 @@
     "addLogo": "Agregar logo",
     "replaceLogo": "Reemplazar logo",
     "removeLogo": "Eliminar logo",
+    "customHeaders": "Encabezados personalizados",
+    "customHeadersHelp": "HTML insertado en el <head> de la página de estado pública, p. ej. Google Tag Manager o recursos de CDN. {{count}}/{{max}} caracteres.",
     "common": "Común",
     "noLogo": "Aún no se ha agregado un logo. Haz clic en \"Agregar logo\" para añadir un logo personalizado a tu página de estado.",
     "publish": "Publicar página de estado",

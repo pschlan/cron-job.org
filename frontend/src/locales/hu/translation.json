@@ -389,6 +389,8 @@
     "addLogo": "Logó hozzáadása",
     "replaceLogo": "Logó cseréje",
     "removeLogo": "Logó eltávolítása",
+    "customHeaders": "Egyéni fejlécek",
+    "customHeadersHelp": "HTML a nyilvános állapotoldal <head> részébe, pl. Google Tag Manager vagy CDN erőforrások. {{count}}/{{max}} karakter.",
     "common": "Közös",
     "noLogo": "Még nincs logó hozzáadva. Kattintson az \"Logó hozzáadása\" gombra, hogy egyéni logót adjon hozzá az állapotoldalához.",
     "publish": "Állapotoldal közzététele",

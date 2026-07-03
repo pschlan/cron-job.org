@@ -191,6 +191,7 @@ CREATE TABLE `statuspage` (
   `title` varchar(255) NOT NULL DEFAULT '',
   `enabled` tinyint(4) NOT NULL DEFAULT '1',
   `uniqueid` varchar(8) NOT NULL DEFAULT '',
+  `custom_headers` varchar(1000) NOT NULL DEFAULT '',
   PRIMARY KEY (`statuspageid`),
   UNIQUE KEY `uniqueid` (`uniqueid`),
   KEY `userid` (`userid`)

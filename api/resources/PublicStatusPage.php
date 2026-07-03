@@ -27,7 +27,7 @@ class PublicStatusPageManager {
   public function getStatusPage($domain) {
     $uniqueId = self::parseStatusPageSubdomain($domain);
 
-    $selectClause = 'SELECT `statuspage`.`statuspageid` AS `statusPageId`, `statuspage`.`title` AS `title`, `statuspage`.`userid` AS `userId`, `logo`, `statuspagelogo`.`mimetype` AS `logoMimeType` '
+    $selectClause = 'SELECT `statuspage`.`statuspageid` AS `statusPageId`, `statuspage`.`title` AS `title`, `statuspage`.`userid` AS `userId`, `statuspage`.`custom_headers` AS `customHeaders`, `logo`, `statuspagelogo`.`mimetype` AS `logoMimeType` '
       . 'FROM `statuspage` '
       . 'LEFT JOIN `statuspagelogo` ON `statuspagelogo`.`statuspageid`=`statuspage`.`statuspageid`';
 
@@ -115,14 +115,15 @@ class PublicStatusPageManager {
         'logo'              => $statusPageMeta->logo !== null ? (object) [
           'data'            => base64_encode($statusPageMeta->logo),
           'mimeType'        => $statusPageMeta->logoMimeType
-        ] : null
+        ] : null,
+        'customHeaders'     => $statusPageMeta->customHeaders ?? ''
       ],
       'statusPageMonitors'  => $statusPageMonitors,
       'incidents'           => $incidents
     ];
   }
 
-  private static function parseStatusPageSubdomain($domain) {
+  public static function parseStatusPageSubdomain($domain) {
     global $config;
     if (strlen($domain) > strlen($config['statusPageDomain'])
         && strcasecmp(substr($domain, -(strlen($config['statusPageDomain']) + 1)), '.' . $config['statusPageDomain']) === 0) {

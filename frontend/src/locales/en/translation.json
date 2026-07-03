@@ -458,6 +458,8 @@
     "addLogo": "Add Logo",
     "replaceLogo": "Replace Logo",
     "removeLogo": "Remove Logo",
+    "customHeaders": "Custom Headers",
+    "customHeadersHelp": "HTML inserted into the public status page <head>, e.g. Google Tag Manager or CDN assets. {{count}}/{{max}} characters.",
     "common": "Common",
     "noLogo": "No logo added yet. Click \"Add Logo\" to add a custom logo to your status page.",
     "publish": "Publish status page",

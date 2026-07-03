@@ -387,6 +387,8 @@
     "addLogo": "Aggiungi Logo",
     "replaceLogo": "Sostituisci Logo",
     "removeLogo": "Rimuovi Logo",
+    "customHeaders": "Intestazioni personalizzate",
+    "customHeadersHelp": "HTML inserito nel <head> della pagina di stato pubblica, es. Google Tag Manager o risorse CDN. {{count}}/{{max}} caratteri.",
     "common": "Base",
     "noLogo": "Nessun logo aggiunto. Clicca su \"Aggiungi Logo\" per aggiungere un logo personalizzato alla tua pagina di stato.",
     "publish": "Pubblica pagina di stato",

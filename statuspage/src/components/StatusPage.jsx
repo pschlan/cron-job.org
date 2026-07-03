@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import LanguageSelector from './LanguageSelector';
 import useLanguageCode from '../hooks/useLanguageCode';
 import { Config } from '../utils/Config';
+import injectCustomHeadHtml from '../utils/injectCustomHeadHtml';
 
 const useStyles = makeStyles(theme => ({
   loading: {
@@ -73,6 +74,18 @@ export default function StatusPage() {
       document.title = statusPage.statusPageMeta.title;
     }
   }, [statusPage]);
+
+  useEffect(() => {
+    const html = statusPage?.statusPageMeta?.customHeaders?.trim();
+    if (!html) {
+      return undefined;
+    }
+
+    const injected = injectCustomHeadHtml(html);
+    return () => {
+      injected.forEach(node => node.remove());
+    };
+  }, [statusPage?.statusPageMeta?.customHeaders]);
 
   return !statusPage ? <>
       {error ?

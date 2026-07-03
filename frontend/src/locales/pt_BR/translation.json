@@ -386,6 +386,8 @@
     "addLogo": "Adicionar logotipo",
     "replaceLogo": "Substituir logotipo",
     "removeLogo": "Remover logotipo",
+    "customHeaders": "Headers personalizados",
+    "customHeadersHelp": "HTML inserido no <head> da página de status pública, ex.: Google Tag Manager ou assets de CDN. {{count}}/{{max}} caracteres.",
     "common": "Comum",
     "noLogo": "Nenhum logotipo adicionado ainda. Clique em \"Adicionar logotipo\" para adicionar um logotipo personalizado à sua página de status.",
     "publish": "Publicar página de status",

@@ -382,6 +382,8 @@
     "addLogo": "添加 Logo",
     "replaceLogo": "替换 Logo",
     "removeLogo": "删除 Logo",
+    "customHeaders": "自定义标头",
+    "customHeadersHelp": "插入到公开状态页面 <head> 的 HTML，例如 Google Tag Manager 或 CDN 资源。{{count}}/{{max}} 字符。",
     "common": "常见",
     "noLogo": "尚未添加 Logo。单击「添加 Logo」可将自订 Logo 添加到您的状态页面。",
     "publish": "发布状态页",

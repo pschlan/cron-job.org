@@ -389,6 +389,8 @@
     "addLogo": "Logo Ekle",
     "replaceLogo": "Logoyu Değiştir",
     "removeLogo": "Logoyu Kaldır",
+    "customHeaders": "Özel başlıklar",
+    "customHeadersHelp": "Herkese açık durum sayfasının <head> bölümüne eklenen HTML, örn. Google Tag Manager veya CDN varlıkları. {{count}}/{{max}} karakter.",
     "common": "Genel",
     "noLogo": "Henüz logo eklenmedi. Özel bir logo eklemek için \"Logo Ekle\"ye tıklayın.",
     "publish": "Durum sayfasını yayınla",

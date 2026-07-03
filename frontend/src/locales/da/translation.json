@@ -394,6 +394,8 @@
     "addLogo": "Tilføj logo",
     "replaceLogo": "Erstat logo",
     "removeLogo": "Fjern logo",
+    "customHeaders": "Brugerdefinerede headere",
+    "customHeadersHelp": "HTML indsat i <head> på den offentlige statusside, f.eks. Google Tag Manager eller CDN-aktiver. {{count}}/{{max}} tegn.",
     "common": "Fælles",
     "noLogo": "Intet logo endnu. Klik på \"Tilføj logo\" for at uploade.",
     "publish": "Offentliggør statusside",

@@ -1,4 +1,4 @@
-import { Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, CircularProgress, InputLabel, LinearProgress, Link, makeStyles, Paper, TableContainer, Tooltip, Typography, Switch, FormControlLabel } from '@material-ui/core';
+import { Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, CircularProgress, InputLabel, LinearProgress, Link, makeStyles, Paper, TableContainer, Tooltip, Typography, Switch, FormControlLabel, TextField, FormControl } from '@material-ui/core';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getStatusPage, deleteStatusPage, deleteStatusPageMonitor, updateStatusPage, deleteStatusPageDomain, updateStatusPageMonitorsOrder, deleteStatusPageIncident } from '../../utils/API';
@@ -116,6 +116,7 @@ export default function StatusPageEditor({ match }) {
   const [ statusPageTitle, setStatusPageTitle ] = useState();
   const [ logoDataUrl, setLogoDataUrl ] = useState(null);
   const [ published, setPublished ] = useState(false);
+  const [ customHeaders, setCustomHeaders ] = useState('');
 
   const [ editMonitor, setEditMonitor ] = useState(null);
   const [ deleteMonitor, setDeleteMonitor ] = useState(null);
@@ -186,6 +187,7 @@ export default function StatusPageEditor({ match }) {
     updateStatusPage(statusPageId, {
         title: statusPageTitle,
         enabled: published,
+        customHeaders,
         ...parseLogoDataUrl(logoDataUrl)
       })
       .then(() => {
@@ -251,6 +253,7 @@ export default function StatusPageEditor({ match }) {
       setLogoDataUrl(statusPage.logo && statusPage.logoMimeType ? `data:${statusPage.logoMimeType};base64,${statusPage.logo}` : null);
       setDomains(statusPage.domains);
       setPublished(statusPage.enabled);
+      setCustomHeaders(statusPage.customHeaders || '');
       setIsLoading(false);
     }
   }, [statusPage]);
@@ -521,6 +524,22 @@ export default function StatusPageEditor({ match }) {
                 </ButtonGroup>
               </Box>
             </Box>
+          </Grid>
+          <Grid item xs={12}>
+            <FormControl fullWidth>
+              <TextField
+                label={t('statuspages.customHeaders')}
+                value={customHeaders}
+                onChange={({target}) => setCustomHeaders(target.value)}
+                helperText={t('statuspages.customHeadersHelp', { count: customHeaders.length, max: 1000 })}
+                InputLabelProps={{ shrink: true }}
+                multiline
+                minRows={4}
+                maxRows={8}
+                inputProps={{ maxLength: 1000 }}
+                fullWidth
+                />
+            </FormControl>
           </Grid>
           <Grid item xs={12} style={{ textAlign: 'right' }}>
             <Button

@@ -458,6 +458,8 @@
     "addLogo": "Logo hinzufügen",
     "replaceLogo": "Logo austauschen",
     "removeLogo": "Logo entfernen",
+    "customHeaders": "Benutzerdefinierte Header",
+    "customHeadersHelp": "HTML im <head> der öffentlichen Statusseite, z. B. Google Tag Manager oder CDN-Ressourcen. {{count}}/{{max}} Zeichen.",
     "common": "Allgemein",
     "noLogo": "Es wurde noch kein Logo hinterlegen. Klicken Sie auf \"Logo hinzufügen\", um ein eigenes Logo zu hinterlegen.",
     "publish": "Status-Seite veröffentlichen",

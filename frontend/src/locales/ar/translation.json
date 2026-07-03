@@ -408,6 +408,8 @@
     "addLogo": "إضافة شعار",
     "replaceLogo": "استبدال الشعار",
     "removeLogo": "إزالة الشعار",
+    "customHeaders": "رؤوس مخصصة",
+    "customHeadersHelp": "HTML يُدرج في <head> صفحة الحالة العامة، مثل Google Tag Manager أو أصول CDN. {{count}}/{{max}} حرف.",
     "common": "عام",
     "noLogo": "لا يوجد شعار مضاف بعد. انقر على \"إضافة شعار\" لإضافة شعار مخصص.",
     "publish": "نشر صفحة الحالة",

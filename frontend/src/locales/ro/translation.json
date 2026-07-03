@@ -387,6 +387,8 @@
     "addLogo": "Adaugă logo",
     "replaceLogo": "Înlocuiește logo",
     "removeLogo": "Elimină logo",
+    "customHeaders": "Antete personalizate",
+    "customHeadersHelp": "HTML inserat în <head> paginii publice de stare, de ex. Google Tag Manager sau resurse CDN. {{count}}/{{max}} caractere.",
     "common": "Obișnuit",
     "noLogo": "Niciun logo adăugat încă. Dă clic pe „Adaugă logo” pentru a adăuga un logo personalizat la pagina ta de stare.",
     "publish": "Publică pagină de stare",

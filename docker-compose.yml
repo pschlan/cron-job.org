@@ -19,6 +19,11 @@ services:
       - ./docker-data/config/config_master.sql:/docker-entrypoint-initdb.d/01_config_master.sql
       - ./database/phrases_mail_template.sql:/docker-entrypoint-initdb.d/02_phrases_mail_template.sql
       - ./database/phrases_ssl_cert_expiry_notify.sql:/docker-entrypoint-initdb.d/03_phrases_ssl_cert_expiry_notify.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
   mysql-node:
     image: mysql:8.3
     command: --default-authentication-plugin=mysql_native_password --sql_mode="" --skip-name-resolve --tls-version=""
@@ -31,6 +36,11 @@ services:
       - ${NODE_MYSQL_DATA_DIR-./docker-data/data/mysql-node}:/var/lib/mysql
       - ${NODE_MYSQL_LOG_DIR-./docker-data/logs/mysql-node}:/var/log/mysql
       - ./database/struct_node.sql:/docker-entrypoint-initdb.d/struct_node.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
   redis:
     image: redis:7-alpine
   frontend:
@@ -66,9 +76,12 @@ services:
       MYSQL_USER: ${MASTER_MYSQL_USER}
       MYSQL_PASSWORD: ${MASTER_MYSQL_PASSWORD}
     depends_on:
-      - chronos
-      - mysql-master
-      - redis
+      chronos:
+        condition: service_started
+      mysql-master:
+        condition: service_healthy
+      redis:
+        condition: service_started
   www:
     build: ./docker/www
     ports:
@@ -96,5 +109,7 @@ services:
       NODE_MYSQL_USER: ${NODE_MYSQL_USER}
       NODE_MYSQL_PASSWORD: ${NODE_MYSQL_PASSWORD}
     depends_on:
-      - mysql-master
-      - mysql-node
+      mysql-master:
+        condition: service_healthy
+      mysql-node:
+        condition: service_healthy

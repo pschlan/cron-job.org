@@ -350,6 +350,8 @@
     "addLogo": "Ajouter un logo",
     "replaceLogo": "Remplacer le logo",
     "removeLogo": "Supprimer le logo",
+    "customHeaders": "En-têtes personnalisés",
+    "customHeadersHelp": "HTML inséré dans le <head> de la page d'état publique, p. ex. Google Tag Manager ou ressources CDN. {{count}}/{{max}} caractères.",
     "common": "Commun",
     "noLogo": "Aucun logo n'a encore été ajouté. Cliquez sur \"Ajouter un logo\" pour ajouter un logo personnalisé à votre page d'état.",
     "publish": "Publier la page d'état",

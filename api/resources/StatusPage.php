@@ -73,6 +73,7 @@ class StatusPage {
   public $monitors;
   public $logo;
   public $logoMimeType;
+  public $customHeaders;
   public $maxMonitors;
   public $maxDomains;
   public $incidents;
@@ -168,7 +169,7 @@ class StatusPageManager {
   }
 
   public function getStatusPage($statusPageId) {
-    $stmt = Database::get()->prepare('SELECT `statuspage`.`statuspageid` AS `statusPageId`, `title`, `uniqueid` AS `uniqueId`, `enabled`, GROUP_CONCAT(`domain`) AS `domains`, `logo`, `statuspagelogo`.`mimetype` AS `logoMimeType` '
+    $stmt = Database::get()->prepare('SELECT `statuspage`.`statuspageid` AS `statusPageId`, `title`, `uniqueid` AS `uniqueId`, `enabled`, `custom_headers` AS `customHeaders`, GROUP_CONCAT(`domain`) AS `domains`, `logo`, `statuspagelogo`.`mimetype` AS `logoMimeType` '
       . 'FROM `statuspage` '
       . 'LEFT JOIN `statuspagedomain` ON `statuspagedomain`.`statuspageid`=`statuspage`.`statuspageid` '
       . 'LEFT JOIN `statuspagelogo` ON `statuspagelogo`.`statuspageid`=`statuspage`.`statuspageid` '
@@ -230,14 +231,20 @@ class StatusPageManager {
       throw new InvalidArgumentsException();
     }
 
+    $customHeaders = isset($statusPage->customHeaders) ? $statusPage->customHeaders : '';
+    if (!is_string($customHeaders) || strlen($customHeaders) > 1000) {
+      throw new InvalidArgumentsException();
+    }
+
     $this->checkStatusPagePermission($statusPageId);
 
     $stmt = Database::get()->prepare('UPDATE `statuspage` '
-      . 'SET `title`=:title, `enabled`=:enabled '
+      . 'SET `title`=:title, `enabled`=:enabled, `custom_headers`=:customHeaders '
       . 'WHERE `statusPageId`=:statusPageId AND `userid`=:userId');
     $stmt->execute([
       ':title'            => $statusPage->title,
       ':enabled'          => $statusPage->enabled ? 1 : 0,
+      ':customHeaders'    => $customHeaders,
       ':statusPageId'     => $statusPageId,
       ':userId'           => $this->authToken->userId
     ]);
