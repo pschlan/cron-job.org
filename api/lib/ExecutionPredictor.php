@@ -98,6 +98,15 @@ class ExecutionPredictor {
   private $wdays;
   private $hours;
   private $minutes;
+  private $expiresAt;
+
+  //! @note Pre-computed once in the constructor and reused across every predictNextExecution()
+  //!       call: wildcard flags avoid the repeated "!= array(-1)" comparisons, the *Set lookup
+  //!       tables replace O(n) in_array() checks, and the sorted hour/minute arrays let the search
+  //!       loop jump straight to the next matching value instead of stepping one unit at a time.
+  private $monthsWild, $mdaysWild, $wdaysWild, $hoursWild, $minutesWild;
+  private $monthSet, $mdaySet, $wdaySet, $hourSet, $minuteSet;
+  private $sortedHours, $sortedMinutes;
 
   function __construct($timezone, $months, $mdays, $wdays, $hours, $minutes, $expiresAt = 0) {
     $this->timezone   = $timezone;
@@ -110,6 +119,39 @@ class ExecutionPredictor {
     $this->hours      = $hours;
     $this->minutes    = $minutes;
     $this->expiresAt  = $expiresAt;
+
+    $this->monthsWild   = self::isWildcard($months);
+    $this->mdaysWild    = self::isWildcard($mdays);
+    $this->wdaysWild    = self::isWildcard($wdays);
+    $this->hoursWild    = self::isWildcard($hours);
+    $this->minutesWild  = self::isWildcard($minutes);
+
+    //! @note Integer keys, so lookups must use intval() on the (possibly zero-padded, e.g. "06")
+    //!       date() strings returned by ExecutionDate.
+    $this->monthSet     = array_flip($months);
+    $this->mdaySet      = array_flip($mdays);
+    $this->wdaySet      = array_flip($wdays);
+    $this->hourSet      = array_flip($hours);
+    $this->minuteSet    = array_flip($minutes);
+
+    $this->sortedHours = $hours;
+    sort($this->sortedHours);
+    $this->sortedMinutes = $minutes;
+    sort($this->sortedMinutes);
+  }
+
+  private static function isWildcard($array) {
+    return count($array) === 1 && intval(reset($array)) === -1;
+  }
+
+  //! @note Smallest element of a sorted (ascending) array that is >= $value, or null if none.
+  private static function nextGE($sortedArray, $value) {
+    foreach ($sortedArray as $v) {
+      if ($v >= $value) {
+        return $v;
+      }
+    }
+    return null;
   }
 
   public function predictNextExecutions($now, $n = 3) {
@@ -149,7 +191,7 @@ class ExecutionPredictor {
       return false;
     }
 
-    if ($this->months != array(-1)) {
+    if (!$this->monthsWild) {
       $maxLimit = 0;
 
       foreach ($this->months as $m) {
@@ -174,7 +216,7 @@ class ExecutionPredictor {
       if (++$iterations == $maxIterations)
         return false;
 
-      if ($this->months != array(-1) && !in_array($next->month(), $this->months)) {
+      if (!$this->monthsWild && !isset($this->monthSet[intval($next->month())])) {
         $next->addMonths(1);
         $next->setDay(1);
         $next->setHour(0);
@@ -182,36 +224,53 @@ class ExecutionPredictor {
         continue;
       }
 
-      if ($this->mdays != array(-1) && $this->wdays != array(-1) && (!in_array($next->day(), $this->mdays) && !in_array($next->weekDay(), $this->wdays))) {
+      if (!$this->mdaysWild && !$this->wdaysWild && (!isset($this->mdaySet[intval($next->day())]) && !isset($this->wdaySet[intval($next->weekDay())]))) {
         $next->addDays(1);
         $next->setHour(0);
         $next->setMinute(0);
         continue;
       }
 
-      if ($this->mdays != array(-1) && $this->wdays == array(-1) && !in_array($next->day(), $this->mdays)) {
+      if (!$this->mdaysWild && $this->wdaysWild && !isset($this->mdaySet[intval($next->day())])) {
         $next->addDays(1);
         $next->setHour(0);
         $next->setMinute(0);
         continue;
       }
 
-      if ($this->wdays != array(-1) && $this->mdays == array(-1) && !in_array($next->weekDay(), $this->wdays)) {
+      if (!$this->wdaysWild && $this->mdaysWild && !isset($this->wdaySet[intval($next->weekDay())])) {
         $next->addDays(1);
         $next->setHour(0);
         $next->setMinute(0);
         continue;
       }
 
-      if ($this->hours != array(-1) && !in_array($next->hour(), $this->hours)) {
-        $next->addHours(1);
-        $next->setMinute(0);
+      if (!$this->hoursWild && !isset($this->hourSet[intval($next->hour())])) {
+        //! @note Jump straight to the next valid hour today (or roll to the next day) instead of
+        //!       stepping one hour at a time; resetting the minute lets the minute check below
+        //!       pick the first valid minute of the new hour.
+        $nh = self::nextGE($this->sortedHours, intval($next->hour()));
+        if ($nh === null) {
+          $next->addDays(1);
+          $next->setHour(0);
+          $next->setMinute(0);
+        } else {
+          $next->setHour($nh);
+          $next->setMinute(0);
+        }
         continue;
       }
 
-      if ($this->minutes != array(-1) && !in_array($next->minute(), $this->minutes)) {
-        $next->addMinutes(1);
-        continue;
+      if (!$this->minutesWild && !isset($this->minuteSet[intval($next->minute())])) {
+        //! @note The month/day/hour are already valid here, so jump directly to the next valid
+        //!       minute within this hour; if there is none, roll to the next hour and re-check.
+        $nm = self::nextGE($this->sortedMinutes, intval($next->minute()));
+        if ($nm === null) {
+          $next->setMinute(0);
+          $next->addHours(1);
+          continue;
+        }
+        $next->setMinute($nm);
       }
 
       break;
