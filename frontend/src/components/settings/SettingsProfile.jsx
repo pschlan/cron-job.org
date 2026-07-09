@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Button, CircularProgress, Grid, InputLabel, LinearProgress, makeStyles, MenuItem, Paper, Select, Typography } from '@material-ui/core';
+import { Button, CircularProgress, FormLabel, Grid, InputLabel, LinearProgress, makeStyles, MenuItem, Paper, Select, Typography } from '@material-ui/core';
 import { grey } from '@material-ui/core/colors';
 import { useTranslation } from 'react-i18next';
 import { updateUserProfile } from '../../utils/API';
 import useTimezones from '../../hooks/useTimezones';
 import useUserProfile from '../../hooks/useUserProfile';
-import Title from '../misc/Title';
 import ValidatingTextField from '../misc/ValidatingTextField';
 import SaveIcon from '@material-ui/icons/Save';
 import { useSnackbar } from 'notistack';
@@ -21,8 +20,15 @@ const useStyles = makeStyles(theme => ({
     }
   },
   paper: {
-    '&:not(:last-of-type)': {
-      marginBottom: theme.spacing(2)
+    padding: theme.spacing(2)
+  },
+  fieldSet: {
+    padding: theme.spacing(2),
+    margin: theme.spacing(2, 0),
+    border: `1px solid ${theme.palette.divider}`,
+    borderRadius: theme.spacing(0.5),
+    '& legend': {
+      padding: theme.spacing(0, 1)
     }
   },
   timezoneNote: {
@@ -92,83 +98,85 @@ export default function SettingsProfile() {
 
   return <>
     <Paper className={classes.paper}>
-      <Title>{t('settings.account')}</Title>
-      <Grid container className={classes.grid}>
-        <Grid item sm={6} xs={12}>
-          <ValidatingTextField
-            label={t('settings.email')}
-            InputLabelProps={{ shrink: true }}
-            defaultValue={email}
-            disabled={true}
-            fullWidth
-            />
+      <fieldset className={classes.fieldSet}>
+        <FormLabel component='legend'>{t('settings.account')}</FormLabel>
+        <Grid container className={classes.grid}>
+          <Grid item sm={6} xs={12}>
+            <ValidatingTextField
+              label={t('settings.email')}
+              InputLabelProps={{ shrink: true }}
+              defaultValue={email}
+              disabled={true}
+              fullWidth
+              />
+          </Grid>
+          <Grid item sm={3} xs={12}>
+            <InputLabel id='newsletter-subscribe-label' shrink={true}>{t('settings.newsletterSubscribe.title')}</InputLabel>
+            <Select
+              value={newsletterSubscribe}
+              onChange={({target}) => setNewsletterSubscribe(target.value)}
+              labelId='newsletter-subscribe-label'>
+                <MenuItem value='yes' key='yes'>{t('settings.newsletterSubscribe.yes')}</MenuItem>
+                <MenuItem value='no' key='no'>{t('settings.newsletterSubscribe.no')}</MenuItem>
+                <MenuItem value='undefined' key='undefined'>{t('settings.newsletterSubscribe.undefined')}</MenuItem>
+            </Select>
+          </Grid>
+          <Grid item sm={3} xs={12}>
+            <Typography variant='caption' component='div'>{t('settings.memberSince')}</Typography>
+            <Typography component='div' className={classes.signupDate}>{moment(signupDate*1000).calendar()}</Typography>
+          </Grid>
         </Grid>
-        <Grid item sm={3} xs={12}>
-          <InputLabel id='newsletter-subscribe-label' shrink={true}>{t('settings.newsletterSubscribe.title')}</InputLabel>
-          <Select
-            value={newsletterSubscribe}
-            onChange={({target}) => setNewsletterSubscribe(target.value)}
-            labelId='newsletter-subscribe-label'>
-              <MenuItem value='yes' key='yes'>{t('settings.newsletterSubscribe.yes')}</MenuItem>
-              <MenuItem value='no' key='no'>{t('settings.newsletterSubscribe.no')}</MenuItem>
-              <MenuItem value='undefined' key='undefined'>{t('settings.newsletterSubscribe.undefined')}</MenuItem>
-          </Select>
-        </Grid>
-        <Grid item sm={3} xs={12}>
-          <Typography variant='caption' component='div'>{t('settings.memberSince')}</Typography>
-          <Typography component='div' className={classes.signupDate}>{moment(signupDate*1000).calendar()}</Typography>
-        </Grid>
-      </Grid>
-    </Paper>
+      </fieldset>
 
-    <Paper className={classes.paper}>
-      <Title>{t('settings.profile')}</Title>
-      <Grid container className={classes.grid}>
-        <Grid item sm={6} xs={12}>
-          <ValidatingTextField
-            label={t('settings.firstName')}
-            InputLabelProps={{ shrink: true }}
-            defaultValue={firstName}
-            onBlur={({target}) => setFirstName(target.value)}
-            pattern={RegexPatterns.name}
-            patternErrorText={t('common.checkInput')}
-            fullWidth
-            />
+      <fieldset className={classes.fieldSet}>
+        <FormLabel component='legend'>{t('settings.profile')}</FormLabel>
+        <Grid container className={classes.grid}>
+          <Grid item sm={6} xs={12}>
+            <ValidatingTextField
+              label={t('settings.firstName')}
+              InputLabelProps={{ shrink: true }}
+              defaultValue={firstName}
+              onBlur={({target}) => setFirstName(target.value)}
+              pattern={RegexPatterns.name}
+              patternErrorText={t('common.checkInput')}
+              fullWidth
+              />
+          </Grid>
+          <Grid item sm={6} xs={12}>
+            <ValidatingTextField
+              label={t('settings.lastName')}
+              InputLabelProps={{ shrink: true }}
+              defaultValue={lastName}
+              onBlur={({target}) => setLastName(target.value)}
+              pattern={RegexPatterns.name}
+              patternErrorText={t('common.checkInput')}
+              fullWidth
+              />
+          </Grid>
         </Grid>
-        <Grid item sm={6} xs={12}>
-          <ValidatingTextField
-            label={t('settings.lastName')}
-            InputLabelProps={{ shrink: true }}
-            defaultValue={lastName}
-            onBlur={({target}) => setLastName(target.value)}
-            pattern={RegexPatterns.name}
-            patternErrorText={t('common.checkInput')}
-            fullWidth
-            />
-        </Grid>
-      </Grid>
-    </Paper>
+      </fieldset>
 
-    <Paper className={classes.paper}>
-      <Title>{t('settings.defaultTimezone')}</Title>
-      <Grid container className={classes.grid}>
-        <Grid item xs={12}>
-          <InputLabel shrink id='timezone-label'>
-            {t('jobs.timezone')}
-          </InputLabel>
-          <Select
-            value={timezones.length ? timezone : ''}
-            onChange={({target}) => setTimezone(target.value)}
-            labelId='timezone-label'
-            fullWidth>
-            {timezones.map(zone =>
-              <MenuItem value={zone} key={zone}>{zone}</MenuItem>)}
-          </Select>
-          <Typography variant='caption' component='div' className={classes.timezoneNote}>
-            {t('settings.timezoneNote')}
-          </Typography>
+      <fieldset className={classes.fieldSet}>
+        <FormLabel component='legend'>{t('settings.defaultTimezone')}</FormLabel>
+        <Grid container className={classes.grid}>
+          <Grid item xs={12}>
+            <InputLabel shrink id='timezone-label'>
+              {t('jobs.timezone')}
+            </InputLabel>
+            <Select
+              value={timezones.length ? timezone : ''}
+              onChange={({target}) => setTimezone(target.value)}
+              labelId='timezone-label'
+              fullWidth>
+              {timezones.map(zone =>
+                <MenuItem value={zone} key={zone}>{zone}</MenuItem>)}
+            </Select>
+            <Typography variant='caption' component='div' className={classes.timezoneNote}>
+              {t('settings.timezoneNote')}
+            </Typography>
+          </Grid>
         </Grid>
-      </Grid>
+      </fieldset>
     </Paper>
 
     <Grid container direction='row' justifyContent='flex-end'>
