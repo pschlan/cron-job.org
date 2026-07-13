@@ -2,7 +2,7 @@ export const Config = {
   //! @note Adjust project name, domains and URLs accordingly.
   'productName': 'cron-job.org OSS',
   'baseURL': 'https://example.com',
-  'twitterURL': 'https://twitter.com/CronJobOrg',
+  'twitterURL': 'https://x.com/CronJobOrg',
   'githubURL': 'https://github.com/pschlan/cron-job.org',
   'privacyPolicyURL': 'https://example.com/privacy/',
   'termsOfServiceURL': 'https://example.com/tos/',
