@@ -178,6 +178,32 @@ describe('parseCurl', () => {
     expect(parseCurl("curl --data-binary @file https://example.com").body).toBe('@file');
   });
 
+  it('moves -d data into the query string when -G is used', () => {
+    const r = parseCurl("curl -G -d 'q=ada' -d 'lang=en' https://example.com/search");
+    expect(r.url).toBe('https://example.com/search?q=ada&lang=en');
+    expect(r.method).toBe('GET');
+    expect(r.body).toBeNull();
+  });
+
+  it('appends -G data to a URL which already has a query string', () => {
+    const r = parseCurl("curl --get --data-urlencode 'q=a b' 'https://example.com/s?page=2'");
+    expect(r.url).toBe('https://example.com/s?page=2&q=a%20b');
+    expect(r.body).toBeNull();
+  });
+
+  it('keeps an explicit method when -G is used', () => {
+    const r = parseCurl("curl -X POST -G -d 'a=1' https://example.com");
+    expect(r.method).toBe('POST');
+    expect(r.url).toBe('https://example.com?a=1');
+    expect(r.body).toBeNull();
+  });
+
+  it('leaves the URL alone when -G is given without data', () => {
+    const r = parseCurl('curl -G https://example.com/s');
+    expect(r.url).toBe('https://example.com/s');
+    expect(r.method).toBe('GET');
+  });
+
   it('handles --json by adding both Content-Type and Accept', () => {
     const r = parseCurl("curl --json '{\"a\":1}' https://example.com");
     expect(r.method).toBe('POST');
