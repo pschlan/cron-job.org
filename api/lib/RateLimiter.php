@@ -36,19 +36,25 @@ class RateLimiter {
   public static function checkWithKey($key, $expire, $checkFunction) {
     $redis = RedisConnection::get();
     if ($redis === null) {
+      error_log('RateLimiter: Redis is not configured/connected, skipping rate limit check for key "' . $key . '"!');
       return true;
     }
 
-    $value = $redis->get($key);
-    if ($value !== false && !$checkFunction($value)) {
-      return false;
+    try {
+      $value = $redis->get($key);
+      if ($value !== false && !$checkFunction($value)) {
+        return false;
+      }
+
+      $res = $redis->multi()
+        ->incr($key)
+        ->expire($key, $expire)
+        ->exec();
+
+      return true;
+    } catch (RedisException $ex) {
+      error_log('RateLimiter: Redis is unreachable, skipping rate limit check for key "' . $key . '": ' . (string)$ex);
+      return true;
     }
-
-    $res = $redis->multi()
-      ->incr($key)
-      ->expire($key, $expire)
-      ->exec();
-
-    return true;
   }
 }
