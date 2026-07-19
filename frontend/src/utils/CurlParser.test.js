@@ -198,6 +198,11 @@ describe('parseCurl', () => {
     expect(r.body).toBeNull();
   });
 
+  it('does not add a form Content-Type when -G moved the data into the URL', () => {
+    const r = parseCurl("curl -G -d 'a=1' https://example.com");
+    expect(r.headers.find(h => h.key.toLowerCase() === 'content-type')).toBeUndefined();
+  });
+
   it('leaves the URL alone when -G is given without data', () => {
     const r = parseCurl('curl -G https://example.com/s');
     expect(r.url).toBe('https://example.com/s');

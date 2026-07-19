@@ -468,6 +468,7 @@ export function parseCurl(input) {
   if (forceGet) {
     result.url = appendQuery(result.url, result.body);
     result.body = null;
+    formBody = false;
     if (!explicitMethod) result.method = 'GET';
   }
 
