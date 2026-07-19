@@ -68,7 +68,7 @@
     "confirmMassDeleteText_plural": "Do you really want to delete the {{count}} selected items?",
     "selectAll": "Select all",
     "deselectAll": "Deselect all",
-    "requestDeniedForSecurityReasons": "Sorry, we couldn't process your request. Possible reason is a non-wellformed job. If you have questions, please contact our support team.",
+    "requestDeniedForSecurityReasons": "Sorry, we couldn't process your request. Possible reason is a malformed job. If you have questions, please contact our support team.",
     "clipboardCopySuccess": "Successfully copied to clipboard.",
     "clipboardCopyFailed": "Sorry, we could not copy the data to your clipboard.",
     "copyToClipboard": "Copy to clipboard",
@@ -106,7 +106,7 @@
     "passwordsDontMatch": "The passwords don't match.",
     "recaptchaError": "Sorry, we couldn't verify your registration. If you think this is an error, please contact our support team.",
     "createAccount": "Create account",
-    "signupError": "An error occured while creating your account. Please try again later.",
+    "signupError": "An error occurred while creating your account. Please try again later.",
     "signupConflict": "There is already an account with this email address. Please use another email address or sign in to your existing account.",
     "signupSuccess": "Your account has been created successfully. We have sent a confirmation email to your email address. Please follow the instructions in the confirmation email in order to activate your account.",
     "confirmError": "Sorry, we couldn't confirm your account. Either the confirmation link is invalid, your account is already activated or the confirmation link has expired. If you think this is an error, please contact our support team.",
@@ -131,7 +131,7 @@
     "likeService": "Do you find {{serviceName}} useful?",
     "donateText": "Your donation helps us to keep {{serviceName}} free of charge and free of advertisements. {{serviceName}} is a non-profit project and all donations will be used for development and server expenses. Thank you for your support!",
     "newsletterTitle": "{{serviceName}} Newsletter",
-    "newsletterText": "Don't miss out on the latest news and announcements from {{serviceName}}! Just subscribe for our free newsletter. The newsletter will be used exlusively for news and announcements regarding {{serviceName}}.",
+    "newsletterText": "Don't miss out on the latest news and announcements from {{serviceName}}! Just subscribe for our free newsletter. The newsletter will be used exclusively for news and announcements regarding {{serviceName}}.",
     "noThanks": "No, thanks",
     "subscribe": "Subscribe",
     "failedToSaveNewsletter": "Sorry, we couldn't save your decision at this time. Please try again later.",
@@ -285,7 +285,7 @@
     "crontabExpression": "Crontab expression",
     "invalidSchedule": "Invalid schedule.",
     "crontabExpressionCopySuccess": "Crontab expression copied to clipboard.",
-    "crontabExpressionCopyFailed": "Failed to copy crontab expresison to clipboard.",
+    "crontabExpressionCopyFailed": "Failed to copy crontab expression to clipboard.",
     "enableJob": "Enable job",
     "saveResponses": "Save responses in job history",
     "timezone": "Time zone",
@@ -449,7 +449,7 @@
     "monitorDeleted": "The status monitor has been deleted successfully.",
     "createMonitor": "Add Status Monitor",
     "createMonitorText": "Please select the cronjob you want to base your status monitor on. We recommend to use minutely jobs for best results. You can also specify the title that should be used to display the monitor on your status page.",
-    "monitorModeNote": "Using a cronjob in a status monitor will swtich the cronjob to monitor mode. In monitor mode, job failures will be ignored and not cause the job to be disabled.",
+    "monitorModeNote": "Using a cronjob in a status monitor will switch the cronjob to monitor mode. In monitor mode, job failures will be ignored and not cause the job to be disabled.",
     "monitorCreateFailed": "Failed to create the status monitor. Please try again later.",
     "monitorCreated": "The status monitor has been created successfully. You can customize it now by editing it.",
     "logoTooBig": "The selected file exceeds the logo size limit of {{limit}} KB.",
@@ -525,7 +525,7 @@
     "failedToChangePassword": "Failed to change password. Please try again later.",
     "wrongPasswordError": "The current password you have entered is invalid. Please try again.",
     "passwordChanged": "Your password has been changed successfully.",
-    "changeEmailAddressNote": "After saving, we will send a confirmation email to your new email address. The email address change will be effective as soon as you confirm it using the link in the vertification email.",
+    "changeEmailAddressNote": "After saving, we will send a confirmation email to your new email address. The email address change will be effective as soon as you confirm it using the link in the verification email.",
     "currentEmailAddress": "Current email address",
     "newEmailAddress": "New email address",
     "failedToChangeEmail": "Failed to change email address. Please try again later.",
@@ -556,7 +556,7 @@
     "subscribeDialog": {
       "text1": "By becoming a Sustaining Member of {{serviceName}}, you're helping us to fund ongoing operation and improvement of our service.",
       "text2": "As a thank-you, we can provide exclusive benefits to users holding Sustaining Member status.",
-      "text3": "You can chose yourself between different available monthly or yearly fees, depending on the amount you want to support us with. Memberships can be cancelled on a monthly or yearly basis, depending on the payment interval you have chosen.",
+      "text3": "You can choose yourself between different available monthly or yearly fees, depending on the amount you want to support us with. Memberships can be cancelled on a monthly or yearly basis, depending on the payment interval you have chosen.",
       "defaultMembership": "Default Membership",
       "sustainingMembership": "Sustaining Membership",
       "supportService": "Support and sustain our service",
@@ -574,7 +574,7 @@
       "amountAYear": "{{amount}} EUR / year",
       "subscribeNow": "Subscribe now",
       "orderNow": "Proceed to checkout",
-      "orderText": "Thanks for supporting us! You can now chose the amount you would like to pay per month and proceed to checkout.",
+      "orderText": "Thanks for supporting us! You can now choose the amount you would like to pay per month and proceed to checkout.",
       "acceptRefundPolicy": "I agree to the Refund Policy"
     },
     "orderFailed": "Failed to load checkout portal. Please try again later or contact our support team.",
@@ -583,7 +583,7 @@
     "cancelSubscription": "Cancel subscription",
     "mfa": {
       "devices": "Multi-Factor Authentication devices",
-      "noDevices": "No devices found. Add a MFA device now to secure your account.",
+      "noDevices": "No devices found. Add an MFA device now to secure your account.",
       "add": "Add device",
       "title": "Title",
       "selectType": "Please select the type of device you want to add, specify a title for easier identification and authenticate using your account password to continue.",
@@ -616,7 +616,7 @@
       "showKey": "Display Key",
       "showDocs": "View API Documentation",
       "ipLimit": "IP Address Restriction",
-      "ipLimitHelp": "Separate multiple addresses with comma. Leave empty to disable IP restriction.",
+      "ipLimitHelp": "Separate multiple addresses with commas. Leave empty to disable IP restriction.",
       "unrestricted": "Unrestricted",
       "noKeys": "You don't have any API keys yet.",
       "showKeyDialogTitle": "Display API Key: {{title}}",
@@ -649,7 +649,7 @@
     "sumExecutions": "Executions per minute"
   },
   "confirmEmailChange": {
-    "success": "Your account's email address has been changed successfully. You can now login with your new email address.",
+    "success": "Your account's email address has been changed successfully. You can now log in with your new email address.",
     "error": "Sorry, we could not confirm your email address change. The confirmation link is invalid, expired or has already been used."
   }
 }
