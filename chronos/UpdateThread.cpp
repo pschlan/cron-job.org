@@ -72,9 +72,29 @@ void UpdateThread::storeResults(const std::vector<std::unique_ptr<JobResult>> &r
 
 	std::string openDbFilePath;
 	std::unique_ptr<SQLite_DB> userDB;
+	bool userDbTxOpen = false;
 
 	std::string openTimeDbFilePath;
 	std::unique_ptr<SQLite_DB> timeDB;
+	bool timeDbTxOpen = false;
+
+	// Best-effort commit of an open transaction. On failure the buffered rows are
+	// lost, but we never let a commit error propagate out of the update thread.
+	const auto commitTransaction = [](std::unique_ptr<SQLite_DB> &db, bool &txOpen, const char *operation)
+	{
+		if(db == nullptr || !txOpen)
+			return;
+		try
+		{
+			db->prepare("COMMIT")->execute();
+		}
+		catch(const std::exception &ex)
+		{
+			std::cerr << "Error committing SQLite transaction: " << ex.what() << std::endl;
+			Metrics::instance().incrementSqliteWriteError(operation);
+		}
+		txOpen = false;
+	};
 
 	for (const auto &result : results)
 	{
@@ -90,6 +110,8 @@ void UpdateThread::storeResults(const std::vector<std::unique_ptr<JobResult>> &r
 		{
 			if (userDB == nullptr || openDbFilePath != dbFilePath)
 			{
+				commitTransaction(userDB, userDbTxOpen, "joblog_commit");
+
 				userDB = std::make_unique<SQLite_DB>(dbFilePath.c_str());
 				userDB->prepare("PRAGMA synchronous = OFF")->execute();
 
@@ -162,6 +184,9 @@ void UpdateThread::storeResults(const std::vector<std::unique_ptr<JobResult>> &r
 				}
 
 				openDbFilePath = dbFilePath;
+
+				userDB->prepare("BEGIN")->execute();
+				userDbTxOpen = true;
 			}
 
 			auto stmt = userDB->prepare("INSERT INTO \"joblog\"(\"jobid\",\"date\",\"date_planned\",\"jitter\",\"url\",\"duration\",\"status\",\"status_text\",\"http_status\",\"created\") "
@@ -220,6 +245,7 @@ void UpdateThread::storeResults(const std::vector<std::unique_ptr<JobResult>> &r
 		{
 			std::cerr << "Error SQLite query: " << ex.what() << std::endl;
 			Metrics::instance().incrementSqliteWriteError("joblog_insert");
+			commitTransaction(userDB, userDbTxOpen, "joblog_commit");
 			openDbFilePath = {};
 			userDB.reset();
 			continue;
@@ -410,6 +436,8 @@ void UpdateThread::storeResults(const std::vector<std::unique_ptr<JobResult>> &r
 			{
 				if (timeDB == nullptr || openTimeDbFilePath != timeDbFilePath)
 				{
+					commitTransaction(timeDB, timeDbTxOpen, "histogram_commit");
+
 					timeDB = std::make_unique<SQLite_DB>(timeDbFilePath.c_str());
 					timeDB->prepare("PRAGMA synchronous = OFF")->execute();
 
@@ -472,6 +500,9 @@ void UpdateThread::storeResults(const std::vector<std::unique_ptr<JobResult>> &r
 					}
 
 					openTimeDbFilePath = timeDbFilePath;
+
+					timeDB->prepare("BEGIN")->execute();
+					timeDbTxOpen = true;
 				}
 
 				const unsigned int bin = std::min(31u, static_cast<unsigned int>(ceil(log(result->timeTotal / 1000) / log(sqrt(2)))));
@@ -504,6 +535,7 @@ void UpdateThread::storeResults(const std::vector<std::unique_ptr<JobResult>> &r
 			{
 				std::cerr << "Error SQLite query: " << ex.what() << std::endl;
 				Metrics::instance().incrementSqliteWriteError("histogram_update");
+				commitTransaction(timeDB, timeDbTxOpen, "histogram_commit");
 				openTimeDbFilePath = {};
 				timeDB.reset();
 				continue;
@@ -512,6 +544,9 @@ void UpdateThread::storeResults(const std::vector<std::unique_ptr<JobResult>> &r
 
 		Metrics::instance().incrementUpdateResults();
 	}
+
+	commitTransaction(userDB, userDbTxOpen, "joblog_commit");
+	commitTransaction(timeDB, timeDbTxOpen, "histogram_commit");
 }
 
 void UpdateThread::stopThread()

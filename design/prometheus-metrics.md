@@ -133,7 +133,7 @@ Worker threads are created per minute tick and exit when their batch finishes.
 | `chronos_update_results_total` | Counter | — | Job results fully persisted (SQLite joblog written **and** MySQL job row updated). Increment only on success |
 | `chronos_update_queue_depth` | Gauge | — | Pending results in the UpdateThread queue. Set from `tempQueue.size()` on batch swap before processing; after drain, set to `queue.size()` (not 0). Do **not** update on `addResult()` |
 | `chronos_update_batch_duration_seconds` | Histogram | — | Time to process one swapped batch (use sub-second precision, e.g. `std::chrono`) |
-| `chronos_sqlite_write_errors_total` | Counter | `operation` | SQLite write failures. `operation`: `joblog_insert`, `joblog_stats_insert`, `joblog_ssl_insert`, `histogram_update` |
+| `chronos_sqlite_write_errors_total` | Counter | `operation` | SQLite write failures. `operation`: `joblog_insert`, `joblog_stats_insert`, `joblog_ssl_insert`, `histogram_update`, `joblog_commit`, `histogram_commit` |
 | `chronos_mysql_write_errors_total` | Counter | `operation` | MySQL write failures. `operation`: `job_update`, `job_disable`, `notification_insert`, `ssl_cert_expiry_update` |
 
 **Executed vs updated:** On SQLite failure, `storeResult()` returns early and the result is dropped (no retry). `chronos_jobs_executed_total` will exceed `chronos_update_results_total` during data-loss incidents. Alert on sustained divergence.
