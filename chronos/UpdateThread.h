@@ -44,7 +44,7 @@ namespace Chronos
 		void addResult(std::unique_ptr<JobResult> result);
 
 	private:
-		void storeResult(const std::unique_ptr<JobResult> &result);
+		void storeResults(const std::vector<std::unique_ptr<JobResult>> &results);
 
 	private:
 		std::atomic<bool> stop{false};

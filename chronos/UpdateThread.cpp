@@ -14,6 +14,8 @@
 #include <iostream>
 #include <sstream>
 #include <cmath>
+#include <unordered_map>
+#include <vector>
 
 #include <stdlib.h>
 #include <time.h>
@@ -63,434 +65,453 @@ void UpdateThread::addResult(std::unique_ptr<JobResult> result)
 	queueSignal.notify_one();
 }
 
-void UpdateThread::storeResult(const std::unique_ptr<JobResult> &result)
+void UpdateThread::storeResults(const std::vector<std::unique_ptr<JobResult>> &results)
 {
 	const int DB_SCHEMA_VERSION = 3;
 	const int TIMEDB_SCHEMA_VERSION = 1;
 
-	struct tm tmStruct = { 0 };
-	time_t tmTime = result->datePlanned / 1000;
-	if(gmtime_r(&tmTime, &tmStruct) == nullptr)
-		throw std::runtime_error("gmtime_r returned nullptr");
+	std::string openDbFilePath;
+	std::unique_ptr<SQLite_DB> userDB;
 
-	std::string dbFilePath = Utils::userDbFilePath(userDbFilePathScheme, userDbFileNameScheme, result->userID, tmStruct.tm_mday, tmStruct.tm_mon);
-	int jobLogID = 0;
-	int jobLogIDDay = tmStruct.tm_mday;
-	int jobLodIDMonth = tmStruct.tm_mon;
+	std::string openTimeDbFilePath;
+	std::unique_ptr<SQLite_DB> timeDB;
 
-	try
+	for (const auto &result : results)
 	{
-		std::unique_ptr<SQLite_DB> userDB = std::make_unique<SQLite_DB>(dbFilePath.c_str());
+		struct tm tmStruct = { 0 };
+		time_t tmTime = result->datePlanned / 1000;
+		if(gmtime_r(&tmTime, &tmStruct) == nullptr)
+			throw std::runtime_error("gmtime_r returned nullptr");
 
-		userDB->prepare("PRAGMA synchronous = OFF")->execute();
-
-		int currentSchemaVersion = 0;
-		auto stmt = userDB->prepare("PRAGMA user_version");
-		while(stmt->execute())
-		{
-			currentSchemaVersion = stmt->intValue(0);
-		}
-
-		if(currentSchemaVersion < 1)
-		{
-			userDB->prepare("CREATE TABLE IF NOT EXISTS \"joblog\"("
-				"	\"joblogid\" INTEGER PRIMARY KEY ASC,"
-				"	\"jobid\" INTEGER NOT NULL,"
-				"	\"date\" INTEGER NOT NULL,"
-				"	\"date_planned\" INTEGER NOT NULL,"
-				"	\"jitter\" INTEGER NOT NULL,"
-				"	\"url\" TEXT NOT NULL,"
-				"	\"duration\" INTEGER NOT NULL,"
-				"	\"status\" INTEGER NOT NULL,"
-				"	\"status_text\" TEXT NOT NULL,"
-				"	\"http_status\" INTEGER NOT NULL,"
-				"	\"created\" INTEGER NOT NULL"
-				")")->execute();
-			userDB->prepare("CREATE INDEX IF NOT EXISTS \"idx_joblog_jobid\" ON \"joblog\" (\"jobid\")")->execute();
-
-			userDB->prepare("CREATE TABLE IF NOT EXISTS \"joblog_response\"("
-				"	\"joblogid\" INTEGER PRIMARY KEY,"
-				"	\"jobid\" INTEGER NOT NULL,"
-				"	\"date\" INTEGER NOT NULL,"
-				"	\"headers\" TEXT NOT NULL,"
-				"	\"body\" TEXT NOT NULL,"
-				"	\"created\" INTEGER NOT NULL"
-				")")->execute();
-		}
-
-		if(currentSchemaVersion < 2)
-		{
-			userDB->prepare("CREATE TABLE IF NOT EXISTS \"joblog_stats\"("
-				"	\"joblogid\" INTEGER PRIMARY KEY,"
-				"	\"jobid\" INTEGER NOT NULL,"
-				"	\"date\" INTEGER NOT NULL,"
-				"	\"status\" INTEGER NOT NULL,"
-				"	\"name_lookup\" INTEGER NOT NULL,"
-				"	\"connect\" INTEGER NOT NULL,"
-				"	\"app_connect\" INTEGER NOT NULL,"
-				"	\"pre_transfer\" INTEGER NOT NULL,"
-				"	\"start_transfer\" INTEGER NOT NULL,"
-				"	\"total\" INTEGER NOT NULL"
-				")")->execute();
-			userDB->prepare("CREATE INDEX IF NOT EXISTS \"idx_stats_jobid\" ON \"joblog_stats\" (\"jobid\")")->execute();
-		}
-
-		if(currentSchemaVersion < 3)
-		{
-			userDB->prepare("CREATE TABLE IF NOT EXISTS \"joblog_ssl\"("
-				"	\"joblogid\" INTEGER PRIMARY KEY,"
-				"	\"jobid\" INTEGER NOT NULL,"
-				"	\"date\" INTEGER NOT NULL,"
-				"	\"ssl_cert_expiry\" INTEGER NOT NULL"
-				")")->execute();
-			userDB->prepare("CREATE INDEX IF NOT EXISTS \"idx_ssl_jobid\" ON \"joblog_ssl\" (\"jobid\")")->execute();
-		}
-
-		if(currentSchemaVersion != DB_SCHEMA_VERSION)
-		{
-			std::string pragmaQuery = "PRAGMA user_version = " + std::to_string(DB_SCHEMA_VERSION);
-			userDB->prepare(pragmaQuery)->execute();
-		}
-
-		stmt = userDB->prepare("INSERT INTO \"joblog\"(\"jobid\",\"date\",\"date_planned\",\"jitter\",\"url\",\"duration\",\"status\",\"status_text\",\"http_status\",\"created\") "
-			"VALUES(:jobid,:date,:date_planned,:jitter,:url,:duration,:status,:status_text,:http_status,strftime('%s', 'now'))");
-		stmt->bind(":jobid", 		result->jobID);
-		stmt->bind(":date", 		static_cast<int>(result->dateStarted / 1000));
-		stmt->bind(":date_planned", static_cast<int>(result->datePlanned / 1000));
-		stmt->bind(":jitter", 		result->jitter);
-		stmt->bind(":url", 			result->url);
-		stmt->bind(":duration", 	result->duration);
-		stmt->bind(":status", 		static_cast<int>(result->status));
-		stmt->bind(":status_text", 	result->statusText);
-		stmt->bind(":http_status", 	result->httpStatus);
-		stmt->execute();
-
-		jobLogID = static_cast<int>(userDB->insertId());
-
-		if(result->saveResponses && (!result->responseHeaders.empty() || !result->responseBody.empty()))
-		{
-			stmt = userDB->prepare("INSERT INTO \"joblog_response\"(\"joblogid\",\"jobid\",\"date\",\"headers\",\"body\",\"created\") "
-				"VALUES(:joblogid,:jobid,:date,:headers,:body,strftime('%s', 'now'))");
-			stmt->bind(":joblogid", jobLogID);
-			stmt->bind(":jobid", 	result->jobID);
-			stmt->bind(":date", 	static_cast<int>(result->dateStarted / 1000));
-			stmt->bind(":headers", 	result->responseHeaders);
-			stmt->bind(":body", 	result->responseBody);
-			stmt->execute();
-		}
-
-		stmt = userDB->prepare("INSERT INTO \"joblog_stats\"(\"joblogid\",\"jobid\",\"date\",\"status\",\"name_lookup\",\"connect\",\"app_connect\",\"pre_transfer\",\"start_transfer\",\"total\") "
-			"VALUES(:joblogid,:jobid,:date,:status,:name_lookup,:connect,:app_connect,:pre_transfer,:start_transfer,:total)");
-		stmt->bind(":joblogid", 		jobLogID);
-		stmt->bind(":jobid", 			result->jobID);
-		stmt->bind(":date", 			static_cast<int>(result->dateStarted / 1000));
-		stmt->bind(":status",			static_cast<int>(result->status));
-		stmt->bind(":name_lookup",		result->timeNameLookup);
-		stmt->bind(":connect",			result->timeConnect);
-		stmt->bind(":app_connect",		result->timeAppConnect);
-		stmt->bind(":pre_transfer",		result->timePreTransfer);
-		stmt->bind(":start_transfer",	result->timeStartTransfer);
-		stmt->bind(":total",			result->timeTotal);
-		stmt->execute();
-
-		if(result->sslCertExpiry > 0)
-		{
-			stmt = userDB->prepare("INSERT INTO \"joblog_ssl\"(\"joblogid\",\"jobid\",\"date\",\"ssl_cert_expiry\") "
-				"VALUES(:joblogid,:jobid,:date,:ssl_cert_expiry)");
-			stmt->bind(":joblogid", 		jobLogID);
-			stmt->bind(":jobid", 			result->jobID);
-			stmt->bind(":date", 			static_cast<int>(result->dateStarted / 1000));
-			stmt->bind(":ssl_cert_expiry",	static_cast<int>(result->sslCertExpiry));
-			stmt->execute();
-		}
-	}
-	catch(const std::exception &ex)
-	{
-		std::cerr << "Error SQLite query: " << ex.what() << std::endl;
-		Metrics::instance().incrementSqliteWriteError("joblog_insert");
-		return;
-	}
-
-	try
-	{
-		int oldFailCounter = result->oldFailCounter;
-		int oldUnfilteredFailCounter = result->oldUnfilteredFailCounter;
-		if(result->status != JOBSTATUS_OK || oldFailCounter > 0 || (result->status == JOBSTATUS_OK && result->notifySuccess && oldFailCounter == 0))
-		{
-			MYSQL_ROW row;
-			auto res = db->query("SELECT `fail_counter`,`unfiltered_fail_counter` FROM `job` WHERE `jobid`=%d",
-				result->jobID);
-			while((row = res->fetchRow()) != NULL)
-			{
-				oldFailCounter = atoi(row[0]);
-				oldUnfilteredFailCounter = atoi(row[1]);
-			}
-			res.reset();
-		}
-
-		std::string query;
-		if(result->status == JOBSTATUS_OK)
-		{
-			query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`ssl_cert_expiry`=%d,`fail_counter`=0,`unfiltered_fail_counter`=0 WHERE `jobid`=%d";
-		}
-		else if(result->status == JOBSTATUS_FAILED_TIMEOUT)
-		{
-			query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`ssl_cert_expiry`=%d,`fail_counter`=GREATEST(`fail_counter`,1),`unfiltered_fail_counter`=`unfiltered_fail_counter`+1 WHERE `jobid`=%d";
-		}
-		else
-		{
-			query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`ssl_cert_expiry`=%d,`fail_counter`=`fail_counter`+1,`unfiltered_fail_counter`=`unfiltered_fail_counter`+1 WHERE `jobid`=%d";
-		}
-		db->query(query.c_str(),
-			static_cast<int>(result->status),
-			static_cast<int>(result->dateStarted / 1000),
-			static_cast<int>(result->duration),
-			static_cast<int>(result->sslCertExpiry),
-			result->jobID);
-
-		// get (new) fail counter and latest enabled status
-		int failCounter = 0;
-		int unfilteredFailCounter = 0;
-		bool isEnabled = false;
-		int sslCertExpiryNotified = 0;
-		MYSQL_ROW row;
-		auto res = db->query("SELECT `fail_counter`,`unfiltered_fail_counter`,`enabled`,`ssl_cert_expiry_notified` FROM `job` WHERE `jobid`=%d",
-			result->jobID);
-		while((row = res->fetchRow()) != NULL)
-		{
-			failCounter = atoi(row[0]);
-			unfilteredFailCounter = atoi(row[1]);
-			isEnabled = atoi(row[2]) != 0;
-			sslCertExpiryNotified = atoi(row[3]);
-		}
-		res.reset();
-
-		const auto queueNotification = [&](NotificationType_t type, int notificationFailCounter, uint64_t sslCertExpiry = 0)
-		{
-			Notification n;
-			n.userID = result->userID;
-			n.jobID = result->jobID;
-			n.date = time(NULL);
-			n.dateStarted = result->dateStarted / 1000;
-			n.datePlanned = result->datePlanned / 1000;
-			n.type = type;
-			n.url = result->url;
-			n.title = result->title;
-			n.status = result->status;
-			n.statusText = result->statusText;
-			n.httpStatus = result->httpStatus;
-			n.failCounter = notificationFailCounter;
-			n.sslCertExpiry = sslCertExpiry;
-
-			db->query("INSERT INTO `notification`(`jobid`,`joblogid`,`date`,`type`,`date_started`,`date_planned`,`url`,`execution_status`,`execution_status_text`,`execution_http_status`) "
-				"VALUES(%d,%d,%u,%u,%u,%u,'%q',%u,'%q',%u)",
-				result->jobID,
-				jobLogID,
-				static_cast<unsigned long>(time(NULL)),
-				static_cast<unsigned long>(n.type),
-				static_cast<unsigned long>(n.dateStarted),
-				static_cast<unsigned long>(n.datePlanned),
-				n.url.c_str(),
-				static_cast<unsigned long>(n.status),
-				n.statusText.c_str(),
-				static_cast<unsigned long>(n.httpStatus));
-
-			NotificationThread::getInstance()->addNotification(std::move(n));
-		};
-
-		bool createNotification = false;
-		NotificationType_t notificationType;
-
-		// disable job?
-		if(failCounter > result->maxFailures && result->jobType != JobType_t::MONITORING)
-		{
-			try
-			{
-				db->query("UPDATE `job` SET `enabled`=0,`fail_counter`=0,`unfiltered_fail_counter`=0 WHERE `jobid`=%d",
-					result->jobID);
-				Metrics::instance().incrementJobsAutoDisabled();
-			}
-			catch(const std::exception &ex)
-			{
-				std::cerr << "Error MySQL job disable: " << ex.what() << std::endl;
-				Metrics::instance().incrementMysqlWriteError("job_disable");
-				return;
-			}
-
-			if(result->notifyDisable)
-			{
-				createNotification 			= true;
-				notificationType 			= NOTIFICATION_TYPE_DISABLE;
-			}
-		}
-
-		if(result->notifyFailure
-			&& result->status != JOBSTATUS_OK
-			&& oldUnfilteredFailCounter < unfilteredFailCounter
-			&& unfilteredFailCounter == result->notifyFailureCount)
-		{
-			createNotification 			= true;
-			notificationType 			= NOTIFICATION_TYPE_FAILURE;
-		}
-
-		if(result->notifySuccess
-			&& result->status == JOBSTATUS_OK
-			&& oldFailCounter > 0
-			&& failCounter == 0
-			&& (!result->notifyFailure ||
-				oldUnfilteredFailCounter >= result->notifyFailureCount))
-		{
-			createNotification 			= true;
-			notificationType 			= NOTIFICATION_TYPE_SUCCESS;
-		}
-
-		if(createNotification && isEnabled)
-		{
-			try
-			{
-				queueNotification(notificationType, std::max(unfilteredFailCounter, failCounter));
-			}
-			catch(const std::exception &ex)
-			{
-				std::cerr << "Error MySQL notification insert: " << ex.what() << std::endl;
-				Metrics::instance().incrementMysqlWriteError("notification_insert");
-				return;
-			}
-		}
-
-		const time_t now = time(nullptr);
-		if(result->notifySslCertExpiry
-			&& result->sslCertExpiry > 0
-			&& isEnabled
-			&& static_cast<uint64_t>(now) + static_cast<uint64_t>(result->notifySslCertExpirySeconds) >= result->sslCertExpiry
-			&& sslCertExpiryNotified != static_cast<int>(result->sslCertExpiry))
-		{
-			try
-			{
-				queueNotification(NOTIFICATION_TYPE_SSL_CERT_EXPIRY, std::max(unfilteredFailCounter, failCounter), result->sslCertExpiry);
-
-				db->query("UPDATE `job` SET `ssl_cert_expiry_notified`=%d WHERE `jobid`=%d",
-					static_cast<int>(result->sslCertExpiry),
-					result->jobID);
-			}
-			catch(const std::exception &ex)
-			{
-				std::cerr << "Error MySQL ssl cert expiry update: " << ex.what() << std::endl;
-				Metrics::instance().incrementMysqlWriteError("ssl_cert_expiry_update");
-				return;
-			}
-		}
-	}
-	catch(const std::exception &ex)
-	{
-		std::cerr << "Error MySQL query: " << ex.what() << std::endl;
-		Metrics::instance().incrementMysqlWriteError("job_update");
-		return;
-	}
-
-	if(result->jobType == JobType_t::MONITORING)
-	{
-		std::string timeDbFilePath = Utils::userTimeDbFilePath(userDbFilePathScheme, userTimeDbFileNameScheme, result->userID, tmStruct.tm_year + 1900);
+		std::string dbFilePath = Utils::userDbFilePath(userDbFilePathScheme, userDbFileNameScheme, result->userID, tmStruct.tm_mday, tmStruct.tm_mon);
+		int jobLogID = 0;
 
 		try
 		{
-			std::unique_ptr<SQLite_DB> timeDB = std::make_unique<SQLite_DB>(timeDbFilePath.c_str());
-
-			timeDB->prepare("PRAGMA synchronous = OFF")->execute();
-
-			int currentSchemaVersion = 0;
-			auto stmt = timeDB->prepare("PRAGMA user_version");
-			while(stmt->execute())
+			if (userDB == nullptr || openDbFilePath != dbFilePath)
 			{
-				currentSchemaVersion = stmt->intValue(0);
+				userDB = std::make_unique<SQLite_DB>(dbFilePath.c_str());
+				userDB->prepare("PRAGMA synchronous = OFF")->execute();
+
+				int currentSchemaVersion = 0;
+				auto stmt = userDB->prepare("PRAGMA user_version");
+				while(stmt->execute())
+				{
+					currentSchemaVersion = stmt->intValue(0);
+				}
+
+				if(currentSchemaVersion < 1)
+				{
+					userDB->prepare("CREATE TABLE IF NOT EXISTS \"joblog\"("
+						"	\"joblogid\" INTEGER PRIMARY KEY ASC,"
+						"	\"jobid\" INTEGER NOT NULL,"
+						"	\"date\" INTEGER NOT NULL,"
+						"	\"date_planned\" INTEGER NOT NULL,"
+						"	\"jitter\" INTEGER NOT NULL,"
+						"	\"url\" TEXT NOT NULL,"
+						"	\"duration\" INTEGER NOT NULL,"
+						"	\"status\" INTEGER NOT NULL,"
+						"	\"status_text\" TEXT NOT NULL,"
+						"	\"http_status\" INTEGER NOT NULL,"
+						"	\"created\" INTEGER NOT NULL"
+						")")->execute();
+					userDB->prepare("CREATE INDEX IF NOT EXISTS \"idx_joblog_jobid\" ON \"joblog\" (\"jobid\")")->execute();
+
+					userDB->prepare("CREATE TABLE IF NOT EXISTS \"joblog_response\"("
+						"	\"joblogid\" INTEGER PRIMARY KEY,"
+						"	\"jobid\" INTEGER NOT NULL,"
+						"	\"date\" INTEGER NOT NULL,"
+						"	\"headers\" TEXT NOT NULL,"
+						"	\"body\" TEXT NOT NULL,"
+						"	\"created\" INTEGER NOT NULL"
+						")")->execute();
+				}
+
+				if(currentSchemaVersion < 2)
+				{
+					userDB->prepare("CREATE TABLE IF NOT EXISTS \"joblog_stats\"("
+						"	\"joblogid\" INTEGER PRIMARY KEY,"
+						"	\"jobid\" INTEGER NOT NULL,"
+						"	\"date\" INTEGER NOT NULL,"
+						"	\"status\" INTEGER NOT NULL,"
+						"	\"name_lookup\" INTEGER NOT NULL,"
+						"	\"connect\" INTEGER NOT NULL,"
+						"	\"app_connect\" INTEGER NOT NULL,"
+						"	\"pre_transfer\" INTEGER NOT NULL,"
+						"	\"start_transfer\" INTEGER NOT NULL,"
+						"	\"total\" INTEGER NOT NULL"
+						")")->execute();
+					userDB->prepare("CREATE INDEX IF NOT EXISTS \"idx_stats_jobid\" ON \"joblog_stats\" (\"jobid\")")->execute();
+				}
+
+				if(currentSchemaVersion < 3)
+				{
+					userDB->prepare("CREATE TABLE IF NOT EXISTS \"joblog_ssl\"("
+						"	\"joblogid\" INTEGER PRIMARY KEY,"
+						"	\"jobid\" INTEGER NOT NULL,"
+						"	\"date\" INTEGER NOT NULL,"
+						"	\"ssl_cert_expiry\" INTEGER NOT NULL"
+						")")->execute();
+					userDB->prepare("CREATE INDEX IF NOT EXISTS \"idx_ssl_jobid\" ON \"joblog_ssl\" (\"jobid\")")->execute();
+				}
+
+				if(currentSchemaVersion != DB_SCHEMA_VERSION)
+				{
+					std::string pragmaQuery = "PRAGMA user_version = " + std::to_string(DB_SCHEMA_VERSION);
+					userDB->prepare(pragmaQuery)->execute();
+				}
+
+				openDbFilePath = dbFilePath;
 			}
 
-			if(currentSchemaVersion < 1)
-			{
-				timeDB->prepare("CREATE TABLE IF NOT EXISTS \"joblog_histogram\"("
-					"	\"jobid\" INTEGER NOT NULL,"
-					"	\"date\" INTEGER NOT NULL,"
-					"	\"bin_0\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_1\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_2\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_3\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_4\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_5\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_6\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_7\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_8\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_9\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_10\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_11\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_12\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_13\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_14\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_15\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_16\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_17\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_18\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_19\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_20\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_21\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_22\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_23\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_24\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_25\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_26\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_27\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_28\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_29\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_30\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"bin_31\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"count_success\" INTEGER NOT NULL DEFAULT 0,"
-					"	\"count_failure\" INTEGER NOT NULL DEFAULT 0,"
-					" 	PRIMARY KEY(\"jobid\", \"date\")"
-					")")->execute();
-				timeDB->prepare("CREATE INDEX IF NOT EXISTS \"idx_histogram_jobid\" ON \"joblog_histogram\" (\"jobid\")")->execute();
-				timeDB->prepare("CREATE INDEX IF NOT EXISTS \"idx_histogram_jobid_date\" ON \"joblog_histogram\" (\"jobid\", \"date\")")->execute();
-			}
-
-			if(currentSchemaVersion != TIMEDB_SCHEMA_VERSION)
-			{
-				std::string pragmaQuery = "PRAGMA user_version = " + std::to_string(TIMEDB_SCHEMA_VERSION);
-				timeDB->prepare(pragmaQuery)->execute();
-			}
-
-			const unsigned int bin = std::min(31u, static_cast<unsigned int>(ceil(log(result->timeTotal / 1000) / log(sqrt(2)))));
-			const unsigned int startedTimestamp = static_cast<unsigned int>(result->dateStarted / 1000);
-
-			std::stringstream query;
-
-			if(result->status == JobStatus_t::JOBSTATUS_OK)
-			{
-				query 	<< "INSERT INTO \"joblog_histogram\"(\"jobid\", \"date\", \"bin_" << bin << "\", \"count_success\") "
-						<< "VALUES(:jobid, :date, 1, 1) "
-						<< "ON CONFLICT(\"jobid\", \"date\") DO UPDATE SET "
-						<< "	\"bin_" << bin << "\" = \"bin_" << bin << "\" + excluded.\"bin_" << bin << "\", "
-						<< "	\"count_success\" = \"count_success\" + excluded.\"count_success\"";
-			}
-			else
-			{
-				query 	<< "INSERT INTO \"joblog_histogram\"(\"jobid\", \"date\",\"count_failure\") "
-						<< "VALUES(:jobid, :date, 1) "
-						<< "ON CONFLICT(\"jobid\", \"date\") DO UPDATE SET "
-						<< "	\"count_failure\" = \"count_failure\" + excluded.\"count_failure\"";
-			}
-
-			stmt = timeDB->prepare(query.str());
-			stmt->bind(":jobid", 			result->jobID);
-			stmt->bind(":date", 			startedTimestamp - (startedTimestamp % 86400));
+			auto stmt = userDB->prepare("INSERT INTO \"joblog\"(\"jobid\",\"date\",\"date_planned\",\"jitter\",\"url\",\"duration\",\"status\",\"status_text\",\"http_status\",\"created\") "
+				"VALUES(:jobid,:date,:date_planned,:jitter,:url,:duration,:status,:status_text,:http_status,strftime('%s', 'now'))");
+			stmt->bind(":jobid", 		result->jobID);
+			stmt->bind(":date", 		static_cast<int>(result->dateStarted / 1000));
+			stmt->bind(":date_planned", static_cast<int>(result->datePlanned / 1000));
+			stmt->bind(":jitter", 		result->jitter);
+			stmt->bind(":url", 			result->url);
+			stmt->bind(":duration", 	result->duration);
+			stmt->bind(":status", 		static_cast<int>(result->status));
+			stmt->bind(":status_text", 	result->statusText);
+			stmt->bind(":http_status", 	result->httpStatus);
 			stmt->execute();
+
+			jobLogID = static_cast<int>(userDB->insertId());
+
+			if(result->saveResponses && (!result->responseHeaders.empty() || !result->responseBody.empty()))
+			{
+				stmt = userDB->prepare("INSERT INTO \"joblog_response\"(\"joblogid\",\"jobid\",\"date\",\"headers\",\"body\",\"created\") "
+					"VALUES(:joblogid,:jobid,:date,:headers,:body,strftime('%s', 'now'))");
+				stmt->bind(":joblogid", jobLogID);
+				stmt->bind(":jobid", 	result->jobID);
+				stmt->bind(":date", 	static_cast<int>(result->dateStarted / 1000));
+				stmt->bind(":headers", 	result->responseHeaders);
+				stmt->bind(":body", 	result->responseBody);
+				stmt->execute();
+			}
+
+			stmt = userDB->prepare("INSERT INTO \"joblog_stats\"(\"joblogid\",\"jobid\",\"date\",\"status\",\"name_lookup\",\"connect\",\"app_connect\",\"pre_transfer\",\"start_transfer\",\"total\") "
+				"VALUES(:joblogid,:jobid,:date,:status,:name_lookup,:connect,:app_connect,:pre_transfer,:start_transfer,:total)");
+			stmt->bind(":joblogid", 		jobLogID);
+			stmt->bind(":jobid", 			result->jobID);
+			stmt->bind(":date", 			static_cast<int>(result->dateStarted / 1000));
+			stmt->bind(":status",			static_cast<int>(result->status));
+			stmt->bind(":name_lookup",		result->timeNameLookup);
+			stmt->bind(":connect",			result->timeConnect);
+			stmt->bind(":app_connect",		result->timeAppConnect);
+			stmt->bind(":pre_transfer",		result->timePreTransfer);
+			stmt->bind(":start_transfer",	result->timeStartTransfer);
+			stmt->bind(":total",			result->timeTotal);
+			stmt->execute();
+
+			if(result->sslCertExpiry > 0)
+			{
+				stmt = userDB->prepare("INSERT INTO \"joblog_ssl\"(\"joblogid\",\"jobid\",\"date\",\"ssl_cert_expiry\") "
+					"VALUES(:joblogid,:jobid,:date,:ssl_cert_expiry)");
+				stmt->bind(":joblogid", 		jobLogID);
+				stmt->bind(":jobid", 			result->jobID);
+				stmt->bind(":date", 			static_cast<int>(result->dateStarted / 1000));
+				stmt->bind(":ssl_cert_expiry",	static_cast<int>(result->sslCertExpiry));
+				stmt->execute();
+			}
 		}
 		catch(const std::exception &ex)
 		{
-			std::cout << "Error SQLite query: " << ex.what() << std::endl;
-			Metrics::instance().incrementSqliteWriteError("histogram_update");
-			return;
+			std::cerr << "Error SQLite query: " << ex.what() << std::endl;
+			Metrics::instance().incrementSqliteWriteError("joblog_insert");
+			openDbFilePath = {};
+			userDB.reset();
+			continue;
 		}
-	}
 
-	Metrics::instance().incrementUpdateResults();
+		try
+		{
+			int oldFailCounter = result->oldFailCounter;
+			int oldUnfilteredFailCounter = result->oldUnfilteredFailCounter;
+			if(result->status != JOBSTATUS_OK || oldFailCounter > 0 || (result->status == JOBSTATUS_OK && result->notifySuccess && oldFailCounter == 0))
+			{
+				MYSQL_ROW row;
+				auto res = db->query("SELECT `fail_counter`,`unfiltered_fail_counter` FROM `job` WHERE `jobid`=%d",
+					result->jobID);
+				while((row = res->fetchRow()) != NULL)
+				{
+					oldFailCounter = atoi(row[0]);
+					oldUnfilteredFailCounter = atoi(row[1]);
+				}
+				res.reset();
+			}
+
+			std::string query;
+			if(result->status == JOBSTATUS_OK)
+			{
+				query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`ssl_cert_expiry`=%d,`fail_counter`=0,`unfiltered_fail_counter`=0 WHERE `jobid`=%d";
+			}
+			else if(result->status == JOBSTATUS_FAILED_TIMEOUT)
+			{
+				query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`ssl_cert_expiry`=%d,`fail_counter`=GREATEST(`fail_counter`,1),`unfiltered_fail_counter`=`unfiltered_fail_counter`+1 WHERE `jobid`=%d";
+			}
+			else
+			{
+				query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`ssl_cert_expiry`=%d,`fail_counter`=`fail_counter`+1,`unfiltered_fail_counter`=`unfiltered_fail_counter`+1 WHERE `jobid`=%d";
+			}
+			db->query(query.c_str(),
+				static_cast<int>(result->status),
+				static_cast<int>(result->dateStarted / 1000),
+				static_cast<int>(result->duration),
+				static_cast<int>(result->sslCertExpiry),
+				result->jobID);
+
+			// get (new) fail counter and latest enabled status
+			int failCounter = 0;
+			int unfilteredFailCounter = 0;
+			bool isEnabled = false;
+			int sslCertExpiryNotified = 0;
+			MYSQL_ROW row;
+			auto res = db->query("SELECT `fail_counter`,`unfiltered_fail_counter`,`enabled`,`ssl_cert_expiry_notified` FROM `job` WHERE `jobid`=%d",
+				result->jobID);
+			while((row = res->fetchRow()) != NULL)
+			{
+				failCounter = atoi(row[0]);
+				unfilteredFailCounter = atoi(row[1]);
+				isEnabled = atoi(row[2]) != 0;
+				sslCertExpiryNotified = atoi(row[3]);
+			}
+			res.reset();
+
+			const auto queueNotification = [&](NotificationType_t type, int notificationFailCounter, uint64_t sslCertExpiry = 0)
+			{
+				Notification n;
+				n.userID = result->userID;
+				n.jobID = result->jobID;
+				n.date = time(NULL);
+				n.dateStarted = result->dateStarted / 1000;
+				n.datePlanned = result->datePlanned / 1000;
+				n.type = type;
+				n.url = result->url;
+				n.title = result->title;
+				n.status = result->status;
+				n.statusText = result->statusText;
+				n.httpStatus = result->httpStatus;
+				n.failCounter = notificationFailCounter;
+				n.sslCertExpiry = sslCertExpiry;
+
+				db->query("INSERT INTO `notification`(`jobid`,`joblogid`,`date`,`type`,`date_started`,`date_planned`,`url`,`execution_status`,`execution_status_text`,`execution_http_status`) "
+					"VALUES(%d,%d,%u,%u,%u,%u,'%q',%u,'%q',%u)",
+					result->jobID,
+					jobLogID,
+					static_cast<unsigned long>(time(NULL)),
+					static_cast<unsigned long>(n.type),
+					static_cast<unsigned long>(n.dateStarted),
+					static_cast<unsigned long>(n.datePlanned),
+					n.url.c_str(),
+					static_cast<unsigned long>(n.status),
+					n.statusText.c_str(),
+					static_cast<unsigned long>(n.httpStatus));
+
+				NotificationThread::getInstance()->addNotification(std::move(n));
+			};
+
+			bool createNotification = false;
+			NotificationType_t notificationType;
+
+			// disable job?
+			if(failCounter > result->maxFailures && result->jobType != JobType_t::MONITORING)
+			{
+				try
+				{
+					db->query("UPDATE `job` SET `enabled`=0,`fail_counter`=0,`unfiltered_fail_counter`=0 WHERE `jobid`=%d",
+						result->jobID);
+					Metrics::instance().incrementJobsAutoDisabled();
+				}
+				catch(const std::exception &ex)
+				{
+					std::cerr << "Error MySQL job disable: " << ex.what() << std::endl;
+					Metrics::instance().incrementMysqlWriteError("job_disable");
+					continue;
+				}
+
+				if(result->notifyDisable)
+				{
+					createNotification 			= true;
+					notificationType 			= NOTIFICATION_TYPE_DISABLE;
+				}
+			}
+
+			if(result->notifyFailure
+				&& result->status != JOBSTATUS_OK
+				&& oldUnfilteredFailCounter < unfilteredFailCounter
+				&& unfilteredFailCounter == result->notifyFailureCount)
+			{
+				createNotification 			= true;
+				notificationType 			= NOTIFICATION_TYPE_FAILURE;
+			}
+
+			if(result->notifySuccess
+				&& result->status == JOBSTATUS_OK
+				&& oldFailCounter > 0
+				&& failCounter == 0
+				&& (!result->notifyFailure ||
+					oldUnfilteredFailCounter >= result->notifyFailureCount))
+			{
+				createNotification 			= true;
+				notificationType 			= NOTIFICATION_TYPE_SUCCESS;
+			}
+
+			if(createNotification && isEnabled)
+			{
+				try
+				{
+					queueNotification(notificationType, std::max(unfilteredFailCounter, failCounter));
+				}
+				catch(const std::exception &ex)
+				{
+					std::cerr << "Error MySQL notification insert: " << ex.what() << std::endl;
+					Metrics::instance().incrementMysqlWriteError("notification_insert");
+					continue;
+				}
+			}
+
+			const time_t now = time(nullptr);
+			if(result->notifySslCertExpiry
+				&& result->sslCertExpiry > 0
+				&& isEnabled
+				&& static_cast<uint64_t>(now) + static_cast<uint64_t>(result->notifySslCertExpirySeconds) >= result->sslCertExpiry
+				&& sslCertExpiryNotified != static_cast<int>(result->sslCertExpiry))
+			{
+				try
+				{
+					queueNotification(NOTIFICATION_TYPE_SSL_CERT_EXPIRY, std::max(unfilteredFailCounter, failCounter), result->sslCertExpiry);
+
+					db->query("UPDATE `job` SET `ssl_cert_expiry_notified`=%d WHERE `jobid`=%d",
+						static_cast<int>(result->sslCertExpiry),
+						result->jobID);
+				}
+				catch(const std::exception &ex)
+				{
+					std::cerr << "Error MySQL ssl cert expiry update: " << ex.what() << std::endl;
+					Metrics::instance().incrementMysqlWriteError("ssl_cert_expiry_update");
+					continue;
+				}
+			}
+		}
+		catch(const std::exception &ex)
+		{
+			std::cerr << "Error MySQL query: " << ex.what() << std::endl;
+			Metrics::instance().incrementMysqlWriteError("job_update");
+			continue;
+		}
+
+		if(result->jobType == JobType_t::MONITORING)
+		{
+			std::string timeDbFilePath = Utils::userTimeDbFilePath(userDbFilePathScheme, userTimeDbFileNameScheme, result->userID, tmStruct.tm_year + 1900);
+
+			try
+			{
+				if (timeDB == nullptr || openTimeDbFilePath != timeDbFilePath)
+				{
+					timeDB = std::make_unique<SQLite_DB>(timeDbFilePath.c_str());
+					timeDB->prepare("PRAGMA synchronous = OFF")->execute();
+
+					int currentSchemaVersion = 0;
+					auto stmt = timeDB->prepare("PRAGMA user_version");
+					while(stmt->execute())
+					{
+						currentSchemaVersion = stmt->intValue(0);
+					}
+
+					if(currentSchemaVersion < 1)
+					{
+						timeDB->prepare("CREATE TABLE IF NOT EXISTS \"joblog_histogram\"("
+							"	\"jobid\" INTEGER NOT NULL,"
+							"	\"date\" INTEGER NOT NULL,"
+							"	\"bin_0\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_1\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_2\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_3\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_4\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_5\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_6\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_7\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_8\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_9\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_10\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_11\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_12\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_13\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_14\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_15\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_16\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_17\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_18\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_19\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_20\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_21\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_22\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_23\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_24\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_25\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_26\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_27\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_28\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_29\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_30\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"bin_31\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"count_success\" INTEGER NOT NULL DEFAULT 0,"
+							"	\"count_failure\" INTEGER NOT NULL DEFAULT 0,"
+							" 	PRIMARY KEY(\"jobid\", \"date\")"
+							")")->execute();
+						timeDB->prepare("CREATE INDEX IF NOT EXISTS \"idx_histogram_jobid\" ON \"joblog_histogram\" (\"jobid\")")->execute();
+						timeDB->prepare("CREATE INDEX IF NOT EXISTS \"idx_histogram_jobid_date\" ON \"joblog_histogram\" (\"jobid\", \"date\")")->execute();
+					}
+
+					if(currentSchemaVersion != TIMEDB_SCHEMA_VERSION)
+					{
+						std::string pragmaQuery = "PRAGMA user_version = " + std::to_string(TIMEDB_SCHEMA_VERSION);
+						timeDB->prepare(pragmaQuery)->execute();
+					}
+
+					openTimeDbFilePath = timeDbFilePath;
+				}
+
+				const unsigned int bin = std::min(31u, static_cast<unsigned int>(ceil(log(result->timeTotal / 1000) / log(sqrt(2)))));
+				const unsigned int startedTimestamp = static_cast<unsigned int>(result->dateStarted / 1000);
+
+				std::stringstream query;
+
+				if(result->status == JobStatus_t::JOBSTATUS_OK)
+				{
+					query 	<< "INSERT INTO \"joblog_histogram\"(\"jobid\", \"date\", \"bin_" << bin << "\", \"count_success\") "
+							<< "VALUES(:jobid, :date, 1, 1) "
+							<< "ON CONFLICT(\"jobid\", \"date\") DO UPDATE SET "
+							<< "	\"bin_" << bin << "\" = \"bin_" << bin << "\" + excluded.\"bin_" << bin << "\", "
+							<< "	\"count_success\" = \"count_success\" + excluded.\"count_success\"";
+				}
+				else
+				{
+					query 	<< "INSERT INTO \"joblog_histogram\"(\"jobid\", \"date\",\"count_failure\") "
+							<< "VALUES(:jobid, :date, 1) "
+							<< "ON CONFLICT(\"jobid\", \"date\") DO UPDATE SET "
+							<< "	\"count_failure\" = \"count_failure\" + excluded.\"count_failure\"";
+				}
+
+				auto stmt = timeDB->prepare(query.str());
+				stmt->bind(":jobid", 			result->jobID);
+				stmt->bind(":date", 			startedTimestamp - (startedTimestamp % 86400));
+				stmt->execute();
+			}
+			catch(const std::exception &ex)
+			{
+				std::cerr << "Error SQLite query: " << ex.what() << std::endl;
+				Metrics::instance().incrementSqliteWriteError("histogram_update");
+				openTimeDbFilePath = {};
+				timeDB.reset();
+				continue;
+			}
+		}
+
+		Metrics::instance().incrementUpdateResults();
+	}
 }
 
 void UpdateThread::stopThread()
@@ -532,11 +553,19 @@ void UpdateThread::run()
 		const auto batchStart = std::chrono::steady_clock::now();
 		if(!tempQueue.empty())
 		{
+			std::unordered_map<int, std::vector<std::unique_ptr<JobResult>>> jobResultsByUserId;
+
 			while(!tempQueue.empty())
 			{
 				std::unique_ptr<JobResult> res = std::move(tempQueue.front());
 				tempQueue.pop();
-				storeResult(res);
+
+				jobResultsByUserId[res->userID].emplace_back(std::move(res));
+			}
+
+			for(const auto &item : jobResultsByUserId)
+			{
+				storeResults(item.second);
 			}
 		}
 		const std::chrono::duration<double> batchElapsed = std::chrono::steady_clock::now() - batchStart;
