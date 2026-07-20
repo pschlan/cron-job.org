@@ -65,25 +65,50 @@ void UpdateThread::addResult(std::unique_ptr<JobResult> result)
 	queueSignal.notify_one();
 }
 
-void UpdateThread::storeResults(const std::vector<std::unique_ptr<JobResult>> &results)
+namespace
 {
-	const int DB_SCHEMA_VERSION = 3;
-	const int TIMEDB_SCHEMA_VERSION = 1;
 
-	std::string openDbFilePath;
-	std::unique_ptr<SQLite_DB> userDB;
-	bool userDbTxOpen = false;
-
-	std::string openTimeDbFilePath;
-	std::unique_ptr<SQLite_DB> timeDB;
-	bool timeDbTxOpen = false;
-
-	// Best-effort commit of an open transaction. On failure the buffered rows are
-	// lost, but we never let a commit error propagate out of the update thread.
-	const auto commitTransaction = [](std::unique_ptr<SQLite_DB> &db, bool &txOpen, const char *operation)
+// Owns a SQLite connection together with an open write transaction for the
+// duration of a batch. The transaction is committed when the object is
+// destroyed -- on normal scope exit, reset(), reassignment, or stack unwinding
+// caused by an exception -- so buffered rows are always flushed on every
+// control-flow path without a separate "transaction open" flag to keep in sync.
+// Commit failures are logged and counted but never thrown, so a failing COMMIT
+// cannot tear down the update thread.
+class BatchTransaction
+{
+public:
+	BatchTransaction(const std::string &fileName, const char *commitErrorOperation)
+		: db(std::make_unique<SQLite_DB>(fileName)),
+		  commitErrorOperation(commitErrorOperation)
 	{
-		if(db == nullptr || !txOpen)
+	}
+
+	~BatchTransaction()
+	{
+		commit();
+	}
+
+	BatchTransaction(const BatchTransaction &) = delete;
+	BatchTransaction &operator=(const BatchTransaction &) = delete;
+
+	SQLite_DB &get()
+	{
+		return *db;
+	}
+
+	void begin()
+	{
+		db->prepare("BEGIN")->execute();
+		open = true;
+	}
+
+private:
+	void commit() noexcept
+	{
+		if(!open)
 			return;
+		open = false;
 		try
 		{
 			db->prepare("COMMIT")->execute();
@@ -91,10 +116,32 @@ void UpdateThread::storeResults(const std::vector<std::unique_ptr<JobResult>> &r
 		catch(const std::exception &ex)
 		{
 			std::cerr << "Error committing SQLite transaction: " << ex.what() << std::endl;
-			Metrics::instance().incrementSqliteWriteError(operation);
+			Metrics::instance().incrementSqliteWriteError(commitErrorOperation);
 		}
-		txOpen = false;
-	};
+		catch(...)
+		{
+			std::cerr << "Error committing SQLite transaction: unknown error" << std::endl;
+			Metrics::instance().incrementSqliteWriteError(commitErrorOperation);
+		}
+	}
+
+	std::unique_ptr<SQLite_DB> db;
+	const char *commitErrorOperation;
+	bool open = false;
+};
+
+}
+
+void UpdateThread::storeResults(const std::vector<std::unique_ptr<JobResult>> &results)
+{
+	const int DB_SCHEMA_VERSION = 3;
+	const int TIMEDB_SCHEMA_VERSION = 1;
+
+	std::string openDbFilePath;
+	std::unique_ptr<BatchTransaction> userTx;
+
+	std::string openTimeDbFilePath;
+	std::unique_ptr<BatchTransaction> timeTx;
 
 	for (const auto &result : results)
 	{
@@ -108,11 +155,15 @@ void UpdateThread::storeResults(const std::vector<std::unique_ptr<JobResult>> &r
 
 		try
 		{
-			if (userDB == nullptr || openDbFilePath != dbFilePath)
-			{
-				commitTransaction(userDB, userDbTxOpen, "joblog_commit");
+			SQLite_DB *userDB = nullptr;
 
-				userDB = std::make_unique<SQLite_DB>(dbFilePath.c_str());
+			if (userTx == nullptr || openDbFilePath != dbFilePath)
+			{
+				userTx.reset();
+
+				userTx = std::make_unique<BatchTransaction>(dbFilePath, "joblog_commit");
+
+				userDB = &userTx->get();
 				userDB->prepare("PRAGMA synchronous = OFF")->execute();
 
 				int currentSchemaVersion = 0;
@@ -185,9 +236,10 @@ void UpdateThread::storeResults(const std::vector<std::unique_ptr<JobResult>> &r
 
 				openDbFilePath = dbFilePath;
 
-				userDB->prepare("BEGIN")->execute();
-				userDbTxOpen = true;
+				userTx->begin();
 			}
+
+			userDB = &userTx->get();
 
 			auto stmt = userDB->prepare("INSERT INTO \"joblog\"(\"jobid\",\"date\",\"date_planned\",\"jitter\",\"url\",\"duration\",\"status\",\"status_text\",\"http_status\",\"created\") "
 				"VALUES(:jobid,:date,:date_planned,:jitter,:url,:duration,:status,:status_text,:http_status,strftime('%s', 'now'))");
@@ -245,9 +297,7 @@ void UpdateThread::storeResults(const std::vector<std::unique_ptr<JobResult>> &r
 		{
 			std::cerr << "Error SQLite query: " << ex.what() << std::endl;
 			Metrics::instance().incrementSqliteWriteError("joblog_insert");
-			commitTransaction(userDB, userDbTxOpen, "joblog_commit");
-			openDbFilePath = {};
-			userDB.reset();
+			userTx.reset();
 			continue;
 		}
 
@@ -434,11 +484,15 @@ void UpdateThread::storeResults(const std::vector<std::unique_ptr<JobResult>> &r
 
 			try
 			{
-				if (timeDB == nullptr || openTimeDbFilePath != timeDbFilePath)
-				{
-					commitTransaction(timeDB, timeDbTxOpen, "histogram_commit");
+				SQLite_DB *timeDB = nullptr;
 
-					timeDB = std::make_unique<SQLite_DB>(timeDbFilePath.c_str());
+				if (timeTx == nullptr || openTimeDbFilePath != timeDbFilePath)
+				{
+					timeTx.reset();
+
+					timeTx = std::make_unique<BatchTransaction>(timeDbFilePath, "histogram_commit");
+
+					timeDB = &timeTx->get();
 					timeDB->prepare("PRAGMA synchronous = OFF")->execute();
 
 					int currentSchemaVersion = 0;
@@ -501,9 +555,10 @@ void UpdateThread::storeResults(const std::vector<std::unique_ptr<JobResult>> &r
 
 					openTimeDbFilePath = timeDbFilePath;
 
-					timeDB->prepare("BEGIN")->execute();
-					timeDbTxOpen = true;
+					timeTx->begin();
 				}
+
+				timeDB = &timeTx->get();
 
 				const unsigned int bin = std::min(31u, static_cast<unsigned int>(ceil(log(result->timeTotal / 1000) / log(sqrt(2)))));
 				const unsigned int startedTimestamp = static_cast<unsigned int>(result->dateStarted / 1000);
@@ -535,18 +590,13 @@ void UpdateThread::storeResults(const std::vector<std::unique_ptr<JobResult>> &r
 			{
 				std::cerr << "Error SQLite query: " << ex.what() << std::endl;
 				Metrics::instance().incrementSqliteWriteError("histogram_update");
-				commitTransaction(timeDB, timeDbTxOpen, "histogram_commit");
-				openTimeDbFilePath = {};
-				timeDB.reset();
+				timeTx.reset();
 				continue;
 			}
 		}
 
 		Metrics::instance().incrementUpdateResults();
 	}
-
-	commitTransaction(userDB, userDbTxOpen, "joblog_commit");
-	commitTransaction(timeDB, timeDbTxOpen, "histogram_commit");
 }
 
 void UpdateThread::stopThread()
