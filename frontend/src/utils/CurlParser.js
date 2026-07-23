@@ -255,6 +255,7 @@ function appendBody(current, addition) {
 
 function appendQuery(url, query) {
   if (!query) return url;
+  if (/[?&]$/.test(url)) return url + query;
   return url + (url.includes('?') ? '&' : '?') + query;
 }
 

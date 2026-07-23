@@ -191,6 +191,13 @@ describe('parseCurl', () => {
     expect(r.body).toBeNull();
   });
 
+  it('does not add a second separator when the -G URL ends with ? or &', () => {
+    expect(parseCurl("curl -G -d 'a=1' 'https://example.com/s?'").url)
+      .toBe('https://example.com/s?a=1');
+    expect(parseCurl("curl -G -d 'b=2' 'https://example.com/s?a=1&'").url)
+      .toBe('https://example.com/s?a=1&b=2');
+  });
+
   it('keeps an explicit method when -G is used', () => {
     const r = parseCurl("curl -X POST -G -d 'a=1' https://example.com");
     expect(r.method).toBe('POST');
