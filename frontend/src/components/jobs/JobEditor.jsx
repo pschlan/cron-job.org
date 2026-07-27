@@ -104,6 +104,11 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
+let nextHeaderId = 0;
+function newHeaderId() {
+  return `header-${++nextHeaderId}`;
+}
+
 export default function JobEditor({ match }) {
   //! @todo Check URL for >/dev/null etc.
   const { folderId, folderBreadcrumb, urlPrefix, folders } = useFolder(match);
@@ -253,7 +258,7 @@ export default function JobEditor({ match }) {
       analyzeBody(job.extendedData.body);
       setTimezone(job.schedule.timezone);
       setJobHeaders(Object.keys(job.extendedData.headers).reduce((prev, cur) =>
-        [...prev, { key: cur, value: job.extendedData.headers[cur] }], []));
+        [...prev, { key: cur, value: job.extendedData.headers[cur], uuid: newHeaderId() }], []));
       setIsLoading(false);
       setJobFolderId(job.folderId);
 
@@ -375,7 +380,7 @@ export default function JobEditor({ match }) {
   }
 
   function addHeader() {
-    setJobHeaders(headers => [...headers, {key: '', value: ''}]);
+    setJobHeaders(headers => [...headers, {key: '', value: '', uuid: newHeaderId()}]);
   }
 
   function updateHeaderKey(rowNo, key) {
@@ -459,7 +464,7 @@ export default function JobEditor({ match }) {
   function applyImportedCommand({ url, method, headers, body, auth, schedule: importedSchedule }) {
     if (url) updateUrl(url);
     if (method !== null && method !== undefined) setRequestMethod(method);
-    setJobHeaders(headers || []);
+    setJobHeaders((headers || []).map(x => ({...x, uuid: newHeaderId()})));
 
     const nextBody = body === null || body === undefined ? '' : body;
     setRequestBody(nextBody);
@@ -783,6 +788,7 @@ export default function JobEditor({ match }) {
               columns={HEADERS_COLUMNS}
               items={jobHeaders}
               empty={<em>{t('jobs.noheaders')}</em>}
+              rowIdentifier='uuid'
               noHeader
               />
           </TableContainer>
@@ -838,7 +844,7 @@ export default function JobEditor({ match }) {
                     size='small'
                     color='default'
                     startIcon={<ApplyIcon />}
-                    onClick={() => setJobHeaders(x => [...x, {key: 'Content-Type', value: 'application/json'}])}>
+                    onClick={() => setJobHeaders(x => [...x, {key: 'Content-Type', value: 'application/json', uuid: newHeaderId()}])}>
                     {t('jobs.jsonNote.setContentType')}
                   </Button>
                 </Box>
