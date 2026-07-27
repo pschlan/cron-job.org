@@ -60,7 +60,7 @@ class NodeManager {
 
   public function getNode($nodeId) {
     $stmt = Database::get()->prepare('SELECT `nodeid` AS `nodeId`, `ip`, `port` FROM `node` '
-                                      . 'WHERE `enabled`=1 AND `nodeid`=:nodeId');
+                                      . 'WHERE `nodeid`=:nodeId');
     $stmt->setFetchMode(PDO::FETCH_CLASS, Node::class);
     $stmt->execute(array(':nodeId' => $nodeId));
     return $stmt->fetch();

@@ -35,7 +35,7 @@ try {
     $dispatcher->registerSessionTokenHandler(UserManager::getSessionTokenHandler());
 
   } else if ($_SERVER['PATH_INFO'] === '/executor-nodes.json') {
-    $stmt = Database::get()->prepare('SELECT `public_ip` AS `publicIp` FROM `node` WHERE `enabled`=1 ORDER BY `nodeid` ASC');
+    $stmt = Database::get()->prepare('SELECT `public_ip` AS `publicIp` FROM `node` ORDER BY `nodeid` ASC');
     $stmt->execute();
 
     $ipAddresses = [];
