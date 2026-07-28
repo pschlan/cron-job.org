@@ -253,6 +253,12 @@ function appendBody(current, addition) {
   return current + '&' + addition;
 }
 
+function appendQuery(url, query) {
+  if (!query) return url;
+  if (/[?&]$/.test(url)) return url + query;
+  return url + (url.includes('?') ? '&' : '?') + query;
+}
+
 export function parseCurl(input) {
   if (typeof input !== 'string') return null;
 
@@ -283,6 +289,7 @@ export function parseCurl(input) {
   };
   let explicitMethod = false;
   let formBody = false;
+  let forceGet = false;
 
   for (let i = start; i < tokens.length; i += 1) {
     const tok = tokens[i];
@@ -416,7 +423,9 @@ export function parseCurl(input) {
       }
       case '-G':
       case '--get': {
-        if (!explicitMethod) result.method = 'GET';
+        // The data is only known once all tokens have been seen, so the
+        // rewrite happens after the loop.
+        forceGet = true;
         break;
       }
       case '-I':
@@ -453,6 +462,16 @@ export function parseCurl(input) {
 
   // Strip wrapping quotes (in case the URL was double-quoted inside a single-quoted block, etc.)
   result.url = result.url.replace(/^['"]+/, '').replace(/['"]+$/, '');
+
+  // With -G, curl does not send the --data content as a request body but
+  // appends it to the URL's query string and performs a GET. An explicit -X
+  // still wins over the method, as it does in curl.
+  if (forceGet) {
+    result.url = appendQuery(result.url, result.body);
+    result.body = null;
+    formBody = false;
+    if (!explicitMethod) result.method = 'GET';
+  }
 
   // If --data was used and no Content-Type was sent, curl defaults to
   // application/x-www-form-urlencoded. Mirror that so the job actually
