@@ -505,6 +505,12 @@
     }
   },
   "settings": {
+    "tabs": {
+      "profile": "Profile",
+      "security": "Security",
+      "apiKeys": "API Keys",
+      "billing": "Billing"
+    },
     "profile": "Profile",
     "firstName": "First name",
     "lastName": "Last name",
