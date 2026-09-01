@@ -45,6 +45,7 @@
 namespace {
 
 constexpr int PHRASE_SYNC_INTERVAL_SECONDS = 300;
+constexpr int MASTER_SYNC_TIMEOUT_MS = 1000;
 
 constexpr size_t MIME_ENCODED_WORD_MAX_LEN = 75;
 constexpr size_t MIME_ENCODED_WORD_PREFIX_LEN = 10; // =?UTF-8?Q?
@@ -509,6 +510,9 @@ NotificationThread::NotificationThread()
 	masterSocket = std::make_shared<apache::thrift::transport::TSocket>(
 		App::getInstance()->config->get("master_service_address"),
 		App::getInstance()->config->getInt("master_service_port"));
+	masterSocket->setConnTimeout(MASTER_SYNC_TIMEOUT_MS);
+	masterSocket->setRecvTimeout(MASTER_SYNC_TIMEOUT_MS);
+	masterSocket->setSendTimeout(MASTER_SYNC_TIMEOUT_MS);
 	masterTransport = std::make_shared<apache::thrift::transport::TBufferedTransport>(masterSocket);
 	masterProtocol = std::make_shared<apache::thrift::protocol::TBinaryProtocol>(masterTransport);
 	masterClient = std::make_shared<ChronosMasterClient>(masterProtocol);

@@ -52,6 +52,8 @@
 namespace
 {
 
+constexpr int MASTER_SYNC_TIMEOUT_MS = 1000;
+
 int g_numLocks = 0;
 pthread_mutex_t *g_sslLocks = nullptr;
 
@@ -459,10 +461,13 @@ UserGroup App::getUserGroupById(uint64_t userGroupId)
 
 void App::syncUserGroups()
 {
-	std::shared_ptr<apache::thrift::transport::TTransport> masterSocket
+	std::shared_ptr<apache::thrift::transport::TSocket> masterSocket
 		= std::make_shared<apache::thrift::transport::TSocket>(
 			config->get("master_service_address"),
 			config->getInt("master_service_port"));
+	masterSocket->setConnTimeout(MASTER_SYNC_TIMEOUT_MS);
+	masterSocket->setRecvTimeout(MASTER_SYNC_TIMEOUT_MS);
+	masterSocket->setSendTimeout(MASTER_SYNC_TIMEOUT_MS);
 	std::shared_ptr<apache::thrift::transport::TTransport> masterTransport
 		= std::make_shared<apache::thrift::transport::TBufferedTransport>(masterSocket);
 	std::shared_ptr<apache::thrift::protocol::TProtocol> masterProtocol

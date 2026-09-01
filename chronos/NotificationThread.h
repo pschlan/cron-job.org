@@ -33,6 +33,7 @@ class TProtocol;
 }
 
 namespace transport {
+class TSocket;
 class TTransport;
 }
 
@@ -72,7 +73,7 @@ namespace Chronos
 		std::mutex queueMutex;
 		std::condition_variable queueSignal;
 		std::queue<Notification> queue;
-		std::shared_ptr<apache::thrift::transport::TTransport> masterSocket;
+		std::shared_ptr<apache::thrift::transport::TSocket> masterSocket;
 		std::shared_ptr<apache::thrift::transport::TTransport> masterTransport;
 		std::shared_ptr<apache::thrift::protocol::TProtocol> masterProtocol;
 		std::shared_ptr<ChronosMasterClient> masterClient;
