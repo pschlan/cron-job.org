@@ -1,0 +1,195 @@
+import React, { useEffect, useState } from 'react';
+import { Button, CircularProgress, FormLabel, Grid, InputLabel, LinearProgress, makeStyles, MenuItem, Paper, Select, Typography } from '@material-ui/core';
+import { grey } from '@material-ui/core/colors';
+import { useTranslation } from 'react-i18next';
+import { updateUserProfile } from '../../utils/API';
+import useTimezones from '../../hooks/useTimezones';
+import useUserProfile from '../../hooks/useUserProfile';
+import ValidatingTextField from '../misc/ValidatingTextField';
+import SaveIcon from '@material-ui/icons/Save';
+import { useSnackbar } from 'notistack';
+import { setUserProfile } from '../../redux/actions';
+import { useDispatch } from 'react-redux';
+import moment from 'moment';
+import { RegexPatterns } from '../../utils/Constants';
+
+const useStyles = makeStyles(theme => ({
+  grid: {
+    '& .MuiGrid-item': {
+      padding: theme.spacing(2)
+    }
+  },
+  paper: {
+    padding: theme.spacing(2)
+  },
+  fieldSet: {
+    padding: theme.spacing(2),
+    margin: theme.spacing(2, 0),
+    border: `1px solid ${theme.palette.divider}`,
+    borderRadius: theme.spacing(0.5),
+    '& legend': {
+      padding: theme.spacing(0, 1)
+    }
+  },
+  timezoneNote: {
+    color: grey[600]
+  },
+  signupDate: {
+    paddingTop: theme.spacing(0.5)
+  }
+}));
+
+export default function SettingsProfile() {
+  const classes = useStyles();
+  const { t } = useTranslation();
+  const timezones = useTimezones();
+  const userProfile = useUserProfile();
+  const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+
+  const [ isLoading, setIsLoading ] = useState(true);
+  const [ saving, setSaving ] = useState(false);
+
+  const [ firstName, setFirstName ] = useState('');
+  const [ lastName, setLastName ] = useState('');
+  const [ timezone, setTimezone ] = useState('');
+  const [ email, setEmail ] = useState('');
+  const [ newsletterSubscribe, setNewsletterSubscribe ] = useState('undefined');
+  const [ signupDate, setSignupDate ] = useState(0);
+
+  useEffect(() => {
+    if (userProfile && userProfile.userProfile && Object.keys(userProfile.userProfile).length > 0) {
+      setFirstName(userProfile.userProfile.firstName);
+      setLastName(userProfile.userProfile.lastName);
+      setTimezone(userProfile.userProfile.timezone);
+      setEmail(userProfile.userProfile.email);
+      setNewsletterSubscribe(userProfile.userProfile.newsletterSubscribe);
+      setSignupDate(userProfile.userProfile.signupDate);
+      setIsLoading(false);
+    }
+  }, [userProfile]);
+
+  function saveSettings() {
+    setSaving(true);
+
+    const newProfile = {
+      ...userProfile,
+      userProfile: {
+        ...userProfile.userProfile,
+        firstName,
+        lastName,
+        timezone,
+        newsletterSubscribe
+      }
+    };
+
+    updateUserProfile(newProfile.userProfile)
+      .then(() => {
+        dispatch(setUserProfile(newProfile));
+        enqueueSnackbar(t('settings.saved'), { variant: 'success' });
+      })
+      .catch(() => enqueueSnackbar(t('settings.saveFailed'), { variant: 'error' }))
+      .finally(() => setSaving(false));
+  }
+
+  if (isLoading) {
+    return <LinearProgress />;
+  }
+
+  return <>
+    <Paper className={classes.paper}>
+      <fieldset className={classes.fieldSet}>
+        <FormLabel component='legend'>{t('settings.account')}</FormLabel>
+        <Grid container className={classes.grid}>
+          <Grid item sm={6} xs={12}>
+            <ValidatingTextField
+              label={t('settings.email')}
+              InputLabelProps={{ shrink: true }}
+              defaultValue={email}
+              disabled={true}
+              fullWidth
+              />
+          </Grid>
+          <Grid item sm={3} xs={12}>
+            <InputLabel id='newsletter-subscribe-label' shrink={true}>{t('settings.newsletterSubscribe.title')}</InputLabel>
+            <Select
+              value={newsletterSubscribe}
+              onChange={({target}) => setNewsletterSubscribe(target.value)}
+              labelId='newsletter-subscribe-label'>
+                <MenuItem value='yes' key='yes'>{t('settings.newsletterSubscribe.yes')}</MenuItem>
+                <MenuItem value='no' key='no'>{t('settings.newsletterSubscribe.no')}</MenuItem>
+                <MenuItem value='undefined' key='undefined'>{t('settings.newsletterSubscribe.undefined')}</MenuItem>
+            </Select>
+          </Grid>
+          <Grid item sm={3} xs={12}>
+            <Typography variant='caption' component='div'>{t('settings.memberSince')}</Typography>
+            <Typography component='div' className={classes.signupDate}>{moment(signupDate*1000).calendar()}</Typography>
+          </Grid>
+        </Grid>
+      </fieldset>
+
+      <fieldset className={classes.fieldSet}>
+        <FormLabel component='legend'>{t('settings.profile')}</FormLabel>
+        <Grid container className={classes.grid}>
+          <Grid item sm={6} xs={12}>
+            <ValidatingTextField
+              label={t('settings.firstName')}
+              InputLabelProps={{ shrink: true }}
+              defaultValue={firstName}
+              onBlur={({target}) => setFirstName(target.value)}
+              pattern={RegexPatterns.name}
+              patternErrorText={t('common.checkInput')}
+              fullWidth
+              />
+          </Grid>
+          <Grid item sm={6} xs={12}>
+            <ValidatingTextField
+              label={t('settings.lastName')}
+              InputLabelProps={{ shrink: true }}
+              defaultValue={lastName}
+              onBlur={({target}) => setLastName(target.value)}
+              pattern={RegexPatterns.name}
+              patternErrorText={t('common.checkInput')}
+              fullWidth
+              />
+          </Grid>
+        </Grid>
+      </fieldset>
+
+      <fieldset className={classes.fieldSet}>
+        <FormLabel component='legend'>{t('settings.defaultTimezone')}</FormLabel>
+        <Grid container className={classes.grid}>
+          <Grid item xs={12}>
+            <InputLabel shrink id='timezone-label'>
+              {t('jobs.timezone')}
+            </InputLabel>
+            <Select
+              value={timezones.length ? timezone : ''}
+              onChange={({target}) => setTimezone(target.value)}
+              labelId='timezone-label'
+              fullWidth>
+              {timezones.map(zone =>
+                <MenuItem value={zone} key={zone}>{zone}</MenuItem>)}
+            </Select>
+            <Typography variant='caption' component='div' className={classes.timezoneNote}>
+              {t('settings.timezoneNote')}
+            </Typography>
+          </Grid>
+        </Grid>
+      </fieldset>
+    </Paper>
+
+    <Grid container direction='row' justifyContent='flex-end'>
+      <Grid item>
+        <Button
+          variant='contained'
+          color='primary'
+          startIcon={saving ? <CircularProgress size='small' /> : <SaveIcon />}
+          onClick={() => saveSettings()}
+          disabled={saving}>
+          {t('common.save')}
+        </Button>
+      </Grid>
+    </Grid>
+  </>;
+}
