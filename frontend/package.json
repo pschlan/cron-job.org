@@ -52,6 +52,45 @@
     ]
   },
   "overrides": {
-    "brace-expansion": "1.1.18"
+    "brace-expansion": "1.1.18",
+    "@svgr/plugin-svgo": {
+      "nth-check": "2.0.1"
+    },
+    "@svgr/webpack": {
+      "nth-check": "2.0.1"
+    },
+    "css-minimizer-webpack-plugin": {
+      "nth-check": "2.0.1"
+    },
+    "css-select": {
+      "nth-check": "2.0.1"
+    },
+    "cssnano": {
+      "nth-check": "2.0.1"
+    },
+    "cssnano-preset-default": {
+      "nth-check": "2.0.1"
+    },
+    "html-webpack-plugin": {
+      "nth-check": "2.0.1"
+    },
+    "nth-check": {
+      "nth-check": "2.0.1"
+    },
+    "postcss-svgo": {
+      "nth-check": "2.0.1"
+    },
+    "pretty-error": {
+      "nth-check": "2.0.1"
+    },
+    "react-scripts": {
+      "nth-check": "2.0.1"
+    },
+    "renderkid": {
+      "nth-check": "2.0.1"
+    },
+    "svgo": {
+      "nth-check": "2.0.1"
+    }
   }
 }
