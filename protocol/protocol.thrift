@@ -152,6 +152,21 @@ struct JobLogEntry
     16: optional i64 sslCertExpiry; // in s, 0 = not available (plain HTTP or no TLS)
 }
 
+enum NotificationChannelType
+{
+    EMAIL               = 0,
+    WEBHOOK             = 1
+}
+
+struct NotificationChannel
+{
+    1: i64 channelId;
+    2: NotificationChannelType type;
+    3: string destination;
+    4: bool enabled;
+    5: map<string, string> settings;
+}
+
 struct UserDetails
 {
     1: i64 userId;
@@ -160,6 +175,7 @@ struct UserDetails
     4: string lastName;
     5: string language;
     6: optional bool suppressNotifications;
+    7: optional list<NotificationChannel> notificationChannels;
 }
 
 struct UserGroup

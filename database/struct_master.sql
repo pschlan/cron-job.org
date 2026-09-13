@@ -73,6 +73,17 @@ CREATE TABLE `usergroup`(
 ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 INSERT INTO `usergroup`(`usergroupid`, `title`) VALUES(1, 'Default');
 
+CREATE TABLE `notificationchannel`(
+    `channelid` int(11) NOT NULL AUTO_INCREMENT,
+    `userid` int(11) NOT NULL DEFAULT 0,
+    `type` tinyint(4) NOT NULL DEFAULT 0,
+    `destination` varchar(255) NOT NULL DEFAULT '',
+    `enabled` tinyint(4) NOT NULL DEFAULT 0,
+    `settings` text NOT NULL,
+    PRIMARY KEY(`channelid`),
+    KEY(`userid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
 CREATE TABLE `node`(
     `nodeid` int(11) NOT NULL AUTO_INCREMENT,
     `name` varchar(128) NOT NULL DEFAULT '',

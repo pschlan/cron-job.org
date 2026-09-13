@@ -97,6 +97,20 @@ public:
                 _return.__isset.suppressNotifications   = true;
                 _return.suppressNotifications           = std::stoi(row[5]) == 1;
             }
+
+            res = db->query("SELECT `channelid`,`type`,`destination`,`enabled`,`settings` FROM `notificationchannel` WHERE `userid`=%v",
+                userId);
+            while((row = res->fetchRow()))
+            {
+                NotificationChannel nc;
+                nc.channelId = std::stoll(row[0]);
+                nc.type = static_cast<NotificationChannelType::type>(std::stoi(row[1]));
+                nc.destination = row[2];
+                nc.enabled = std::stoi(row[3]) == 1;
+                //nc.settings = row[4]; TODO
+                _return.notificationChannels.push_back(nc);
+            }
+            _return.__isset.notificationChannels = true;
         }
         catch(const std::exception &ex)
         {
