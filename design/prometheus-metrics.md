@@ -113,7 +113,7 @@ Per-job execution delay relative to the planned time is captured by `chronos_wor
 
 For `status=failed_httperror`, optionally add label `http_status_class` (`2xx`/`3xx`/`4xx`/`5xx`).
 
-Blocked-subnet rejections happen during cURL socket open (`verifyPeerAddress()`), not as a separate pre-flight path. They appear in `chronos_jobs_executed_total` with a failure `status` (typically `failed_connect` or `failed_others`). URL malformation is reported by cURL as `failed_url` in the same counter.
+Blocked-subnet rejections happen during cURL socket open (`App::verifyPeerAddress()`), not as a separate pre-flight path. Job executions appear in `chronos_jobs_executed_total` with a failure `status` (typically `failed_connect` or `failed_others`). Webhook deliveries fail at send time (`chronos_notification_send_errors_total`) and are not retried. URL malformation is reported by cURL as `failed_url` in the same job counter.
 
 ## Worker threads
 

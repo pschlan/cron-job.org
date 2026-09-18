@@ -30,6 +30,8 @@
 
 #include <curl/curl.h>
 
+#include <sys/socket.h>
+
 #include <nlohmann/json.hpp>
 
 #include "App.h"
@@ -345,6 +347,24 @@ size_t curlResponseLimiterWriteFunction(char *buffer, size_t size, size_t nitems
 	return bytes;
 }
 
+curl_socket_t webhookCurlOpenSocketFunction(void *userdata, curlsocktype purpose, struct curl_sockaddr *address)
+{
+	if(purpose != CURLSOCKTYPE_IPCXN)
+	{
+		std::cerr << "Invalid socket purpose: " << purpose << std::endl;
+		return CURL_SOCKET_BAD;
+	}
+
+	if(address == nullptr || !Chronos::App::getInstance()->verifyPeerAddress(address->addrlen, &address->addr))
+	{
+		if(userdata != nullptr)
+			*static_cast<bool *>(userdata) = true;
+		return CURL_SOCKET_BAD;
+	}
+
+	return ::socket(address->family, address->socktype, address->protocol);
+}
+
 struct WebhookRequest
 {
 	~WebhookRequest()
@@ -358,6 +378,7 @@ struct WebhookRequest
 	curl_slist *headers{nullptr};
 	std::string payload;
 	ResponseLimiterState responseLimiterState;
+	bool peerAddressBlocked{false};
 };
 
 struct MailRequest
@@ -986,13 +1007,16 @@ void webhookOnDone(const std::shared_ptr<WebhookSendState> &state, CURLcode res,
 	}
 
 	std::string resultDetails;
-	if(res != CURLE_OK)
+	if(state->request->peerAddressBlocked)
+		resultDetails = "Destination address is blocked";
+	else if(res != CURLE_OK)
 		resultDetails = std::string(curl_easy_strerror(res));
 	else
 		resultDetails = "HTTP error: " + std::to_string(httpCode);
 	resultDetails += attemptSuffix;
 
-	if(webhookFailureRetryable(res, httpCode) && state->attempt < state->maxAttempts)
+	if(!state->request->peerAddressBlocked
+		&& webhookFailureRetryable(res, httpCode) && state->attempt < state->maxAttempts)
 	{
 		curl_off_t retryAfter = 0;
 #ifdef CURLINFO_RETRY_AFTER
@@ -1000,6 +1024,7 @@ void webhookOnDone(const std::shared_ptr<WebhookSendState> &state, CURLcode res,
 #endif
 		const double delay = webhookRetryDelaySeconds(state->attempt, state->baseDelayMs, state->maxDelayMs, retryAfter);
 		state->request->responseLimiterState.bytes = 0;
+		state->request->peerAddressBlocked = false;
 		if(state->dt->submitDelayed(state->curl, [state](CURLcode r, const std::unique_ptr<MySQL_DB> &d) {
 			webhookOnDone(state, r, d);
 		}, delay))
@@ -1467,6 +1492,8 @@ void NotificationThread::sendWebhookNotification(const Notification &notificatio
 	curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, curlResponseLimiterWriteFunction);
 	curl_easy_setopt(curl, CURLOPT_HEADERDATA, &whRequest->responseLimiterState);
 	curl_easy_setopt(curl, CURLOPT_MAXFILESIZE,	MAX_WEBHOOK_RESPONSE_SIZE);
+	curl_easy_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, webhookCurlOpenSocketFunction);
+	curl_easy_setopt(curl, CURLOPT_OPENSOCKETDATA, &whRequest->peerAddressBlocked);
 
 	int maxAttempts = App::getInstance()->config->getInt("webhook_retry_max_attempts", 3);
 	if(maxAttempts < 1)

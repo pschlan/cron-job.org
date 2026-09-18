@@ -205,6 +205,28 @@ bool App::isIpAddressBlocked(in_addr_t ipAddress) const
 	return false;
 }
 
+bool App::verifyPeerAddress(unsigned int addressLength, const struct sockaddr *address) const
+{
+	if(address == nullptr)
+		return false;
+
+	//! @note We don't support IPv6 at the moment.
+	if(address->sa_family != AF_INET)
+	{
+		std::cerr << "Unsupported sa_family: " << address->sa_family << std::endl;
+		return false;
+	}
+
+	if(addressLength != sizeof(struct sockaddr_in))
+	{
+		std::cerr << "Invalid AF_INET address length: " << addressLength << std::endl;
+		return false;
+	}
+
+	const struct sockaddr_in *inAddress = reinterpret_cast<const struct sockaddr_in *>(address);
+	return !isIpAddressBlocked(inAddress->sin_addr.s_addr);
+}
+
 void App::processJobs(time_t forTime, time_t plannedTime)
 {
 	const auto tickStart = std::chrono::steady_clock::now();

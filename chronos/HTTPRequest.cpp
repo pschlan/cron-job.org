@@ -23,6 +23,7 @@
 #include <strings.h>
 
 #include <netinet/in.h>
+#include <sys/socket.h>
 
 #include "WorkerThread.h"
 #include "CurlWorker.h"
@@ -128,7 +129,7 @@ uint64_t extractSslCertExpiry(CURL *easy)
 	return 0;
 }
 
-curl_socket_t curlOpenSocketFunction(void *userdata, curlsocktype purpose, struct curl_sockaddr *address)
+curl_socket_t curlOpenSocketFunction(void * /*userdata*/, curlsocktype purpose, struct curl_sockaddr *address)
 {
 	if(purpose != CURLSOCKTYPE_IPCXN)
 	{
@@ -136,7 +137,7 @@ curl_socket_t curlOpenSocketFunction(void *userdata, curlsocktype purpose, struc
 		return CURL_SOCKET_BAD;
 	}
 
-	if(!static_cast<HTTPRequest *>(userdata)->verifyPeerAddress(address->addrlen, &address->addr))
+	if(address == nullptr || !App::getInstance()->verifyPeerAddress(address->addrlen, &address->addr))
 	{
 		return CURL_SOCKET_BAD;
 	}
@@ -302,25 +303,6 @@ bool HTTPRequest::processData(const char *data, size_t size)
 		result->responseBody.append(data, size);
 	}
 	return true;
-}
-
-bool HTTPRequest::verifyPeerAddress(unsigned int addressLength, const struct sockaddr *address) const
-{
-	//! @note We don't support IPv6 at the moment.
-	if(address->sa_family != AF_INET)
-	{
-		std::cerr << "Unsupported sa_family: " << address->sa_family << std::endl;
-		return false;
-	}
-
-	if(addressLength != sizeof(struct sockaddr_in))
-	{
-		std::cerr << "Invalid AF_INET address length: " << addressLength << std::endl;
-		return false;
-	}
-
-	const struct sockaddr_in *inAddress = reinterpret_cast<const struct sockaddr_in *>(address);
-	return !App::getInstance()->isIpAddressBlocked(inAddress->sin_addr.s_addr);
 }
 
 void HTTPRequest::done(CURLcode res)
