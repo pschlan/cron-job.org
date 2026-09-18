@@ -13,8 +13,12 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
+#include <functional>
 #include <iomanip>
 #include <iostream>
+#include <map>
+#include <memory>
 #include <random>
 #include <regex>
 #include <sstream>
@@ -367,8 +371,90 @@ struct MailRequest
 	}
 
 	curl_slist *recipients{nullptr};
-	std::string data;;
+	std::string data;
 };
+
+bool webhookHttpStatusRetryable(long httpCode)
+{
+	switch(httpCode)
+	{
+	case 408:
+	case 429:
+	case 500:
+	case 502:
+	case 503:
+	case 504:
+		return true;
+	default:
+		return false;
+	}
+}
+
+bool webhookCurlRetryable(CURLcode res)
+{
+	switch(res)
+	{
+	case CURLE_COULDNT_CONNECT:
+	case CURLE_OPERATION_TIMEDOUT:
+	case CURLE_GOT_NOTHING:
+	case CURLE_SEND_ERROR:
+	case CURLE_RECV_ERROR:
+	case CURLE_SSL_CONNECT_ERROR:
+	case CURLE_COULDNT_RESOLVE_HOST:
+	case CURLE_FAILED_INIT:
+#ifdef CURLE_HTTP2
+	case CURLE_HTTP2:
+#endif
+#ifdef CURLE_HTTP2_STREAM
+	case CURLE_HTTP2_STREAM:
+#endif
+		return true;
+	default:
+		return false;
+	}
+}
+
+bool webhookFailureRetryable(CURLcode res, long httpCode)
+{
+	if(httpCode >= 200 && httpCode < 300)
+		return false;
+	if(httpCode > 0)
+		return webhookHttpStatusRetryable(httpCode);
+	if(res == CURLE_WRITE_ERROR || res == CURLE_ABORTED_BY_CALLBACK)
+		return false;
+	return webhookCurlRetryable(res);
+}
+
+double webhookRetryDelaySeconds(int retryNumber, int baseDelayMs, int maxDelayMs, curl_off_t retryAfterSeconds)
+{
+	double delayMs = 0;
+	if(retryAfterSeconds > 0)
+	{
+		delayMs = static_cast<double>(retryAfterSeconds) * 1000.0;
+	}
+	else
+	{
+		if(retryNumber < 1)
+			retryNumber = 1;
+		int shift = retryNumber - 1;
+		if(shift > 20)
+			shift = 20;
+		delayMs = static_cast<double>(baseDelayMs) * std::ldexp(1.0, shift);
+	}
+
+	const double maxMs = static_cast<double>(maxDelayMs > 0 ? maxDelayMs : 0);
+	if(delayMs > maxMs)
+		delayMs = maxMs;
+
+	static thread_local std::mt19937 rng{std::random_device{}()};
+	std::uniform_real_distribution<double> dist(0.5, 1.5);
+	delayMs *= dist(rng);
+	if(delayMs > maxMs)
+		delayMs = maxMs;
+	if(delayMs < 0)
+		delayMs = 0;
+	return delayMs / 1000.0;
+}
 
 } // anon ns
 
@@ -680,12 +766,20 @@ private:
 public:
 	DispatchThread()
 	{
+		retryQueueMax = App::getInstance()->config->getInt("webhook_retry_queue_max", 2048);
+		if(retryQueueMax < 0)
+			retryQueueMax = 0;
+
 		queueProcessingTrigger = curlWorker.addAsyncWatcher([this] () {
 			processQueue();
 		});
 
 		stopTrigger = curlWorker.addAsyncWatcher([this] () {
 			curlWorker.stop();
+		});
+
+		retryTimer = curlWorker.addTimerWatcher([this] () {
+			flushDelayed();
 		});
 
 		curlWorker.onDone([this] (CURL *easy, CURLcode res) {
@@ -717,6 +811,15 @@ public:
 			curlWorker.run();
 		}
 
+		if(retryTimer)
+			retryTimer->stop();
+		while(!delayed.empty())
+		{
+			curl_easy_cleanup(delayed.begin()->second.handle);
+			delayed.erase(delayed.begin());
+		}
+		Metrics::instance().setNotificationRetryQueueDepth(0);
+
 		std::cout << "NotificationThread::DispatchThread::run(): Finished" << std::endl;
 	}
 
@@ -724,6 +827,11 @@ public:
 	{
 		stop = true;
 		stopTrigger->fire();
+	}
+
+	bool isStopping() const
+	{
+		return stop.load();
 	}
 
 	void submit(CURL *handle, const DoneCallback &onDone)
@@ -736,7 +844,59 @@ public:
 		queueProcessingTrigger->fire();
 	}
 
+	// Dispatch-thread only (webhook onDone / retry timer).
+	bool submitDelayed(CURL *handle, const DoneCallback &onDone, double delaySeconds)
+	{
+		if(stop)
+			return false;
+		if(static_cast<int>(delayed.size()) >= retryQueueMax)
+			return false;
+
+		const auto due = std::chrono::steady_clock::now()
+			+ std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+				std::chrono::duration<double>(delaySeconds));
+		delayed.emplace(due, QueueEntry{handle, onDone});
+		Metrics::instance().setNotificationRetryQueueDepth(static_cast<double>(delayed.size()));
+		armRetryTimer();
+		return true;
+	}
+
 private:
+	void armRetryTimer()
+	{
+		if(!retryTimer)
+			return;
+		if(delayed.empty())
+		{
+			retryTimer->stop();
+			return;
+		}
+
+		const auto now = std::chrono::steady_clock::now();
+		double delay = std::chrono::duration<double>(delayed.begin()->first - now).count();
+		if(delay < 0)
+			delay = 0;
+		retryTimer->set(delay);
+	}
+
+	void flushDelayed()
+	{
+		const auto now = std::chrono::steady_clock::now();
+		while(!delayed.empty() && delayed.begin()->first <= now)
+		{
+			QueueEntry entry = std::move(delayed.begin()->second);
+			delayed.erase(delayed.begin());
+			if(stop)
+			{
+				curl_easy_cleanup(entry.handle);
+				continue;
+			}
+			submit(entry.handle, entry.onDone);
+		}
+		Metrics::instance().setNotificationRetryQueueDepth(static_cast<double>(delayed.size()));
+		armRetryTimer();
+	}
+
 	void processQueue()
 	{
 		decltype(queue) tempQueue;
@@ -778,14 +938,94 @@ private:
 	CurlWorker curlWorker;
 	std::shared_ptr<AsyncWatcher> queueProcessingTrigger;
 	std::shared_ptr<AsyncWatcher> stopTrigger;
+	std::shared_ptr<TimerWatcher> retryTimer;
 
 	std::mutex queueMutex;
 	std::queue<QueueEntry> queue;
+	std::multimap<std::chrono::steady_clock::time_point, QueueEntry> delayed;
+	int retryQueueMax = 2048;
 
 	std::unordered_map<CURL *, PendingRequest> pendingRequests;
 
 	std::unique_ptr<MySQL_DB> db;
 };
+
+namespace {
+
+struct WebhookSendState
+{
+	CURL *curl = nullptr;
+	std::shared_ptr<WebhookRequest> request;
+	Notification notification;
+	NotificationChannel channel;
+	int attempt = 1;
+	int maxAttempts = 3;
+	int baseDelayMs = 2000;
+	int maxDelayMs = 30000;
+	NotificationThread::DispatchThread *dt = nullptr;
+};
+
+void webhookOnDone(const std::shared_ptr<WebhookSendState> &state, CURLcode res, const std::unique_ptr<MySQL_DB> &db)
+{
+	long httpCode = 0;
+	curl_easy_getinfo(state->curl, CURLINFO_RESPONSE_CODE, &httpCode);
+
+	const std::string typeLabel = MetricsLabels::notificationTypeLabel(state->notification.type);
+	const std::string channelLabel = MetricsLabels::notificationChannelLabel(static_cast<int>(state->channel.type));
+	const std::string attemptSuffix = " (attempt " + std::to_string(state->attempt)
+		+ "/" + std::to_string(state->maxAttempts) + ")";
+
+	if(httpCode >= 200 && httpCode < 300)
+	{
+		curl_easy_cleanup(state->curl);
+		state->curl = nullptr;
+		Metrics::instance().incrementNotificationsSent(typeLabel, channelLabel);
+		storeNotification(state->notification, state->channel, NotificationResult::SUCCESS,
+			"Success (HTTP " + std::to_string(httpCode) + ")" + attemptSuffix, db);
+		return;
+	}
+
+	std::string resultDetails;
+	if(res != CURLE_OK)
+		resultDetails = std::string(curl_easy_strerror(res));
+	else
+		resultDetails = "HTTP error: " + std::to_string(httpCode);
+	resultDetails += attemptSuffix;
+
+	if(webhookFailureRetryable(res, httpCode) && state->attempt < state->maxAttempts)
+	{
+		curl_off_t retryAfter = 0;
+#ifdef CURLINFO_RETRY_AFTER
+		curl_easy_getinfo(state->curl, CURLINFO_RETRY_AFTER, &retryAfter);
+#endif
+		const double delay = webhookRetryDelaySeconds(state->attempt, state->baseDelayMs, state->maxDelayMs, retryAfter);
+		state->request->responseLimiterState.bytes = 0;
+		if(state->dt->submitDelayed(state->curl, [state](CURLcode r, const std::unique_ptr<MySQL_DB> &d) {
+			webhookOnDone(state, r, d);
+		}, delay))
+		{
+			std::cerr << "NotificationThread::sendWebhookNotification(): Retrying webhook in "
+				<< delay << "s after " << resultDetails << std::endl;
+			Metrics::instance().incrementNotificationRetries(channelLabel);
+			++state->attempt;
+			return;
+		}
+
+		if(state->dt->isStopping())
+			resultDetails += "; retries cancelled (stopping)";
+		else
+			resultDetails += "; retry queue full";
+	}
+
+	std::cerr << "NotificationThread::sendWebhookNotification(): Failed to send webhook notification: "
+		<< resultDetails << std::endl;
+	curl_easy_cleanup(state->curl);
+	state->curl = nullptr;
+	Metrics::instance().incrementNotificationSendErrors(typeLabel, channelLabel);
+	storeNotification(state->notification, state->channel, NotificationResult::FAILED_SEND, resultDetails, db);
+}
+
+} // anon ns
 
 NotificationThread *NotificationThread::instance = nullptr;
 
@@ -1228,53 +1468,23 @@ void NotificationThread::sendWebhookNotification(const Notification &notificatio
 	curl_easy_setopt(curl, CURLOPT_HEADERDATA, &whRequest->responseLimiterState);
 	curl_easy_setopt(curl, CURLOPT_MAXFILESIZE,	MAX_WEBHOOK_RESPONSE_SIZE);
 
-	// TODO implement retries when using async submission
+	int maxAttempts = App::getInstance()->config->getInt("webhook_retry_max_attempts", 3);
+	if(maxAttempts < 1)
+		maxAttempts = 1;
 
-	dispatchThread->submit(curl, [curl, whRequest, notification, channel] (CURLcode res, const std::unique_ptr<MySQL_DB> &db) {
-		long httpCode = 0;
-		if (res == CURLE_OK)
-		{
-			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
-		}
-		curl_easy_cleanup(curl);
+	auto state = std::make_shared<WebhookSendState>();
+	state->curl = curl;
+	state->request = whRequest;
+	state->notification = notification;
+	state->channel = channel;
+	state->attempt = 1;
+	state->maxAttempts = maxAttempts;
+	state->baseDelayMs = App::getInstance()->config->getInt("webhook_retry_base_delay_ms", 2000);
+	state->maxDelayMs = App::getInstance()->config->getInt("webhook_retry_max_delay_ms", 30000);
+	state->dt = dispatchThread.get();
 
-		NotificationResult::type result;
-		std::string resultDetails;
-		const std::string typeLabel = MetricsLabels::notificationTypeLabel(notification.type);
-		const std::string channelLabel = MetricsLabels::notificationChannelLabel(static_cast<int>(channel.type));
-
-		if(res != CURLE_OK)
-		{
-			std::cerr << "NotificationThread::sendWebhookNotification(): Failed to send webhook notification due to curl error: " << res << std::endl;
-			Metrics::instance().incrementNotificationSendErrors(typeLabel, channelLabel);
-
-			resultDetails = std::string(curl_easy_strerror(res));
-
-			// TODO retry?
-
-			result = NotificationResult::FAILED_SEND;
-		}
-		else if(httpCode < 200 || httpCode >= 300)
-		{
-			std::cerr << "NotificationThread::sendWebhookNotification(): Failed to send webhook notification due to HTTP error: " << httpCode << std::endl;
-			Metrics::instance().incrementNotificationSendErrors(typeLabel, channelLabel);
-
-			resultDetails = "HTTP error: " + std::to_string(httpCode);
-
-			// TODO retry?
-
-			result = NotificationResult::FAILED_SEND;
-		}
-		else
-		{
-			Metrics::instance().incrementNotificationsSent(typeLabel, channelLabel);
-
-			resultDetails = "Success (HTTP " + std::to_string(httpCode) + ")";
-
-			result = NotificationResult::SUCCESS;
-		}
-
-		storeNotification(notification, channel, result, resultDetails, db);
+	dispatchThread->submit(curl, [state](CURLcode res, const std::unique_ptr<MySQL_DB> &db) {
+		webhookOnDone(state, res, db);
 	});
 }
 

@@ -47,9 +47,9 @@ namespace Chronos
 
 	class NotificationThread
 	{
+	public:
 		class DispatchThread;
 
-	public:
 		NotificationThread();
 		~NotificationThread();
 
@@ -65,7 +65,7 @@ namespace Chronos
 		void stopThread();
 		void addNotification(Notification &&notification);
 
-    private:
+	private:
 		void syncPhrases();
 		std::string getPhrase(const std::string &lang, const std::string &key) const;
 		std::string formatDate(const std::string &lang, const uint64_t date) const;

@@ -78,6 +78,7 @@ These run at lower frequency; direct `Metrics::instance()` calls are fine.
 
 - Preprocess queue depth on `addNotification()` and after batch swap; after the drain loop, set depth to `queue.size()` (not 0).
 - Dispatch queue depth on `DispatchThread::submit()` and after queue swap; after drain, set depth to `queue.size()` (not 0). Update `chronos_notification_dispatch_inflight` from `pendingRequests.size()`.
+- Webhook retries stay in-memory on DispatchThread (`submitDelayed` + one timer). Increment `chronos_notification_retries_total` when a retry is scheduled; set `chronos_notification_retry_queue_depth` from the delayed map. `sent` / `send_errors` only on the terminal attempt. Do not retry email.
 - Pass notification `type` and `channel` (`email` / `webhook`) into `incrementNotificationsSent` / `incrementNotificationSendErrors`. `incrementEmailsSuppressed` when `suppressNotifications` is set.
 - MySQL failures in `storeNotification()`: `incrementMysqlWriteError("notification_insert")`.
 - Use `callMaster()` for `getUserDetails` / `getPhrases`.
@@ -102,7 +103,7 @@ These run at lower frequency; direct `Metrics::instance()` calls are fine.
 5. Add or extend panels in `grafana/dashboards/chronos.json`.
 6. Add or update alerts in `prometheus/alerts/chronos.yml` when the change affects operability or SLOs.
 
-Config keys: `metrics_enable`, `metrics_port`, `metrics_interface` in `chronos/chronos.cfg` and `docker/chronos/chronos.cfg`. Use `Config::get(key, default)` / `getInt(key, default)` for optional keys.
+Config keys: `metrics_enable`, `metrics_port`, `metrics_interface`, `webhook_retry_max_attempts`, `webhook_retry_base_delay_ms`, `webhook_retry_max_delay_ms`, `webhook_retry_queue_max` in `chronos/chronos.cfg` and `docker/chronos/chronos.cfg`. Use `Config::get(key, default)` / `getInt(key, default)` for optional keys.
 
 Build: prometheus-cpp is vendored via CMake `FetchContent` in `chronos/CMakeLists.txt` (requires CMake ≥ 3.14; Docker build installs Kitware CMake).
 

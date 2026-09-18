@@ -248,6 +248,16 @@ groups:
           description: |
             SMTP/HTTP notification dispatch is backed up (inflight or queued > 50 for 10 minutes).
 
+      - alert: ChronosNotificationRetryQueueBacklog
+        expr: chronos_notification_retry_queue_depth > 1800
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: Webhook retry queue near cap on {{ $labels.instance }}
+          description: |
+            chronos_notification_retry_queue_depth={{ $value }} for 10 minutes (cap is webhook_retry_queue_max, default 2048).
+
       - alert: ChronosNotificationSendErrors
         expr: sum by (instance, channel) (rate(chronos_notification_send_errors_total[5m])) > 0
         for: 5m

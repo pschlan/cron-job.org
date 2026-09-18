@@ -147,6 +147,12 @@ struct CurlWorker::Callbacks
         watcher->callback();
     }
 
+    static void evTimerWatcherCallback(EV_P_ struct ev_timer *w, int revents)
+    {
+        TimerWatcher *watcher = static_cast<TimerWatcher *>(w->data);
+        watcher->callback();
+    }
+
 private:
     static void setSocket(CurlWorker *worker, SockInfo *sockInfo, CURL *e, curl_socket_t s, int what)
     {
@@ -188,6 +194,42 @@ AsyncWatcher::~AsyncWatcher()
 void AsyncWatcher::fire()
 {
     ev_async_send(privateData->w->privateData->evLoop, &privateData->async);
+}
+
+struct TimerWatcher::PrivateData
+{
+    CurlWorker *w;
+    ev_timer timer;
+};
+
+TimerWatcher::TimerWatcher(CurlWorker *w, const std::function<void()> &callback)
+    : privateData(std::make_unique<TimerWatcher::PrivateData>())
+    , callback{callback}
+{
+    privateData->w = w;
+
+    ev_timer_init(&privateData->timer, CurlWorker::Callbacks::evTimerWatcherCallback, 0, 0);
+    privateData->timer.data = this;
+}
+
+TimerWatcher::~TimerWatcher()
+{
+    stop();
+}
+
+void TimerWatcher::set(double delaySeconds)
+{
+    stop();
+    if(delaySeconds < 0)
+        delaySeconds = 0;
+    ev_timer_set(&privateData->timer, delaySeconds, 0);
+    ev_timer_start(privateData->w->privateData->evLoop, &privateData->timer);
+}
+
+void TimerWatcher::stop()
+{
+    if(ev_is_active(&privateData->timer))
+        ev_timer_stop(privateData->w->privateData->evLoop, &privateData->timer);
 }
 
 CurlWorker::CurlWorker()
@@ -274,4 +316,9 @@ std::shared_ptr<AsyncWatcher> CurlWorker::addAsyncWatcher(const std::function<vo
     std::shared_ptr<AsyncWatcher> w(new AsyncWatcher(this, handler));
     asyncWatchers.push_back(w);
     return w;
+}
+
+std::shared_ptr<TimerWatcher> CurlWorker::addTimerWatcher(const std::function<void()> &handler)
+{
+    return std::shared_ptr<TimerWatcher>(new TimerWatcher(this, handler));
 }

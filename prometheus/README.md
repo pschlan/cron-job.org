@@ -53,6 +53,7 @@ Reload or restart Prometheus after deploying the file.
 | `ChronosMysqlWriteErrors` | critical | MySQL job update failures |
 | `ChronosNotificationQueueBacklog` | warning | Notification preprocess queue depth >50 for 10m |
 | `ChronosNotificationDispatchBacklog` | warning | SMTP/HTTP dispatch queue or inflight >50 for 10m |
+| `ChronosNotificationRetryQueueBacklog` | warning | Webhook retry queue near cap (>1800) for 10m |
 | `ChronosNotificationSendErrors` | warning | Email or webhook send failures |
 | `ChronosPhraseSyncErrors` | warning | Phrase cache sync failures |
 | `ChronosMasterClientErrors` | warning | Outbound master Thrift errors |

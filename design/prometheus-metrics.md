@@ -149,9 +149,11 @@ MySQL errors in `storeResult()` are not caught today; instrumentation should wra
 | `chronos_notification_queue_depth` | Gauge | — | Pending notifications in the NotificationThread **preprocess** queue. Update on `addNotification()` and after each queue swap; after drain, set to `queue.size()` (not 0) |
 | `chronos_notification_dispatch_queue_depth` | Gauge | — | Pending SMTP/HTTP sends waiting to be added to the curl multi. Update on `DispatchThread::submit()` and after each queue swap; after drain, set to `queue.size()` (not 0) |
 | `chronos_notification_dispatch_inflight` | Gauge | — | In-flight SMTP/HTTP sends (`pendingRequests`). Update when a handle is added or completed |
+| `chronos_notification_retry_queue_depth` | Gauge | — | Webhook deliveries waiting for a retry delay. Update on `submitDelayed()` and after the delay timer drains due entries |
 | `chronos_notification_batch_duration_seconds` | Histogram | — | Time to preprocess one swapped batch (user details, template, submit). **Excludes** SMTP/HTTP send |
-| `chronos_notifications_sent_total` | Counter | `type`, `channel` | Channel deliveries accepted. `channel`: `email` (SMTP `CURLE_OK`), `webhook` (HTTP 2xx) |
-| `chronos_notification_send_errors_total` | Counter | `type`, `channel` | Channel delivery failures after submit. `channel`: `email`, `webhook` |
+| `chronos_notifications_sent_total` | Counter | `type`, `channel` | Channel deliveries accepted. `channel`: `email` (SMTP `CURLE_OK`), `webhook` (HTTP 2xx). Incremented once on the **terminal** attempt |
+| `chronos_notification_send_errors_total` | Counter | `type`, `channel` | Channel delivery failures after submit. `channel`: `email`, `webhook`. Incremented once on the **terminal** attempt (not on retries that will be tried again) |
+| `chronos_notification_retries_total` | Counter | `channel` | Webhook deliveries scheduled for another attempt after a transient failure |
 | `chronos_emails_sent_total` | Counter | `type` | Legacy alias of `chronos_notifications_sent_total{channel="email"}` |
 | `chronos_emails_suppressed_total` | Counter | `type` | Synthetic account-email channel omitted because `userDetails.suppressNotifications` is set |
 | `chronos_email_send_errors_total` | Counter | — | Legacy alias of `chronos_notification_send_errors_total{channel="email"}` |
@@ -159,7 +161,9 @@ MySQL errors in `storeResult()` are not caught today; instrumentation should wra
 
 **Notification flow:** `processNotification()` increments `processed` once, then fans out to N channels. Each enabled channel is either submitted (later `sent` or `send_errors`) or counted as `dropped{reason="preprocess_failed"|"unknown_channel_type"}`. `user_details_failed` / `unknown_type` drop the whole notification. `emails_suppressed` is independent of webhook/other-email delivery. Store failures after a send increment `chronos_mysql_write_errors_total{operation="notification_insert"}`.
 
-Dispatch backlog (`chronos_notification_dispatch_queue_depth` / `chronos_notification_dispatch_inflight`) is the metric for hung SMTP/HTTP; preprocess `chronos_notification_queue_depth` no longer includes send time.
+Webhook retries: only transient curl/HTTP failures (connect/timeout/DNS, 408/429/5xx), in-memory with exponential backoff + jitter, capped attempts and delayed-queue size. `Retry-After` is honored when present and clamped to `webhook_retry_max_delay_ms`. Email is not retried. A 2xx after a limiter `CURLE_WRITE_ERROR` counts as `sent`.
+
+Dispatch backlog (`chronos_notification_dispatch_queue_depth` / `chronos_notification_dispatch_inflight`) is the metric for hung SMTP/HTTP; preprocess `chronos_notification_queue_depth` no longer includes send time. `chronos_notification_retry_queue_depth` near `webhook_retry_queue_max` means a destination (or many) is failing in a retryable way.
 
 ## Outbound master client
 
@@ -254,6 +258,7 @@ Same metrics as Node service with `service=master`.
 | Silent result data loss | `rate(chronos_jobs_executed_total[5m])` − `rate(chronos_update_results_total[5m])` > 0 sustained |
 | Notification preprocess backlog growing | `chronos_notification_queue_depth` sustained above threshold |
 | Notification send backlog / hung SMTP or webhooks | `chronos_notification_dispatch_inflight` or `chronos_notification_dispatch_queue_depth` sustained above threshold |
+| Webhook retry queue near cap | `chronos_notification_retry_queue_depth` sustained near `webhook_retry_queue_max` |
 | Email or webhook delivery broken | `rate(chronos_notification_send_errors_total[5m])` > 0, or `rate(chronos_master_client_errors_total{method="getUserDetails"}[5m])` > 0 |
 | DNS problems fleet-wide | `rate(chronos_jobs_executed_total{status="failed_dns"}[5m])` spike |
 | Connect/timeout problems | High rate on `failed_connect` / `failed_timeout`, or elevated p95 on `chronos_job_duration_seconds` |

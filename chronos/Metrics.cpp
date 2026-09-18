@@ -274,6 +274,12 @@ Metrics::Metrics(const std::string &mode, int nodeId)
 		.Register(*registry_);
 	notificationDispatchInflight_ = &notificationDispatchInflightFamily.Add({});
 
+	auto &notificationRetryQueueFamily = prometheus::BuildGauge()
+		.Name("chronos_notification_retry_queue_depth")
+		.Help("Webhook deliveries waiting for a retry delay")
+		.Register(*registry_);
+	notificationRetryQueueDepth_ = &notificationRetryQueueFamily.Add({});
+
 	notificationBatchDurationFamily_ = &prometheus::BuildHistogram()
 		.Name("chronos_notification_batch_duration_seconds")
 		.Help("Time to preprocess one NotificationThread batch (excludes SMTP/HTTP send)")
@@ -293,6 +299,11 @@ Metrics::Metrics(const std::string &mode, int nodeId)
 	notificationSendErrorsFamily_ = &prometheus::BuildCounter()
 		.Name("chronos_notification_send_errors_total")
 		.Help("Channel delivery failures after submit (SMTP or webhook HTTP)")
+		.Register(*registry_);
+
+	notificationRetriesFamily_ = &prometheus::BuildCounter()
+		.Name("chronos_notification_retries_total")
+		.Help("Webhook deliveries scheduled for another attempt after a transient failure")
 		.Register(*registry_);
 
 	emailsSentFamily_ = &prometheus::BuildCounter()
@@ -327,6 +338,8 @@ Metrics::Metrics(const std::string &mode, int nodeId)
 			notificationSendErrorsFamily_->Add({{"type", type}, {"channel", channel}});
 		}
 	}
+	for(const char *channel : kNotificationChannels)
+		notificationRetriesFamily_->Add({{"channel", channel}});
 	for(const char *reason : kNotificationDroppedReasons)
 		notificationsDroppedFamily_->Add({{"reason", reason}});
 
@@ -512,6 +525,11 @@ void Metrics::setNotificationDispatchInflight(double count)
 	notificationDispatchInflight_->Set(count);
 }
 
+void Metrics::setNotificationRetryQueueDepth(double depth)
+{
+	notificationRetryQueueDepth_->Set(depth);
+}
+
 void Metrics::observeNotificationBatchDurationSeconds(double seconds)
 {
 	notificationBatchDuration_->Observe(seconds);
@@ -534,6 +552,11 @@ void Metrics::incrementNotificationSendErrors(const std::string &type, const std
 	notificationSendErrorsFamily_->Add({{"type", type}, {"channel", channel}}).Increment();
 	if(channel == "email")
 		emailSendErrors_->Increment();
+}
+
+void Metrics::incrementNotificationRetries(const std::string &channel)
+{
+	notificationRetriesFamily_->Add({{"channel", channel}}).Increment();
 }
 
 void Metrics::incrementEmailsSent(const std::string &type)
