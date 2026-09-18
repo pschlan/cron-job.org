@@ -1,3 +1,6 @@
 [submodule "chronos/cctz"]
 	path = chronos/cctz
 	url = https://github.com/google/cctz.git
+[submodule "chronos/json"]
+	path = chronos/json
+	url = https://github.com/nlohmann/json.git

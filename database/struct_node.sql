@@ -93,6 +93,11 @@ CREATE TABLE `notification` (
   `execution_status` tinyint(4) NOT NULL DEFAULT '0',
   `execution_status_text` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `execution_http_status` int(11) NOT NULL DEFAULT '0',
+  `notificationchannelid` int(11) NOT NULL DEFAULT '0',
+  `notificationchanneltype` tinyint(4) NOT NULL DEFAULT '0',
+  `notificationchanneldestination` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `result` tinyint(4) NOT NULL DEFAULT '0',
+  `result_details` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`notificationid`),
   KEY `jobid` (`jobid`),
   KEY `joblogid` (`joblogid`)

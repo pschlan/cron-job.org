@@ -28,6 +28,7 @@ namespace Chronos
 	{
 		int userID = 0;
 		int jobID = 0;
+		int jobLogID = 0;
 		uint64_t date = 0;			// in ms
 		uint64_t dateStarted = 0;	// in ms
 		uint64_t datePlanned = 0;	// in ms

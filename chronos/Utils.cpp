@@ -18,11 +18,13 @@
 #include <stdexcept>
 #include <sstream>
 #include <string>
+#include <unordered_set>
 
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <arpa/inet.h>
+#include <strings.h>
 
 using namespace Chronos;
 
@@ -292,4 +294,48 @@ std::string Utils::replaceVariables(const std::string &in)
 	}
 
 	return res;
+}
+
+std::string Utils::sanitizeHttpHeaderKey(std::string key)
+{
+	static const std::unordered_set<char> forbiddenChars = {
+		// CTLs
+		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+		21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 127,
+		// Separators
+		'(', ')', '<', '>', '@',
+		',', ';', ':', '\\', '"',
+		'/', '[', ']', '?', '=',
+		'{', '}', ' '
+	};
+
+	key.erase(std::remove_if(key.begin(), key.end(),
+			[] (char c) { return forbiddenChars.count(c) != 0;  }),
+		key.end());
+
+	return key;
+}
+
+std::string Utils::sanitizeHttpHeaderValue(std::string value)
+{
+	static const std::unordered_set<char> forbiddenChars = {
+		10, 13
+	};
+
+	value.erase(std::remove_if(value.begin(), value.end(),
+			[] (char c) { return forbiddenChars.count(c) != 0;  }),
+		value.end());
+
+	return value;
+}
+
+bool Utils::isBannedHeaderKey(const std::string &key)
+{
+	if (strcasecmp(key.c_str(), "user-agent") == 0
+		|| strcasecmp(key.c_str(), "connection") == 0
+		|| strcasecmp(key.c_str(), "x-forwarded-for") == 0)
+	{
+		return true;
+	}
+	return false;
 }

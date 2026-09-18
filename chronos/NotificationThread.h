@@ -25,6 +25,8 @@
 
 class ChronosMasterClient;
 class Mail;
+class UserDetails;
+class NotificationChannel;
 
 namespace apache { namespace thrift {
 
@@ -41,8 +43,12 @@ class TTransport;
 
 namespace Chronos
 {
+	class MySQL_DB;
+
 	class NotificationThread
 	{
+		class DispatchThread;
+
 	public:
 		NotificationThread();
 		~NotificationThread();
@@ -64,8 +70,9 @@ namespace Chronos
 		std::string getPhrase(const std::string &lang, const std::string &key) const;
 		std::string formatDate(const std::string &lang, const uint64_t date) const;
 		std::string formatStatus(const std::string &lang, const Notification &notification) const;
-        void processNotification(const Notification &notification);
-		void sendMail(const Mail &mail, NotificationType_t type) const;
+        void processNotification(Notification &notification);
+		void sendMailNotification(const Notification &notification, const UserDetails &userDetails, const NotificationChannel &channel) const;
+		void sendWebhookNotification(const Notification &notification, const UserDetails &userDetails, const NotificationChannel &channel) const;
 
 	private:
 		std::atomic<bool> stop{false};
@@ -85,6 +92,8 @@ namespace Chronos
 		std::string mailLogoURL;
 		std::string smtpServer;
 		std::unordered_map<std::string, std::unordered_map<std::string, std::string>> phrases;
+		std::unique_ptr<DispatchThread> dispatchThread;
+		std::unique_ptr<MySQL_DB> db;
 	};
 };
 

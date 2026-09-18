@@ -98,6 +98,19 @@ public:
                 _return.suppressNotifications           = std::stoi(row[5]) == 1;
             }
 
+            _return.__isset.notificationChannels = true;
+
+            if (!_return.suppressNotifications)
+            {
+                NotificationChannel emailChannel;
+                emailChannel.channelId = 0;
+                emailChannel.type = NotificationChannelType::EMAIL;
+                emailChannel.destination = _return.email;
+                emailChannel.enabled = true;
+                emailChannel.settings = {};
+                _return.notificationChannels.push_back(emailChannel);
+            }
+
             res = db->query("SELECT `channelid`,`type`,`destination`,`enabled`,`settings` FROM `notificationchannel` WHERE `userid`=%v",
                 userId);
             while((row = res->fetchRow()))
@@ -107,10 +120,16 @@ public:
                 nc.type = static_cast<NotificationChannelType::type>(std::stoi(row[1]));
                 nc.destination = row[2];
                 nc.enabled = std::stoi(row[3]) == 1;
-                //nc.settings = row[4]; TODO
+                nc.settings = row[4];
+
+                // Skip redundant email channels which have the same destination as the synthetic email channel
+                if (nc.type == NotificationChannelType::EMAIL && strcasecmp(nc.destination.c_str(), _return.email.c_str()) == 0)
+                {
+                    continue;
+                }
+
                 _return.notificationChannels.push_back(nc);
             }
-            _return.__isset.notificationChannels = true;
         }
         catch(const std::exception &ex)
         {

@@ -38,6 +38,9 @@ namespace Chronos
 		std::string formatString(const std::string &in, const std::unordered_map<char, std::string> &arguments);
 		std::string replaceVariables(const std::string &in);
 		std::string generateUuid4();
+		std::string sanitizeHttpHeaderKey(std::string key);
+		std::string sanitizeHttpHeaderValue(std::string value);
+		bool isBannedHeaderKey(const std::string &key);
 
 		class Subnet
 		{

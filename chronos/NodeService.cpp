@@ -591,7 +591,7 @@ public:
             std::unique_ptr<MySQL_DB> db(App::getInstance()->createMySQLConnection());
 
 	        MYSQL_ROW row;
-            auto res = db->query("SELECT `notification`.`joblogid`,`notification`.`jobid`,`job`.`userid`,`notification`.`date`,`notification`.`type`,`notification`.`date_started`,`notification`.`date_planned`,`notification`.`url`,`notification`.`execution_status`,`notification`.`execution_status_text`,`notification`.`execution_http_status` "
+            auto res = db->query("SELECT `notification`.`notificationid`,`notification`.`jobid`,`job`.`userid`,`notification`.`date`,`notification`.`type`,`notification`.`date_started`,`notification`.`date_planned`,`notification`.`url`,`notification`.`execution_status`,`notification`.`execution_status_text`,`notification`.`execution_http_status`,`notification`.`notificationchannelid`,`notification`.`notificationchanneltype`,`notification`.`notificationchanneldestination`,`notification`.`result`,`notification`.`result_details`,`notification`.`joblogid` "
                 "FROM `notification` "
                 "INNER JOIN `job` ON `job`.`jobid`=`notification`.`jobid` "
                 "WHERE `job`.`userid`=%v "
@@ -604,6 +604,7 @@ public:
                 NotificationEntry n;
 
                 n.notificationId = std::stoll(row[0]);
+                n.jobLogId = std::stoll(row[16]);
 
                 n.jobIdentifier.jobId = std::stoll(row[1]);
                 n.jobIdentifier.userId = std::stoll(row[2]);
@@ -620,6 +621,12 @@ public:
                 n.executionStatus = static_cast<JobStatus::type>(std::stoi(row[8])); //!< @todo Nicer conversion
                 n.executionStatusText = row[9];
                 n.httpStatus = std::stoi(row[10]);
+
+                n.notificationChannelId = std::stoll(row[11]);
+                n.notificationChannelType = static_cast<NotificationChannelType::type>(std::stoi(row[12])); //!< @todo Nicer conversion
+                n.notificationChannelDestination = row[13];
+                n.result = static_cast<NotificationResult::type>(std::stoi(row[14])); //!< @todo Nicer conversion
+                n.resultDetails = row[15];
 
                 _return.push_back(n);
             }

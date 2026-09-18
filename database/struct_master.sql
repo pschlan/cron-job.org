@@ -296,9 +296,11 @@ CREATE TABLE `bouncelog` (
   `userid` int NOT NULL DEFAULT '0',
   `jobid` int NOT NULL DEFAULT '0',
   `notification_type` tinyint NOT NULL DEFAULT '0',
+  `notificationchannelid` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`bouncelogid`),
   KEY `userid` (`userid`),
-  KEY `jobid` (`jobid`)
+  KEY `jobid` (`jobid`),
+  KEY `notificationchannelid` (`notificationchannelid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `bouncemessage` (
