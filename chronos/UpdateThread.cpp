@@ -430,8 +430,7 @@ void UpdateThread::storeResults(const std::vector<std::unique_ptr<JobResult>> &r
 				}
 				catch(const std::exception &ex)
 				{
-					std::cerr << "Error MySQL notification insert: " << ex.what() << std::endl;
-					Metrics::instance().incrementMysqlWriteError("notification_insert");
+					std::cerr << "Error queueing notification: " << ex.what() << std::endl;
 					continue;
 				}
 			}

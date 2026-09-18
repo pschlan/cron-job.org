@@ -55,8 +55,12 @@ namespace Chronos
 		void incrementMysqlWriteError(const std::string &operation);
 
 		void setNotificationQueueDepth(double depth);
+		void setNotificationDispatchQueueDepth(double depth);
+		void setNotificationDispatchInflight(double count);
 		void observeNotificationBatchDurationSeconds(double seconds);
 		void incrementNotificationsProcessed(const std::string &type);
+		void incrementNotificationsSent(const std::string &type, const std::string &channel);
+		void incrementNotificationSendErrors(const std::string &type, const std::string &channel);
 		void incrementEmailsSent(const std::string &type);
 		void incrementEmailsSuppressed(const std::string &type);
 		void incrementEmailSendErrors();
@@ -126,9 +130,13 @@ namespace Chronos
 		prometheus::Family<prometheus::Counter> *mysqlWriteErrorsFamily_ = nullptr;
 
 		prometheus::Gauge *notificationQueueDepth_ = nullptr;
+		prometheus::Gauge *notificationDispatchQueueDepth_ = nullptr;
+		prometheus::Gauge *notificationDispatchInflight_ = nullptr;
 		prometheus::Family<prometheus::Histogram> *notificationBatchDurationFamily_ = nullptr;
 		prometheus::Histogram *notificationBatchDuration_ = nullptr;
 		prometheus::Family<prometheus::Counter> *notificationsProcessedFamily_ = nullptr;
+		prometheus::Family<prometheus::Counter> *notificationsSentFamily_ = nullptr;
+		prometheus::Family<prometheus::Counter> *notificationSendErrorsFamily_ = nullptr;
 		prometheus::Family<prometheus::Counter> *emailsSentFamily_ = nullptr;
 		prometheus::Family<prometheus::Counter> *emailsSuppressedFamily_ = nullptr;
 		prometheus::Counter *emailSendErrors_ = nullptr;

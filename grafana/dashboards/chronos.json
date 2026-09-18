@@ -800,11 +800,21 @@
       "targets": [
         {
           "expr": "chronos_notification_queue_depth{instance=~\"$instance\"}",
-          "legendFormat": "queue depth",
+          "legendFormat": "preprocess queue",
           "refId": "A"
+        },
+        {
+          "expr": "chronos_notification_dispatch_queue_depth{instance=~\"$instance\"}",
+          "legendFormat": "dispatch queue",
+          "refId": "B"
+        },
+        {
+          "expr": "chronos_notification_dispatch_inflight{instance=~\"$instance\"}",
+          "legendFormat": "dispatch inflight",
+          "refId": "C"
         }
       ],
-      "title": "Notification queue",
+      "title": "Notification queues",
       "type": "timeseries"
     },
     {
@@ -836,8 +846,8 @@
           "refId": "A"
         },
         {
-          "expr": "sum by (type) (rate(chronos_emails_sent_total{instance=~\"$instance\"}[$__rate_interval]))",
-          "legendFormat": "sent {{type}}",
+          "expr": "sum by (type, channel) (rate(chronos_notifications_sent_total{instance=~\"$instance\"}[$__rate_interval]))",
+          "legendFormat": "sent {{channel}} {{type}}",
           "refId": "B"
         },
         {
@@ -872,8 +882,8 @@
       },
       "targets": [
         {
-          "expr": "rate(chronos_email_send_errors_total{instance=~\"$instance\"}[$__rate_interval])",
-          "legendFormat": "send errors",
+          "expr": "sum by (channel) (rate(chronos_notification_send_errors_total{instance=~\"$instance\"}[$__rate_interval]))",
+          "legendFormat": "send errors {{channel}}",
           "refId": "A"
         },
         {
@@ -887,7 +897,7 @@
           "refId": "C"
         }
       ],
-      "title": "Email & phrase sync errors",
+      "title": "Notification & phrase sync errors",
       "type": "timeseries"
     },
     {

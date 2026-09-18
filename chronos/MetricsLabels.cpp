@@ -65,6 +65,17 @@ std::string notificationTypeLabel(NotificationType_t type)
 	}
 }
 
+std::string notificationChannelLabel(int channelType)
+{
+	// Matches protocol.thrift NotificationChannelType
+	switch(channelType)
+	{
+	case 0:  return "email";
+	case 1:  return "webhook";
+	default: return "unknown";
+	}
+}
+
 std::string httpStatusClass(int httpStatus)
 {
 	if(httpStatus >= 200 && httpStatus < 300)

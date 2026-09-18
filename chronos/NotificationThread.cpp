@@ -652,7 +652,7 @@ void storeNotification(const Chronos::Notification &n,
 	catch (const std::exception &ex)
 	{
 		std::cerr << "NotificationThread::storeNotification(): Failed to store notification: " << ex.what() << std::endl;
-		// TODO metric
+		Chronos::Metrics::instance().incrementMysqlWriteError("notification_insert");
 	}
 }
 
@@ -701,6 +701,7 @@ public:
 
 			it->second.onDone(res, db);
 			pendingRequests.erase(it);
+			Metrics::instance().setNotificationDispatchInflight(static_cast<double>(pendingRequests.size()));
 		});
 	}
 
@@ -730,6 +731,7 @@ public:
 		{
 			std::lock_guard<std::mutex> lg(queueMutex);
 			queue.push(QueueEntry{handle, onDone});
+			Metrics::instance().setNotificationDispatchQueueDepth(static_cast<double>(queue.size()));
 		}
 		queueProcessingTrigger->fire();
 	}
@@ -743,12 +745,11 @@ private:
 			if(stop)
 				return;
 			queue.swap(tempQueue);
-			// TODO metric Metrics::instance().setTestrunQueueDepth(static_cast<double>(queue.size()));
+			Metrics::instance().setNotificationDispatchQueueDepth(static_cast<double>(queue.size()));
 		}
 
 		if(!tempQueue.empty())
 		{
-			// TODO metrics
 			while (!tempQueue.empty())
 			{
 				QueueEntry entry = std::move(tempQueue.front());
@@ -759,12 +760,17 @@ private:
 				if (!curlWorker.add(entry.handle))
 				{
 					pendingRequests.erase(entry.handle);
-					entry.onDone(CURLE_FAILED_INIT, db); // TODO better error code?
+					entry.onDone(CURLE_FAILED_INIT, db);
 				}
+
+				Metrics::instance().setNotificationDispatchInflight(static_cast<double>(pendingRequests.size()));
 			}
 		}
 
-		// TODO more metrics, see TestRunThread etc
+		{
+			std::lock_guard<std::mutex> lock(queueMutex);
+			Metrics::instance().setNotificationDispatchQueueDepth(static_cast<double>(queue.size()));
+		}
 	}
 
 private:
@@ -1145,7 +1151,6 @@ void NotificationThread::sendWebhookNotification(const Notification &notificatio
 		catch (const std::exception &ex)
 		{
 			std::cerr << "NotificationThread::sendWebhookNotification(): Failed to parse settings: " << ex.what() << std::endl;
-			// TODO Metric
 			throw std::runtime_error("Failed to parse settings: " + std::string(ex.what()));
 		}
 	}
@@ -1161,7 +1166,6 @@ void NotificationThread::sendWebhookNotification(const Notification &notificatio
 	catch (const std::exception &ex)
 	{
 		std::cerr << "NotificationThread::sendWebhookNotification(): Failed to prepare payload: " << ex.what() << std::endl;
-		// TODO Metric
 		throw std::runtime_error("Failed to prepare payload: " + std::string(ex.what()));
 	}
 
@@ -1169,7 +1173,6 @@ void NotificationThread::sendWebhookNotification(const Notification &notificatio
 	if(curl == nullptr)
 	{
 		std::cerr << "NotificationThread::sendWebhookNotification(): curl_easy_init() failed!" << std::endl;
-		// TODO Metrics::instance().incrementEmailSendErrors();
 		throw std::runtime_error("curl_easy_init() failed");
 	}
 
@@ -1204,8 +1207,6 @@ void NotificationThread::sendWebhookNotification(const Notification &notificatio
 		}
 	}
 
-	// TODO Recycle HTTPRequest here?
-
 	curl_easy_setopt(curl, CURLOPT_URL, channel.destination.c_str());
 	curl_easy_setopt(curl, CURLOPT_POST, 1L);
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, whRequest->payload.c_str());
@@ -1239,11 +1240,13 @@ void NotificationThread::sendWebhookNotification(const Notification &notificatio
 
 		NotificationResult::type result;
 		std::string resultDetails;
+		const std::string typeLabel = MetricsLabels::notificationTypeLabel(notification.type);
+		const std::string channelLabel = MetricsLabels::notificationChannelLabel(static_cast<int>(channel.type));
 
 		if(res != CURLE_OK)
 		{
 			std::cerr << "NotificationThread::sendWebhookNotification(): Failed to send webhook notification due to curl error: " << res << std::endl;
-			// TODO Metrics::instance().incrementEmailSendErrors();
+			Metrics::instance().incrementNotificationSendErrors(typeLabel, channelLabel);
 
 			resultDetails = std::string(curl_easy_strerror(res));
 
@@ -1254,7 +1257,7 @@ void NotificationThread::sendWebhookNotification(const Notification &notificatio
 		else if(httpCode < 200 || httpCode >= 300)
 		{
 			std::cerr << "NotificationThread::sendWebhookNotification(): Failed to send webhook notification due to HTTP error: " << httpCode << std::endl;
-			// TODO Metrics::instance().incrementEmailSendErrors();
+			Metrics::instance().incrementNotificationSendErrors(typeLabel, channelLabel);
 
 			resultDetails = "HTTP error: " + std::to_string(httpCode);
 
@@ -1264,8 +1267,7 @@ void NotificationThread::sendWebhookNotification(const Notification &notificatio
 		}
 		else
 		{
-			// TODO Metrics::instance().incrementEmailsSent(MetricsLabels::notificationTypeLabel(type));
-			std::cout << "NotificationThread::sendWebhookNotification(): Webhook notification sent successfully" << std::endl; // TODO remove
+			Metrics::instance().incrementNotificationsSent(typeLabel, channelLabel);
 
 			resultDetails = "Success (HTTP " + std::to_string(httpCode) + ")";
 
@@ -1273,36 +1275,7 @@ void NotificationThread::sendWebhookNotification(const Notification &notificatio
 		}
 
 		storeNotification(notification, channel, result, resultDetails, db);
-
-		// TODO handle
 	});
-
-	// TODO clean up, handle error/success, etc
-
-	/*
-
-	std::string curlError;
-	CURLcode res = curl_easy_perform(curl);
-	if(res != CURLE_OK)
-	{
-		std::cerr << "NotificationThread::sendWebhookNotification(): Failed to send webhook notification: " << res << std::endl;
-		// TODO Metrics::instance().incrementEmailSendErrors();
-		curlError = std::string(curl_easy_strerror(res));
-	}
-	else
-	{
-		// TODO Metrics::instance().incrementEmailsSent(MetricsLabels::notificationTypeLabel(type));
-		std::cout << "NotificationThread::sendWebhookNotification(): Webhook notification sent successfully" << std::endl; // TODO remove
-	}
-
-	curl_slist_free_all(headers);
-	curl_easy_cleanup(curl);
-
-	if(res != CURLE_OK)
-	{
-		throw std::runtime_error("Failed to send webhook notification: " + curlError);
-	}
-	*/
 }
 
 void NotificationThread::sendMailNotification(const Notification &notification, const UserDetails &userDetails, const NotificationChannel &channel) const
@@ -1374,7 +1347,6 @@ void NotificationThread::sendMailNotification(const Notification &notification, 
 	if(curl == nullptr)
 	{
 		std::cerr << "NotificationThread::sendMail(): curl_easy_init() failed!" << std::endl;
-		Chronos::Metrics::instance().incrementEmailSendErrors();
 		throw std::runtime_error("curl_easy_init() failed");
 	}
 
@@ -1397,18 +1369,20 @@ void NotificationThread::sendMailNotification(const Notification &notification, 
 
 		NotificationResult::type result;
 		std::string resultDetails;
+		const std::string typeLabel = MetricsLabels::notificationTypeLabel(notification.type);
+		const std::string channelLabel = MetricsLabels::notificationChannelLabel(static_cast<int>(channel.type));
 
 		if (res != CURLE_OK)
 		{
 			std::cerr << "NotificationThread::sendMail(): Failed to send email: " << res << std::endl;
-			Metrics::instance().incrementEmailSendErrors();
+			Metrics::instance().incrementNotificationSendErrors(typeLabel, channelLabel);
 			resultDetails = std::string(curl_easy_strerror(res));
 
 			result = NotificationResult::FAILED_SEND;
 		}
 		else
 		{
-			Metrics::instance().incrementEmailsSent(MetricsLabels::notificationTypeLabel(notification.type));
+			Metrics::instance().incrementNotificationsSent(typeLabel, channelLabel);
 
 			result = NotificationResult::SUCCESS;
 		}

@@ -59,7 +59,11 @@ const char *kStatusLabels[] = {
 };
 const char *kPriorityLabels[] = { "low", "default", "high" };
 
-const char *kNotificationTypes[] = { "failure", "success", "disable", "ssl_cert_expiry" };
+const char *kNotificationTypes[] = { "failure", "success", "disable", "ssl_cert_expiry", "unknown" };
+const char *kNotificationChannels[] = { "email", "webhook", "unknown" };
+const char *kNotificationDroppedReasons[] = {
+	"user_details_failed", "unknown_type", "unknown_channel_type", "preprocess_failed"
+};
 
 }
 
@@ -249,18 +253,30 @@ Metrics::Metrics(const std::string &mode, int nodeId)
 
 	mysqlWriteErrorsFamily_ = &prometheus::BuildCounter()
 		.Name("chronos_mysql_write_errors_total")
-		.Help("MySQL write failures in UpdateThread")
+		.Help("MySQL write failures")
 		.Register(*registry_);
 
 	auto &notificationQueueFamily = prometheus::BuildGauge()
 		.Name("chronos_notification_queue_depth")
-		.Help("Pending notifications in NotificationThread queue")
+		.Help("Pending notifications in NotificationThread preprocess queue")
 		.Register(*registry_);
 	notificationQueueDepth_ = &notificationQueueFamily.Add({});
 
+	auto &notificationDispatchQueueFamily = prometheus::BuildGauge()
+		.Name("chronos_notification_dispatch_queue_depth")
+		.Help("Pending SMTP/HTTP sends in NotificationThread dispatch queue")
+		.Register(*registry_);
+	notificationDispatchQueueDepth_ = &notificationDispatchQueueFamily.Add({});
+
+	auto &notificationDispatchInflightFamily = prometheus::BuildGauge()
+		.Name("chronos_notification_dispatch_inflight")
+		.Help("In-flight SMTP/HTTP notification sends")
+		.Register(*registry_);
+	notificationDispatchInflight_ = &notificationDispatchInflightFamily.Add({});
+
 	notificationBatchDurationFamily_ = &prometheus::BuildHistogram()
 		.Name("chronos_notification_batch_duration_seconds")
-		.Help("Time to process one NotificationThread batch")
+		.Help("Time to preprocess one NotificationThread batch (excludes SMTP/HTTP send)")
 		.Register(*registry_);
 	notificationBatchDuration_ = &notificationBatchDurationFamily_->Add({}, kBatchDurationBuckets);
 
@@ -269,19 +285,29 @@ Metrics::Metrics(const std::string &mode, int nodeId)
 		.Help("Notifications entered processNotification()")
 		.Register(*registry_);
 
+	notificationsSentFamily_ = &prometheus::BuildCounter()
+		.Name("chronos_notifications_sent_total")
+		.Help("Channel deliveries accepted (SMTP OK or webhook HTTP 2xx)")
+		.Register(*registry_);
+
+	notificationSendErrorsFamily_ = &prometheus::BuildCounter()
+		.Name("chronos_notification_send_errors_total")
+		.Help("Channel delivery failures after submit (SMTP or webhook HTTP)")
+		.Register(*registry_);
+
 	emailsSentFamily_ = &prometheus::BuildCounter()
 		.Name("chronos_emails_sent_total")
-		.Help("Emails accepted by SMTP")
+		.Help("Emails accepted by SMTP (legacy; also counted in chronos_notifications_sent_total{channel=\"email\"})")
 		.Register(*registry_);
 
 	emailsSuppressedFamily_ = &prometheus::BuildCounter()
 		.Name("chronos_emails_suppressed_total")
-		.Help("Notifications skipped due to user suppression")
+		.Help("Synthetic account-email channel skipped due to suppressNotifications")
 		.Register(*registry_);
 
 	emailSendErrors_ = &prometheus::BuildCounter()
 		.Name("chronos_email_send_errors_total")
-		.Help("SMTP send failures")
+		.Help("SMTP send failures (legacy; also counted in chronos_notification_send_errors_total{channel=\"email\"})")
 		.Register(*registry_)
 		.Add({});
 
@@ -289,6 +315,20 @@ Metrics::Metrics(const std::string &mode, int nodeId)
 		.Name("chronos_notifications_dropped_total")
 		.Help("Notifications abandoned before send attempt")
 		.Register(*registry_);
+
+	for(const char *type : kNotificationTypes)
+	{
+		notificationsProcessedFamily_->Add({{"type", type}});
+		emailsSentFamily_->Add({{"type", type}});
+		emailsSuppressedFamily_->Add({{"type", type}});
+		for(const char *channel : kNotificationChannels)
+		{
+			notificationsSentFamily_->Add({{"type", type}, {"channel", channel}});
+			notificationSendErrorsFamily_->Add({{"type", type}, {"channel", channel}});
+		}
+	}
+	for(const char *reason : kNotificationDroppedReasons)
+		notificationsDroppedFamily_->Add({{"reason", reason}});
 
 	masterClientRequestsFamily_ = &prometheus::BuildCounter()
 		.Name("chronos_master_client_requests_total")
@@ -462,6 +502,16 @@ void Metrics::setNotificationQueueDepth(double depth)
 	notificationQueueDepth_->Set(depth);
 }
 
+void Metrics::setNotificationDispatchQueueDepth(double depth)
+{
+	notificationDispatchQueueDepth_->Set(depth);
+}
+
+void Metrics::setNotificationDispatchInflight(double count)
+{
+	notificationDispatchInflight_->Set(count);
+}
+
 void Metrics::observeNotificationBatchDurationSeconds(double seconds)
 {
 	notificationBatchDuration_->Observe(seconds);
@@ -472,9 +522,23 @@ void Metrics::incrementNotificationsProcessed(const std::string &type)
 	notificationsProcessedFamily_->Add({{"type", type}}).Increment();
 }
 
+void Metrics::incrementNotificationsSent(const std::string &type, const std::string &channel)
+{
+	notificationsSentFamily_->Add({{"type", type}, {"channel", channel}}).Increment();
+	if(channel == "email")
+		emailsSentFamily_->Add({{"type", type}}).Increment();
+}
+
+void Metrics::incrementNotificationSendErrors(const std::string &type, const std::string &channel)
+{
+	notificationSendErrorsFamily_->Add({{"type", type}, {"channel", channel}}).Increment();
+	if(channel == "email")
+		emailSendErrors_->Increment();
+}
+
 void Metrics::incrementEmailsSent(const std::string &type)
 {
-	emailsSentFamily_->Add({{"type", type}}).Increment();
+	incrementNotificationsSent(type, "email");
 }
 
 void Metrics::incrementEmailsSuppressed(const std::string &type)
@@ -484,7 +548,7 @@ void Metrics::incrementEmailsSuppressed(const std::string &type)
 
 void Metrics::incrementEmailSendErrors()
 {
-	emailSendErrors_->Increment();
+	incrementNotificationSendErrors("unknown", "email");
 }
 
 void Metrics::incrementNotificationsDropped(const std::string &reason)

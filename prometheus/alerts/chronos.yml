@@ -234,19 +234,29 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: Notification backlog on {{ $labels.instance }}
+          summary: Notification preprocess backlog on {{ $labels.instance }}
           description: |
             chronos_notification_queue_depth={{ $value }} for 10 minutes.
 
-      - alert: ChronosEmailSendErrors
-        expr: sum by (instance) (rate(chronos_email_send_errors_total[5m])) > 0
+      - alert: ChronosNotificationDispatchBacklog
+        expr: chronos_notification_dispatch_inflight > 50 or chronos_notification_dispatch_queue_depth > 50
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: Notification send backlog on {{ $labels.instance }}
+          description: |
+            SMTP/HTTP notification dispatch is backed up (inflight or queued > 50 for 10 minutes).
+
+      - alert: ChronosNotificationSendErrors
+        expr: sum by (instance, channel) (rate(chronos_notification_send_errors_total[5m])) > 0
         for: 5m
         labels:
           severity: warning
         annotations:
-          summary: Email send failures on {{ $labels.instance }}
+          summary: Notification send failures on {{ $labels.instance }} ({{ $labels.channel }})
           description: |
-            SMTP delivery via curl_easy_perform is failing.
+            Channel delivery is failing (SMTP or webhook HTTP).
 
       - alert: ChronosPhraseSyncErrors
         expr: sum by (instance) (rate(chronos_phrase_sync_errors_total[5m])) > 0
@@ -279,7 +289,7 @@ groups:
         annotations:
           summary: getUserDetails failures on {{ $labels.instance }}
           description: |
-            NotificationThread cannot fetch user details; emails may be dropped.
+            NotificationThread cannot fetch user details; notifications may be dropped.
 
       - alert: ChronosRpcErrors
         expr: sum by (instance, service) (rate(chronos_rpc_errors_total[5m])) > 0.1

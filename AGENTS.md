@@ -76,8 +76,10 @@ These run at lower frequency; direct `Metrics::instance()` calls are fine.
 
 **NotificationThread**
 
-- Queue depth on `addNotification()` and after batch swap; after the drain loop, set depth to `queue.size()` (not 0).
-- Pass notification `type` into email metrics (`incrementEmailsSent`, `incrementEmailsSuppressed`).
+- Preprocess queue depth on `addNotification()` and after batch swap; after the drain loop, set depth to `queue.size()` (not 0).
+- Dispatch queue depth on `DispatchThread::submit()` and after queue swap; after drain, set depth to `queue.size()` (not 0). Update `chronos_notification_dispatch_inflight` from `pendingRequests.size()`.
+- Pass notification `type` and `channel` (`email` / `webhook`) into `incrementNotificationsSent` / `incrementNotificationSendErrors`. `incrementEmailsSuppressed` when `suppressNotifications` is set.
+- MySQL failures in `storeNotification()`: `incrementMysqlWriteError("notification_insert")`.
 - Use `callMaster()` for `getUserDetails` / `getPhrases`.
 
 **Workers**
