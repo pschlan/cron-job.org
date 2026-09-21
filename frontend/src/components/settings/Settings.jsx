@@ -166,13 +166,13 @@ export default function Settings() {
     Promise.all(requests)
       .then(() => {
         if (shouldReenable) {
-          dispatch(setUserProfile(profile => ({
-            ...profile,
+          dispatch(setUserProfile({
+            ...userProfile,
             userProfile: {
-              ...profile.userProfile,
+              ...userProfile.userProfile,
               notificationsAutoDisabled: false
             }
-          })));
+          }));
         }
       })
       .catch(() => {
