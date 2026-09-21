@@ -73,32 +73,34 @@ function EventDescription({ type, details }) {
   } else if (type === 'NotificationItem') {
     const success = details.result === NotificationResult.SUCCESS;
     const icon = details.channelType === NotificationChannelType.EMAIL ? EmailIcon : NotificationsIcon;
+    const captionParts = [];
+    if (details.channelDestination) {
+      captionParts.push(t('events.channelDestination', {
+        channel: t('events.channels.' + notificationChannelTypeKey(details.channelType)),
+        destination: details.channelDestination
+      }));
+    }
+    if (!success && details.resultDetails) {
+      captionParts.push(details.resultDetails);
+    }
+    if (!captionParts.length && details.url) {
+      captionParts.push(details.url);
+    }
+    const caption = captionParts.join(' · ');
+    const captionTitle = details.url && details.url !== caption ? `${caption}\n${details.url}` : caption;
     return <div style={{display: 'flex', alignItems: 'center'}}>
       <IconAvatar icon={icon} color={success ? 'green' : 'orange'} />
-      <div style={{minWidth: 0}}>
+      <div style={{minWidth: 0, overflow: 'hidden'}}>
         <div>
           {t(success ? 'events.notificationSent' : 'events.notificationFailed', {
             notificationType: t('events.notifications.' + notificationTypeText(details.type))
           })}
         </div>
-        {details.channelDestination ? <div>
-          <Typography variant="caption" title={details.channelDestination} style={{display: 'block', maxWidth: 420, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
-            {t('events.channelDestination', {
-              channel: t('events.channels.' + notificationChannelTypeKey(details.channelType)),
-              destination: details.channelDestination
-            })}
+        {caption ? <div>
+          <Typography variant="caption" title={captionTitle} style={{display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
+            {caption}
           </Typography>
         </div> : null}
-        {!success && details.resultDetails ? <div>
-          <Typography variant="caption">
-            {details.resultDetails}
-          </Typography>
-        </div> : null}
-        <div>
-          <Typography variant="caption">
-            {details.url}
-          </Typography>
-        </div>
       </div>
     </div>;
   }
