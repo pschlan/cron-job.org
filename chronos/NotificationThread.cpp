@@ -993,7 +993,7 @@ void webhookOnDone(const std::shared_ptr<WebhookSendState> &state, CURLcode res,
 
 	const std::string typeLabel = MetricsLabels::notificationTypeLabel(state->notification.type);
 	const std::string channelLabel = MetricsLabels::notificationChannelLabel(static_cast<int>(state->channel.type));
-	const std::string attemptSuffix = " (attempt " + std::to_string(state->attempt)
+	const std::string attemptNote = " (attempt " + std::to_string(state->attempt)
 		+ "/" + std::to_string(state->maxAttempts) + ")";
 
 	if(httpCode >= 200 && httpCode < 300)
@@ -1001,8 +1001,10 @@ void webhookOnDone(const std::shared_ptr<WebhookSendState> &state, CURLcode res,
 		curl_easy_cleanup(state->curl);
 		state->curl = nullptr;
 		Metrics::instance().incrementNotificationsSent(typeLabel, channelLabel);
-		storeNotification(state->notification, state->channel, NotificationResult::SUCCESS,
-			"Success (HTTP " + std::to_string(httpCode) + ")" + attemptSuffix, db);
+		std::string resultDetails = "Success (HTTP " + std::to_string(httpCode) + ")";
+		if(state->attempt > 1)
+			resultDetails += attemptNote;
+		storeNotification(state->notification, state->channel, NotificationResult::SUCCESS, resultDetails, db);
 		return;
 	}
 
@@ -1013,7 +1015,6 @@ void webhookOnDone(const std::shared_ptr<WebhookSendState> &state, CURLcode res,
 		resultDetails = std::string(curl_easy_strerror(res));
 	else
 		resultDetails = "HTTP error: " + std::to_string(httpCode);
-	resultDetails += attemptSuffix;
 
 	if(!state->request->peerAddressBlocked
 		&& webhookFailureRetryable(res, httpCode) && state->attempt < state->maxAttempts)
@@ -1030,16 +1031,21 @@ void webhookOnDone(const std::shared_ptr<WebhookSendState> &state, CURLcode res,
 		}, delay))
 		{
 			std::cerr << "NotificationThread::sendWebhookNotification(): Retrying webhook in "
-				<< delay << "s after " << resultDetails << std::endl;
+				<< delay << "s after " << resultDetails << attemptNote << std::endl;
 			Metrics::instance().incrementNotificationRetries(channelLabel);
 			++state->attempt;
 			return;
 		}
 
+		resultDetails += attemptNote;
 		if(state->dt->isStopping())
 			resultDetails += "; retries cancelled (stopping)";
 		else
 			resultDetails += "; retry queue full";
+	}
+	else if(state->attempt > 1)
+	{
+		resultDetails += attemptNote;
 	}
 
 	std::cerr << "NotificationThread::sendWebhookNotification(): Failed to send webhook notification: "
