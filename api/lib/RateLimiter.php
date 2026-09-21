@@ -75,16 +75,16 @@ class RateLimiter {
       $hourlyLimit = 5;
     }
 
-    $emailKey = 'notifyChannelEmail:' . hash('sha256', strtolower(trim($email)));
-    if (!self::claimExclusive($emailKey, $ttl)) {
+    $hourBucket = (int)floor(time() / 3600);
+    $userKey = 'notifyChannelEmailUser:' . intval($userId) . ':' . $hourBucket;
+    if (!self::checkWithKeyFailClosed($userKey, 3601, function ($value) use ($hourlyLimit) {
+      return intval($value) < $hourlyLimit;
+    })) {
       return false;
     }
 
-    $hourBucket = (int)floor(time() / 3600);
-    $userKey = 'notifyChannelEmailUser:' . intval($userId) . ':' . $hourBucket;
-    return self::checkWithKeyFailClosed($userKey, 3601, function ($value) use ($hourlyLimit) {
-      return intval($value) < $hourlyLimit;
-    });
+    $emailKey = 'notifyChannelEmail:' . hash('sha256', strtolower(trim($email)));
+    return self::claimExclusive($emailKey, $ttl);
   }
 
   private static function claimExclusive($key, $ttl) {
