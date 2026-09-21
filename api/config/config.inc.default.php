@@ -48,6 +48,7 @@ $config = array(
   'sessionTokenSecret'              => 'PLACE_RANDOM_STRING_HERE',
   'emailVerificationTokenSecret'    => 'PLACE_RANDOM_STRING_HERE',
   'notificationChannelConfirmationTokenSecret' => 'PLACE_RANDOM_STRING_HERE',
+  'notificationChannelConfirmationEmailHashSecret' => 'PLACE_RANDOM_STRING_HERE',
   'lostPasswordTokenSecret'         => 'PLACE_RANDOM_STRING_HERE',
   'accountConfirmationTokenSecret'  => 'PLACE_RANDOM_STRING_HERE',
   'statusBadgeTokenSecret'          => 'PLACE_RANDOM_STRING_HERE',

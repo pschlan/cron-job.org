@@ -195,7 +195,7 @@ class NotificationChannelManager {
     if (intval($row['type']) !== NotificationChannel::TYPE_EMAIL) {
       throw new InvalidArgumentsException();
     }
-    if (strcasecmp($row['destination'], $token->email) !== 0) {
+    if (!$token->matchesEmail($row['destination'])) {
       throw new InvalidArgumentsException();
     }
     if (intval($row['confirmed']) != 0) {
@@ -213,7 +213,7 @@ class NotificationChannelManager {
   private function sendConfirmationEmail($channelId, $email, $language) {
     global $config;
 
-    $confirmationToken = new NotificationChannelConfirmationToken($this->authToken->userId, $channelId, $email);
+    $confirmationToken = NotificationChannelConfirmationToken::fromEmail($this->authToken->userId, $channelId, $email);
 
     $mail = new Mail();
     $mail->setVerp('channelconfirm', $channelId, $config);
