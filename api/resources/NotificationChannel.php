@@ -102,6 +102,30 @@ class NotificationChannelManager {
       ]);
   }
 
+  public function setNotificationChannelEnabled($channelId, $enabled) {
+    $channelId = intval($channelId);
+    if ($channelId === NotificationChannel::ACCOUNT_CHANNEL_ID) {
+      Database::get()->prepare('UPDATE `user` SET `email_notifications_enabled`=:enabled WHERE `userid`=:userId')
+        ->execute([
+          ':userId'  => $this->authToken->userId,
+          ':enabled' => $enabled ? 1 : 0
+        ]);
+      return;
+    }
+
+    $existing = $this->getStoredChannel($channelId);
+    if ($existing === false) {
+      throw new InvalidArgumentsException();
+    }
+
+    Database::get()->prepare('UPDATE `notificationchannel` SET `enabled`=:enabled WHERE `channelid`=:channelId AND `userid`=:userId')
+      ->execute([
+        ':userId'    => $this->authToken->userId,
+        ':channelId' => $channelId,
+        ':enabled'   => $enabled ? 1 : 0
+      ]);
+  }
+
   public function deleteNotificationChannel($channelId) {
     $channelId = intval($channelId);
     if ($channelId === NotificationChannel::ACCOUNT_CHANNEL_ID) {
@@ -140,7 +164,7 @@ class NotificationChannelManager {
     $channel->channelId = NotificationChannel::ACCOUNT_CHANNEL_ID;
     $channel->type = NotificationChannel::TYPE_EMAIL;
     $channel->destination = $profile->email;
-    $channel->enabled = !$profile->notificationsAutoDisabled;
+    $channel->enabled = $profile->emailNotificationsEnabled && !$profile->notificationsAutoDisabled;
     $channel->builtIn = true;
     $channel->payload = '';
     return $channel;

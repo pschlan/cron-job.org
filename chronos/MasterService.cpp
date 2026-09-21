@@ -80,8 +80,10 @@ public:
         {
             std::unique_ptr<MySQL_DB> db(App::getInstance()->createMasterMySQLConnection());
 
+            bool emailNotificationsEnabled = false;
+
 	        MYSQL_ROW row;
-            auto res = db->query("SELECT `userid`,`email`,`firstname`,`lastname`,`lastlogin_lang`,`notifications_auto_disabled` "
+            auto res = db->query("SELECT `userid`,`email`,`firstname`,`lastname`,`lastlogin_lang`,`notifications_auto_disabled`,`email_notifications_enabled` "
                     "FROM `user` WHERE `userid`=%v",
                 userId);
             if(res->numRows() == 0)
@@ -96,6 +98,8 @@ public:
 
                 _return.__isset.suppressNotifications   = true;
                 _return.suppressNotifications           = std::stoi(row[5]) == 1;
+
+                emailNotificationsEnabled = std::stoi(row[6]) == 1;
             }
 
             _return.__isset.notificationChannels = true;
@@ -106,7 +110,7 @@ public:
                 emailChannel.channelId = 0;
                 emailChannel.type = NotificationChannelType::EMAIL;
                 emailChannel.destination = _return.email;
-                emailChannel.enabled = true;
+                emailChannel.enabled = emailNotificationsEnabled;
                 emailChannel.settings = {};
                 _return.notificationChannels.push_back(emailChannel);
             }

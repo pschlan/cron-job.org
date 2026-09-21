@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, ButtonGroup, CircularProgress, Grid, InputLabel, LinearProgress, makeStyles, MenuItem, Paper, Select, TableContainer, Tooltip, Typography } from '@material-ui/core';
+import { Box, Button, ButtonGroup, CircularProgress, Grid, InputLabel, LinearProgress, makeStyles, MenuItem, Paper, Select, Switch, TableContainer, Tooltip, Typography } from '@material-ui/core';
 import { grey } from '@material-ui/core/colors';
 import { useTranslation } from 'react-i18next';
-import { getAPIKeys, getMFADevices, getNotificationChannels, getSubscriptionLink, getUserProfile, updateUserProfile } from '../../utils/API';
+import { getAPIKeys, getMFADevices, getNotificationChannels, getSubscriptionLink, getUserProfile, reenableUserNotifications, setNotificationChannelEnabled, updateUserProfile } from '../../utils/API';
 import useTimezones from '../../hooks/useTimezones';
 import useUserProfile from '../../hooks/useUserProfile';
 import Breadcrumbs from '../misc/Breadcrumbs';
@@ -109,6 +109,7 @@ export default function Settings() {
   const [ showCreateNotificationChannel, setShowCreateNotificationChannel ] = useState(false);
   const [ editNotificationChannel, setEditNotificationChannel ] = useState(null);
   const [ deleteNotificationChannel, setDeleteNotificationChannel ] = useState(null);
+  const [ togglingChannelIds, setTogglingChannelIds ] = useState([]);
 
   const [ firstName, setFirstName ] = useState('');
   const [ lastName, setLastName ] = useState('');
@@ -148,6 +149,37 @@ export default function Settings() {
     getNotificationChannels()
       .then(response => setNotificationChannels(response.notificationChannels))
       .finally(() => setIsLoadingNotificationChannels(false));
+  }
+
+  function toggleNotificationChannelEnabled(channel, enabled) {
+    const notificationsAutoDisabled = !!(userProfile && userProfile.userProfile && userProfile.userProfile.notificationsAutoDisabled);
+    const shouldReenable = channel.builtIn && enabled && notificationsAutoDisabled;
+
+    setTogglingChannelIds(ids => ids.includes(channel.channelId) ? ids : [...ids, channel.channelId]);
+    setNotificationChannels(list => list.map(item => item.channelId === channel.channelId ? { ...item, enabled } : item));
+
+    const requests = [setNotificationChannelEnabled(channel.channelId, enabled)];
+    if (shouldReenable) {
+      requests.push(reenableUserNotifications());
+    }
+
+    Promise.all(requests)
+      .then(() => {
+        if (shouldReenable) {
+          dispatch(setUserProfile(profile => ({
+            ...profile,
+            userProfile: {
+              ...profile.userProfile,
+              notificationsAutoDisabled: false
+            }
+          })));
+        }
+      })
+      .catch(() => {
+        setNotificationChannels(list => list.map(item => item.channelId === channel.channelId ? { ...item, enabled: channel.enabled } : item));
+        enqueueSnackbar(t('settings.notificationChannels.saveError'), { variant: 'error' });
+      })
+      .finally(() => setTogglingChannelIds(ids => ids.filter(id => id !== channel.channelId)));
   }
 
   useEffect(() => {
@@ -325,9 +357,14 @@ export default function Settings() {
     },
     {
       head: t('settings.notificationChannels.enabled'),
-      cell: channel => channel.enabled
-        ? t('settings.notificationChannels.statusEnabled')
-        : t('settings.notificationChannels.statusDisabled')
+      cell: channel =>
+        <Switch
+          size='small'
+          color='primary'
+          checked={!!channel.enabled}
+          disabled={togglingChannelIds.includes(channel.channelId)}
+          onChange={({target}) => toggleNotificationChannelEnabled(channel, target.checked)}
+          />
     },
     {
       head: t('common.actions'),

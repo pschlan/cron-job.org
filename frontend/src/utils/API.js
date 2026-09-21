@@ -427,6 +427,10 @@ export function updateNotificationChannel(channelId, destination, enabled, paylo
   return performRequest('UpdateNotificationChannel', { channelId, destination, enabled, payload });
 }
 
+export function setNotificationChannelEnabled(channelId, enabled) {
+  return performRequest('SetNotificationChannelEnabled', { channelId, enabled });
+}
+
 export function deleteNotificationChannel(channelId) {
   return performRequest('DeleteNotificationChannel', { channelId });
 }

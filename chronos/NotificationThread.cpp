@@ -1357,7 +1357,6 @@ void NotificationThread::processNotification(Notification &notification)
 	{
 		if (!notificationChannel.enabled)
 		{
-			std::cout << "NotificationThread::processNotification(): Notification channel " << notificationChannel.channelId << " is disabled" << std::endl;
 			continue;
 		}
 
