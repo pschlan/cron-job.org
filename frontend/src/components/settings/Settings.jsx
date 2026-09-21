@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, ButtonGroup, CircularProgress, Grid, InputLabel, LinearProgress, makeStyles, MenuItem, Paper, Select, TableContainer, Typography } from '@material-ui/core';
+import { Box, Button, ButtonGroup, CircularProgress, Grid, InputLabel, LinearProgress, makeStyles, MenuItem, Paper, Select, TableContainer, Tooltip, Typography } from '@material-ui/core';
 import { grey } from '@material-ui/core/colors';
 import { useTranslation } from 'react-i18next';
-import { getAPIKeys, getMFADevices, getSubscriptionLink, getUserProfile, updateUserProfile } from '../../utils/API';
+import { getAPIKeys, getMFADevices, getNotificationChannels, getSubscriptionLink, getUserProfile, updateUserProfile } from '../../utils/API';
 import useTimezones from '../../hooks/useTimezones';
 import useUserProfile from '../../hooks/useUserProfile';
 import Breadcrumbs from '../misc/Breadcrumbs';
@@ -21,7 +21,7 @@ import ChangePasswordDialog from './ChangePasswordDialog';
 import ChangeEmailAddressDialog from './ChangeEmailAddressDialog';
 import CreateMFADeviceDialog from './CreateMFADeviceDialog';
 import DeleteMFADeviceDialog from './DeleteMFADeviceDialog';
-import { RegexPatterns, SubscriptionStatus } from '../../utils/Constants';
+import { NotificationChannelType, notificationChannelTypeKey, RegexPatterns, SubscriptionStatus } from '../../utils/Constants';
 import DeleteAccountDialog from './DeleteAccountDialog';
 import ManageSubscriptionIcon from '@material-ui/icons/CreditCard';
 import SubscriptionActiveIcon from '@material-ui/icons/FavoriteBorder';
@@ -43,6 +43,10 @@ import ShowAPIKeyDialog from './ShowAPIKeyDialog';
 import DeleteAPIKeyDialog from './DeleteAPIKeyDialog';
 import CreateAPIKeyDialog from './CreateAPIKeyDialog';
 import EditAPIKeyDialog from './EditAPIKeyDialog';
+import CreateNotificationChannelDialog from './CreateNotificationChannelDialog';
+import EditNotificationChannelDialog from './EditNotificationChannelDialog';
+import DeleteNotificationChannelDialog from './DeleteNotificationChannelDialog';
+import NotificationsIcon from '@material-ui/icons/Notifications';
 
 const useStyles = makeStyles(theme => ({
   grid: {
@@ -100,6 +104,12 @@ export default function Settings() {
   const [ deleteApiKey, setDeleteApiKey ] = useState(null);
   const [ editApiKey, setEditApiKey ] = useState(null);
 
+  const [ isLoadingNotificationChannels, setIsLoadingNotificationChannels ] = useState(true);
+  const [ notificationChannels, setNotificationChannels ] = useState([]);
+  const [ showCreateNotificationChannel, setShowCreateNotificationChannel ] = useState(false);
+  const [ editNotificationChannel, setEditNotificationChannel ] = useState(null);
+  const [ deleteNotificationChannel, setDeleteNotificationChannel ] = useState(null);
+
   const [ firstName, setFirstName ] = useState('');
   const [ lastName, setLastName ] = useState('');
   const [ timezone, setTimezone ] = useState('');
@@ -133,9 +143,17 @@ export default function Settings() {
       .finally(() => setIsLoadingApiKeys(false));
   }
 
+  function refreshNotificationChannels() {
+    setIsLoadingNotificationChannels(true);
+    getNotificationChannels()
+      .then(response => setNotificationChannels(response.notificationChannels))
+      .finally(() => setIsLoadingNotificationChannels(false));
+  }
+
   useEffect(() => {
     refreshMFADevices();
     refreshApiKeys();
+    refreshNotificationChannels();
   }, []);
 
   function saveSettings() {
@@ -278,6 +296,70 @@ export default function Settings() {
           >
           {t('common.delete')}
         </Button>
+      </>
+    }
+  ];
+
+  const extraNotificationChannels = notificationChannels.filter(channel => !channel.builtIn);
+  const maxNotificationChannels = userProfile && userProfile.userGroup ? userProfile.userGroup.maxNotificationChannels : 0;
+
+  const NOTIFICATION_CHANNEL_COLUMNS = [
+    {
+      head: t('settings.notificationChannels.destination'),
+      cell: channel => <div style={{display: 'flex', alignItems: 'center'}}>
+          <IconAvatar
+            icon={channel.type === NotificationChannelType.EMAIL ? <EmailIcon /> : <NotificationsIcon />}
+            color={channel.enabled ? 'green' : 'default'}
+          />
+          <div>
+            <div>
+              {t('settings.notificationChannels.types.' + notificationChannelTypeKey(channel.type))}
+              {' · '}
+              {channel.destination}
+            </div>
+            {channel.builtIn && <Typography variant='caption' color='textSecondary'>
+              {t('settings.notificationChannels.accountEmail')}
+            </Typography>}
+          </div>
+        </div>
+    },
+    {
+      head: t('settings.notificationChannels.enabled'),
+      cell: channel => channel.enabled
+        ? t('settings.notificationChannels.statusEnabled')
+        : t('settings.notificationChannels.statusDisabled')
+    },
+    {
+      head: t('common.actions'),
+      cell: channel => <>
+        <Tooltip title={channel.builtIn ? t('settings.notificationChannels.cannotEdit') : ''}>
+          <span>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<EditIcon />}
+              className={classes.actionButton}
+              disabled={channel.builtIn}
+              onClick={() => setEditNotificationChannel(channel)}
+              >
+              {t('common.edit')}
+            </Button>
+          </span>
+        </Tooltip>
+        <Tooltip title={channel.builtIn ? t('settings.notificationChannels.cannotDelete') : ''}>
+          <span>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<DeleteIcon />}
+              className={classes.actionButton}
+              disabled={channel.builtIn}
+              onClick={() => setDeleteNotificationChannel(channel)}
+              >
+              {t('common.delete')}
+            </Button>
+          </span>
+        </Tooltip>
       </>
     }
   ];
@@ -462,6 +544,31 @@ export default function Settings() {
           />
       </TableContainer>
 
+      <TableContainer component={Paper} className={classes.paper}>
+        <Title actionButtons={<div style={{display: 'flex', alignItems: 'center'}}>
+            <Typography variant='caption' className={classes.quotaIndicator}>
+              {userProfile !== null && !isLoadingNotificationChannels && t('common.quotaIndicator', { cur: extraNotificationChannels.length, max: maxNotificationChannels})}
+            </Typography>
+            <Button
+              variant='contained'
+              size='small'
+              startIcon={<AddIcon />}
+              onClick={() => setShowCreateNotificationChannel(true)}
+              disabled={userProfile === null || isLoadingNotificationChannels || extraNotificationChannels.length >= maxNotificationChannels}
+              >{t('settings.notificationChannels.add')}
+            </Button>
+          </div>}>
+          {t('settings.notificationChannels.channels')}
+        </Title>
+        <Table
+          columns={NOTIFICATION_CHANNEL_COLUMNS}
+          items={notificationChannels}
+          empty={<em>{t('settings.notificationChannels.noChannels')}</em>}
+          loading={isLoadingNotificationChannels}
+          rowIdentifier='channelId'
+          />
+      </TableContainer>
+
       <Paper className={classes.paper}>
         <Title>{t('settings.profile')}</Title>
         <Grid container className={classes.grid}>
@@ -537,6 +644,9 @@ export default function Settings() {
     {deleteApiKey!==null && <DeleteAPIKeyDialog apiKey={deleteApiKey} onClose={() => setDeleteApiKey(null)} onRefreshAPIKeys={() => refreshApiKeys()} />}
     {showCreateApiKey && <CreateAPIKeyDialog onClose={() => setShowCreateApiKey(false)} onRefreshAPIKeys={() => refreshApiKeys()} />}
     {editApiKey!==null && <EditAPIKeyDialog apiKey={editApiKey} onClose={() => setEditApiKey(null)} onRefreshAPIKeys={() => refreshApiKeys()} />}
+    {showCreateNotificationChannel && <CreateNotificationChannelDialog accountEmail={email} onClose={() => setShowCreateNotificationChannel(false)} onRefreshChannels={() => refreshNotificationChannels()} />}
+    {editNotificationChannel!==null && <EditNotificationChannelDialog channel={editNotificationChannel} accountEmail={email} onClose={() => setEditNotificationChannel(null)} onRefreshChannels={() => refreshNotificationChannels()} />}
+    {deleteNotificationChannel!==null && <DeleteNotificationChannelDialog channel={deleteNotificationChannel} onClose={() => setDeleteNotificationChannel(null)} onRefreshChannels={() => refreshNotificationChannels()} />}
 
   </div>;
 }

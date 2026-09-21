@@ -583,6 +583,39 @@
       "editKey": "Editar clave API: {{title}}",
       "saveError": "No se pudieron guardar los cambios. Por favor, inténtalo más tarde.",
       "saved": "Tus cambios en la clave API se han guardado correctamente."
+    },
+    "notificationChannels": {
+      "channels": "Canales de notificación",
+      "add": "Añadir canal",
+      "noChannels": "Aún no tienes canales de notificación adicionales.",
+      "accountEmail": "Correo de la cuenta",
+      "type": "Tipo",
+      "types": {
+        "email": "Correo",
+        "webhook": "Webhook"
+      },
+      "destination": "Destino",
+      "emailAddress": "Dirección de correo",
+      "webhookUrl": "URL del webhook",
+      "payload": "Carga JSON",
+      "payloadHelp": "Los marcadores en los valores de cadena JSON se sustituyen al enviar la notificación.",
+      "payloadInvalid": "Introduce un JSON válido.",
+      "enabled": "Activado",
+      "statusEnabled": "Activado",
+      "statusDisabled": "Desactivado",
+      "addText": "Las notificaciones de tus cronjobs se envían a todos los canales activados. Puedes añadir direcciones de correo o URLs de webhook adicionales.",
+      "createError": "No hemos podido crear el canal de notificación. Inténtalo de nuevo más tarde.",
+      "created": "El canal de notificación se ha creado correctamente.",
+      "editChannel": "Editar canal de notificación",
+      "saveError": "No hemos podido guardar los cambios. Inténtalo de nuevo más tarde.",
+      "saved": "Los cambios del canal de notificación se han guardado correctamente.",
+      "deleteChannel": "Eliminar canal de notificación",
+      "confirmDelete": "¿Seguro que quieres eliminar este canal de notificación? Dejará de recibir notificaciones.",
+      "deleteError": "No hemos podido eliminar el canal de notificación. Inténtalo de nuevo más tarde.",
+      "deleted": "El canal de notificación se ha eliminado correctamente.",
+      "cannotUseAccountEmail": "Esta dirección ya la usa el canal de correo de la cuenta.",
+      "cannotEdit": "El canal de correo de la cuenta no se puede editar.",
+      "cannotDelete": "El canal de correo de la cuenta no se puede eliminar."
     }
   },
   "statistics": {

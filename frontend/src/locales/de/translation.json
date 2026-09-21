@@ -644,6 +644,39 @@
       "editKey": "API-Key bearbeiten: {{title}}",
       "saveError": "Entschuldigung, aber wir konnten Ihre Änderungen nicht speichern. Bitte versuchen Sie es später erneut.",
       "saved": "Die Änderungen an Ihrem API-Key wurden erfolgreich gespeichert."
+    },
+    "notificationChannels": {
+      "channels": "Benachrichtigungskanäle",
+      "add": "Kanal hinzufügen",
+      "noChannels": "Sie haben noch keine zusätzlichen Benachrichtigungskanäle.",
+      "accountEmail": "Account-E-Mail",
+      "type": "Typ",
+      "types": {
+        "email": "E-Mail",
+        "webhook": "Webhook"
+      },
+      "destination": "Ziel",
+      "emailAddress": "E-Mail-Adresse",
+      "webhookUrl": "Webhook-URL",
+      "payload": "JSON-Payload",
+      "payloadHelp": "Platzhalter in JSON-Zeichenketten werden beim Versand der Benachrichtigung ersetzt.",
+      "payloadInvalid": "Bitte geben Sie gültiges JSON ein.",
+      "enabled": "Aktiviert",
+      "statusEnabled": "Aktiviert",
+      "statusDisabled": "Deaktiviert",
+      "addText": "Benachrichtigungen zu Ihren Cronjobs werden an alle aktivierten Kanäle gesendet. Sie können zusätzliche E-Mail-Adressen oder Webhook-URLs hinzufügen.",
+      "createError": "Entschuldigung, aber wir konnten den Benachrichtigungskanal nicht erstellen. Bitte versuchen Sie es später erneut.",
+      "created": "Der Benachrichtigungskanal wurde erfolgreich erstellt.",
+      "editChannel": "Benachrichtigungskanal bearbeiten",
+      "saveError": "Entschuldigung, aber wir konnten Ihre Änderungen nicht speichern. Bitte versuchen Sie es später erneut.",
+      "saved": "Die Änderungen am Benachrichtigungskanal wurden erfolgreich gespeichert.",
+      "deleteChannel": "Benachrichtigungskanal löschen",
+      "confirmDelete": "Möchten Sie diesen Benachrichtigungskanal wirklich löschen? Er empfängt dann keine Benachrichtigungen mehr.",
+      "deleteError": "Entschuldigung, aber wir konnten den Benachrichtigungskanal nicht löschen. Bitte versuchen Sie es später erneut.",
+      "deleted": "Der Benachrichtigungskanal wurde erfolgreich gelöscht.",
+      "cannotUseAccountEmail": "Diese Adresse wird bereits vom Account-E-Mail-Kanal verwendet.",
+      "cannotEdit": "Der Account-E-Mail-Kanal kann nicht bearbeitet werden.",
+      "cannotDelete": "Der Account-E-Mail-Kanal kann nicht gelöscht werden."
     }
   },
   "statistics": {

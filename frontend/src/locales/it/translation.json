@@ -550,6 +550,39 @@
       "editKey": "Modifica chiave API: {{title}}",
       "saveError": "Spiacenti, non è stato possibile salvare le modifiche. Per favore riprova più tardi.",
       "saved": "Le tue modifiche alla chiave API sono state salvate correttamente."
+    },
+    "notificationChannels": {
+      "channels": "Canali di notifica",
+      "add": "Aggiungi canale",
+      "noChannels": "Non hai ancora canali di notifica aggiuntivi.",
+      "accountEmail": "Email dell'account",
+      "type": "Tipo",
+      "types": {
+        "email": "Email",
+        "webhook": "Webhook"
+      },
+      "destination": "Destinazione",
+      "emailAddress": "Indirizzo email",
+      "webhookUrl": "URL webhook",
+      "payload": "Payload JSON",
+      "payloadHelp": "I segnaposto nei valori stringa JSON vengono sostituiti all'invio della notifica.",
+      "payloadInvalid": "Inserisci un JSON valido.",
+      "enabled": "Abilitato",
+      "statusEnabled": "Abilitato",
+      "statusDisabled": "Disabilitato",
+      "addText": "Le notifiche dei cronjob vengono inviate a tutti i canali abilitati. Puoi aggiungere altri indirizzi email o URL webhook.",
+      "createError": "Impossibile creare il canale di notifica. Riprova più tardi.",
+      "created": "Il canale di notifica è stato creato correttamente.",
+      "editChannel": "Modifica canale di notifica",
+      "saveError": "Impossibile salvare le modifiche. Riprova più tardi.",
+      "saved": "Le modifiche al canale di notifica sono state salvate correttamente.",
+      "deleteChannel": "Elimina canale di notifica",
+      "confirmDelete": "Vuoi davvero eliminare questo canale di notifica? Non riceverà più notifiche.",
+      "deleteError": "Impossibile eliminare il canale di notifica. Riprova più tardi.",
+      "deleted": "Il canale di notifica è stato eliminato correttamente.",
+      "cannotUseAccountEmail": "Questo indirizzo è già usato dal canale email dell'account.",
+      "cannotEdit": "Il canale email dell'account non può essere modificato.",
+      "cannotDelete": "Il canale email dell'account non può essere eliminato."
     }
   },
   "statistics": {

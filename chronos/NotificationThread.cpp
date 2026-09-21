@@ -1398,18 +1398,18 @@ void NotificationThread::sendWebhookNotification(const Notification &notificatio
 	constexpr size_t MAX_WEBHOOK_RESPONSE_SIZE = 16 * 1024; // 16 KB
 
 	std::unordered_map<std::string, std::string> variables = {
-		{ "firstname", userDetails.firstName },
-		{ "lastname", userDetails.lastName },
-		{ "title", !notification.title.empty() ? notification.title : notification.url },
-		{ "url", notification.url },
+		{ "jobTitle", !notification.title.empty() ? notification.title : notification.url },
+		{ "jobId", std::to_string(notification.jobID) },
+		{ "jobUrl", notification.url },
 		{ "executed", formatDate(userDetails.language, notification.dateStarted) },
 		{ "executedTimestamp", std::to_string(notification.dateStarted) },
 		{ "scheduled", formatDate(userDetails.language, notification.datePlanned) },
 		{ "scheduledTimestamp", std::to_string(notification.datePlanned) },
 		{ "attempts", std::to_string(notification.failCounter) },
 		{ "status", formatStatus(userDetails.language, notification) },
-		{ "certexpiry", formatDate(userDetails.language, notification.sslCertExpiry) },
-		{ "type", typeToString(notification.type) }
+		{ "sslCertExpiry", formatDate(userDetails.language, notification.sslCertExpiry) },
+		{ "sslCertExpiryTimestamp", std::to_string(notification.sslCertExpiry) },
+		{ "notificationType", typeToString(notification.type) }
 	};
 
 	json settings = json::object();
@@ -1491,6 +1491,8 @@ void NotificationThread::sendWebhookNotification(const Notification &notificatio
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0);
 	curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 	curl_easy_setopt(curl, CURLOPT_DNS_CACHE_TIMEOUT, 0);
+	curl_easy_setopt(curl, CURLOPT_FORBID_REUSE, 1L);
+	curl_easy_setopt(curl, CURLOPT_FRESH_CONNECT, 1L);
 	curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1);
 	curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, "http,https");
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlResponseLimiterWriteFunction);

@@ -513,6 +513,39 @@
       "editKey": "Modifier la clé API : {{titre}}",
       "saveError": "Désolé, nous n'avons pas pu enregistrer vos modifications. Veuillez réessayer plus tard.",
       "saved": "Vos modifications de la clé API ont été enregistrées avec succès."
+    },
+    "notificationChannels": {
+      "channels": "Canaux de notification",
+      "add": "Ajouter un canal",
+      "noChannels": "Vous n'avez pas encore de canaux de notification supplémentaires.",
+      "accountEmail": "E-mail du compte",
+      "type": "Type",
+      "types": {
+        "email": "E-mail",
+        "webhook": "Webhook"
+      },
+      "destination": "Destination",
+      "emailAddress": "Adresse e-mail",
+      "webhookUrl": "URL du webhook",
+      "payload": "Charge utile JSON",
+      "payloadHelp": "Les espaces réservés dans les chaînes JSON sont remplacés à l'envoi de la notification.",
+      "payloadInvalid": "Veuillez saisir un JSON valide.",
+      "enabled": "Activé",
+      "statusEnabled": "Activé",
+      "statusDisabled": "Désactivé",
+      "addText": "Les notifications de vos cronjobs sont envoyées à tous les canaux activés. Vous pouvez ajouter des adresses e-mail ou des URL de webhook supplémentaires.",
+      "createError": "Désolé, nous n'avons pas pu créer le canal de notification. Veuillez réessayer plus tard.",
+      "created": "Le canal de notification a été créé avec succès.",
+      "editChannel": "Modifier le canal de notification",
+      "saveError": "Désolé, nous n'avons pas pu enregistrer vos modifications. Veuillez réessayer plus tard.",
+      "saved": "Vos modifications du canal de notification ont été enregistrées avec succès.",
+      "deleteChannel": "Supprimer le canal de notification",
+      "confirmDelete": "Voulez-vous vraiment supprimer ce canal de notification ? Il ne recevra plus de notifications.",
+      "deleteError": "Désolé, nous n'avons pas pu supprimer le canal de notification. Veuillez réessayer plus tard.",
+      "deleted": "Le canal de notification a été supprimé avec succès.",
+      "cannotUseAccountEmail": "Cette adresse est déjà utilisée par le canal e-mail du compte.",
+      "cannotEdit": "Le canal e-mail du compte ne peut pas être modifié.",
+      "cannotDelete": "Le canal e-mail du compte ne peut pas être supprimé."
     }
   },
   "statistics": {
