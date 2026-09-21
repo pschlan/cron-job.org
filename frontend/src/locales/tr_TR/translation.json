@@ -158,6 +158,13 @@
   "events": {
     "cronjobExecution": "Cron görevi yürütme: {{statusText}}",
     "notificationSent": "Bildirim gönderildi: {{notificationType}}",
+    "notificationFailed": "Bildirim başarısız: {{notificationType}}",
+    "channelDestination": "{{channel}} · {{destination}}",
+    "channels": {
+      "email": "E-posta",
+      "webhook": "Webhook",
+      "unknown": "Kanal"
+    },
     "notifications": {
       "FAILURE": "Yürütme başarısız",
       "SUCCESS": "Yürütme başarılı",

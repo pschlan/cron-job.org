@@ -156,6 +156,13 @@
   "events": {
     "cronjobExecution": "Execuție cronjob: {{statusText}}",
     "notificationSent": "Notificare trimisă: {{notificationType}}",
+    "notificationFailed": "Notificare eșuată: {{notificationType}}",
+    "channelDestination": "{{channel}} · {{destination}}",
+    "channels": {
+      "email": "E-mail",
+      "webhook": "Webhook",
+      "unknown": "Canal"
+    },
     "notifications": {
       "FAILURE": "Execuție eșuată",
       "SUCCESS": "Execuție reușită",

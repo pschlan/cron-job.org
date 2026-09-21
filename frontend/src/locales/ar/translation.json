@@ -163,6 +163,13 @@
   "events": {
     "cronjobExecution": "تنفيذ مهمة كرون: {{statusText}}",
     "notificationSent": "تم إرسال إشعار: {{notificationType}}",
+    "notificationFailed": "فشل الإشعار: {{notificationType}}",
+    "channelDestination": "{{channel}} · {{destination}}",
+    "channels": {
+      "email": "البريد الإلكتروني",
+      "webhook": "Webhook",
+      "unknown": "قناة"
+    },
     "notifications": {
       "FAILURE": "فشل التنفيذ",
       "SUCCESS": "تم التنفيذ بنجاح",

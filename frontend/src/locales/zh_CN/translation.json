@@ -154,6 +154,13 @@
   "events": {
     "计划任务Execution": "计划任务运行：{{statusText}}",
     "notificationSent": "通知已发送：{{notificationType}}",
+    "notificationFailed": "通知发送失败：{{notificationType}}",
+    "channelDestination": "{{channel}} · {{destination}}",
+    "channels": {
+      "email": "电子邮件",
+      "webhook": "Webhook",
+      "unknown": "渠道"
+    },
     "notifications": {
       "FAILURE": "运行失败",
       "SUCCESS": "运行成功",

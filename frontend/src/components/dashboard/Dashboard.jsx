@@ -11,7 +11,7 @@ import { setDashboardData, setUserProfile } from '../../redux/actions';
 import Breadcrumbs from '../misc/Breadcrumbs';
 import Heading from '../misc/Heading';
 import moment from 'moment';
-import { JobStatus, jobStatusText, notificationTypeText, SubscriptionStatus } from '../../utils/Constants';
+import { JobStatus, jobStatusText, NotificationChannelType, NotificationResult, notificationChannelTypeKey, notificationTypeText, SubscriptionStatus } from '../../utils/Constants';
 import JobIcon from '../jobs/JobIcon';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import IconAvatar from '../misc/IconAvatar';
@@ -71,14 +71,29 @@ function EventDescription({ type, details }) {
       </div>
     </div>;
   } else if (type === 'NotificationItem') {
+    const success = details.result === NotificationResult.SUCCESS;
+    const icon = details.channelType === NotificationChannelType.EMAIL ? EmailIcon : NotificationsIcon;
     return <div style={{display: 'flex', alignItems: 'center'}}>
-      <IconAvatar icon={NotificationsIcon} color='blue' />
-      <div>
+      <IconAvatar icon={icon} color={success ? 'green' : 'orange'} />
+      <div style={{minWidth: 0}}>
         <div>
-          {t('events.notificationSent', {
+          {t(success ? 'events.notificationSent' : 'events.notificationFailed', {
             notificationType: t('events.notifications.' + notificationTypeText(details.type))
           })}
         </div>
+        {details.channelDestination ? <div>
+          <Typography variant="caption" title={details.channelDestination} style={{display: 'block', maxWidth: 420, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
+            {t('events.channelDestination', {
+              channel: t('events.channels.' + notificationChannelTypeKey(details.channelType)),
+              destination: details.channelDestination
+            })}
+          </Typography>
+        </div> : null}
+        {!success && details.resultDetails ? <div>
+          <Typography variant="caption">
+            {details.resultDetails}
+          </Typography>
+        </div> : null}
         <div>
           <Typography variant="caption">
             {details.url}

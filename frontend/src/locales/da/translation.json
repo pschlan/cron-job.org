@@ -159,6 +159,13 @@
   "events": {
     "cronjobExecution": "Cronjob-kørsel: {{statusText}}",
     "notificationSent": "Notifikation sendt: {{notificationType}}",
+    "notificationFailed": "Notifikation mislykkedes: {{notificationType}}",
+    "channelDestination": "{{channel}} · {{destination}}",
+    "channels": {
+      "email": "E-mail",
+      "webhook": "Webhook",
+      "unknown": "Kanal"
+    },
     "notifications": {
       "FAILURE": "Kørsel mislykkedes",
       "SUCCESS": "Kørsel lykkedes",

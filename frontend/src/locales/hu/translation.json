@@ -158,6 +158,13 @@
   "events": {
     "cronjobExecution": "Cron feladat végrehajtás: {{statusText}}",
     "notificationSent": "Értesítés küldve: {{notificationType}}",
+    "notificationFailed": "Értesítés sikertelen: {{notificationType}}",
+    "channelDestination": "{{channel}} · {{destination}}",
+    "channels": {
+      "email": "E-mail",
+      "webhook": "Webhook",
+      "unknown": "Csatorna"
+    },
     "notifications": {
       "FAILURE": "Végrehajtás meghiúsult",
       "SUCCESS": "Végrehajtás sikeres",

@@ -147,6 +147,13 @@
   "events": {
     "cronjobExecution": "Запуск Cron задания: {{statusText}}",
     "notificationSent": "Уведомление отправлено: {{notificationType}}",
+    "notificationFailed": "Уведомление не отправлено: {{notificationType}}",
+    "channelDestination": "{{channel}} · {{destination}}",
+    "channels": {
+      "email": "Эл. почта",
+      "webhook": "Вебхук",
+      "unknown": "Канал"
+    },
     "notifications": {
       "FAILURE": "Запуск не удался",
       "SUCCESS": "Успешно запущено",

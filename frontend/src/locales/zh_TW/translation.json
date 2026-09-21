@@ -154,6 +154,13 @@
   "events": {
     "定時工作Execution": "定時工作執行：{{statusText}}",
     "notificationSent": "通知已傳送：{{notificationType}}",
+    "notificationFailed": "通知傳送失敗：{{notificationType}}",
+    "channelDestination": "{{channel}} · {{destination}}",
+    "channels": {
+      "email": "電子郵件",
+      "webhook": "Webhook",
+      "unknown": "頻道"
+    },
     "notifications": {
       "FAILURE": "執行失敗",
       "SUCCESS": "執行成功",

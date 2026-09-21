@@ -163,6 +163,13 @@
   "events": {
     "cronjobExecution": "Eksekusi Cronjob: {{statusText}}",
     "notificationSent": "Notifikasi terkirim: {{notificationType}}",
+    "notificationFailed": "Notifikasi gagal: {{notificationType}}",
+    "channelDestination": "{{channel}} · {{destination}}",
+    "channels": {
+      "email": "Email",
+      "webhook": "Webhook",
+      "unknown": "Kanal"
+    },
     "notifications": {
       "FAILURE": "Eksekusi gagal",
       "SUCCESS": "Eksekusi berhasil",

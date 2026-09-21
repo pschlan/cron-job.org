@@ -156,6 +156,13 @@
   "events": {
     "cronjobExecution": "Esecuzione cronjob: {{statusText}}",
     "notificationSent": "Notifica inviata: {{notificationType}}",
+    "notificationFailed": "Notifica non inviata: {{notificationType}}",
+    "channelDestination": "{{channel}} · {{destination}}",
+    "channels": {
+      "email": "Email",
+      "webhook": "Webhook",
+      "unknown": "Canale"
+    },
     "notifications": {
       "FAILURE": "Esecuzione fallita",
       "SUCCESS": "Esecuzione completata",
