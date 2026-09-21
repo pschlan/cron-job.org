@@ -502,6 +502,7 @@
       "maxFailures": "أقصى عدد للفشل قبل تعطيل المهمة",
       "maxStatusPages": "أقصى عدد لصفحات/مراقبي الحالة",
       "maxApiCallsPerDay": "أقصى عدد لطلبات API يوميًا",
+      "maxNotificationChannels": "أقصى عدد لقنوات الإشعار",
       "price": "السعر",
       "free": "مجاني",
       "subscriptionPrices": "5، 10 أو 20 يورو شهريًا \nأو 12، 24 أو 36 يورو سنويًا (حسب اختيارك)",

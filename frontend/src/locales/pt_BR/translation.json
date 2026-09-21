@@ -479,6 +479,7 @@
       "maxFailures": "Máximo de falhas antes de desabilitar um job",
       "maxStatusPages": "Máximo de páginas de status/monitores",
       "maxApiCallsPerDay": "Máximo de chamadas de API por dia",
+      "maxNotificationChannels": "Máximo de canais de notificação",
       "price": "Preço",
       "free": "gratuito",
       "subscriptionPrices": "5,10 EUR ou 20 EUR por mês \nou 12,24 EUR ou 36 EUR por ano (à sua escolha)",

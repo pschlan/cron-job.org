@@ -480,6 +480,7 @@
       "maxFailures": "Număr maxim de eșecuri înainte de a dezactiva o sarcină",
       "maxStatusPages": "Număr maxim de pagini stare/monitoare",
       "maxApiCallsPerDay": "Număr maxim de apeluri API pe zi",
+      "maxNotificationChannels": "Număr maxim de canale de notificare",
       "price": "Preț",
       "free": "gratuit",
       "subscriptionPrices": "5, 10 sau 20 EUR pe lună \nsau 12, 24 sau 36 EUR pe an (la alegere)",

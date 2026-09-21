@@ -475,6 +475,7 @@
       "maxFailures": "停用工作前的最大失敗次數",
       "maxStatusPages": "最大狀態頁面/監視器",
       "maxApiCallsPerDay": "每天最大 API 調用",
+      "maxNotificationChannels": "最大通知頻道數",
       "price": "價格",
       "free": "免費",
       "subscriptionPrices": "每月5、10 或 20 歐元\n或每年 12、24 或 36 歐元（由您選擇）",

@@ -480,6 +480,7 @@
       "maxFailures": "Numero massimo di esecuzioni fallite prima di disabilitare un cronjob",
       "maxStatusPages": "Numero massimo pagine di stato / monitor di stato",
       "maxApiCallsPerDay": "Numero massimo di chiamate API al giorno",
+      "maxNotificationChannels": "Numero massimo di canali di notifica",
       "price": "Prezzo",
       "free": "gratuito",
       "subscriptionPrices": "5, 10 o 20 EURO al mese \no 12, 24 o 36 EURO al anno (a tua scelta)",

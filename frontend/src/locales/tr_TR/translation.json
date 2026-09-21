@@ -483,6 +483,7 @@
       "maxFailures": "Bir görevi devre dışı bırakmadan önce maksimum hata sayısı",
       "maxStatusPages": "Maksimum durum sayfaları / monitörler",
       "maxApiCallsPerDay": "Günlük maksimum API çağrısı",
+      "maxNotificationChannels": "Maksimum bildirim kanalı",
       "price": "Fiyat",
       "free": "Ücretsiz",
       "subscriptionPrices": "Aylık 5, 10 veya 20 EUR \nveya yıllık 12, 24 veya 36 EUR (seçiminize bağlı olarak)",

@@ -511,6 +511,7 @@
       "maxFailures": "Kegagalan maks sebelum menonaktifkan job",
       "maxStatusPages": "Halaman status / monitor maks",
       "maxApiCallsPerDay": "Panggilan API maks per hari",
+      "maxNotificationChannels": "Jumlah kanal notifikasi maks",
       "price": "Harga",
       "free": "gratis",
       "subscriptionPrices": "5, 10, atau 20 EUR sebulan \natau 12, 24, atau 36 EUR setahun (sesuai pilihan Anda)",

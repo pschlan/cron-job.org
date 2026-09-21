@@ -480,6 +480,7 @@
       "maxFailures": "Maksymalna liczba awarii przed wyłączeniem zadania",
       "maxStatusPages": "Maksymalna liczba stron statusu / monitorów",
       "maxApiCallsPerDay": "Maksymalna liczba wywołań API dziennie",
+      "maxNotificationChannels": "Maksymalna liczba kanałów powiadomień",
       "price": "Cena",
       "free": "bezpłatne",
       "subscriptionPrices": "5, 10 lub 20 EUR miesięcznie \nlub 12, 24 lub 36 EUR rocznie (według własnego wyboru)",

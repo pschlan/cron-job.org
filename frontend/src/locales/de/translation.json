@@ -576,6 +576,7 @@
       "maxFailures": "Max. Fehlschläge vor Job-Deaktivierung",
       "maxStatusPages": "Max. Anzahl Status-Seiten/-Monitore",
       "maxApiCallsPerDay": "Max. API-Calls pro Tag",
+      "maxNotificationChannels": "Max. Anzahl Benachrichtigungskanäle",
       "price": "Preis",
       "free": "kostenlos",
       "subscriptionPrices": "5, 10 oder 20 EUR pro Monat \noder 12, 24 oder 36 EUR pro Jahr (frei wählbar)",

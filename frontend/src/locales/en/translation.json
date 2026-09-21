@@ -572,6 +572,7 @@
       "maxFailures": "Max failures before disabling a job",
       "maxStatusPages": "Max status pages / monitors",
       "maxApiCallsPerDay": "Max API calls per day",
+      "maxNotificationChannels": "Max notification channels",
       "price": "Price",
       "free": "free",
       "subscriptionPrices": "5, 10 or 20 EUR a month \nor 12, 24 or 36 EUR a year (at your choice)",

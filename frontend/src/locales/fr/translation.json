@@ -443,6 +443,7 @@
       "maxFailures": "Nombre maximal d'échecs avant la désactivation d'une tâche",
       "maxStatusPages": "Max pages d'état / moniteurs",
       "maxApiCallsPerDay": "Nombre maximum d'appels API par jour",
+      "maxNotificationChannels": "Nombre maximum de canaux de notification",
       "price": "Prix",
       "free": "gratuit",
       "subscriptionPrices": "5, 10 ou 20 EUR par mois \nou 12, 24 ou 36 EUR par an (à votre choix)",

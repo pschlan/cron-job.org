@@ -96,6 +96,11 @@ export default function SubscribeDialog({ onClose }) {
                   <TableCell>5000</TableCell>
                 </TableRow>
                 <TableRow>
+                  <TableCell>{t('settings.subscribeDialog.maxNotificationChannels')}</TableCell>
+                  <TableCell>2</TableCell>
+                  <TableCell>25</TableCell>
+                </TableRow>
+                <TableRow>
                   <TableCell>{t('settings.subscribeDialog.price')}</TableCell>
                   <TableCell>{t('settings.subscribeDialog.free')}</TableCell>
                   <TableCell style={{whiteSpace: 'pre-line'}}>{t('settings.subscribeDialog.subscriptionPrices')}</TableCell>

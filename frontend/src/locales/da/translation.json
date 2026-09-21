@@ -488,6 +488,7 @@
       "maxFailures": "Maks. fejl før deaktivering",
       "maxStatusPages": "Maks. statussider/overvågninger",
       "maxApiCallsPerDay": "Maks. API-kald pr. dag",
+      "maxNotificationChannels": "Maks. antal notifikationskanaler",
       "price": "Pris",
       "free": "gratis",
       "subscriptionPrices": "5, 10 eller 20 EUR om måneden \neller 12, 24 eller 36 EUR om året",

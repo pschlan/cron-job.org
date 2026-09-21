@@ -483,6 +483,7 @@
       "maxFailures": "Maximális hibák a feladat letiltásáig",
       "maxStatusPages": "Maximális állapotoldalak / figyelők",
       "maxApiCallsPerDay": "Maximális API hívások naponta",
+      "maxNotificationChannels": "Értesítési csatornák maximális száma",
       "price": "Ár",
       "free": "ingyenes",
       "subscriptionPrices": "5, 10 vagy 20 EUR havonta \nvagy 12, 24 vagy 36 EUR évente (az Ön választása szerint)",
