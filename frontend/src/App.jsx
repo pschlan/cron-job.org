@@ -39,6 +39,7 @@ import History from './components/jobs/History';
 import NotFound from './components/misc/NotFound';
 import Settings from './components/settings/Settings';
 import ConfirmEmailChange from './components/auth/ConfirmEmailChange';
+import ConfirmNotificationChannel from './components/auth/ConfirmNotificationChannel';
 import AppToolbar from './components/AppToolbar';
 import Statistics from './components/statistics/Statistics';
 import AppLayout from './components/AppLayout';
@@ -303,6 +304,7 @@ function App() {
               <Route path="/settings" exact component={Settings} />
               <Route path="/statistics" exact component={Statistics} />
               <Route path="/confirmEmailChange/:token" exact component={ConfirmEmailChange} />
+              <Route path="/confirmNotificationChannel/:token" exact component={ConfirmNotificationChannel} />
               <Redirect from="/login" exact to="/dashboard" />
               <Redirect from="/signup" exact to="/dashboard" />
               <Redirect from="/" exact to="/dashboard" />

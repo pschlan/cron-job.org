@@ -543,7 +543,13 @@
       "deleted": "The notification channel has been deleted successfully.",
       "cannotUseAccountEmail": "This address is already used by your account email channel.",
       "cannotEdit": "The account email channel cannot be edited.",
-      "cannotDelete": "The account email channel cannot be deleted."
+      "cannotDelete": "The account email channel cannot be deleted.",
+      "pendingConfirmation": "Pending confirmation",
+      "pendingConfirmationHint": "Check this inbox for a confirmation link. If you did not get the email, delete this channel and add it again.",
+      "cannotEditEmail": "Email channels cannot be edited. Delete this channel and add a new one to change the address.",
+      "cannotEnableUnconfirmed": "This channel must be confirmed before it can be enabled.",
+      "createdCheckInbox": "We sent a confirmation email to {{email}}. Click the link in that message to activate this channel.",
+      "createdCheckInboxTitle": "Confirm the email address"
     }
   },
   "statistics": {
@@ -558,5 +564,9 @@
   "confirmEmailChange": {
     "success": "Адрес электронной почты вашей учетной записи был успешно изменен. Теперь вы можете войти с новым адресом электронной почты.",
     "error": "К сожалению, мы не смогли подтвердить изменение вашего адреса электронной почты. Ссылка для подтверждения недействительна, просрочена или уже использовалась."
+  },
+  "confirmNotificationChannel": {
+    "success": "This email address has been confirmed and will now receive cron job notifications.",
+    "error": "Sorry, we could not confirm this email address. The confirmation link is invalid, expired or has already been used."
   }
 }

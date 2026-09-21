@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, InputLabel, makeStyles, MenuItem, Select, TextField } from '@material-ui/core';
+import { Alert, AlertTitle } from '@material-ui/lab';
 import { useTranslation } from 'react-i18next';
 import { createNotificationChannel } from '../../utils/API';
 import { useSnackbar } from 'notistack';
@@ -25,6 +26,7 @@ export default function CreateNotificationChannelDialog({ accountEmail, onClose,
   const [ type, setType ] = useState(NotificationChannelType.WEBHOOK);
   const [ destination, setDestination ] = useState('');
   const [ payload, setPayload ] = useState(DEFAULT_WEBHOOK_PAYLOAD);
+  const [ createdEmail, setCreatedEmail ] = useState(null);
 
   const isEmail = type === NotificationChannelType.EMAIL;
   const usesAccountEmail = isEmail && destination.trim().toLowerCase() === (accountEmail || '').toLowerCase();
@@ -38,15 +40,40 @@ export default function CreateNotificationChannelDialog({ accountEmail, onClose,
     if (!canCreate) {
       return;
     }
-    createNotificationChannel(type, destination.trim(), true, isEmail ? '' : payload)
+    const trimmedDestination = destination.trim();
+    createNotificationChannel(type, trimmedDestination, true, isEmail ? '' : payload)
       .then(() => {
-        enqueueSnackbar(t('settings.notificationChannels.created'), { variant: 'success' });
         onRefreshChannelsHook.current();
-        onCloseHook.current();
+        if (isEmail) {
+          setCreatedEmail(trimmedDestination);
+        } else {
+          enqueueSnackbar(t('settings.notificationChannels.created'), { variant: 'success' });
+          onCloseHook.current();
+        }
       })
-      .catch(() => {
+      .catch(error => {
+        if (error.response && error.response.status === 429) {
+          return;
+        }
         enqueueSnackbar(t('settings.notificationChannels.createError'), { variant: 'error' });
       });
+  }
+
+  if (createdEmail) {
+    return <Dialog open={true} onClose={onCloseHook.current} fullWidth maxWidth='sm'>
+      <DialogTitle>{t('settings.notificationChannels.createdCheckInboxTitle')}</DialogTitle>
+      <DialogContent>
+        <Alert severity='info'>
+          <AlertTitle>{t('settings.notificationChannels.createdCheckInboxTitle')}</AlertTitle>
+          {t('settings.notificationChannels.createdCheckInbox', { email: createdEmail })}
+        </Alert>
+      </DialogContent>
+      <DialogActions>
+        <Button color='primary' autoFocus onClick={onCloseHook.current}>
+          {t('common.close')}
+        </Button>
+      </DialogActions>
+    </Dialog>;
   }
 
   return <Dialog open={true} onClose={onCloseHook.current} fullWidth maxWidth='sm'>

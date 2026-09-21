@@ -580,7 +580,13 @@
       "deleted": "The notification channel has been deleted successfully.",
       "cannotUseAccountEmail": "This address is already used by your account email channel.",
       "cannotEdit": "The account email channel cannot be edited.",
-      "cannotDelete": "The account email channel cannot be deleted."
+      "cannotDelete": "The account email channel cannot be deleted.",
+      "pendingConfirmation": "待確認",
+      "pendingConfirmationHint": "請檢查此收件匣中的確認連結。如果沒有收到郵件，請刪除此頻道並重新新增。",
+      "cannotEditEmail": "無法編輯電子郵件頻道。請刪除此頻道並新增一個以變更地址。",
+      "cannotEnableUnconfirmed": "必須先確認此頻道才能啟用。",
+      "createdCheckInbox": "我們已向 {{email}} 傳送確認郵件。請點擊該郵件中的連結以啟用此頻道。",
+      "createdCheckInboxTitle": "確認電子郵件地址"
     }
   },
   "statistics": {
@@ -595,5 +601,9 @@
   "confirmEmailChange": {
     "success": "您的帳號電子郵件地址修改成功，您現在可以使用新的電子郵件地址登入了。",
     "error": "很抱歉，我們無法確認您的電子郵件地址更改，確認連結無效、過期或已被使用。"
+  },
+  "confirmNotificationChannel": {
+    "success": "此電子郵件地址已確認，現在將接收排程工作通知。",
+    "error": "無法確認此電子郵件地址。確認連結無效、已過期或已被使用。"
   }
 }

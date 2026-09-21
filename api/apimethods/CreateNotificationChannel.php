@@ -34,14 +34,19 @@ class CreateNotificationChannel extends AbstractAPIMethod {
           $request->type,
           $request->destination,
           !isset($request->enabled) || $request->enabled,
-          isset($request->payload) ? $request->payload : ''
+          isset($request->payload) ? $request->payload : '',
+          $language
         );
 
       return (object)[];
     } catch (QuotaExceededException $ex) {
       throw new QuotaExceededAPIException();
+    } catch (RateLimitExceededException $ex) {
+      throw new TooManyRequestsAPIException();
     } catch (InvalidArgumentsException $ex) {
       throw new BadRequestAPIException();
+    } catch (InternalErrorException $ex) {
+      throw new InternalErrorAPIException();
     }
   }
 }

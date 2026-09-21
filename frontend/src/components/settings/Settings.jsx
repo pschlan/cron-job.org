@@ -152,6 +152,9 @@ export default function Settings() {
   }
 
   function toggleNotificationChannelEnabled(channel, enabled) {
+    if (!channel.builtIn && channel.type === NotificationChannelType.EMAIL && !channel.confirmed) {
+      return;
+    }
     const notificationsAutoDisabled = !!(userProfile && userProfile.userProfile && userProfile.userProfile.notificationsAutoDisabled);
     const shouldReenable = channel.builtIn && enabled && notificationsAutoDisabled;
 
@@ -341,7 +344,7 @@ export default function Settings() {
       cell: channel => <div style={{display: 'flex', alignItems: 'center'}}>
           <IconAvatar
             icon={channel.type === NotificationChannelType.EMAIL ? <EmailIcon /> : <NotificationsIcon />}
-            color={channel.enabled ? 'green' : 'default'}
+            color={channel.enabled && channel.confirmed !== false ? 'green' : 'default'}
           />
           <div>
             <div>
@@ -352,31 +355,49 @@ export default function Settings() {
             {channel.builtIn && <Typography variant='caption' color='textSecondary'>
               {t('settings.notificationChannels.accountEmail')}
             </Typography>}
+            {!channel.builtIn && channel.type === NotificationChannelType.EMAIL && !channel.confirmed &&
+              <Tooltip title={t('settings.notificationChannels.pendingConfirmationHint')}>
+                <Typography variant='caption' color='textSecondary' component='div'>
+                  {t('settings.notificationChannels.pendingConfirmation')}
+                </Typography>
+              </Tooltip>}
           </div>
         </div>
     },
     {
       head: t('settings.notificationChannels.enabled'),
-      cell: channel =>
-        <Switch
-          size='small'
-          color='primary'
-          checked={!!channel.enabled}
-          disabled={togglingChannelIds.includes(channel.channelId)}
-          onChange={({target}) => toggleNotificationChannelEnabled(channel, target.checked)}
-          />
+      cell: channel => {
+        const unconfirmedEmail = !channel.builtIn && channel.type === NotificationChannelType.EMAIL && !channel.confirmed;
+        return <Tooltip title={unconfirmedEmail ? t('settings.notificationChannels.cannotEnableUnconfirmed') : ''}>
+          <span>
+            <Switch
+              size='small'
+              color='primary'
+              checked={!!channel.enabled}
+              disabled={togglingChannelIds.includes(channel.channelId) || unconfirmedEmail}
+              onChange={({target}) => toggleNotificationChannelEnabled(channel, target.checked)}
+              />
+          </span>
+        </Tooltip>;
+      }
     },
     {
       head: t('common.actions'),
-      cell: channel => <>
-        <Tooltip title={channel.builtIn ? t('settings.notificationChannels.cannotEdit') : ''}>
+      cell: channel => {
+        const isExtraEmail = !channel.builtIn && channel.type === NotificationChannelType.EMAIL;
+        const editDisabled = channel.builtIn || isExtraEmail;
+        const editTitle = channel.builtIn
+          ? t('settings.notificationChannels.cannotEdit')
+          : (isExtraEmail ? t('settings.notificationChannels.cannotEditEmail') : '');
+        return <>
+        <Tooltip title={editTitle}>
           <span>
             <Button
               variant="outlined"
               size="small"
               startIcon={<EditIcon />}
               className={classes.actionButton}
-              disabled={channel.builtIn}
+              disabled={editDisabled}
               onClick={() => setEditNotificationChannel(channel)}
               >
               {t('common.edit')}
@@ -397,7 +418,8 @@ export default function Settings() {
             </Button>
           </span>
         </Tooltip>
-      </>
+      </>;
+      }
     }
   ];
 

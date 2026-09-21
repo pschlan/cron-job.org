@@ -616,7 +616,13 @@
       "deleted": "El canal de notificación se ha eliminado correctamente.",
       "cannotUseAccountEmail": "Esta dirección ya la usa el canal de correo de la cuenta.",
       "cannotEdit": "El canal de correo de la cuenta no se puede editar.",
-      "cannotDelete": "El canal de correo de la cuenta no se puede eliminar."
+      "cannotDelete": "El canal de correo de la cuenta no se puede eliminar.",
+      "pendingConfirmation": "Pendiente de confirmación",
+      "pendingConfirmationHint": "Revisa esta bandeja de entrada para el enlace de confirmación. Si no recibiste el correo, elimina este canal y añádelo de nuevo.",
+      "cannotEditEmail": "Los canales de correo no se pueden editar. Elimina este canal y añade uno nuevo para cambiar la dirección.",
+      "cannotEnableUnconfirmed": "Este canal debe confirmarse antes de poder activarlo.",
+      "createdCheckInbox": "Hemos enviado un correo de confirmación a {{email}}. Haz clic en el enlace de ese mensaje para activar este canal.",
+      "createdCheckInboxTitle": "Confirmar la dirección de correo"
     }
   },
   "statistics": {
@@ -631,5 +637,9 @@
   "confirmEmailChange": {
     "success": "La dirección de correo de tu cuenta ha sido cambiada correctamente. Ahora puedes iniciar sesión con tu nuevo correo.",
     "error": "No se pudo confirmar el cambio de correo. El enlace de confirmación es inválido, ha expirado o ya se usó."
+  },
+  "confirmNotificationChannel": {
+    "success": "Esta dirección de correo ha sido confirmada y ahora recibirá notificaciones de cron jobs.",
+    "error": "No pudimos confirmar esta dirección de correo. El enlace es inválido, ha caducado o ya se ha usado."
   }
 }

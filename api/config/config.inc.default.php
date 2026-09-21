@@ -47,6 +47,7 @@ $config = array(
   'emailVerpSecret'                 => 'PLACE_RANDOM_STRING_HERE',
   'sessionTokenSecret'              => 'PLACE_RANDOM_STRING_HERE',
   'emailVerificationTokenSecret'    => 'PLACE_RANDOM_STRING_HERE',
+  'notificationChannelConfirmationTokenSecret' => 'PLACE_RANDOM_STRING_HERE',
   'lostPasswordTokenSecret'         => 'PLACE_RANDOM_STRING_HERE',
   'accountConfirmationTokenSecret'  => 'PLACE_RANDOM_STRING_HERE',
   'statusBadgeTokenSecret'          => 'PLACE_RANDOM_STRING_HERE',
@@ -77,6 +78,8 @@ $config = array(
   'emailVerificationTokenLifetime'  => 3 * 86400,
   'lostPasswordTokenLifetime'       => 3 * 86400,
   'accountConfirmationTokenLifetime' => 3 * 86400,
+  'notificationChannelEmailCooldownSeconds' => 30,
+  'notificationChannelEmailCreatesPerHour' => 5,
   'refreshTokenValiditySeconds'     => 365 * 86400,
 
   //! @note Minimum session token refresh interval

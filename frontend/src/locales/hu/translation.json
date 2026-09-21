@@ -588,7 +588,13 @@
       "deleted": "The notification channel has been deleted successfully.",
       "cannotUseAccountEmail": "This address is already used by your account email channel.",
       "cannotEdit": "The account email channel cannot be edited.",
-      "cannotDelete": "The account email channel cannot be deleted."
+      "cannotDelete": "The account email channel cannot be deleted.",
+      "pendingConfirmation": "Megerősítésre vár",
+      "pendingConfirmationHint": "Ellenőrizze ezt a postafiókot a megerősítő linkért. Ha nem kapta meg a levelet, törölje a csatornát, és adja hozzá újra.",
+      "cannotEditEmail": "Az e-mail csatornák nem szerkeszthetők. Törölje a csatornát, és adjon hozzá egy újat a cím módosításához.",
+      "cannotEnableUnconfirmed": "A csatornát meg kell erősíteni, mielőtt engedélyezhető lenne.",
+      "createdCheckInbox": "Megerősítő e-mailt küldtünk a(z) {{email}} címre. Kattintson az üzenetben lévő linkre a csatorna aktiválásához.",
+      "createdCheckInboxTitle": "E-mail cím megerősítése"
     }
   },
   "statistics": {
@@ -603,5 +609,9 @@
   "confirmEmailChange": {
     "success": "A fiók e-mail címe sikeresen megváltozott. Most már bejelentkezhet az új e-mail címével.",
     "error": "Sajnáljuk, nem tudtuk megerősíteni az e-mail cím megváltoztatását. A megerősítő link érvénytelen, lejárt vagy már fel lett használva."
+  },
+  "confirmNotificationChannel": {
+    "success": "Ez az e-mail cím meg lett erősítve, és ezentúl cron job értesítéseket kap.",
+    "error": "Nem sikerült megerősíteni ezt az e-mail címet. A megerősítő link érvénytelen, lejárt vagy már felhasználták."
   }
 }

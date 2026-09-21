@@ -616,7 +616,13 @@
       "deleted": "The notification channel has been deleted successfully.",
       "cannotUseAccountEmail": "This address is already used by your account email channel.",
       "cannotEdit": "The account email channel cannot be edited.",
-      "cannotDelete": "The account email channel cannot be deleted."
+      "cannotDelete": "The account email channel cannot be deleted.",
+      "pendingConfirmation": "Menunggu konfirmasi",
+      "pendingConfirmationHint": "Periksa kotak masuk ini untuk tautan konfirmasi. Jika Anda tidak menerima email, hapus kanal ini dan tambahkan lagi.",
+      "cannotEditEmail": "Kanal email tidak dapat diedit. Hapus kanal ini dan tambahkan yang baru untuk mengubah alamat.",
+      "cannotEnableUnconfirmed": "Kanal ini harus dikonfirmasi sebelum dapat diaktifkan.",
+      "createdCheckInbox": "Kami telah mengirim email konfirmasi ke {{email}}. Klik tautan di pesan itu untuk mengaktifkan kanal ini.",
+      "createdCheckInboxTitle": "Konfirmasi alamat email"
     }
   },
   "statistics": {
@@ -631,5 +637,9 @@
   "confirmEmailChange": {
     "success": "Alamat email akun Anda telah berhasil diubah. Anda sekarang dapat masuk dengan alamat email baru Anda.",
     "error": "Maaf, kami tidak dapat mengonfirmasi perubahan alamat email Anda. Tautan konfirmasi tidak valid, kedaluwarsa, atau telah digunakan."
+  },
+  "confirmNotificationChannel": {
+    "success": "Alamat email ini telah dikonfirmasi dan sekarang akan menerima notifikasi cron job.",
+    "error": "Kami tidak dapat mengonfirmasi alamat email ini. Tautan konfirmasi tidak valid, kedaluwarsa, atau sudah digunakan."
   }
 }

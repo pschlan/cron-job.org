@@ -583,7 +583,13 @@
       "deleted": "Il canale di notifica è stato eliminato correttamente.",
       "cannotUseAccountEmail": "Questo indirizzo è già usato dal canale email dell'account.",
       "cannotEdit": "Il canale email dell'account non può essere modificato.",
-      "cannotDelete": "Il canale email dell'account non può essere eliminato."
+      "cannotDelete": "Il canale email dell'account non può essere eliminato.",
+      "pendingConfirmation": "Conferma in attesa",
+      "pendingConfirmationHint": "Controlla questa casella per il link di conferma. Se non hai ricevuto l'email, elimina questo canale e aggiungilo di nuovo.",
+      "cannotEditEmail": "I canali email non possono essere modificati. Elimina questo canale e aggiungine uno nuovo per cambiare l'indirizzo.",
+      "cannotEnableUnconfirmed": "Questo canale deve essere confermato prima di poterlo abilitare.",
+      "createdCheckInbox": "Abbiamo inviato un'email di conferma a {{email}}. Clicca il link nel messaggio per attivare questo canale.",
+      "createdCheckInboxTitle": "Conferma l'indirizzo email"
     }
   },
   "statistics": {
@@ -598,5 +604,9 @@
   "confirmEmailChange": {
     "success": "L'indirizzo email collegato al tuo account è stato aggiornato correttamente. Puoi ora entrare con il tuo nuovo indirizzo email.",
     "error": "Ci dispiace, ma non riusciamo a confermare il cambio di indirizzo email. Il link di conferma non è valido, è scaduto o è già stato utilizzato."
+  },
+  "confirmNotificationChannel": {
+    "success": "Questo indirizzo email è stato confermato e riceverà le notifiche dei cronjob.",
+    "error": "Impossibile confermare questo indirizzo email. Il link è non valido, scaduto o già utilizzato."
   }
 }

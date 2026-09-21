@@ -423,6 +423,12 @@ export function createNotificationChannel(type, destination, enabled, payload) {
   return performRequest('CreateNotificationChannel', { type, destination, enabled, payload });
 }
 
+export function confirmNotificationChannelEmail(token) {
+  return performRequest('ConfirmNotificationChannelEmail', {
+    token
+  }, false);
+}
+
 export function updateNotificationChannel(channelId, destination, enabled, payload) {
   return performRequest('UpdateNotificationChannel', { channelId, destination, enabled, payload });
 }

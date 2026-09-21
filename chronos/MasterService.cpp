@@ -115,7 +115,7 @@ public:
                 _return.notificationChannels.push_back(emailChannel);
             }
 
-            res = db->query("SELECT `channelid`,`type`,`destination`,`enabled`,`settings` FROM `notificationchannel` WHERE `userid`=%v",
+            res = db->query("SELECT `channelid`,`type`,`destination`,`enabled`,`settings` FROM `notificationchannel` WHERE `userid`=%v AND `confirmed`=1",
                 userId);
             while((row = res->fetchRow()))
             {

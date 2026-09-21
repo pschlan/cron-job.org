@@ -10,6 +10,16 @@ $lang = [
     . 'În cazul în care nu ai solicitat această modificare, te rugăm să NU dai clic pe legătura de confirmare și, în schimb, ignoră și șterge acest e-mail.' . "\n\n"
     . 'Toate cele bune,' . "\n\n"
     . '$projectName',
+  'confirmNotificationChannelEmail.footer' => 'Primești acest e-mail pentru că cineva a adăugat adresa ta ca canal de notificare. Dacă nu ai solicitat acest lucru, ignoră și șterge e-mailul.',
+  'confirmNotificationChannelEmail.subject' => '$projectName: Confirmă adresa de e-mail pentru notificări',
+  'confirmNotificationChannelEmail.body' =>
+      'Hi,' . "\n\n"
+    . 'cineva a solicitat trimiterea notificărilor pentru sarcinile $projectName către $email.' . "\n\n"
+    . 'Te rugăm să apeși pe următorul link pentru a confirma această adresă de e-mail.' . "\n\n"
+    . '{link|$confirmationLink|Confirmă adresa de e-mail}' . "\n\n"
+    . 'Dacă nu ai solicitat acest lucru, NU apăsa pe linkul de confirmare; ignoră și șterge acest e-mail.' . "\n\n"
+    . 'Cu stimă,' . "\n\n"
+    . '$projectName',
   'lostPasswordEmail.footer' => 'Primești acest e-mail pentru că cineva a încercat să reseteze parola contului tău. În cazul în care nu ai solicitat acest lucru, te rugăm să ignori și să ștergi acest e-mail.',
   'lostPasswordEmail.subject' => '$projectName: Resetare parolă',
   'lostPasswordEmail.body' =>

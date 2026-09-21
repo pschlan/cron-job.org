@@ -580,7 +580,13 @@
       "deleted": "The notification channel has been deleted successfully.",
       "cannotUseAccountEmail": "This address is already used by your account email channel.",
       "cannotEdit": "The account email channel cannot be edited.",
-      "cannotDelete": "The account email channel cannot be deleted."
+      "cannotDelete": "The account email channel cannot be deleted.",
+      "pendingConfirmation": "待确认",
+      "pendingConfirmationHint": "请检查此收件箱中的确认链接。如果没有收到邮件，请删除此渠道并重新添加。",
+      "cannotEditEmail": "无法编辑电子邮件渠道。请删除此渠道并添加新渠道以更改地址。",
+      "cannotEnableUnconfirmed": "必须先确认此渠道才能启用。",
+      "createdCheckInbox": "我们已向 {{email}} 发送确认邮件。请点击该邮件中的链接以激活此渠道。",
+      "createdCheckInboxTitle": "确认电子邮件地址"
     }
   },
   "statistics": {
@@ -595,5 +601,9 @@
   "confirmEmailChange": {
     "success": "您的帐号电子邮件地址修改成功，您现在可以使用新的电子邮件地址登录了。",
     "error": "很抱歉，我们无法确认您的电子邮件地址更改，请排查是否有链接无效、过期或已被使用的情况。"
+  },
+  "confirmNotificationChannel": {
+    "success": "此电子邮件地址已确认，现在将接收定时任务通知。",
+    "error": "无法确认此电子邮件地址。确认链接无效、已过期或已被使用。"
   }
 }

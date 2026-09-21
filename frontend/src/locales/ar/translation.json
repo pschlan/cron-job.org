@@ -607,7 +607,13 @@
       "deleted": "The notification channel has been deleted successfully.",
       "cannotUseAccountEmail": "This address is already used by your account email channel.",
       "cannotEdit": "The account email channel cannot be edited.",
-      "cannotDelete": "The account email channel cannot be deleted."
+      "cannotDelete": "The account email channel cannot be deleted.",
+      "pendingConfirmation": "بانتظار التأكيد",
+      "pendingConfirmationHint": "تحقق من صندوق الوارد هذا بحثًا عن رابط التأكيد. إذا لم تصلك الرسالة، احذف هذه القناة وأضفها مرة أخرى.",
+      "cannotEditEmail": "لا يمكن تعديل قنوات البريد الإلكتروني. احذف هذه القناة وأضف واحدة جديدة لتغيير العنوان.",
+      "cannotEnableUnconfirmed": "يجب تأكيد هذه القناة قبل تمكينها.",
+      "createdCheckInbox": "أرسلنا رسالة تأكيد إلى {{email}}. انقر على الرابط في تلك الرسالة لتفعيل هذه القناة.",
+      "createdCheckInboxTitle": "تأكيد عنوان البريد الإلكتروني"
     }
   },
   "statistics": {
@@ -622,5 +628,9 @@
   "confirmEmailChange": {
     "success": "تم تغيير البريد الإلكتروني بنجاح. يمكنك الآن تسجيل الدخول بالبريد الجديد.",
     "error": "عذرًا، لم نتمكن من تأكيد تغيير البريد الإلكتروني. الرابط غير صالح أو منتهي الصلاحية أو تم استخدامه بالفعل."
+  },
+  "confirmNotificationChannel": {
+    "success": "تم تأكيد عنوان البريد الإلكتروني هذا وسيتلقى الآن إشعارات المهام المجدولة.",
+    "error": "تعذر تأكيد عنوان البريد الإلكتروني هذا. رابط التأكيد غير صالح أو منتهٍ أو مستخدم مسبقًا."
   }
 }

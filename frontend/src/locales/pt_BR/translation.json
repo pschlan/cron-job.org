@@ -584,7 +584,13 @@
       "deleted": "The notification channel has been deleted successfully.",
       "cannotUseAccountEmail": "This address is already used by your account email channel.",
       "cannotEdit": "The account email channel cannot be edited.",
-      "cannotDelete": "The account email channel cannot be deleted."
+      "cannotDelete": "The account email channel cannot be deleted.",
+      "pendingConfirmation": "Confirmação pendente",
+      "pendingConfirmationHint": "Verifique esta caixa de entrada pelo link de confirmação. Se não recebeu o e-mail, exclua este canal e adicione-o novamente.",
+      "cannotEditEmail": "Canais de e-mail não podem ser editados. Exclua este canal e adicione um novo para alterar o endereço.",
+      "cannotEnableUnconfirmed": "Este canal precisa ser confirmado antes de poder ser ativado.",
+      "createdCheckInbox": "Enviamos um e-mail de confirmação para {{email}}. Clique no link da mensagem para ativar este canal.",
+      "createdCheckInboxTitle": "Confirmar o endereço de e-mail"
     }
   },
   "statistics": {
@@ -599,5 +605,9 @@
   "confirmEmailChange": {
     "success": "O endereço de e-mail da sua conta foi alterado com sucesso. Agora você pode fazer login com seu novo endereço de e-mail.",
     "error": "Desculpe, não conseguimos confirmar a alteração do seu endereço de e-mail. O link de confirmação é inválido, expirou ou já foi usado."
+  },
+  "confirmNotificationChannel": {
+    "success": "Este endereço de e-mail foi confirmado e agora receberá notificações de cron jobs.",
+    "error": "Não foi possível confirmar este endereço de e-mail. O link é inválido, expirou ou já foi usado."
   }
 }

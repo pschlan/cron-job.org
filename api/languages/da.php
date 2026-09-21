@@ -11,6 +11,16 @@ $lang = [
     . 'Venlig hilsen,' . "\n\n"
     . '$projectName',
 
+  'confirmNotificationChannelEmail.footer' => 'Du modtager denne e-mail, fordi nogen har tilføjet din e-mailadresse som notifikationskanal. Hvis du ikke har anmodet om dette, skal du ignorere og slette e-mailen.',
+  'confirmNotificationChannelEmail.subject' => '$projectName: Bekræft e-mailadresse til notifikationer',
+  'confirmNotificationChannelEmail.body' =>
+      'Hi,' . "\n\n"
+    . 'nogen har anmodet om at sende $projectName-cronjob-notifikationer til $email.' . "\n\n"
+    . 'Klik på følgende link for at bekræfte denne e-mailadresse.' . "\n\n"
+    . '{link|$confirmationLink|Bekræft e-mailadresse}' . "\n\n"
+    . 'Hvis du ikke har anmodet om dette, skal du IKKE klikke på bekræftelseslinket, men ignorere og slette denne e-mail.' . "\n\n"
+    . 'Venlig hilsen,' . "\n\n"
+    . '$projectName',
   'lostPasswordEmail.footer' => 'Du modtager denne e-mail, fordi nogen har forsøgt at nulstille adgangskoden til din konto. Hvis du ikke har anmodet om dette, skal du blot ignorere og slette denne e-mail.',
   'lostPasswordEmail.subject' => '$projectName: Nulstil adgangskode',
   'lostPasswordEmail.body' =>

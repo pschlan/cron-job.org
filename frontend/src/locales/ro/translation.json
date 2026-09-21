@@ -585,7 +585,13 @@
       "deleted": "The notification channel has been deleted successfully.",
       "cannotUseAccountEmail": "This address is already used by your account email channel.",
       "cannotEdit": "The account email channel cannot be edited.",
-      "cannotDelete": "The account email channel cannot be deleted."
+      "cannotDelete": "The account email channel cannot be deleted.",
+      "pendingConfirmation": "Confirmare în așteptare",
+      "pendingConfirmationHint": "Verifică această căsuță pentru linkul de confirmare. Dacă nu ai primit e-mailul, șterge canalul și adaugă-l din nou.",
+      "cannotEditEmail": "Canalele de e-mail nu pot fi editate. Șterge canalul și adaugă unul nou pentru a schimba adresa.",
+      "cannotEnableUnconfirmed": "Acest canal trebuie confirmat înainte de a putea fi activat.",
+      "createdCheckInbox": "Am trimis un e-mail de confirmare la {{email}}. Apasă pe linkul din mesaj pentru a activa canalul.",
+      "createdCheckInboxTitle": "Confirmă adresa de e-mail"
     }
   },
   "statistics": {
@@ -600,5 +606,9 @@
   "confirmEmailChange": {
     "success": "Adresa de email a contului tău a fost schimbată cu succes. Acum te poți autentifica cu noua adresă de email.",
     "error": "Ne pare rău, nu am putut confirma modificarea adresei tale de email. Legătura de confirmare nu este validă, a expirat sau a fost deja folosită."
+  },
+  "confirmNotificationChannel": {
+    "success": "Această adresă de e-mail a fost confirmată și va primi acum notificări pentru sarcini cron.",
+    "error": "Nu am putut confirma această adresă de e-mail. Linkul este invalid, a expirat sau a fost deja folosit."
   }
 }

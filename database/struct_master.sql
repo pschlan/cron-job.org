@@ -81,6 +81,7 @@ CREATE TABLE `notificationchannel`(
     `type` tinyint(4) NOT NULL DEFAULT 0,
     `destination` varchar(255) NOT NULL DEFAULT '',
     `enabled` tinyint(4) NOT NULL DEFAULT 0,
+    `confirmed` tinyint(4) NOT NULL DEFAULT 0,
     `settings` text NOT NULL,
     PRIMARY KEY(`channelid`),
     KEY(`userid`)

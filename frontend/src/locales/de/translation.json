@@ -677,7 +677,13 @@
       "deleted": "Der Benachrichtigungskanal wurde erfolgreich gelöscht.",
       "cannotUseAccountEmail": "Diese Adresse wird bereits vom Account-E-Mail-Kanal verwendet.",
       "cannotEdit": "Der Account-E-Mail-Kanal kann nicht bearbeitet werden.",
-      "cannotDelete": "Der Account-E-Mail-Kanal kann nicht gelöscht werden."
+      "cannotDelete": "Der Account-E-Mail-Kanal kann nicht gelöscht werden.",
+      "pendingConfirmation": "Bestätigung ausstehend",
+      "pendingConfirmationHint": "Prüfen Sie dieses Postfach auf einen Bestätigungslink. Wenn Sie die E-Mail nicht erhalten haben, löschen Sie diesen Kanal und fügen Sie ihn erneut hinzu.",
+      "cannotEditEmail": "E-Mail-Kanäle können nicht bearbeitet werden. Löschen Sie den Kanal und fügen Sie eine neue Adresse hinzu.",
+      "cannotEnableUnconfirmed": "Dieser Kanal muss bestätigt werden, bevor er aktiviert werden kann.",
+      "createdCheckInbox": "Wir haben eine Bestätigungs-E-Mail an {{email}} gesendet. Klicken Sie auf den Link in der Nachricht, um diesen Kanal zu aktivieren.",
+      "createdCheckInboxTitle": "E-Mail-Adresse bestätigen"
     }
   },
   "statistics": {
@@ -692,5 +698,9 @@
   "confirmEmailChange": {
     "success": "Die E-Mail-Adresse Ihres Accounts wurde erfolgreich geändert. Sie können sich nun mit der neuen E-Mail-Adresse einloggen.",
     "error": "Entschuldigung, aber wir konnten Ihre E-Mail-Adresse nicht ändern. Der Bestätigungslink ist entweder ungültig, abgelaufen oder wurde schon verwendet."
+  },
+  "confirmNotificationChannel": {
+    "success": "Diese E-Mail-Adresse wurde bestätigt und empfängt nun Cronjob-Benachrichtigungen.",
+    "error": "Entschuldigung, wir konnten diese E-Mail-Adresse nicht bestätigen. Der Bestätigungslink ist ungültig, abgelaufen oder wurde bereits verwendet."
   }
 }

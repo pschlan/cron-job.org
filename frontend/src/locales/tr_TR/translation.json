@@ -588,7 +588,13 @@
       "deleted": "The notification channel has been deleted successfully.",
       "cannotUseAccountEmail": "This address is already used by your account email channel.",
       "cannotEdit": "The account email channel cannot be edited.",
-      "cannotDelete": "The account email channel cannot be deleted."
+      "cannotDelete": "The account email channel cannot be deleted.",
+      "pendingConfirmation": "Onay bekleniyor",
+      "pendingConfirmationHint": "Onay bağlantısı için bu gelen kutusunu kontrol edin. E-postayı almadıysanız bu kanalı silip yeniden ekleyin.",
+      "cannotEditEmail": "E-posta kanalları düzenlenemez. Adresi değiştirmek için bu kanalı silip yeni bir tane ekleyin.",
+      "cannotEnableUnconfirmed": "Bu kanal etkinleştirilmeden önce onaylanmalıdır.",
+      "createdCheckInbox": "{{email}} adresine bir onay e-postası gönderdik. Kanalı etkinleştirmek için iletideki bağlantıya tıklayın.",
+      "createdCheckInboxTitle": "E-posta adresini onayla"
     }
   },
   "statistics": {
@@ -603,5 +609,9 @@
   "confirmEmailChange": {
     "success": "Hesap e-posta adresiniz başarıyla değiştirildi. Artık yeni e-posta adresinizle giriş yapabilirsiniz.",
     "error": "Üzgünüz, e-posta adresi değişikliğinizi onaylayamadık. Onay bağlantısı geçersiz, süresi dolmuş veya daha önce kullanılmış olabilir."
+  },
+  "confirmNotificationChannel": {
+    "success": "Bu e-posta adresi onaylandı ve artık cron işi bildirimleri alacak.",
+    "error": "Bu e-posta adresi onaylanamadı. Bağlantı geçersiz, süresi dolmuş veya zaten kullanılmış."
   }
 }
