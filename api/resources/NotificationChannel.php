@@ -324,8 +324,9 @@ class NotificationChannelManager {
     if (!is_string($payload) || strlen($payload) > NotificationChannel::MAX_PAYLOAD_BYTES) {
       throw new InvalidArgumentsException();
     }
-    json_decode($payload);
-    if (json_last_error() !== JSON_ERROR_NONE) {
+    try {
+      json_decode($payload, false, 512, JSON_THROW_ON_ERROR);
+    } catch (JsonException $ex) {
       throw new InvalidArgumentsException();
     }
     return $payload;
