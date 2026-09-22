@@ -122,7 +122,7 @@ class PublicStatusPageManager {
     ];
   }
 
-  private static function parseStatusPageSubdomain($domain) {
+  public static function parseStatusPageSubdomain($domain) {
     global $config;
     if (strlen($domain) > strlen($config['statusPageDomain'])
         && strcasecmp(substr($domain, -(strlen($config['statusPageDomain']) + 1)), '.' . $config['statusPageDomain']) === 0) {

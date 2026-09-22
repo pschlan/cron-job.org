@@ -337,6 +337,9 @@ class StatusPageManager {
 
   public function createStatusPageMonitor($statusPageId, $jobId, $title) {
     $statusPage = $this->getStatusPage($statusPageId);
+    if ($statusPage === false) {
+      throw new InvalidArgumentsException();
+    }
     if (count($statusPage->monitors) + 1 > $statusPage->maxMonitors) {
       throw new QuotaExceededException();
     }
@@ -386,6 +389,9 @@ class StatusPageManager {
 
   public function deleteStatusPage($statusPageId, $force = false) {
     $statusPage = $this->getStatusPage($statusPageId);
+    if ($statusPage === false) {
+      throw new InvalidArgumentsException();
+    }
     if ($statusPage->enabled && $force !== true) {
       throw new StatusPagePublishedException();
     }
@@ -628,6 +634,9 @@ class StatusPageManager {
     }
 
     $statusPage = $this->getStatusPage($statusPageId);
+    if ($statusPage === false) {
+      throw new InvalidArgumentsException();
+    }
     if (count($statusPage->domains) + 1 > $statusPage->maxDomains) {
       throw new QuotaExceededException();
     }
