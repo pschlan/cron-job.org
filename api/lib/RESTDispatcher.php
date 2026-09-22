@@ -124,7 +124,8 @@ class RESTDispatcher extends AbstractDispatcher {
         $matches = null;
         if (strcasecmp($_SERVER['REQUEST_METHOD'], $uriHandler->method) === 0 && preg_match('@^' . $uriHandler->pattern . '$@', $uri, $matches)) {
           if (!isset($this->handlers[$uriHandler->handler])) {
-            throw new InternalErrorAPIException('URI handler not found: ' . $uri->handler);
+            error_log('URI handler not found: ' . $uriHandler->handler);
+            throw new InternalErrorAPIException('URI handler not found: ' . $uriHandler->handler);
           }
           $handler = ($this->handlers[$uriHandler->handler])();
 
