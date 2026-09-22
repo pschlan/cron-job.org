@@ -223,6 +223,16 @@ class UserManager {
     return $result;
   }
 
+  public function getPaddleCustomerId() {
+    $stmt = Database::get()->prepare('SELECT `paddle_customer_id` AS `paddleCustomerId` FROM `user_paddle_mapping` WHERE `userid`=:userId');
+    $stmt->execute([':userId' => $this->authToken->userId]);
+    $row = $stmt->fetch(PDO::FETCH_OBJ);
+    if ($row) {
+      return $row->paddleCustomerId;
+    }
+    return null;
+  }
+
   public function updateProfile($profile) {
     Database::get()
       ->prepare('UPDATE `user` SET `firstname`=:firstName, `lastname`=:lastName, `timezone`=:timezone WHERE `userid`=:userId')

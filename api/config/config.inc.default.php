@@ -113,3 +113,20 @@ $config = array(
   //! @note Lifetime for status badges in redis cache.
   'statusBadgeCacheTimeSeconds'     => 60
 );
+
+//! @note If you want to accept Paddle subscriptions, define paddleConfig here.
+//!       webhookKey is used by paddleWebhook.php; products/fallbackUserGroupId
+//!       are used when processing subscription events.
+//$paddleConfig = array(
+//  'apiEndpoint'         => 'https://api.paddle.com/',
+//  'apiKey'              => 'PLACE_PADDLE_API_KEY_HERE',
+//  'portalApiKey'        => 'PLACE_PADDLE_PORTAL_API_KEY_HERE',
+//  'webhookKey'          => 'PLACE_PADDLE_WEBHOOK_KEY_HERE',
+//  'fallbackUserGroupId' => 1,
+//  'products'            => array(
+//    'sustain10' => array(
+//      'priceId'     => 'pri_PLACE_PRICE_ID_HERE',
+//      'userGroupId' => 2
+//    )
+//  )
+//);

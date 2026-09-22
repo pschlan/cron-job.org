@@ -261,6 +261,13 @@ CREATE TABLE `user_paddle_subscription` (
   PRIMARY KEY (`userid`)
 ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+CREATE TABLE `user_paddle_mapping` (
+  `userid` int(11) NOT NULL DEFAULT '0',
+  `paddle_customer_id` varchar(255) NOT NULL DEFAULT '',
+  PRIMARY KEY (`userid`),
+  UNIQUE KEY `paddle_customer_id` (`paddle_customer_id`)
+) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
 CREATE TABLE `folder` (
   `folderid` int(11) NOT NULL AUTO_INCREMENT,
   `userid` int(11) NOT NULL,
