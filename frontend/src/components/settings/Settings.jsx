@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Button, ButtonGroup, CircularProgress, Grid, InputLabel, LinearProgress, makeStyles, MenuItem, Paper, Select, TableContainer, Typography } from '@material-ui/core';
 import { grey } from '@material-ui/core/colors';
 import { useTranslation } from 'react-i18next';
-import { createBillingPortalSession, getAPIKeys, getMFADevices, getSubscriptionLink, getUserProfile, updateUserProfile } from '../../utils/API';
+import { getAPIKeys, getMFADevices, getSubscriptionLink, getUserProfile, updateUserProfile } from '../../utils/API';
 import useTimezones from '../../hooks/useTimezones';
 import useUserProfile from '../../hooks/useUserProfile';
 import Breadcrumbs from '../misc/Breadcrumbs';
@@ -164,14 +164,7 @@ export default function Settings() {
   function manageSubscription() {
     setIsLoadingManageSubscription(true);
 
-    if (userProfile.userSubscription.type === 'stripe') {
-      createBillingPortalSession()
-        .then(respone => window.location.href = respone.url)
-        .catch(() => {
-          enqueueSnackbar(t('settings.manageSubscriptionFailed'), { variant: 'error' });
-          setIsLoadingManageSubscription(false);
-        });
-    } else if (userProfile.userSubscription.type === 'paddle') {
+    if (userProfile.userSubscription.type === 'paddle') {
       const wnd = window.open('', '_blank');
 
       getSubscriptionLink('manage')
@@ -387,17 +380,6 @@ export default function Settings() {
             </Grid>
             <Grid item sm={6} xs={12} align='right'>
               <ButtonGroup variant='contained' size='small'>
-                {userProfile.userSubscription && userProfile.userSubscription.type==='stripe' && userProfile.userSubscription.status !== SubscriptionStatus.EXPIRING &&
-                  <Button
-                    size='small'
-                    variant='contained'
-                    startIcon={isLoadingManageSubscription ? <CircularProgress size='small' /> : <ManageSubscriptionIcon />}
-                    onClick={manageSubscription}
-                    disabled={isLoadingManageSubscription}
-                    float='right'
-                    >
-                    {t('settings.manageSubscription')}
-                  </Button>}
                 {userProfile.userSubscription && userProfile.userSubscription.type==='paddle' &&
                     <Button
                       size='small'

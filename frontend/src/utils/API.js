@@ -369,10 +369,6 @@ export function deleteJobTestRun(handle) {
   });
 }
 
-export function createBillingPortalSession() {
-  return performRequest('CreateBillingPortalSession', {});
-}
-
 export function getSubscriptionLink(type) {
   return performRequest('GetSubscriptionLink', { type });
 }

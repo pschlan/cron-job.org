@@ -218,35 +218,9 @@ class UserManager {
 
     if ($result) {
       $result->type = 'paddle';
-    } else {
-      $stmt = Database::get()->prepare('SELECT `product_id` AS `productId`, `status`, `current_period_start` AS `currentPeriodStart`, `current_period_end` AS `currentPeriodEnd`, `cancel_at` AS `cancelAt`, `subscription_id` AS `subscriptionId` FROM `user_subscription` WHERE `userid`=:userId');
-      $stmt->setFetchMode(PDO::FETCH_CLASS, UserSubscription::class);
-      $stmt->execute(array(':userId' => $this->authToken->userId));
-      $result = $stmt->fetch();
-
-      if ($result) {
-        $result->type = 'stripe';
-
-        $stmt = Database::get()->prepare('SELECT `date_grace_period_end` FROM `deferred_stripe_downgrade` WHERE `userid`=:userId AND `date_grace_period_end`>=UNIX_TIMESTAMP()');
-        $stmt->execute(array(':userId' => $this->authToken->userId));
-        while ($deferredResult = $stmt->fetch()) {
-            $result->isOnGracePeriod = true;
-            $result->gracePeriodEndsAt = intval($deferredResult['date_grace_period_end']);
-        }
-      }
     }
 
     return $result;
-  }
-
-  public function getStripeCustomerId() {
-    $stmt = Database::get()->prepare('SELECT `stripe_customer_id` AS `stripeCustomerId` FROM `user_stripe_mapping` WHERE `userid`=:userId');
-    $stmt->execute([':userId' => $this->authToken->userId]);
-    $row = $stmt->fetch(PDO::FETCH_OBJ);
-    if ($row) {
-      return $row->stripeCustomerId;
-    }
-    return null;
   }
 
   public function updateProfile($profile) {

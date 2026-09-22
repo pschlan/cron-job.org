@@ -2,6 +2,7 @@
 require_once('lib/Task.php');
 require_once('lib/Database.php');
 require_once('resources/Node.php');
+require_once('resources/Statistics.php');
 
 class UpdateNodeLoad implements Task {
   const TIME_ONE_DAY = 86400;

@@ -238,13 +238,6 @@ CREATE TABLE `statuspageincident` (
   KEY `statuspageid` (`statuspageid`)
 ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE `user_stripe_mapping` (
-  `userid` int(11) NOT NULL DEFAULT '0',
-  `stripe_customer_id` varchar(255) NOT NULL DEFAULT '',
-  PRIMARY KEY (`userid`),
-  UNIQUE KEY `stripe_customer_id` (`stripe_customer_id`)
-) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
 CREATE TABLE `user_subscription` (
   `userid` int(11) NOT NULL DEFAULT '0',
   `product_id` varchar(64) NOT NULL DEFAULT '',
