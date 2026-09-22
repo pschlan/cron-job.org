@@ -18,7 +18,7 @@ Database::initialize(
   $config['db']['database']
 );
 
-if (count($_SERVER['argv']) != 2) {
+if (count($_SERVER['argv']) < 2) {
   printf("Usage: %s <task-name>\n", $_SERVER['argv'][0]);
   exit(1);
 }
