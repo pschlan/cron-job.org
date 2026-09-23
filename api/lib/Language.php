@@ -9,7 +9,7 @@ class Language {
 
     foreach ($config['languages'] as $langCode) {
       $lang = [];
-      include('./languages/' . preg_replace('/[^a-z]/', '', $langCode) . '.php');
+      include('./languages/' . preg_replace('/[^a-zA-Z_]/', '', $langCode) . '.php');
       self::$lang[$langCode] = $lang;
     }
   }
