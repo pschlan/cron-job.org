@@ -163,6 +163,13 @@
   "events": {
     "cronjobExecution": "Ejecución de cronjob: {{statusText}}",
     "notificationSent": "Notificación enviada: {{notificationType}}",
+    "notificationFailed": "Notificación fallida: {{notificationType}}",
+    "channelDestination": "{{channel}} · {{destination}}",
+    "channels": {
+      "email": "Correo",
+      "webhook": "Webhook",
+      "unknown": "Canal"
+    },
     "notifications": {
       "FAILURE": "Ejecución fallida",
       "SUCCESS": "Ejecución exitosa",
@@ -504,6 +511,7 @@
       "maxFailures": "Fallos máximos antes de deshabilitar un job",
       "maxStatusPages": "Máx. páginas/monitores de estado",
       "maxApiCallsPerDay": "Máx. llamadas API por día",
+      "maxNotificationChannels": "Máx. canales de notificación",
       "price": "Precio",
       "free": "gratis",
       "subscriptionPrices": "5, 10 o 20 EUR al mes \no 12, 24 o 36 EUR al año (a tu elección)",
@@ -576,6 +584,45 @@
       "editKey": "Editar clave API: {{title}}",
       "saveError": "No se pudieron guardar los cambios. Por favor, inténtalo más tarde.",
       "saved": "Tus cambios en la clave API se han guardado correctamente."
+    },
+    "notificationChannels": {
+      "channels": "Canales de notificación",
+      "add": "Añadir canal",
+      "noChannels": "Aún no tienes canales de notificación adicionales.",
+      "accountEmail": "Correo de la cuenta",
+      "type": "Tipo",
+      "types": {
+        "email": "Correo",
+        "webhook": "Webhook"
+      },
+      "destination": "Destino",
+      "emailAddress": "Dirección de correo",
+      "webhookUrl": "URL del webhook",
+      "payload": "Carga JSON",
+      "payloadHelp": "Los marcadores en los valores de cadena JSON se sustituyen al enviar la notificación.",
+      "payloadInvalid": "Introduce un JSON válido.",
+      "enabled": "Activado",
+      "statusEnabled": "Activado",
+      "statusDisabled": "Desactivado",
+      "addText": "Las notificaciones de tus cronjobs se envían a todos los canales activados. Puedes añadir direcciones de correo o URLs de webhook adicionales.",
+      "createError": "No hemos podido crear el canal de notificación. Inténtalo de nuevo más tarde.",
+      "created": "El canal de notificación se ha creado correctamente.",
+      "editChannel": "Editar canal de notificación",
+      "saveError": "No hemos podido guardar los cambios. Inténtalo de nuevo más tarde.",
+      "saved": "Los cambios del canal de notificación se han guardado correctamente.",
+      "deleteChannel": "Eliminar canal de notificación",
+      "confirmDelete": "¿Seguro que quieres eliminar este canal de notificación? Dejará de recibir notificaciones.",
+      "deleteError": "No hemos podido eliminar el canal de notificación. Inténtalo de nuevo más tarde.",
+      "deleted": "El canal de notificación se ha eliminado correctamente.",
+      "cannotUseAccountEmail": "Esta dirección ya la usa el canal de correo de la cuenta.",
+      "cannotEdit": "El canal de correo de la cuenta no se puede editar.",
+      "cannotDelete": "El canal de correo de la cuenta no se puede eliminar.",
+      "pendingConfirmation": "Pendiente de confirmación",
+      "pendingConfirmationHint": "Revisa esta bandeja de entrada para el enlace de confirmación. Si no recibiste el correo, elimina este canal y añádelo de nuevo.",
+      "cannotEditEmail": "Los canales de correo no se pueden editar. Elimina este canal y añade uno nuevo para cambiar la dirección.",
+      "cannotEnableUnconfirmed": "Este canal debe confirmarse antes de poder activarlo.",
+      "createdCheckInbox": "Hemos enviado un correo de confirmación a {{email}}. Haz clic en el enlace de ese mensaje para activar este canal.",
+      "createdCheckInboxTitle": "Confirmar la dirección de correo"
     }
   },
   "statistics": {
@@ -590,5 +637,9 @@
   "confirmEmailChange": {
     "success": "La dirección de correo de tu cuenta ha sido cambiada correctamente. Ahora puedes iniciar sesión con tu nuevo correo.",
     "error": "No se pudo confirmar el cambio de correo. El enlace de confirmación es inválido, ha expirado o ya se usó."
+  },
+  "confirmNotificationChannel": {
+    "success": "Esta dirección de correo ha sido confirmada y ahora recibirá notificaciones de cron jobs.",
+    "error": "No pudimos confirmar esta dirección de correo. El enlace es inválido, ha caducado o ya se ha usado."
   }
 }

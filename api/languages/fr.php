@@ -10,6 +10,16 @@ $lang = [
         . 'Si vous n\'avez pas demandé ce changement, veuillez NE PAS cliquer sur le lien de confirmation et ignorer et supprimer cet e-mail.' . "\n\n"
         . 'Meilleures salutations,' . "\n\n"
         . '$projectName',
+    'confirmNotificationChannelEmail.footer' => 'Vous recevez cet e-mail car quelqu\'un a ajouté votre adresse comme canal de notification. Si vous ne l\'avez pas demandé, veuillez ignorer et supprimer cet e-mail.',
+    'confirmNotificationChannelEmail.subject' => '$projectName : Confirmer l\'adresse e-mail de notification',
+    'confirmNotificationChannelEmail.body' =>
+        'Bonjour,' . "\n\n"
+      . 'quelqu\'un a demandé l\'envoi des notifications de tâches $projectName à $email.' . "\n\n"
+      . 'Veuillez cliquer sur le lien suivant pour confirmer cette adresse e-mail.' . "\n\n"
+      . '{link|$confirmationLink|Confirmer l\'adresse e-mail}' . "\n\n"
+      . 'Si vous n\'avez pas demandé cela, ne cliquez PAS sur le lien de confirmation et ignorez et supprimez cet e-mail.' . "\n\n"
+      . 'Cordialement,' . "\n\n"
+      . '$projectName',
     'lostPasswordEmail.footer' => 'Vous recevez cet e-mail car quelqu\'un a essayé de réinitialiser le mot de passe de votre compte. Si vous ne l\'avez pas demandé, veuillez ignorer et supprimer cet e-mail.',
     'lostPasswordEmail.subject' => '$projectName: Réinitialiser le mot de passe',
     'lostPasswordEmail.body' =>

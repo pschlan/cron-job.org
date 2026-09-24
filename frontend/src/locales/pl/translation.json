@@ -156,6 +156,13 @@
   "events": {
     "cronjobExecution": "Wykonanie cronjobu: {{statusText}}",
     "notificationSent": "Wysłano powiadomienie: {{notificationType}}",
+    "notificationFailed": "Nie udało się wysłać powiadomienia: {{notificationType}}",
+    "channelDestination": "{{channel}} · {{destination}}",
+    "channels": {
+      "email": "E-mail",
+      "webhook": "Webhook",
+      "unknown": "Kanał"
+    },
     "notifications": {
       "FAILURE": "Wykonanie nieudane",
       "SUCCESS": "Wykonanie udane",
@@ -473,6 +480,7 @@
       "maxFailures": "Maksymalna liczba awarii przed wyłączeniem zadania",
       "maxStatusPages": "Maksymalna liczba stron statusu / monitorów",
       "maxApiCallsPerDay": "Maksymalna liczba wywołań API dziennie",
+      "maxNotificationChannels": "Maksymalna liczba kanałów powiadomień",
       "price": "Cena",
       "free": "bezpłatne",
       "subscriptionPrices": "5, 10 lub 20 EUR miesięcznie \nlub 12, 24 lub 36 EUR rocznie (według własnego wyboru)",
@@ -545,6 +553,45 @@
       "editKey": "Edytuj klucz API: {{title}}",
       "saveError": "Przepraszamy, nie udało się zapisać zmian w kluczu API. Spróbuj ponownie później.",
       "saved": "Twoje zmiany w kluczu API zostały pomyślnie zapisane."
+    },
+    "notificationChannels": {
+      "channels": "Notification Channels",
+      "add": "Add Channel",
+      "noChannels": "You don't have any additional notification channels yet.",
+      "accountEmail": "Account email",
+      "type": "Type",
+      "types": {
+        "email": "Email",
+        "webhook": "Webhook"
+      },
+      "destination": "Destination",
+      "emailAddress": "Email address",
+      "webhookUrl": "Webhook URL",
+      "payload": "JSON payload",
+      "payloadHelp": "Placeholders in JSON string values are replaced when the notification is sent.",
+      "payloadInvalid": "Please enter valid JSON.",
+      "enabled": "Enabled",
+      "statusEnabled": "Enabled",
+      "statusDisabled": "Disabled",
+      "addText": "Notifications for your cronjobs are sent to all enabled channels. You can add extra email addresses or webhook URLs.",
+      "createError": "Sorry, we could not create the notification channel. Please try again later.",
+      "created": "The notification channel has been created successfully.",
+      "editChannel": "Edit notification channel",
+      "saveError": "Sorry, we could not save your changes. Please try again later.",
+      "saved": "Your changes to the notification channel have been saved successfully.",
+      "deleteChannel": "Delete notification channel",
+      "confirmDelete": "Do you really want to delete this notification channel? It will no longer receive notifications.",
+      "deleteError": "Sorry, we could not delete the notification channel. Please try again later.",
+      "deleted": "The notification channel has been deleted successfully.",
+      "cannotUseAccountEmail": "This address is already used by your account email channel.",
+      "cannotEdit": "The account email channel cannot be edited.",
+      "cannotDelete": "The account email channel cannot be deleted.",
+      "pendingConfirmation": "Oczekuje na potwierdzenie",
+      "pendingConfirmationHint": "Sprawdź skrzynkę pod kątem linku potwierdzającego. Jeśli nie dostałeś e-maila, usuń ten kanał i dodaj go ponownie.",
+      "cannotEditEmail": "Kanałów e-mail nie można edytować. Usuń ten kanał i dodaj nowy, aby zmienić adres.",
+      "cannotEnableUnconfirmed": "Ten kanał musi zostać potwierdzony, zanim będzie można go włączyć.",
+      "createdCheckInbox": "Wysłaliśmy e-mail potwierdzający na {{email}}. Kliknij link w wiadomości, aby aktywować ten kanał.",
+      "createdCheckInboxTitle": "Potwierdź adres e-mail"
     }
   },
   "statistics": {
@@ -559,5 +606,9 @@
   "confirmEmailChange": {
     "success": "Adres e-mail twojego konta został pomyślnie zmieniony. Możesz teraz zalogować się za pomocą nowego adresu e-mail.",
     "error": "Przepraszamy, nie udało się potwierdzić zmiany adresu e-mail. Link potwierdzający jest nieprawidłowy, wygasły lub został już użyty."
+  },
+  "confirmNotificationChannel": {
+    "success": "Ten adres e-mail został potwierdzony i będzie otrzymywał powiadomienia o zadaniach cron.",
+    "error": "Nie udało się potwierdzić tego adresu e-mail. Link jest nieprawidłowy, wygasł lub został już użyty."
   }
 }

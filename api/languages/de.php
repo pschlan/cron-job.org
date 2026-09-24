@@ -10,6 +10,16 @@ $lang = [
     . 'Falls Sie diese Änderung nicht selbst veranlasst haben, klicken Sie den Link bitte NICHT, sondern ignorieren und löschen Sie diese E-Mail.' . "\n\n"
     . 'Viele Grüße' . "\n\n"
     . '$projectName',
+  'confirmNotificationChannelEmail.footer' => 'Sie erhalten diese E-Mail, weil jemand Ihre E-Mail-Adresse als Benachrichtigungskanal hinterlegt hat. Falls Sie dies nicht selbst veranlasst haben, ignorieren und löschen Sie die E-Mail bitte.',
+  'confirmNotificationChannelEmail.subject' => '$projectName: E-Mail-Adresse für Benachrichtigungen bestätigen',
+  'confirmNotificationChannelEmail.body' =>
+      'Hi,' . "\n\n"
+    . 'jemand hat angefordert, $projectName-Cronjob-Benachrichtigungen an $email zu senden.' . "\n\n"
+    . 'Bitte klicken Sie auf den folgenden Link, um diese E-Mail-Adresse zu bestätigen.' . "\n\n"
+    . '{link|$confirmationLink|E-Mail-Adresse bestätigen}' . "\n\n"
+    . 'Falls Sie dies nicht selbst veranlasst haben, klicken Sie den Link bitte NICHT, sondern ignorieren und löschen Sie diese E-Mail.' . "\n\n"
+    . 'Viele Grüße' . "\n\n"
+    . '$projectName',
   'lostPasswordEmail.footer' => 'Sie erhalten diese E-Mail, weil jemand versucht hat, das Passwort Ihres Accounts zurückzusetzen. Falls Sie dies nicht selbst veranlasst haben, ignorieren und löschen Sie die E-Mail bitte.',
   'lostPasswordEmail.subject' => '$projectName: Password zurücksetzen',
   'lostPasswordEmail.body' =>

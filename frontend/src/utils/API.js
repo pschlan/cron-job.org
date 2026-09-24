@@ -415,6 +415,32 @@ export function updateAPIKey(apiKeyId, title, ipAddresses) {
   return performRequest('UpdateAPIKey', { apiKeyId, title, limitIPs });
 }
 
+export function getNotificationChannels() {
+  return performRequest('GetNotificationChannels', {});
+}
+
+export function createNotificationChannel(type, destination, enabled, payload) {
+  return performRequest('CreateNotificationChannel', { type, destination, enabled, payload });
+}
+
+export function confirmNotificationChannelEmail(token) {
+  return performRequest('ConfirmNotificationChannelEmail', {
+    token
+  }, false);
+}
+
+export function updateNotificationChannel(channelId, destination, enabled, payload) {
+  return performRequest('UpdateNotificationChannel', { channelId, destination, enabled, payload });
+}
+
+export function setNotificationChannelEnabled(channelId, enabled) {
+  return performRequest('SetNotificationChannelEnabled', { channelId, enabled });
+}
+
+export function deleteNotificationChannel(channelId) {
+  return performRequest('DeleteNotificationChannel', { channelId });
+}
+
 export function reenableUserNotifications() {
   return performRequest('ReenableUserNotifications', {});
 }

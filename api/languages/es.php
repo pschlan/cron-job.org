@@ -10,6 +10,16 @@ $lang = [
     . 'Si no solicitaste este cambio, NO hagas clic en el enlace y simplemente ignora y elimina este correo.' . "\n\n"
     . 'Saludos,' . "\n\n"
     . '$projectName',
+  'confirmNotificationChannelEmail.footer' => 'Has recibido este correo porque alguien añadió tu dirección como canal de notificación. Si no lo solicitaste, ignora y elimina este correo.',
+  'confirmNotificationChannelEmail.subject' => '$projectName: Confirmar dirección de correo de notificación',
+  'confirmNotificationChannelEmail.body' =>
+      'Hi,' . "\n\n"
+    . 'alguien ha solicitado enviar notificaciones de cron jobs de $projectName a $email.' . "\n\n"
+    . 'Haz clic en el siguiente enlace para confirmar esta dirección de correo.' . "\n\n"
+    . '{link|$confirmationLink|Confirmar dirección de correo}' . "\n\n"
+    . 'Si no solicitaste esto, NO hagas clic en el enlace de confirmación; ignora y elimina este correo.' . "\n\n"
+    . 'Un saludo,' . "\n\n"
+    . '$projectName',
   'lostPasswordEmail.footer' => 'Has recibido este correo porque alguien intentó restablecer la contraseña de tu cuenta. Si no solicitaste esto, ignora y elimina este correo.',
   'lostPasswordEmail.subject' => '$projectName: Restablecer contraseña',
   'lostPasswordEmail.body' =>

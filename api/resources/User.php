@@ -32,11 +32,13 @@ class UserProfile {
   public $signupDate;
   public $userGroupId;
   public $notificationsAutoDisabled;
+  public $emailNotificationsEnabled;
 
   function __construct() {
     $this->signupDate = intval($this->signupDate);
     $this->userGroupId = intval($this->userGroupId);
-    $this->notificationsAutoDisabled = boolval($this->notificationsAutoDisabled);
+    $this->notificationsAutoDisabled = intval($this->notificationsAutoDisabled) != 0;
+    $this->emailNotificationsEnabled = intval($this->emailNotificationsEnabled) != 0;
   }
 }
 
@@ -50,6 +52,7 @@ class UserGroup {
   public $maxFailures;
   public $apiRequestsPerDay;
   public $maxApiKeys;
+  public $maxNotificationChannels;
   public $enableWAFValidator;
 
   private $title;
@@ -64,6 +67,7 @@ class UserGroup {
     $this->maxFailures = intval($this->maxFailures);
     $this->apiRequestsPerDay = intval($this->apiRequestsPerDay);
     $this->maxApiKeys = intval($this->maxApiKeys);
+    $this->maxNotificationChannels = intval($this->maxNotificationChannels);
     $this->enableWAFValidator = intval($this->enableWAFValidator) != 0;
   }
 
@@ -204,7 +208,7 @@ class UserManager {
   }
 
   public function getProfile() {
-    $stmt = Database::get()->prepare('SELECT `firstname` AS `firstName`, `lastname` AS `lastName`, `timezone`, `email`, `signup_date` AS `signupDate`, `newsletter_subscribe` AS `newsletterSubscribe`, `usergroupid` AS `userGroupId`, `notifications_auto_disabled` AS `notificationsAutoDisabled` FROM `user` WHERE `userid`=:userId');
+    $stmt = Database::get()->prepare('SELECT `firstname` AS `firstName`, `lastname` AS `lastName`, `timezone`, `email`, `signup_date` AS `signupDate`, `newsletter_subscribe` AS `newsletterSubscribe`, `usergroupid` AS `userGroupId`, `notifications_auto_disabled` AS `notificationsAutoDisabled`, `email_notifications_enabled` AS `emailNotificationsEnabled` FROM `user` WHERE `userid`=:userId');
     $stmt->setFetchMode(PDO::FETCH_CLASS, UserProfile::class);
     $stmt->execute(array(':userId' => $this->authToken->userId));
     return $stmt->fetch();
@@ -249,7 +253,7 @@ class UserManager {
   }
 
   public function getGroup() {
-    $stmt = Database::get()->prepare('SELECT `usergroup`.`usergroupid` AS `userGroupId`, `usergroup`.`title`, `usergroup`.`max_status_pages` AS `maxStatusPages`, `usergroup`.`max_status_page_monitors` AS `maxStatusPageMonitors`, `usergroup`.`max_status_page_domains` AS `maxStatusPageDomains`, `usergroup`.`request_timeout` AS `requestTimeout`, `usergroup`.`request_max_size` AS `requestMaxSize`, `usergroup`.`max_failures` AS `maxFailures`, `usergroup`.`api_requests_per_day` AS `apiRequestsPerDay`, `usergroup`.`max_api_keys` AS `maxApiKeys`, `usergroup`.`enable_waf_validator` AS `enableWAFValidator` '
+    $stmt = Database::get()->prepare('SELECT `usergroup`.`usergroupid` AS `userGroupId`, `usergroup`.`title`, `usergroup`.`max_status_pages` AS `maxStatusPages`, `usergroup`.`max_status_page_monitors` AS `maxStatusPageMonitors`, `usergroup`.`max_status_page_domains` AS `maxStatusPageDomains`, `usergroup`.`request_timeout` AS `requestTimeout`, `usergroup`.`request_max_size` AS `requestMaxSize`, `usergroup`.`max_failures` AS `maxFailures`, `usergroup`.`api_requests_per_day` AS `apiRequestsPerDay`, `usergroup`.`max_api_keys` AS `maxApiKeys`, `usergroup`.`max_notification_channels` AS `maxNotificationChannels`, `usergroup`.`enable_waf_validator` AS `enableWAFValidator` '
       . 'FROM `usergroup` '
       . 'INNER JOIN `user` ON `usergroup`.`usergroupid`=`user`.`usergroupid` '
       . 'WHERE `user`.`userid`=:userId');
@@ -717,6 +721,11 @@ class UserManager {
     ]);
 
     $stmt = Database::get()->prepare('DELETE FROM `apikey` WHERE `userid`=:userId');
+    $stmt->execute([
+      ':userId'             => $this->authToken->userId
+    ]);
+
+    $stmt = Database::get()->prepare('DELETE FROM `notificationchannel` WHERE `userid`=:userId');
     $stmt->execute([
       ':userId'             => $this->authToken->userId
     ]);

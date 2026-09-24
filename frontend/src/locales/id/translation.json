@@ -163,6 +163,13 @@
   "events": {
     "cronjobExecution": "Eksekusi Cronjob: {{statusText}}",
     "notificationSent": "Notifikasi terkirim: {{notificationType}}",
+    "notificationFailed": "Notifikasi gagal: {{notificationType}}",
+    "channelDestination": "{{channel}} · {{destination}}",
+    "channels": {
+      "email": "Email",
+      "webhook": "Webhook",
+      "unknown": "Kanal"
+    },
     "notifications": {
       "FAILURE": "Eksekusi gagal",
       "SUCCESS": "Eksekusi berhasil",
@@ -504,6 +511,7 @@
       "maxFailures": "Kegagalan maks sebelum menonaktifkan job",
       "maxStatusPages": "Halaman status / monitor maks",
       "maxApiCallsPerDay": "Panggilan API maks per hari",
+      "maxNotificationChannels": "Jumlah kanal notifikasi maks",
       "price": "Harga",
       "free": "gratis",
       "subscriptionPrices": "5, 10, atau 20 EUR sebulan \natau 12, 24, atau 36 EUR setahun (sesuai pilihan Anda)",
@@ -576,6 +584,45 @@
       "editKey": "Ubah API Key: {{title}}",
       "saveError": "Maaf, kami tidak dapat menyimpan perubahan Anda. Silakan coba lagi nanti.",
       "saved": "Perubahan Anda pada API Key telah berhasil disimpan."
+    },
+    "notificationChannels": {
+      "channels": "Notification Channels",
+      "add": "Add Channel",
+      "noChannels": "You don't have any additional notification channels yet.",
+      "accountEmail": "Account email",
+      "type": "Type",
+      "types": {
+        "email": "Email",
+        "webhook": "Webhook"
+      },
+      "destination": "Destination",
+      "emailAddress": "Email address",
+      "webhookUrl": "Webhook URL",
+      "payload": "JSON payload",
+      "payloadHelp": "Placeholders in JSON string values are replaced when the notification is sent.",
+      "payloadInvalid": "Please enter valid JSON.",
+      "enabled": "Enabled",
+      "statusEnabled": "Enabled",
+      "statusDisabled": "Disabled",
+      "addText": "Notifications for your cronjobs are sent to all enabled channels. You can add extra email addresses or webhook URLs.",
+      "createError": "Sorry, we could not create the notification channel. Please try again later.",
+      "created": "The notification channel has been created successfully.",
+      "editChannel": "Edit notification channel",
+      "saveError": "Sorry, we could not save your changes. Please try again later.",
+      "saved": "Your changes to the notification channel have been saved successfully.",
+      "deleteChannel": "Delete notification channel",
+      "confirmDelete": "Do you really want to delete this notification channel? It will no longer receive notifications.",
+      "deleteError": "Sorry, we could not delete the notification channel. Please try again later.",
+      "deleted": "The notification channel has been deleted successfully.",
+      "cannotUseAccountEmail": "This address is already used by your account email channel.",
+      "cannotEdit": "The account email channel cannot be edited.",
+      "cannotDelete": "The account email channel cannot be deleted.",
+      "pendingConfirmation": "Menunggu konfirmasi",
+      "pendingConfirmationHint": "Periksa kotak masuk ini untuk tautan konfirmasi. Jika Anda tidak menerima email, hapus kanal ini dan tambahkan lagi.",
+      "cannotEditEmail": "Kanal email tidak dapat diedit. Hapus kanal ini dan tambahkan yang baru untuk mengubah alamat.",
+      "cannotEnableUnconfirmed": "Kanal ini harus dikonfirmasi sebelum dapat diaktifkan.",
+      "createdCheckInbox": "Kami telah mengirim email konfirmasi ke {{email}}. Klik tautan di pesan itu untuk mengaktifkan kanal ini.",
+      "createdCheckInboxTitle": "Konfirmasi alamat email"
     }
   },
   "statistics": {
@@ -590,5 +637,9 @@
   "confirmEmailChange": {
     "success": "Alamat email akun Anda telah berhasil diubah. Anda sekarang dapat masuk dengan alamat email baru Anda.",
     "error": "Maaf, kami tidak dapat mengonfirmasi perubahan alamat email Anda. Tautan konfirmasi tidak valid, kedaluwarsa, atau telah digunakan."
+  },
+  "confirmNotificationChannel": {
+    "success": "Alamat email ini telah dikonfirmasi dan sekarang akan menerima notifikasi cron job.",
+    "error": "Kami tidak dapat mengonfirmasi alamat email ini. Tautan konfirmasi tidak valid, kedaluwarsa, atau sudah digunakan."
   }
 }

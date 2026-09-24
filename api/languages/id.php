@@ -10,6 +10,16 @@ $lang = [
     . 'Jika Anda tidak meminta perubahan ini, JANGAN klik tautan konfirmasi dan sebaliknya abaikan dan hapus email ini.' . "\n\n"
     . 'Hormat kami,' . "\n\n"
     . '$projectName',
+  'confirmNotificationChannelEmail.footer' => 'Anda menerima email ini karena seseorang menambahkan alamat email Anda sebagai kanal notifikasi. Jika Anda tidak memintanya, abaikan dan hapus email ini.',
+  'confirmNotificationChannelEmail.subject' => '$projectName: Konfirmasi alamat email notifikasi',
+  'confirmNotificationChannelEmail.body' =>
+      'Hi,' . "\n\n"
+    . 'seseorang meminta agar notifikasi cron job $projectName dikirim ke $email.' . "\n\n"
+    . 'Klik tautan berikut untuk mengonfirmasi alamat email ini.' . "\n\n"
+    . '{link|$confirmationLink|Konfirmasi alamat email}' . "\n\n"
+    . 'Jika Anda tidak memintanya, JANGAN klik tautan konfirmasi; abaikan dan hapus email ini.' . "\n\n"
+    . 'Hormat kami,' . "\n\n"
+    . '$projectName',
   'lostPasswordEmail.footer' => 'Anda menerima email ini karena seseorang mencoba mengatur ulang kata sandi akun Anda. Jika Anda tidak meminta ini, silakan abaikan dan hapus email ini.',
   'lostPasswordEmail.subject' => '$projectName: Atur ulang kata sandi',
   'lostPasswordEmail.body' =>

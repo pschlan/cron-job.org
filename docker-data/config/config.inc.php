@@ -28,6 +28,10 @@ $config = array(
   'lostPasswordTokenSecret'         => getenv('CJO_LOST_PASSWORD_TOKEN_SECRET'),
   'accountConfirmationTokenLifetime'=> 3 * 86400,
   'accountConfirmationTokenSecret'  => getenv('CJO_ACCOUNT_CONFIRMATION_TOKEN_SECRET'),
+  'notificationChannelConfirmationTokenSecret' => getenv('CJO_NOTIFICATION_CHANNEL_CONFIRMATION_TOKEN_SECRET'),
+  'notificationChannelConfirmationEmailHashSecret' => getenv('CJO_NOTIFICATION_CHANNEL_CONFIRMATION_EMAIL_HASH_SECRET'),
+  'notificationChannelEmailCooldownSeconds' => 30,
+  'notificationChannelEmailCreatesPerHour' => 5,
   'minPasswordLength'               => 8,
   'passwordSaltLength'              => 16,
   'statusPageUniqueIdLength'        => 8,
@@ -63,6 +67,12 @@ if (empty($config['lostPasswordTokenSecret'])) {
 }
 if (empty($config['accountConfirmationTokenSecret'])) {
   throw new Exception('Please set CJO_ACCOUNT_CONFIRMATION_TOKEN_SECRET in .env!');
+}
+if (empty($config['notificationChannelConfirmationTokenSecret'])) {
+  throw new Exception('Please set CJO_NOTIFICATION_CHANNEL_CONFIRMATION_TOKEN_SECRET in .env!');
+}
+if (empty($config['notificationChannelConfirmationEmailHashSecret'])) {
+  throw new Exception('Please set CJO_NOTIFICATION_CHANNEL_CONFIRMATION_EMAIL_HASH_SECRET in .env!');
 }
 if (empty($config['emailVerpSecret'])) {
   throw new Exception('Please set CJO_VERP_SECRET in .env!');

@@ -149,6 +149,13 @@
   "events": {
     "cronjobExecution": "Cronjob-Ausführung: {{statusText}}",
     "notificationSent": "Benachrichtigung gesendet: {{notificationType}}",
+    "notificationFailed": "Benachrichtigung fehlgeschlagen: {{notificationType}}",
+    "channelDestination": "{{channel}} · {{destination}}",
+    "channels": {
+      "email": "E-Mail",
+      "webhook": "Webhook",
+      "unknown": "Kanal"
+    },
     "notifications": {
       "FAILURE": "Ausführung fehlgeschlagen",
       "SUCCESS": "Ausführung erfolgreich",
@@ -569,6 +576,7 @@
       "maxFailures": "Max. Fehlschläge vor Job-Deaktivierung",
       "maxStatusPages": "Max. Anzahl Status-Seiten/-Monitore",
       "maxApiCallsPerDay": "Max. API-Calls pro Tag",
+      "maxNotificationChannels": "Max. Anzahl Benachrichtigungskanäle",
       "price": "Preis",
       "free": "kostenlos",
       "subscriptionPrices": "5, 10 oder 20 EUR pro Monat \noder 12, 24 oder 36 EUR pro Jahr (frei wählbar)",
@@ -637,6 +645,45 @@
       "editKey": "API-Key bearbeiten: {{title}}",
       "saveError": "Entschuldigung, aber wir konnten Ihre Änderungen nicht speichern. Bitte versuchen Sie es später erneut.",
       "saved": "Die Änderungen an Ihrem API-Key wurden erfolgreich gespeichert."
+    },
+    "notificationChannels": {
+      "channels": "Benachrichtigungskanäle",
+      "add": "Kanal hinzufügen",
+      "noChannels": "Sie haben noch keine zusätzlichen Benachrichtigungskanäle.",
+      "accountEmail": "Account-E-Mail",
+      "type": "Typ",
+      "types": {
+        "email": "E-Mail",
+        "webhook": "Webhook"
+      },
+      "destination": "Ziel",
+      "emailAddress": "E-Mail-Adresse",
+      "webhookUrl": "Webhook-URL",
+      "payload": "JSON-Payload",
+      "payloadHelp": "Platzhalter in JSON-Zeichenketten werden beim Versand der Benachrichtigung ersetzt.",
+      "payloadInvalid": "Bitte geben Sie gültiges JSON ein.",
+      "enabled": "Aktiviert",
+      "statusEnabled": "Aktiviert",
+      "statusDisabled": "Deaktiviert",
+      "addText": "Benachrichtigungen zu Ihren Cronjobs werden an alle aktivierten Kanäle gesendet. Sie können zusätzliche E-Mail-Adressen oder Webhook-URLs hinzufügen.",
+      "createError": "Entschuldigung, aber wir konnten den Benachrichtigungskanal nicht erstellen. Bitte versuchen Sie es später erneut.",
+      "created": "Der Benachrichtigungskanal wurde erfolgreich erstellt.",
+      "editChannel": "Benachrichtigungskanal bearbeiten",
+      "saveError": "Entschuldigung, aber wir konnten Ihre Änderungen nicht speichern. Bitte versuchen Sie es später erneut.",
+      "saved": "Die Änderungen am Benachrichtigungskanal wurden erfolgreich gespeichert.",
+      "deleteChannel": "Benachrichtigungskanal löschen",
+      "confirmDelete": "Möchten Sie diesen Benachrichtigungskanal wirklich löschen? Er empfängt dann keine Benachrichtigungen mehr.",
+      "deleteError": "Entschuldigung, aber wir konnten den Benachrichtigungskanal nicht löschen. Bitte versuchen Sie es später erneut.",
+      "deleted": "Der Benachrichtigungskanal wurde erfolgreich gelöscht.",
+      "cannotUseAccountEmail": "Diese Adresse wird bereits vom Account-E-Mail-Kanal verwendet.",
+      "cannotEdit": "Der Account-E-Mail-Kanal kann nicht bearbeitet werden.",
+      "cannotDelete": "Der Account-E-Mail-Kanal kann nicht gelöscht werden.",
+      "pendingConfirmation": "Bestätigung ausstehend",
+      "pendingConfirmationHint": "Prüfen Sie dieses Postfach auf einen Bestätigungslink. Wenn Sie die E-Mail nicht erhalten haben, löschen Sie diesen Kanal und fügen Sie ihn erneut hinzu.",
+      "cannotEditEmail": "E-Mail-Kanäle können nicht bearbeitet werden. Löschen Sie den Kanal und fügen Sie eine neue Adresse hinzu.",
+      "cannotEnableUnconfirmed": "Dieser Kanal muss bestätigt werden, bevor er aktiviert werden kann.",
+      "createdCheckInbox": "Wir haben eine Bestätigungs-E-Mail an {{email}} gesendet. Klicken Sie auf den Link in der Nachricht, um diesen Kanal zu aktivieren.",
+      "createdCheckInboxTitle": "E-Mail-Adresse bestätigen"
     }
   },
   "statistics": {
@@ -651,5 +698,9 @@
   "confirmEmailChange": {
     "success": "Die E-Mail-Adresse Ihres Accounts wurde erfolgreich geändert. Sie können sich nun mit der neuen E-Mail-Adresse einloggen.",
     "error": "Entschuldigung, aber wir konnten Ihre E-Mail-Adresse nicht ändern. Der Bestätigungslink ist entweder ungültig, abgelaufen oder wurde schon verwendet."
+  },
+  "confirmNotificationChannel": {
+    "success": "Diese E-Mail-Adresse wurde bestätigt und empfängt nun Cronjob-Benachrichtigungen.",
+    "error": "Entschuldigung, wir konnten diese E-Mail-Adresse nicht bestätigen. Der Bestätigungslink ist ungültig, abgelaufen oder wurde bereits verwendet."
   }
 }

@@ -26,6 +26,7 @@ namespace Chronos
 		std::string statusLabel(JobStatus_t status);
 		std::string priorityBin(int8_t executionPriority);
 		std::string notificationTypeLabel(NotificationType_t type);
+		std::string notificationChannelLabel(int channelType);
 		std::string httpStatusClass(int httpStatus);
 
 		int jobTypeIndex(JobType_t jobType);

@@ -360,6 +360,7 @@ void UpdateThread::storeResults(const std::vector<std::unique_ptr<JobResult>> &r
 				Notification n;
 				n.userID = result->userID;
 				n.jobID = result->jobID;
+				n.jobLogID = jobLogID;
 				n.date = time(NULL);
 				n.dateStarted = result->dateStarted / 1000;
 				n.datePlanned = result->datePlanned / 1000;
@@ -371,19 +372,6 @@ void UpdateThread::storeResults(const std::vector<std::unique_ptr<JobResult>> &r
 				n.httpStatus = result->httpStatus;
 				n.failCounter = notificationFailCounter;
 				n.sslCertExpiry = sslCertExpiry;
-
-				db->query("INSERT INTO `notification`(`jobid`,`joblogid`,`date`,`type`,`date_started`,`date_planned`,`url`,`execution_status`,`execution_status_text`,`execution_http_status`) "
-					"VALUES(%d,%d,%u,%u,%u,%u,'%q',%u,'%q',%u)",
-					result->jobID,
-					jobLogID,
-					static_cast<unsigned long>(time(NULL)),
-					static_cast<unsigned long>(n.type),
-					static_cast<unsigned long>(n.dateStarted),
-					static_cast<unsigned long>(n.datePlanned),
-					n.url.c_str(),
-					static_cast<unsigned long>(n.status),
-					n.statusText.c_str(),
-					static_cast<unsigned long>(n.httpStatus));
 
 				NotificationThread::getInstance()->addNotification(std::move(n));
 			};
@@ -442,8 +430,7 @@ void UpdateThread::storeResults(const std::vector<std::unique_ptr<JobResult>> &r
 				}
 				catch(const std::exception &ex)
 				{
-					std::cerr << "Error MySQL notification insert: " << ex.what() << std::endl;
-					Metrics::instance().incrementMysqlWriteError("notification_insert");
+					std::cerr << "Error queueing notification: " << ex.what() << std::endl;
 					continue;
 				}
 			}

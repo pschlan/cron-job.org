@@ -154,6 +154,13 @@
   "events": {
     "计划任务Execution": "计划任务运行：{{statusText}}",
     "notificationSent": "通知已发送：{{notificationType}}",
+    "notificationFailed": "通知发送失败：{{notificationType}}",
+    "channelDestination": "{{channel}} · {{destination}}",
+    "channels": {
+      "email": "电子邮件",
+      "webhook": "Webhook",
+      "unknown": "渠道"
+    },
     "notifications": {
       "FAILURE": "运行失败",
       "SUCCESS": "运行成功",
@@ -468,6 +475,7 @@
       "maxFailures": "停用任务前的最大失败次数",
       "maxStatusPages": "最大状态页面/监视器",
       "maxApiCallsPerDay": "每天最大 API 调用",
+      "maxNotificationChannels": "最大通知渠道数",
       "price": "价格",
       "free": "免费",
       "subscriptionPrices": "每月5、10 或 20 欧元\n或每年 12、24 或 36 欧元（由您选择）",
@@ -540,6 +548,45 @@
       "editKey": "编辑 API 密钥：{{title}}",
       "saveError": "很抱歉，我们无法保存您的更改，请稍后再试。",
       "saved": "您对 API 密钥的更改已成功保存。"
+    },
+    "notificationChannels": {
+      "channels": "Notification Channels",
+      "add": "Add Channel",
+      "noChannels": "You don't have any additional notification channels yet.",
+      "accountEmail": "Account email",
+      "type": "Type",
+      "types": {
+        "email": "Email",
+        "webhook": "Webhook"
+      },
+      "destination": "Destination",
+      "emailAddress": "Email address",
+      "webhookUrl": "Webhook URL",
+      "payload": "JSON payload",
+      "payloadHelp": "Placeholders in JSON string values are replaced when the notification is sent.",
+      "payloadInvalid": "Please enter valid JSON.",
+      "enabled": "Enabled",
+      "statusEnabled": "Enabled",
+      "statusDisabled": "Disabled",
+      "addText": "Notifications for your cronjobs are sent to all enabled channels. You can add extra email addresses or webhook URLs.",
+      "createError": "Sorry, we could not create the notification channel. Please try again later.",
+      "created": "The notification channel has been created successfully.",
+      "editChannel": "Edit notification channel",
+      "saveError": "Sorry, we could not save your changes. Please try again later.",
+      "saved": "Your changes to the notification channel have been saved successfully.",
+      "deleteChannel": "Delete notification channel",
+      "confirmDelete": "Do you really want to delete this notification channel? It will no longer receive notifications.",
+      "deleteError": "Sorry, we could not delete the notification channel. Please try again later.",
+      "deleted": "The notification channel has been deleted successfully.",
+      "cannotUseAccountEmail": "This address is already used by your account email channel.",
+      "cannotEdit": "The account email channel cannot be edited.",
+      "cannotDelete": "The account email channel cannot be deleted.",
+      "pendingConfirmation": "待确认",
+      "pendingConfirmationHint": "请检查此收件箱中的确认链接。如果没有收到邮件，请删除此渠道并重新添加。",
+      "cannotEditEmail": "无法编辑电子邮件渠道。请删除此渠道并添加新渠道以更改地址。",
+      "cannotEnableUnconfirmed": "必须先确认此渠道才能启用。",
+      "createdCheckInbox": "我们已向 {{email}} 发送确认邮件。请点击该邮件中的链接以激活此渠道。",
+      "createdCheckInboxTitle": "确认电子邮件地址"
     }
   },
   "statistics": {
@@ -554,5 +601,9 @@
   "confirmEmailChange": {
     "success": "您的帐号电子邮件地址修改成功，您现在可以使用新的电子邮件地址登录了。",
     "error": "很抱歉，我们无法确认您的电子邮件地址更改，请排查是否有链接无效、过期或已被使用的情况。"
+  },
+  "confirmNotificationChannel": {
+    "success": "此电子邮件地址已确认，现在将接收定时任务通知。",
+    "error": "无法确认此电子邮件地址。确认链接无效、已过期或已被使用。"
   }
 }

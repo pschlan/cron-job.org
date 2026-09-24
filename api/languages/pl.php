@@ -10,6 +10,16 @@ $lang = [
     . 'Jeśli nie prosiłeś o tę zmianę, NIE KLIKAJ linku potwierdzającego, lecz zignoruj i usuń tę wiadomość.' . "\n\n"
     . 'Z poważaniem,' . "\n\n"
     . '$projectName',
+  'confirmNotificationChannelEmail.footer' => 'Otrzymujesz tę wiadomość, ponieważ ktoś dodał Twój adres e-mail jako kanał powiadomień. Jeśli tego nie prosiłeś, zignoruj i usuń tę wiadomość.',
+  'confirmNotificationChannelEmail.subject' => '$projectName: Potwierdź adres e-mail powiadomień',
+  'confirmNotificationChannelEmail.body' =>
+      'Hi,' . "\n\n"
+    . 'ktoś poprosił o wysyłanie powiadomień o zadaniach $projectName na adres $email.' . "\n\n"
+    . 'Kliknij poniższy link, aby potwierdzić ten adres e-mail.' . "\n\n"
+    . '{link|$confirmationLink|Potwierdź adres e-mail}' . "\n\n"
+    . 'Jeśli tego nie prosiłeś, NIE klikaj linku potwierdzającego, tylko zignoruj i usuń tę wiadomość.' . "\n\n"
+    . 'Pozdrawiamy,' . "\n\n"
+    . '$projectName',
   'lostPasswordEmail.footer' => 'Otrzymujesz tę wiadomość e-mail, ponieważ ktoś próbował zresetować hasło Twojego konta. Jeśli to nie Ty prosiłeś o to, proszę zignoruj i usuń tę wiadomość.',
   'lostPasswordEmail.subject' => '$projectName: Zresetuj hasło',
   'lostPasswordEmail.body' =>

@@ -46,6 +46,31 @@ namespace Chronos
     friend class CurlWorker;
   };
 
+  class TimerWatcher
+  {
+    struct PrivateData;
+    std::unique_ptr<PrivateData> privateData;
+
+    TimerWatcher(CurlWorker *w, const std::function<void()> &callback);
+
+    TimerWatcher(const TimerWatcher &) = delete;
+    TimerWatcher(TimerWatcher &&) = delete;
+
+    TimerWatcher &operator=(const TimerWatcher &) = delete;
+    TimerWatcher &operator=(TimerWatcher &&) = delete;
+
+  public:
+    ~TimerWatcher();
+
+    void set(double delaySeconds);
+    void stop();
+
+  private:
+    std::function<void()> callback;
+
+    friend class CurlWorker;
+  };
+
   class CurlWorker
   {
     struct Callbacks;
@@ -83,6 +108,7 @@ namespace Chronos
     }
 
     std::shared_ptr<AsyncWatcher> addAsyncWatcher(const std::function<void()> &handler);
+    std::shared_ptr<TimerWatcher> addTimerWatcher(const std::function<void()> &handler);
 
   private:
     void checkResults();
@@ -94,6 +120,7 @@ namespace Chronos
     std::vector<std::shared_ptr<AsyncWatcher>> asyncWatchers;
 
     friend class AsyncWatcher;
+    friend class TimerWatcher;
   };
 };
 

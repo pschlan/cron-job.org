@@ -163,6 +163,13 @@
   "events": {
     "cronjobExecution": "تنفيذ مهمة كرون: {{statusText}}",
     "notificationSent": "تم إرسال إشعار: {{notificationType}}",
+    "notificationFailed": "فشل الإشعار: {{notificationType}}",
+    "channelDestination": "{{channel}} · {{destination}}",
+    "channels": {
+      "email": "البريد الإلكتروني",
+      "webhook": "Webhook",
+      "unknown": "قناة"
+    },
     "notifications": {
       "FAILURE": "فشل التنفيذ",
       "SUCCESS": "تم التنفيذ بنجاح",
@@ -495,6 +502,7 @@
       "maxFailures": "أقصى عدد للفشل قبل تعطيل المهمة",
       "maxStatusPages": "أقصى عدد لصفحات/مراقبي الحالة",
       "maxApiCallsPerDay": "أقصى عدد لطلبات API يوميًا",
+      "maxNotificationChannels": "أقصى عدد لقنوات الإشعار",
       "price": "السعر",
       "free": "مجاني",
       "subscriptionPrices": "5، 10 أو 20 يورو شهريًا \nأو 12، 24 أو 36 يورو سنويًا (حسب اختيارك)",
@@ -567,6 +575,45 @@
       "editKey": "تعديل مفتاح API: {{title}}",
       "saveError": "عذرًا، لم نتمكن من حفظ التغييرات. يرجى المحاولة لاحقًا.",
       "saved": "تم حفظ التغييرات على مفتاح API بنجاح."
+    },
+    "notificationChannels": {
+      "channels": "Notification Channels",
+      "add": "Add Channel",
+      "noChannels": "You don't have any additional notification channels yet.",
+      "accountEmail": "Account email",
+      "type": "Type",
+      "types": {
+        "email": "Email",
+        "webhook": "Webhook"
+      },
+      "destination": "Destination",
+      "emailAddress": "Email address",
+      "webhookUrl": "Webhook URL",
+      "payload": "JSON payload",
+      "payloadHelp": "Placeholders in JSON string values are replaced when the notification is sent.",
+      "payloadInvalid": "Please enter valid JSON.",
+      "enabled": "Enabled",
+      "statusEnabled": "Enabled",
+      "statusDisabled": "Disabled",
+      "addText": "Notifications for your cronjobs are sent to all enabled channels. You can add extra email addresses or webhook URLs.",
+      "createError": "Sorry, we could not create the notification channel. Please try again later.",
+      "created": "The notification channel has been created successfully.",
+      "editChannel": "Edit notification channel",
+      "saveError": "Sorry, we could not save your changes. Please try again later.",
+      "saved": "Your changes to the notification channel have been saved successfully.",
+      "deleteChannel": "Delete notification channel",
+      "confirmDelete": "Do you really want to delete this notification channel? It will no longer receive notifications.",
+      "deleteError": "Sorry, we could not delete the notification channel. Please try again later.",
+      "deleted": "The notification channel has been deleted successfully.",
+      "cannotUseAccountEmail": "This address is already used by your account email channel.",
+      "cannotEdit": "The account email channel cannot be edited.",
+      "cannotDelete": "The account email channel cannot be deleted.",
+      "pendingConfirmation": "بانتظار التأكيد",
+      "pendingConfirmationHint": "تحقق من صندوق الوارد هذا بحثًا عن رابط التأكيد. إذا لم تصلك الرسالة، احذف هذه القناة وأضفها مرة أخرى.",
+      "cannotEditEmail": "لا يمكن تعديل قنوات البريد الإلكتروني. احذف هذه القناة وأضف واحدة جديدة لتغيير العنوان.",
+      "cannotEnableUnconfirmed": "يجب تأكيد هذه القناة قبل تمكينها.",
+      "createdCheckInbox": "أرسلنا رسالة تأكيد إلى {{email}}. انقر على الرابط في تلك الرسالة لتفعيل هذه القناة.",
+      "createdCheckInboxTitle": "تأكيد عنوان البريد الإلكتروني"
     }
   },
   "statistics": {
@@ -581,5 +628,9 @@
   "confirmEmailChange": {
     "success": "تم تغيير البريد الإلكتروني بنجاح. يمكنك الآن تسجيل الدخول بالبريد الجديد.",
     "error": "عذرًا، لم نتمكن من تأكيد تغيير البريد الإلكتروني. الرابط غير صالح أو منتهي الصلاحية أو تم استخدامه بالفعل."
+  },
+  "confirmNotificationChannel": {
+    "success": "تم تأكيد عنوان البريد الإلكتروني هذا وسيتلقى الآن إشعارات المهام المجدولة.",
+    "error": "تعذر تأكيد عنوان البريد الإلكتروني هذا. رابط التأكيد غير صالح أو منتهٍ أو مستخدم مسبقًا."
   }
 }

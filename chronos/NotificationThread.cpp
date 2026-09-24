@@ -13,8 +13,12 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
+#include <functional>
 #include <iomanip>
 #include <iostream>
+#include <map>
+#include <memory>
 #include <random>
 #include <regex>
 #include <sstream>
@@ -26,7 +30,12 @@
 
 #include <curl/curl.h>
 
+#include <sys/socket.h>
+
+#include <nlohmann/json.hpp>
+
 #include "App.h"
+#include "CurlWorker.h"
 #include "Notification.h"
 #include "NotificationThread.h"
 #include "SQLite.h"
@@ -243,6 +252,231 @@ std::string currentYear()
 	return buffer;
 }
 
+std::string typeToString(Chronos::NotificationType_t type)
+{
+	using namespace Chronos;
+
+	switch (type)
+	{
+	case NOTIFICATION_TYPE_FAILURE:
+		return "failure";
+	case NOTIFICATION_TYPE_SUCCESS:
+		return "success";
+	case NOTIFICATION_TYPE_DISABLE:
+		return "disable";
+	case NOTIFICATION_TYPE_SSL_CERT_EXPIRY:
+		return "ssl_cert_expiry";
+	default:
+		return "unknown";
+	}
+}
+
+std::string replaceVars(const std::string &text, const std::unordered_map<std::string, std::string> &vars)
+{
+	static const std::regex re(R"(\$\{([A-Za-z0-9]+)\})");
+
+	std::string out;
+	out.reserve(text.size());
+
+	auto it = std::sregex_iterator(text.begin(), text.end(), re);
+	const auto end = std::sregex_iterator();
+	std::size_t lastPos = 0;
+
+	for(; it != end; ++it)
+	{
+		const std::smatch &m = *it;
+		const std::size_t matchPos = static_cast<std::size_t>(m.position(0));
+		out.append(text, lastPos, matchPos - lastPos);
+
+		const auto vit = vars.find(m[1].str());
+		if(vit != vars.end())
+		{
+			out += vit->second;
+		}
+		else
+		{
+			out += m[0].str();
+		}
+
+		lastPos = matchPos + static_cast<std::size_t>(m.length(0));
+	}
+
+	out.append(text, lastPos, std::string::npos);
+	return out;
+}
+
+void replaceVars(::nlohmann::json &j, const std::unordered_map<std::string, std::string> &vars, unsigned int depth = 0)
+{
+	constexpr unsigned int MAX_DEPTH = 10;
+
+	if (depth > MAX_DEPTH)
+	{
+		throw std::runtime_error("Maximum recursion depth reached!");
+	}
+
+	for(auto it = j.begin(); it != j.end(); ++it)
+	{
+		if (it->is_structured())
+		{
+			replaceVars(*it, vars, depth + 1);
+		}
+		else if (it->is_string())
+		{
+			*it = replaceVars(it->get<std::string>(), vars);
+		}
+	}
+}
+
+struct ResponseLimiterState
+{
+	size_t bytes{0};
+	size_t maxBytes{0};
+};
+
+size_t curlResponseLimiterWriteFunction(char *buffer, size_t size, size_t nitems, void *userData)
+{
+	ResponseLimiterState *state = reinterpret_cast<ResponseLimiterState *>(userData);
+	std::size_t bytes = size * nitems;
+
+	state->bytes += bytes;
+	if (state->bytes > state->maxBytes)
+	{
+		return 0;
+	}
+
+	return bytes;
+}
+
+curl_socket_t webhookCurlOpenSocketFunction(void *userdata, curlsocktype purpose, struct curl_sockaddr *address)
+{
+	if(purpose != CURLSOCKTYPE_IPCXN)
+	{
+		std::cerr << "Invalid socket purpose: " << purpose << std::endl;
+		return CURL_SOCKET_BAD;
+	}
+
+	if(address == nullptr || !Chronos::App::getInstance()->verifyPeerAddress(address->addrlen, &address->addr))
+	{
+		if(userdata != nullptr)
+			*static_cast<bool *>(userdata) = true;
+		return CURL_SOCKET_BAD;
+	}
+
+	return ::socket(address->family, address->socktype, address->protocol);
+}
+
+struct WebhookRequest
+{
+	~WebhookRequest()
+	{
+		if (headers != nullptr)
+		{
+			curl_slist_free_all(headers);
+		}
+	}
+
+	curl_slist *headers{nullptr};
+	std::string payload;
+	ResponseLimiterState responseLimiterState;
+	bool peerAddressBlocked{false};
+};
+
+struct MailRequest
+{
+	~MailRequest()
+	{
+		if (recipients != nullptr)
+		{
+			curl_slist_free_all(recipients);
+		}
+	}
+
+	curl_slist *recipients{nullptr};
+	std::string data;
+};
+
+bool webhookHttpStatusRetryable(long httpCode)
+{
+	switch(httpCode)
+	{
+	case 408:
+	case 429:
+	case 500:
+	case 502:
+	case 503:
+	case 504:
+		return true;
+	default:
+		return false;
+	}
+}
+
+bool webhookCurlRetryable(CURLcode res)
+{
+	switch(res)
+	{
+	case CURLE_COULDNT_CONNECT:
+	case CURLE_OPERATION_TIMEDOUT:
+	case CURLE_GOT_NOTHING:
+	case CURLE_SEND_ERROR:
+	case CURLE_RECV_ERROR:
+	case CURLE_SSL_CONNECT_ERROR:
+	case CURLE_COULDNT_RESOLVE_HOST:
+	case CURLE_FAILED_INIT:
+#ifdef CURLE_HTTP2
+	case CURLE_HTTP2:
+#endif
+#ifdef CURLE_HTTP2_STREAM
+	case CURLE_HTTP2_STREAM:
+#endif
+		return true;
+	default:
+		return false;
+	}
+}
+
+bool webhookFailureRetryable(CURLcode res, long httpCode)
+{
+	if(httpCode >= 200 && httpCode < 300)
+		return false;
+	if(httpCode > 0)
+		return webhookHttpStatusRetryable(httpCode);
+	if(res == CURLE_WRITE_ERROR || res == CURLE_ABORTED_BY_CALLBACK)
+		return false;
+	return webhookCurlRetryable(res);
+}
+
+double webhookRetryDelaySeconds(int retryNumber, int baseDelayMs, int maxDelayMs, curl_off_t retryAfterSeconds)
+{
+	double delayMs = 0;
+	if(retryAfterSeconds > 0)
+	{
+		delayMs = static_cast<double>(retryAfterSeconds) * 1000.0;
+	}
+	else
+	{
+		if(retryNumber < 1)
+			retryNumber = 1;
+		int shift = retryNumber - 1;
+		if(shift > 20)
+			shift = 20;
+		delayMs = static_cast<double>(baseDelayMs) * std::ldexp(1.0, shift);
+	}
+
+	const double maxMs = static_cast<double>(maxDelayMs > 0 ? maxDelayMs : 0);
+	if(delayMs > maxMs)
+		delayMs = maxMs;
+
+	static thread_local std::mt19937 rng{std::random_device{}()};
+	std::uniform_real_distribution<double> dist(0.5, 1.5);
+	delayMs *= dist(rng);
+	if(delayMs > maxMs)
+		delayMs = maxMs;
+	if(delayMs < 0)
+		delayMs = 0;
+	return delayMs / 1000.0;
+}
+
 } // anon ns
 
 class Mail
@@ -387,6 +621,8 @@ private:
 		static const std::regex re(R"(\$(\.?[A-Za-z0-9]+))");
 
 		std::string out;
+		out.reserve(text.size());
+
 		auto it = std::sregex_iterator(text.begin(), text.end(), re);
 		const auto end = std::sregex_iterator();
 		std::size_t lastPos = 0;
@@ -494,13 +730,338 @@ size_t curlStringReadFunction(char *buffer, size_t size, size_t nitems, void *us
 	return bytesToRead;
 }
 
+void storeNotification(const Chronos::Notification &n,
+	const NotificationChannel &channel,
+	NotificationResult::type result,
+	const std::string &resultDetails,
+	const std::unique_ptr<Chronos::MySQL_DB> &db)
+{
+	try
+	{
+		db->query("INSERT INTO `notification`(`jobid`,`joblogid`,`date`,`type`,`date_started`,`date_planned`,`url`,`execution_status`,`execution_status_text`,`execution_http_status`,`notificationchannelid`,`notificationchanneltype`,`notificationchanneldestination`,`result`,`result_details`) "
+			"VALUES(%d,%d,%u,%u,%u,%u,'%q',%u,'%q',%u,%v,%u,'%q',%u,'%q')",
+			n.jobID,
+			n.jobLogID,
+			static_cast<unsigned long>(time(nullptr)),
+			static_cast<unsigned long>(n.type),
+			static_cast<unsigned long>(n.dateStarted),
+			static_cast<unsigned long>(n.datePlanned),
+			n.url.c_str(),
+			static_cast<unsigned long>(n.status),
+			n.statusText.c_str(),
+			static_cast<unsigned long>(n.httpStatus),
+			channel.channelId,
+			static_cast<unsigned long>(channel.type),
+			channel.destination.c_str(),
+			static_cast<unsigned long>(result),
+			resultDetails.c_str());
+	}
+	catch (const std::exception &ex)
+	{
+		std::cerr << "NotificationThread::storeNotification(): Failed to store notification: " << ex.what() << std::endl;
+		Chronos::Metrics::instance().incrementMysqlWriteError("notification_insert");
+	}
 }
 
+} // anon ns
+
 using namespace Chronos;
+
+class NotificationThread::DispatchThread
+{
+public:
+	using DoneCallback = std::function<void(CURLcode, const std::unique_ptr<MySQL_DB> &)>;
+
+private:
+	struct QueueEntry
+	{
+		CURL *handle;
+		DoneCallback onDone;
+	};
+
+	struct PendingRequest
+	{
+		DoneCallback onDone;
+	};
+
+public:
+	DispatchThread()
+	{
+		retryQueueMax = App::getInstance()->config->getInt("webhook_retry_queue_max", 2048);
+		if(retryQueueMax < 0)
+			retryQueueMax = 0;
+
+		queueProcessingTrigger = curlWorker.addAsyncWatcher([this] () {
+			processQueue();
+		});
+
+		stopTrigger = curlWorker.addAsyncWatcher([this] () {
+			curlWorker.stop();
+		});
+
+		retryTimer = curlWorker.addTimerWatcher([this] () {
+			flushDelayed();
+		});
+
+		curlWorker.onDone([this] (CURL *easy, CURLcode res) {
+			curlWorker.remove(easy);
+
+			auto it = pendingRequests.find(easy);
+			if (it == pendingRequests.end())
+			{
+				std::cerr << "NotificationThread::DispatchThread::curlWorker.onDone(): Easy handle not found in pending requests!" << std::endl;
+				curl_easy_cleanup(easy);
+				return;
+			}
+
+			it->second.onDone(res, db);
+			pendingRequests.erase(it);
+			Metrics::instance().setNotificationDispatchInflight(static_cast<double>(pendingRequests.size()));
+		});
+	}
+
+	void run()
+	{
+		std::cout << "NotificationThread::DispatchThread::run(): Entered" << std::endl;
+
+		db = App::getInstance()->createMySQLConnection();
+
+		stop = false;
+		while(!stop)
+		{
+			curlWorker.run();
+		}
+
+		if(retryTimer)
+			retryTimer->stop();
+		while(!delayed.empty())
+		{
+			curl_easy_cleanup(delayed.begin()->second.handle);
+			delayed.erase(delayed.begin());
+		}
+		Metrics::instance().setNotificationRetryQueueDepth(0);
+
+		std::cout << "NotificationThread::DispatchThread::run(): Finished" << std::endl;
+	}
+
+	void stopThread()
+	{
+		stop = true;
+		stopTrigger->fire();
+	}
+
+	bool isStopping() const
+	{
+		return stop.load();
+	}
+
+	void submit(CURL *handle, const DoneCallback &onDone)
+	{
+		{
+			std::lock_guard<std::mutex> lg(queueMutex);
+			queue.push(QueueEntry{handle, onDone});
+			Metrics::instance().setNotificationDispatchQueueDepth(static_cast<double>(queue.size()));
+		}
+		queueProcessingTrigger->fire();
+	}
+
+	// Dispatch-thread only (webhook onDone / retry timer).
+	bool submitDelayed(CURL *handle, const DoneCallback &onDone, double delaySeconds)
+	{
+		if(stop)
+			return false;
+		if(static_cast<int>(delayed.size()) >= retryQueueMax)
+			return false;
+
+		const auto due = std::chrono::steady_clock::now()
+			+ std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+				std::chrono::duration<double>(delaySeconds));
+		delayed.emplace(due, QueueEntry{handle, onDone});
+		Metrics::instance().setNotificationRetryQueueDepth(static_cast<double>(delayed.size()));
+		armRetryTimer();
+		return true;
+	}
+
+private:
+	void armRetryTimer()
+	{
+		if(!retryTimer)
+			return;
+		if(delayed.empty())
+		{
+			retryTimer->stop();
+			return;
+		}
+
+		const auto now = std::chrono::steady_clock::now();
+		double delay = std::chrono::duration<double>(delayed.begin()->first - now).count();
+		if(delay < 0)
+			delay = 0;
+		retryTimer->set(delay);
+	}
+
+	void flushDelayed()
+	{
+		const auto now = std::chrono::steady_clock::now();
+		while(!delayed.empty() && delayed.begin()->first <= now)
+		{
+			QueueEntry entry = std::move(delayed.begin()->second);
+			delayed.erase(delayed.begin());
+			if(stop)
+			{
+				curl_easy_cleanup(entry.handle);
+				continue;
+			}
+			submit(entry.handle, entry.onDone);
+		}
+		Metrics::instance().setNotificationRetryQueueDepth(static_cast<double>(delayed.size()));
+		armRetryTimer();
+	}
+
+	void processQueue()
+	{
+		decltype(queue) tempQueue;
+		{
+			std::unique_lock<std::mutex> lock(queueMutex);
+			if(stop)
+				return;
+			queue.swap(tempQueue);
+			Metrics::instance().setNotificationDispatchQueueDepth(static_cast<double>(queue.size()));
+		}
+
+		if(!tempQueue.empty())
+		{
+			while (!tempQueue.empty())
+			{
+				QueueEntry entry = std::move(tempQueue.front());
+				tempQueue.pop();
+
+				pendingRequests.emplace(entry.handle, PendingRequest{entry.onDone});
+
+				if (!curlWorker.add(entry.handle))
+				{
+					pendingRequests.erase(entry.handle);
+					entry.onDone(CURLE_FAILED_INIT, db);
+				}
+
+				Metrics::instance().setNotificationDispatchInflight(static_cast<double>(pendingRequests.size()));
+			}
+		}
+
+		{
+			std::lock_guard<std::mutex> lock(queueMutex);
+			Metrics::instance().setNotificationDispatchQueueDepth(static_cast<double>(queue.size()));
+		}
+	}
+
+private:
+	std::atomic<bool> stop{false};
+	CurlWorker curlWorker;
+	std::shared_ptr<AsyncWatcher> queueProcessingTrigger;
+	std::shared_ptr<AsyncWatcher> stopTrigger;
+	std::shared_ptr<TimerWatcher> retryTimer;
+
+	std::mutex queueMutex;
+	std::queue<QueueEntry> queue;
+	std::multimap<std::chrono::steady_clock::time_point, QueueEntry> delayed;
+	int retryQueueMax = 2048;
+
+	std::unordered_map<CURL *, PendingRequest> pendingRequests;
+
+	std::unique_ptr<MySQL_DB> db;
+};
+
+namespace {
+
+struct WebhookSendState
+{
+	CURL *curl = nullptr;
+	std::shared_ptr<WebhookRequest> request;
+	Notification notification;
+	NotificationChannel channel;
+	int attempt = 1;
+	int maxAttempts = 3;
+	int baseDelayMs = 2000;
+	int maxDelayMs = 30000;
+	NotificationThread::DispatchThread *dt = nullptr;
+};
+
+void webhookOnDone(const std::shared_ptr<WebhookSendState> &state, CURLcode res, const std::unique_ptr<MySQL_DB> &db)
+{
+	long httpCode = 0;
+	curl_easy_getinfo(state->curl, CURLINFO_RESPONSE_CODE, &httpCode);
+
+	const std::string typeLabel = MetricsLabels::notificationTypeLabel(state->notification.type);
+	const std::string channelLabel = MetricsLabels::notificationChannelLabel(static_cast<int>(state->channel.type));
+	const std::string attemptNote = " (attempt " + std::to_string(state->attempt)
+		+ "/" + std::to_string(state->maxAttempts) + ")";
+
+	if(httpCode >= 200 && httpCode < 300)
+	{
+		curl_easy_cleanup(state->curl);
+		state->curl = nullptr;
+		Metrics::instance().incrementNotificationsSent(typeLabel, channelLabel);
+		std::string resultDetails = "Success (HTTP " + std::to_string(httpCode) + ")";
+		if(state->attempt > 1)
+			resultDetails += attemptNote;
+		storeNotification(state->notification, state->channel, NotificationResult::SUCCESS, resultDetails, db);
+		return;
+	}
+
+	std::string resultDetails;
+	if(state->request->peerAddressBlocked)
+		resultDetails = "Destination address is blocked";
+	else if(res != CURLE_OK)
+		resultDetails = std::string(curl_easy_strerror(res));
+	else
+		resultDetails = "HTTP error: " + std::to_string(httpCode);
+
+	if(!state->request->peerAddressBlocked
+		&& webhookFailureRetryable(res, httpCode) && state->attempt < state->maxAttempts)
+	{
+		curl_off_t retryAfter = 0;
+#ifdef CURLINFO_RETRY_AFTER
+		curl_easy_getinfo(state->curl, CURLINFO_RETRY_AFTER, &retryAfter);
+#endif
+		const double delay = webhookRetryDelaySeconds(state->attempt, state->baseDelayMs, state->maxDelayMs, retryAfter);
+		state->request->responseLimiterState.bytes = 0;
+		state->request->peerAddressBlocked = false;
+		if(state->dt->submitDelayed(state->curl, [state](CURLcode r, const std::unique_ptr<MySQL_DB> &d) {
+			webhookOnDone(state, r, d);
+		}, delay))
+		{
+			std::cerr << "NotificationThread::sendWebhookNotification(): Retrying webhook in "
+				<< delay << "s after " << resultDetails << attemptNote << std::endl;
+			Metrics::instance().incrementNotificationRetries(channelLabel);
+			++state->attempt;
+			return;
+		}
+
+		resultDetails += attemptNote;
+		if(state->dt->isStopping())
+			resultDetails += "; retries cancelled (stopping)";
+		else
+			resultDetails += "; retry queue full";
+	}
+	else if(state->attempt > 1)
+	{
+		resultDetails += attemptNote;
+	}
+
+	std::cerr << "NotificationThread::sendWebhookNotification(): Failed to send webhook notification: "
+		<< resultDetails << std::endl;
+	curl_easy_cleanup(state->curl);
+	state->curl = nullptr;
+	Metrics::instance().incrementNotificationSendErrors(typeLabel, channelLabel);
+	storeNotification(state->notification, state->channel, NotificationResult::FAILED_SEND, resultDetails, db);
+}
+
+} // anon ns
 
 NotificationThread *NotificationThread::instance = nullptr;
 
 NotificationThread::NotificationThread()
+	: dispatchThread(std::make_unique<DispatchThread>())
 {
 	if(NotificationThread::instance != nullptr)
 		throw std::runtime_error("Notification thread instance already exists");
@@ -557,6 +1118,10 @@ void NotificationThread::stopThread()
 void NotificationThread::run()
 {
 	std::cout << "NotificationThread::run(): Entered" << std::endl;
+
+	db = App::getInstance()->createMySQLConnection();
+
+	std::thread dispatchThreadObj(std::bind(&DispatchThread::run, dispatchThread.get()));
 
 	decltype(queue) tempQueue;
 	time_t tLastPhraseSync = 0;
@@ -619,6 +1184,9 @@ void NotificationThread::run()
 		if(numNotifications > 100)
 			std::cout << "NotificationThread::run(): Processing " << numNotifications << " took " << batchElapsed.count() << " seconds" << std::endl;
 	}
+
+	dispatchThread->stopThread();
+	dispatchThreadObj.join();
 
 	std::cout << "NotificationThread::run(): Finished" << std::endl;
 }
@@ -718,8 +1286,10 @@ std::string NotificationThread::formatStatus(const std::string &lang, const Noti
 	return result;
 }
 
-void NotificationThread::processNotification(const Notification &notification)
+void NotificationThread::processNotification(Notification &notification)
 {
+	std::cout << "NotificationThread::processNotification(): Processing notification of type " << notification.type << std::endl;
+
 	Metrics::instance().incrementNotificationsProcessed(MetricsLabels::notificationTypeLabel(notification.type));
 
 	UserDetails userDetails;
@@ -733,30 +1303,232 @@ void NotificationThread::processNotification(const Notification &notification)
 	catch (const apache::thrift::TException &ex)
 	{
 		std::cerr << "NotificationThread::processNotification(): Failed to retrieve user details: " << ex.what() << std::endl;
+
+		NotificationChannel dummyChannel;
+		dummyChannel.channelId = 0;
+		dummyChannel.destination = {};
+		storeNotification(notification, dummyChannel, NotificationResult::FAILED_PREPROCESS,
+			"Exception during user details retrieval: " +std::string(ex.what()), db);
+
 		Metrics::instance().incrementNotificationsDropped("user_details_failed");
+
 		return;
 	}
 
+	// Always increment the suppressed metric if suppression is active
 	if (userDetails.__isset.suppressNotifications && userDetails.suppressNotifications)
 	{
-		std::cerr << "NotificationThread::processNotification(): Notifications suppressed for user " << userDetails.userId << std::endl;
 		Metrics::instance().incrementEmailsSuppressed(MetricsLabels::notificationTypeLabel(notification.type));
-		return;
+	}
+
+	std::vector<NotificationChannel> notificationChannels;
+	if (userDetails.__isset.notificationChannels)
+	{
+		std::cout << "NotificationThread::processNotification(): User " << userDetails.userId << " has " << userDetails.notificationChannels.size() << " notification channels" << std::endl;
+		notificationChannels = std::move(userDetails.notificationChannels);
+	}
+	else
+	{
+		std::cout << "NotificationThread::processNotification(): User " << userDetails.userId << " has no notification channels, using default email channel" << std::endl;
+
+		if (userDetails.__isset.suppressNotifications && userDetails.suppressNotifications)
+		{
+			std::cerr << "NotificationThread::processNotification(): Notifications suppressed for user " << userDetails.userId << std::endl;
+			return;
+		}
+
+		NotificationChannel emailChannel;
+		emailChannel.channelId = 0;
+		emailChannel.type = NotificationChannelType::EMAIL;
+		emailChannel.destination = userDetails.email;
+		emailChannel.enabled = true;
+		emailChannel.settings = {};
+		notificationChannels.emplace_back(std::move(emailChannel));
 	}
 
 	// Remove query part of URL (might contain sensitive data)
-	std::string url = notification.url;
-	std::size_t qmPos = url.find('?');
+	std::size_t qmPos = notification.url.find('?');
 	if(qmPos != std::string::npos)
 	{
-		url = url.substr(0, qmPos + 1) + "...";
+		notification.url = notification.url.substr(0, qmPos + 1) + "...";
 	}
 
+	for (const auto &notificationChannel : notificationChannels)
+	{
+		if (!notificationChannel.enabled)
+		{
+			continue;
+		}
+
+		try
+		{
+			switch (notificationChannel.type)
+			{
+			case NotificationChannelType::EMAIL:
+				sendMailNotification(notification, userDetails, notificationChannel);
+				break;
+
+			case NotificationChannelType::WEBHOOK:
+				sendWebhookNotification(notification, userDetails, notificationChannel);
+				break;
+
+			default:
+				std::cerr << "NotificationThread::processNotification(): Unknown notification channel type: " << notificationChannel.type << std::endl;
+				Metrics::instance().incrementNotificationsDropped("unknown_channel_type");
+				break;
+			}
+		}
+		catch (const std::exception &ex)
+		{
+			std::cerr << "NotificationThread::processNotification(): Failed to send notification: " << ex.what() << std::endl;
+
+			Metrics::instance().incrementNotificationsDropped("preprocess_failed");
+
+			storeNotification(notification, notificationChannel, NotificationResult::FAILED_PREPROCESS,
+				"Exception during pre-processing: " +std::string(ex.what()), db);
+		}
+	}
+}
+
+void NotificationThread::sendWebhookNotification(const Notification &notification, const UserDetails &userDetails, const NotificationChannel &channel) const
+{
+	using ::nlohmann::json;
+
+	constexpr size_t MAX_WEBHOOK_RESPONSE_SIZE = 16 * 1024; // 16 KB
+
+	std::unordered_map<std::string, std::string> variables = {
+		{ "jobTitle", !notification.title.empty() ? notification.title : notification.url },
+		{ "jobId", std::to_string(notification.jobID) },
+		{ "jobUrl", notification.url },
+		{ "executed", formatDate(userDetails.language, notification.dateStarted) },
+		{ "executedTimestamp", std::to_string(notification.dateStarted) },
+		{ "scheduled", formatDate(userDetails.language, notification.datePlanned) },
+		{ "scheduledTimestamp", std::to_string(notification.datePlanned) },
+		{ "attempts", std::to_string(notification.failCounter) },
+		{ "status", formatStatus(userDetails.language, notification) },
+		{ "sslCertExpiry", formatDate(userDetails.language, notification.sslCertExpiry) },
+		{ "sslCertExpiryTimestamp", std::to_string(notification.sslCertExpiry) },
+		{ "notificationType", typeToString(notification.type) }
+	};
+
+	json settings = json::object();
+	if (!channel.settings.empty())
+	{
+		try
+		{
+			settings = json::parse(channel.settings);
+		}
+		catch (const std::exception &ex)
+		{
+			std::cerr << "NotificationThread::sendWebhookNotification(): Failed to parse settings: " << ex.what() << std::endl;
+			throw std::runtime_error("Failed to parse settings: " + std::string(ex.what()));
+		}
+	}
+
+	std::string payloadJson;
+	try
+	{
+		// `payload` is a user-supplied JSON string and not a nested object, so we need to parse it
+		json payload = json::parse(settings.value("payload", "{}"));
+		replaceVars(payload, variables);
+		payloadJson = payload.dump();
+	}
+	catch (const std::exception &ex)
+	{
+		std::cerr << "NotificationThread::sendWebhookNotification(): Failed to prepare payload: " << ex.what() << std::endl;
+		throw std::runtime_error("Failed to prepare payload: " + std::string(ex.what()));
+	}
+
+	CURL *curl = curl_easy_init();
+	if(curl == nullptr)
+	{
+		std::cerr << "NotificationThread::sendWebhookNotification(): curl_easy_init() failed!" << std::endl;
+		throw std::runtime_error("curl_easy_init() failed");
+	}
+
+	auto whRequest = std::make_shared<WebhookRequest>();
+	whRequest->payload = payloadJson;
+	whRequest->responseLimiterState.maxBytes = MAX_WEBHOOK_RESPONSE_SIZE;
+
+	whRequest->headers = nullptr;
+	whRequest->headers = curl_slist_append(whRequest->headers, "Content-Type: application/json");
+
+	if (settings.contains("headers"))
+	{
+		const auto &headers = settings["headers"];
+		if (headers.is_array())
+		{
+			for (const auto &header : headers)
+			{
+				if (!header.is_object() || !header.contains("key") || !header.contains("value")
+					|| !header["key"].is_string() || !header["value"].is_string())
+				{
+					continue;
+				}
+
+				const std::string headerKey = Utils::sanitizeHttpHeaderKey(header["key"].get<std::string>());
+				if (Utils::isBannedHeaderKey(headerKey))
+				{
+					continue;
+				}
+				std::string head = headerKey + ": " + Utils::sanitizeHttpHeaderValue(header["value"].get<std::string>());
+				whRequest->headers = curl_slist_append(whRequest->headers, head.c_str());
+			}
+		}
+	}
+
+	curl_easy_setopt(curl, CURLOPT_URL, channel.destination.c_str());
+	curl_easy_setopt(curl, CURLOPT_POST, 1L);
+	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, whRequest->payload.c_str());
+	curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, payloadJson.size());
+	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, whRequest->headers);
+	curl_easy_setopt(curl, CURLOPT_TIMEOUT, 20L);
+	curl_easy_setopt(curl, CURLOPT_USERAGENT, App::getInstance()->config->get("user_agent").c_str());
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0);
+	curl_easy_setopt(curl, CURLOPT_CAINFO, NULL);
+	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0);
+	curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+	curl_easy_setopt(curl, CURLOPT_DNS_CACHE_TIMEOUT, 0);
+	curl_easy_setopt(curl, CURLOPT_FORBID_REUSE, 1L);
+	curl_easy_setopt(curl, CURLOPT_FRESH_CONNECT, 1L);
+	curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1);
+	curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, "http,https");
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlResponseLimiterWriteFunction);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &whRequest->responseLimiterState);
+	curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, curlResponseLimiterWriteFunction);
+	curl_easy_setopt(curl, CURLOPT_HEADERDATA, &whRequest->responseLimiterState);
+	curl_easy_setopt(curl, CURLOPT_MAXFILESIZE,	MAX_WEBHOOK_RESPONSE_SIZE);
+	curl_easy_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, webhookCurlOpenSocketFunction);
+	curl_easy_setopt(curl, CURLOPT_OPENSOCKETDATA, &whRequest->peerAddressBlocked);
+
+	int maxAttempts = App::getInstance()->config->getInt("webhook_retry_max_attempts", 3);
+	if(maxAttempts < 1)
+		maxAttempts = 1;
+
+	auto state = std::make_shared<WebhookSendState>();
+	state->curl = curl;
+	state->request = whRequest;
+	state->notification = notification;
+	state->channel = channel;
+	state->attempt = 1;
+	state->maxAttempts = maxAttempts;
+	state->baseDelayMs = App::getInstance()->config->getInt("webhook_retry_base_delay_ms", 2000);
+	state->maxDelayMs = App::getInstance()->config->getInt("webhook_retry_max_delay_ms", 30000);
+	state->dt = dispatchThread.get();
+
+	dispatchThread->submit(curl, [state](CURLcode res, const std::unique_ptr<MySQL_DB> &db) {
+		webhookOnDone(state, res, db);
+	});
+}
+
+void NotificationThread::sendMailNotification(const Notification &notification, const UserDetails &userDetails, const NotificationChannel &channel) const
+{
 	Mail mail;
-	mail.setVerp("notify", std::to_string(notification.jobID) + "." + std::to_string(static_cast<int>(notification.type)), mailFrom, mailVerpSecret);
-	mail.setRcptTo(userDetails.email);
+	mail.setVerp("notify", std::to_string(notification.jobID) + "." + std::to_string(static_cast<int>(notification.type)) + "." + std::to_string(channel.channelId), mailFrom, mailVerpSecret);
+	mail.setRcptTo(channel.destination);
 	mail.addHeader("From", mailSender);
-	mail.addHeader("To", std::string("<") + userDetails.email + std::string(">"));
+	mail.addHeader("To", std::string("<") + channel.destination + std::string(">"));
 	mail.addHeader("Auto-Submitted", "auto-generated");
 
 	// Shared branded wrapper (stored language-independently under the sentinel
@@ -772,8 +1544,8 @@ void NotificationThread::processNotification(const Notification &notification)
 
 	mail.assign("firstname", userDetails.firstName);
 	mail.assign("lastname", userDetails.lastName);
-	mail.assign("title", !notification.title.empty() ? notification.title : url);
-	mail.assign("url", url);
+	mail.assign("title", !notification.title.empty() ? notification.title : notification.url);
+	mail.assign("url", notification.url);
 	mail.assign("executed", formatDate(userDetails.language, notification.dateStarted));
 	mail.assign("scheduled", formatDate(userDetails.language, notification.datePlanned));
 	mail.assign("attempts", std::to_string(notification.failCounter));
@@ -815,41 +1587,50 @@ void NotificationThread::processNotification(const Notification &notification)
 	mail.assign("body", getPhrase(userDetails.language, bodyKey));
 	mail.addHeader("Subject", subject, true);
 
-	sendMail(mail, notification.type);
-}
-
-void NotificationThread::sendMail(const Mail &mail, NotificationType_t type) const
-{
 	CURL *curl = curl_easy_init();
 	if(curl == nullptr)
 	{
 		std::cerr << "NotificationThread::sendMail(): curl_easy_init() failed!" << std::endl;
-		return;
+		throw std::runtime_error("curl_easy_init() failed");
 	}
 
-	struct curl_slist *recipients = nullptr;
-	recipients = curl_slist_append(recipients, mail.rcptTo().c_str());
+	auto mailRequest = std::make_shared<MailRequest>();
+	mailRequest->data = mail.dump();
 
-	std::string mailData = mail.dump();
+	mailRequest->recipients = nullptr;
+	mailRequest->recipients = curl_slist_append(mailRequest->recipients, mail.rcptTo().c_str());
 
 	curl_easy_setopt(curl, CURLOPT_URL, smtpServer.c_str());
 	curl_easy_setopt(curl, CURLOPT_MAIL_FROM, mail.mailFrom().c_str());
-	curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
+	curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, mailRequest->recipients);
 	curl_easy_setopt(curl, CURLOPT_READFUNCTION, curlStringReadFunction);
-	curl_easy_setopt(curl, CURLOPT_READDATA, &mailData);
+	curl_easy_setopt(curl, CURLOPT_READDATA, &mailRequest->data);
 	curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+	curl_easy_setopt(curl, CURLOPT_TIMEOUT, 20L);
 
-	int res = curl_easy_perform(curl);
-	if(res != CURLE_OK)
-	{
-		std::cerr << "NotificationThread::sendMail(): Failed to send email: " << res << std::endl;
-		Metrics::instance().incrementEmailSendErrors();
-	}
-	else
-	{
-		Metrics::instance().incrementEmailsSent(MetricsLabels::notificationTypeLabel(type));
-	}
+	dispatchThread->submit(curl, [curl, mailRequest, notification, channel] (CURLcode res, const std::unique_ptr<Chronos::MySQL_DB> &db) {
+		curl_easy_cleanup(curl);
 
-	curl_slist_free_all(recipients);
-	curl_easy_cleanup(curl);
+		NotificationResult::type result;
+		std::string resultDetails;
+		const std::string typeLabel = MetricsLabels::notificationTypeLabel(notification.type);
+		const std::string channelLabel = MetricsLabels::notificationChannelLabel(static_cast<int>(channel.type));
+
+		if (res != CURLE_OK)
+		{
+			std::cerr << "NotificationThread::sendMail(): Failed to send email: " << res << std::endl;
+			Metrics::instance().incrementNotificationSendErrors(typeLabel, channelLabel);
+			resultDetails = std::string(curl_easy_strerror(res));
+
+			result = NotificationResult::FAILED_SEND;
+		}
+		else
+		{
+			Metrics::instance().incrementNotificationsSent(typeLabel, channelLabel);
+
+			result = NotificationResult::SUCCESS;
+		}
+
+		storeNotification(notification, channel, result, resultDetails, db);
+	});
 }

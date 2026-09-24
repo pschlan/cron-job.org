@@ -63,6 +63,57 @@ export function notificationTypeText(code) {
   return Object.keys(NotificationType).find(k => NotificationType[k] === code) || 'UNKNOWN';
 }
 
+export const NotificationChannelType = {
+  EMAIL: 0,
+  WEBHOOK: 1
+};
+
+export function notificationChannelTypeKey(code) {
+  switch (code) {
+    case NotificationChannelType.EMAIL:
+      return 'email';
+    case NotificationChannelType.WEBHOOK:
+      return 'webhook';
+    default:
+      return 'unknown';
+  }
+}
+
+export const WEBHOOK_PAYLOAD_VARIABLES = [
+  'jobTitle', 'jobId', 'jobUrl',
+  'executed', 'executedTimestamp', 'scheduled', 'scheduledTimestamp',
+  'attempts', 'status', 'sslCertExpiry', 'sslCertExpiryTimestamp',
+  'notificationType'
+];
+
+function webhookPlaceholder(name) {
+  return '${' + name + '}';
+}
+
+export const DEFAULT_WEBHOOK_PAYLOAD = JSON.stringify({
+  jobTitle: webhookPlaceholder('jobTitle'),
+  jobUrl: webhookPlaceholder('jobUrl'),
+  notificationType: webhookPlaceholder('notificationType'),
+  status: webhookPlaceholder('status'),
+  executed: webhookPlaceholder('executed')
+}, null, 2);
+
+export function isValidJson(value) {
+  try {
+    JSON.parse(value);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+export const NotificationResult = {
+  SUCCESS: 0,
+  FAILED_PREPROCESS: 1,
+  FAILED_SEND: 2,
+  FAILED_OTHERS: 3
+};
+
 export const ChartColors = [
   '#003f5c',
   '#444e86',

@@ -18,6 +18,7 @@
 #include <atomic>
 
 #include <time.h>
+#include <sys/socket.h>
 
 #include "MySQL.h"
 #include "Config.h"
@@ -89,6 +90,7 @@ namespace Chronos
 	public:
 		std::shared_ptr<Config> config;
 		bool isIpAddressBlocked(in_addr_t ipAddress) const;
+		bool verifyPeerAddress(unsigned int addressLength, const struct sockaddr *address) const;
 
 	private:
 		std::atomic<bool> stop{false};
