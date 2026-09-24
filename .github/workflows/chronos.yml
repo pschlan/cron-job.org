@@ -14,7 +14,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt update && sudo apt-get install -y build-essential libev-dev libsqlite3-dev libmysqlclient-dev \
-          libboost-all-dev libssl-dev flex bison pkg-config
+          libboost-all-dev libssl-dev flex bison pkg-config libpsl-dev
     - name: Build dependencies
       run: |
         mkdir deps
