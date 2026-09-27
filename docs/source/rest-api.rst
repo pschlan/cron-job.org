@@ -239,7 +239,9 @@ jobDetails          array of :ref:`DetailedJob`             Job details
                 "onSuccess": false,
                 "onDisable": false,
                 "onSslCertExpiry": true,
-                "onSslCertExpirySeconds": 604800
+                "onSslCertExpirySeconds": 604800,
+                "mode": 1,
+                "selectedChannels": []
             },
             "extendedData": {
                 "headers": {
@@ -826,6 +828,13 @@ JobNotificationSettings
 ^^^^^^^^^^^^^^^^^^^^^^^
 The JobNotificationSettings specifies notification settings for a job.
 
+When to notify is controlled by the ``on*`` flags below. Which channels receive
+those notifications is controlled by ``mode`` / ``selectedChannels``. Channel
+IDs refer to the account's notification channels (``0`` is the built-in account
+email). Omitting ``mode`` / ``selectedChannels`` when creating a job keeps the
+previous fan-out behaviour (all channels). On ``PATCH``, omitted notification
+fields are left unchanged.
+
 ======================== ======================================= ======================================================================================= ===================
 Key                      Type                                    Description                                                                             Default *          
 ======================== ======================================= ======================================================================================= ===================
@@ -835,9 +844,21 @@ onSuccess                boolean                                 Whether to send
 onDisable                boolean                                 Whether to send a notification when the job has been disabled automatically or not.     ``false``          
 onSslCertExpiry          boolean                                 Whether to send a notification when the server TLS certificate is about to expire.      ``false``          
 onSslCertExpirySeconds   int                                     How many seconds before certificate expiry to send the notification (min 0).            ``604800`` (7 days)
+mode                     :ref:`JobNotificationMode`              Which notification channels to use for this job.                                         ``1`` (All)
+selectedChannels         array of int                            Channel IDs to use when ``mode`` is ``2`` (Selected). Ignored for other modes.          ``[]``
 ======================== ======================================= ======================================================================================= ===================
 
 `* Value when field is omitted while creating a job.`
+
+JobNotificationMode
+^^^^^^^^^^^^^^^^^^^
+=================== =========================================================
+Value               Description
+=================== =========================================================
+0                   None (do not deliver to any channel)
+1                   All notification channels
+2                   Only the channels listed in ``selectedChannels``
+=================== =========================================================
 
 JobExtendedData
 ^^^^^^^^^^^^^^^
