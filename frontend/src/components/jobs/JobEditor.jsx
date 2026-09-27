@@ -164,6 +164,7 @@ export default function JobEditor({ match }) {
     selectedChannels: []
   });
   const [ notificationChannels, setNotificationChannels ] = useState([]);
+  const [ notificationChannelsLoading, setNotificationChannelsLoading ] = useState(true);
   const [ requestMethod, setRequestMethod ] = useState(RequestMethod.GET);
   const [ requestBody, setRequestBody ] = useState('');
   const [ jobHeaders, setJobHeaders ] = useState([]);
@@ -199,9 +200,11 @@ export default function JobEditor({ match }) {
   //! @todo Show warning on leave if not saved?
 
   useEffect(() => {
+    setNotificationChannelsLoading(true);
     getNotificationChannels()
       .then(response => setNotificationChannels(response.notificationChannels || []))
-      .catch(() => setNotificationChannels([]));
+      .catch(() => setNotificationChannels([]))
+      .finally(() => setNotificationChannelsLoading(false));
   }, []);
 
   useEffect(() => {
@@ -814,7 +817,11 @@ export default function JobEditor({ match }) {
               label={t('jobs.notificationMode.selected')}
             />
             {notification.mode === JobNotificationMode.SELECTED && (
-              notificationChannels.length === 0 ? (
+              notificationChannelsLoading ? (
+                <Box className={classes.channelHint}>
+                  <LinearProgress />
+                </Box>
+              ) : notificationChannels.length === 0 ? (
                 <Typography variant='body2' color='textSecondary' className={classes.channelHint}>
                   {t('jobs.notificationChannels.noChannels')}{' '}
                   <MuiLink component={RouterLink} to='/settings'>{t('jobs.notificationChannels.manageInSettings')}</MuiLink>
