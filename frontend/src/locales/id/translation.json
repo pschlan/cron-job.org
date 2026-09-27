@@ -235,6 +235,18 @@
     "notifyOnFailureRequiredTimes": "Beri tahu setelah",
     "notifyOnFailureFailures": "kegagalan",
     "notifyOnFailureFailures_plural": "kegagalan berturut-turut",
+    "notifyVia": "Notify via...",
+    "notificationMode": {
+      "all": "All notification channels",
+      "selected": "Selected channels only",
+      "none": "No channels"
+    },
+    "notificationChannels": {
+      "noChannels": "No notification channels configured yet.",
+      "manageInSettings": "Manage channels in Settings.",
+      "accountEmail": "Account email",
+      "pendingConfirmation": "Pending confirmation"
+    },
     "requireshttpauth": "Memerlukan otentikasi HTTP",
     "username": "Nama pengguna",
     "password": "Kata sandi",

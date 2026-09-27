@@ -251,6 +251,18 @@
     "notifyOnSslCertExpiryLeadTime": "Notify before expiry",
     "notifyOnSslCertExpiryDays": "day",
     "notifyOnSslCertExpiryDays_plural": "days",
+    "notifyVia": "Notify via...",
+    "notificationMode": {
+      "all": "All notification channels",
+      "selected": "Selected channels only",
+      "none": "No channels"
+    },
+    "notificationChannels": {
+      "noChannels": "No notification channels configured yet.",
+      "manageInSettings": "Manage channels in Settings.",
+      "accountEmail": "Account email",
+      "pendingConfirmation": "Pending confirmation"
+    },
     "requireshttpauth": "Requires HTTP authentication",
     "username": "Username",
     "password": "Password",

@@ -60,6 +60,8 @@ namespace Chronos
 		bool notifyDisable = false;
 		bool notifySslCertExpiry = false;
 		int notifySslCertExpirySeconds = 604800; // in s, default 7 days
+		int notificationMode = 1; // 0=none, 1=all, 2=selected
+		std::string selectedNotificationChannels; // comma-separated channel IDs
 		bool saveResponses = false;
 		int oldFailCounter = 0;
 		int oldUnfilteredFailCounter = 0;

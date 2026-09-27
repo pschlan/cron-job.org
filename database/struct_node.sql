@@ -14,6 +14,8 @@ CREATE TABLE `job` (
   `notify_disable` tinyint(1) NOT NULL DEFAULT '1',
   `notify_ssl_cert_expiry` tinyint(1) NOT NULL DEFAULT '0',
   `notify_ssl_cert_expiry_seconds` int(11) NOT NULL DEFAULT '604800',
+  `notification_mode` tinyint(4) NOT NULL DEFAULT '1',
+  `selected_notification_channels` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
   `last_status` tinyint(4) NOT NULL DEFAULT '0',
   `last_fetch` int(11) NOT NULL DEFAULT '0',
   `last_duration` int(11) NOT NULL DEFAULT '0',

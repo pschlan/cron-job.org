@@ -219,6 +219,18 @@
       "onDisable": "cronjob-ul va fi dezactivat din cauza prea multor eșecuri",
       "onSslCertExpiry": "certificatul TLS al serverului este pe cale să expire"
     },
+    "notifyVia": "Notify via...",
+    "notificationMode": {
+      "all": "All notification channels",
+      "selected": "Selected channels only",
+      "none": "No channels"
+    },
+    "notificationChannels": {
+      "noChannels": "No notification channels configured yet.",
+      "manageInSettings": "Manage channels in Settings.",
+      "accountEmail": "Account email",
+      "pendingConfirmation": "Pending confirmation"
+    },
     "requireshttpauth": "Necesită autentificare HTTP",
     "username": "Nume de utilizator",
     "password": "Parolă",

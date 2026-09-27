@@ -221,6 +221,18 @@
       "onDisable": "çok fazla başarısızlık nedeniyle cronjob devre dışı bırakıldığında",
       "onSslCertExpiry": "sunucunun TLS sertifikası süresi dolmak üzere"
     },
+    "notifyVia": "Notify via...",
+    "notificationMode": {
+      "all": "All notification channels",
+      "selected": "Selected channels only",
+      "none": "No channels"
+    },
+    "notificationChannels": {
+      "noChannels": "No notification channels configured yet.",
+      "manageInSettings": "Manage channels in Settings.",
+      "accountEmail": "Account email",
+      "pendingConfirmation": "Pending confirmation"
+    },
     "requireshttpauth": "HTTP kimlik doğrulaması gerektirir",
     "username": "Kullanıcı adı",
     "password": "Şifre",

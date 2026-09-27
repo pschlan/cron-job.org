@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link as RouterLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -7,7 +7,7 @@ import {
   FormGroup, FormControlLabel, Select, MenuItem, InputLabel, TableContainer, Button,
   IconButton, Tabs, Tab, Grid, CircularProgress, Dialog, DialogTitle, DialogContent,
   DialogContentText, DialogActions, InputAdornment,
-  Box
+  Box, RadioGroup, Radio, Checkbox, Typography, Link as MuiLink
 } from '@material-ui/core';
 import { grey } from '@material-ui/core/colors';
 import { Alert, AlertTitle } from '@material-ui/lab';
@@ -16,12 +16,16 @@ import { useSnackbar } from 'notistack';
 import {
   getJobDetails, updateJob, createJob,
   deleteJob as apiDeleteJob,
-  cloneJob as apiCloneJob
+  cloneJob as apiCloneJob,
+  getNotificationChannels
 } from '../../utils/API';
 import {
   RegexPatterns,
   RequestMethod,
-  RequestMethodsSupportingCustomBody
+  RequestMethodsSupportingCustomBody,
+  JobNotificationMode,
+  NotificationChannelType,
+  notificationChannelTypeKey
 } from '../../utils/Constants';
 import { looksLikeHttpCommand, parseHttpCommand, looksLikeCrontabLine, parseCrontabLine } from '../../utils/CommandParser';
 import useTimezones from '../../hooks/useTimezones';
@@ -101,6 +105,15 @@ const useStyles = makeStyles((theme) => ({
   },
   tableContainer: {
     marginBottom: theme.spacing(2)
+  },
+  channelList: {
+    marginLeft: theme.spacing(4),
+    marginTop: theme.spacing(0.5),
+    marginBottom: theme.spacing(1)
+  },
+  channelHint: {
+    marginLeft: theme.spacing(4),
+    marginBottom: theme.spacing(1)
   }
 }));
 
@@ -146,8 +159,11 @@ export default function JobEditor({ match }) {
     onFailureCount: 1,
     onDisable: true,
     onSslCertExpiry: false,
-    onSslCertExpirySeconds: 604800
+    onSslCertExpirySeconds: 604800,
+    mode: JobNotificationMode.ALL,
+    selectedChannels: []
   });
+  const [ notificationChannels, setNotificationChannels ] = useState([]);
   const [ requestMethod, setRequestMethod ] = useState(RequestMethod.GET);
   const [ requestBody, setRequestBody ] = useState('');
   const [ jobHeaders, setJobHeaders ] = useState([]);
@@ -183,6 +199,12 @@ export default function JobEditor({ match }) {
   //! @todo Show warning on leave if not saved?
 
   useEffect(() => {
+    getNotificationChannels()
+      .then(response => setNotificationChannels(response.notificationChannels || []))
+      .catch(() => setNotificationChannels([]));
+  }, []);
+
+  useEffect(() => {
     if (createMode) {
       if (!userProfile || !userProfile.userProfile || !userProfile.userProfile.timezone) {
         return;
@@ -216,7 +238,9 @@ export default function JobEditor({ match }) {
           onFailure: false,
           onFailureCount: 1,
           onSslCertExpiry: false,
-          onSslCertExpirySeconds: 604800
+          onSslCertExpirySeconds: 604800,
+          mode: JobNotificationMode.ALL,
+          selectedChannels: []
         },
         requestMethod: RequestMethod.GET,
         folderId
@@ -237,6 +261,28 @@ export default function JobEditor({ match }) {
     }
   }
 
+  function toggleSelectedChannel(channelId, checked) {
+    setNotification(x => {
+      const current = Array.isArray(x.selectedChannels) ? x.selectedChannels : [];
+      const next = checked
+        ? (current.includes(channelId) ? current : [...current, channelId])
+        : current.filter(id => id !== channelId);
+      return { ...x, selectedChannels: next };
+    });
+  }
+
+  function channelLabel(channel) {
+    const typeLabel = t('settings.notificationChannels.types.' + notificationChannelTypeKey(channel.type));
+    const destination = channel.builtIn
+      ? t('jobs.notificationChannels.accountEmail')
+      : channel.destination;
+    let label = `${typeLabel} · ${destination}`;
+    if (!channel.builtIn && channel.type === NotificationChannelType.EMAIL && !channel.confirmed) {
+      label += ` (${t('jobs.notificationChannels.pendingConfirmation')})`;
+    }
+    return label;
+  }
+
   useEffect(() => {
     if (job && userProfile && userProfile.userGroup) {
       setJobTitle(job.title);
@@ -251,7 +297,13 @@ export default function JobEditor({ match }) {
       setNotification({
         onSslCertExpiry: false,
         onSslCertExpirySeconds: 604800,
-        ...job.notification
+        ...job.notification,
+        mode: (job.notification && job.notification.mode != null)
+          ? job.notification.mode
+          : JobNotificationMode.ALL,
+        selectedChannels: (job.notification && Array.isArray(job.notification.selectedChannels))
+          ? job.notification.selectedChannels
+          : []
       });
       setRequestMethod(job.requestMethod);
       setRequestBody(job.extendedData.body);
@@ -740,6 +792,58 @@ export default function JobEditor({ match }) {
                 />
             </Box>
           </FormGroup>
+        </fieldset>
+
+        <fieldset className={classes.fieldSet}>
+          <FormLabel component='legend'>{t('jobs.notifyVia')}</FormLabel>
+          <RadioGroup
+            value={String(notification.mode != null ? notification.mode : JobNotificationMode.ALL)}
+            onChange={({target}) => setNotification(x => ({
+              ...x,
+              mode: parseInt(target.value, 10)
+            }))}
+          >
+            <FormControlLabel
+              value={String(JobNotificationMode.ALL)}
+              control={<Radio color='primary' />}
+              label={t('jobs.notificationMode.all')}
+            />
+            <FormControlLabel
+              value={String(JobNotificationMode.SELECTED)}
+              control={<Radio color='primary' />}
+              label={t('jobs.notificationMode.selected')}
+            />
+            {notification.mode === JobNotificationMode.SELECTED && (
+              notificationChannels.length === 0 ? (
+                <Typography variant='body2' color='textSecondary' className={classes.channelHint}>
+                  {t('jobs.notificationChannels.noChannels')}{' '}
+                  <MuiLink component={RouterLink} to='/settings'>{t('jobs.notificationChannels.manageInSettings')}</MuiLink>
+                </Typography>
+              ) : (
+                <FormGroup className={classes.channelList}>
+                  {notificationChannels.map(channel => (
+                    <FormControlLabel
+                      key={channel.channelId}
+                      control={<Checkbox
+                        color='primary'
+                        checked={(notification.selectedChannels || []).includes(channel.channelId)}
+                        onChange={({target}) => toggleSelectedChannel(channel.channelId, target.checked)}
+                      />}
+                      label={channelLabel(channel)}
+                    />
+                  ))}
+                  <Typography variant='caption' color='textSecondary'>
+                    <MuiLink component={RouterLink} to='/settings'>{t('jobs.notificationChannels.manageInSettings')}</MuiLink>
+                  </Typography>
+                </FormGroup>
+              )
+            )}
+            <FormControlLabel
+              value={String(JobNotificationMode.NONE)}
+              control={<Radio color='primary' />}
+              label={t('jobs.notificationMode.none')}
+            />
+          </RadioGroup>
         </fieldset>
       </Paper>
     </div>

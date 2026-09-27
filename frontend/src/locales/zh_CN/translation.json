@@ -217,6 +217,18 @@
       "onDisable": "由于失败次数太多，计划任务将被停用",
       "onSslCertExpiry": "服务器 TLS 证书即将过期"
     },
+    "notifyVia": "Notify via...",
+    "notificationMode": {
+      "all": "All notification channels",
+      "selected": "Selected channels only",
+      "none": "No channels"
+    },
+    "notificationChannels": {
+      "noChannels": "No notification channels configured yet.",
+      "manageInSettings": "Manage channels in Settings.",
+      "accountEmail": "Account email",
+      "pendingConfirmation": "Pending confirmation"
+    },
     "requireshttpauth": "需要 HTTP 身份验证",
     "username": "用户名",
     "password": "密码",

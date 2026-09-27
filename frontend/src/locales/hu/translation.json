@@ -221,6 +221,18 @@
       "onDisable": "a cron feladat le lesz tiltva a túl sok hiba miatt",
       "onSslCertExpiry": "a szerver TLS-tanúsítványa hamarosan lejár"
     },
+    "notifyVia": "Notify via...",
+    "notificationMode": {
+      "all": "All notification channels",
+      "selected": "Selected channels only",
+      "none": "No channels"
+    },
+    "notificationChannels": {
+      "noChannels": "No notification channels configured yet.",
+      "manageInSettings": "Manage channels in Settings.",
+      "accountEmail": "Account email",
+      "pendingConfirmation": "Pending confirmation"
+    },
     "requireshttpauth": "HTTP hitelesítés szükséges",
     "username": "Felhasználónév",
     "password": "Jelszó",

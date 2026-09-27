@@ -16,6 +16,7 @@
 #include <functional>
 #include <iostream>
 #include <ctime>
+#include <unordered_set>
 
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/server/TThreadedServer.h>
@@ -65,6 +66,63 @@ void getJobSchedule(const std::unique_ptr<Chronos::MySQL_DB> &db, const JobIdent
     {
         target.insert(std::stoi(row[0]));
     }
+}
+
+JobNotificationMode::type normalizeNotificationMode(int mode)
+{
+    if(mode == static_cast<int>(JobNotificationMode::NONE)
+        || mode == static_cast<int>(JobNotificationMode::ALL)
+        || mode == static_cast<int>(JobNotificationMode::SELECTED))
+    {
+        return static_cast<JobNotificationMode::type>(mode);
+    }
+    return JobNotificationMode::ALL;
+}
+
+std::vector<int64_t> parseSelectedNotificationChannels(const char *raw)
+{
+    std::vector<int64_t> result;
+    if(raw == nullptr || raw[0] == '\0')
+        return result;
+
+    std::unordered_set<int64_t> seen;
+    for(const auto &part : Chronos::Utils::split(raw, ','))
+    {
+        const std::string trimmed = Chronos::Utils::trim(part);
+        if(trimmed.empty())
+            continue;
+        try
+        {
+            const int64_t channelId = std::stoll(trimmed);
+            if(channelId < 0 || !seen.insert(channelId).second)
+                continue;
+            result.push_back(channelId);
+        }
+        catch(const std::exception &)
+        {
+            // ignore malformed entries
+        }
+    }
+    return result;
+}
+
+std::string serializeSelectedNotificationChannels(const std::vector<int64_t> &channels)
+{
+    std::unordered_set<int64_t> seen;
+    std::string serialized;
+    for(const int64_t channelId : channels)
+    {
+        if(channelId < 0 || !seen.insert(channelId).second)
+            continue;
+        const std::string piece = std::to_string(channelId);
+        const std::size_t needed = serialized.empty() ? piece.size() : piece.size() + 1;
+        if(serialized.size() + needed > 255)
+            break;
+        if(!serialized.empty())
+            serialized.push_back(',');
+        serialized.append(piece);
+    }
+    return serialized;
 }
 
 std::vector<Job> listJobs(const std::function<std::unique_ptr<Chronos::MySQL_Result>(const char *fields)> &queryFn)
@@ -222,7 +280,8 @@ public:
             auto res = db->query("SELECT `jobid`,`userid`,`enabled`,`title`,`save_responses`,`last_status`,`last_fetch`,"
                     "`last_duration`,`fail_counter`,`url`,`request_method`,`auth_enable`,`auth_user`,`auth_pass`,"
                     "`notify_failure`,`notify_success`,`notify_disable`,`timezone`,`type`,`usergroupid`,`request_timeout`, "
-                    "`redirect_success`,`expires_at`,`folderid`,`notify_failure_count`,`unfiltered_fail_counter`,`ssl_cert_expiry`,`notify_ssl_cert_expiry`,`notify_ssl_cert_expiry_seconds` "
+                    "`redirect_success`,`expires_at`,`folderid`,`notify_failure_count`,`unfiltered_fail_counter`,`ssl_cert_expiry`,`notify_ssl_cert_expiry`,`notify_ssl_cert_expiry_seconds`,"
+                    "`notification_mode`,`selected_notification_channels` "
                     "FROM `job` WHERE `jobid`=%v AND `userid`=%v",
                 identifier.jobId,
                 identifier.userId);
@@ -274,6 +333,10 @@ public:
                 _return.notification.onDisable = std::strcmp(row[16], "1") == 0;
                 _return.notification.onSslCertExpiry = std::strcmp(row[27], "1") == 0;
                 _return.notification.onSslCertExpirySeconds = std::stoi(row[28]);
+                _return.notification.mode = normalizeNotificationMode(std::stoi(row[29]));
+                _return.notification.selectedChannels = parseSelectedNotificationChannels(row[30]);
+                _return.notification.__isset.mode = true;
+                _return.notification.__isset.selectedChannels = true;
                 _return.__isset.notification = true;
 
                 _return.schedule.timezone = row[17];
@@ -392,13 +455,22 @@ public:
 
             if(job.__isset.notification)
             {
-                db->query("UPDATE `job` SET `notify_failure`=%d, `notify_failure_count`=%d, `notify_success`=%d, `notify_disable`=%d, `notify_ssl_cert_expiry`=%d, `notify_ssl_cert_expiry_seconds`=%d WHERE `jobid`=%v",
+                const JobNotificationMode::type mode = job.notification.__isset.mode
+                    ? normalizeNotificationMode(static_cast<int>(job.notification.mode))
+                    : JobNotificationMode::ALL;
+                const std::string selectedChannels = job.notification.__isset.selectedChannels
+                    ? serializeSelectedNotificationChannels(job.notification.selectedChannels)
+                    : std::string();
+
+                db->query("UPDATE `job` SET `notify_failure`=%d, `notify_failure_count`=%d, `notify_success`=%d, `notify_disable`=%d, `notify_ssl_cert_expiry`=%d, `notify_ssl_cert_expiry_seconds`=%d, `notification_mode`=%d, `selected_notification_channels`='%q' WHERE `jobid`=%v",
                     job.notification.onFailure ? 1 : 0,
                     std::max(1, job.notification.onFailureCount),
                     job.notification.onSuccess ? 1 : 0,
                     job.notification.onDisable ? 1 : 0,
                     job.notification.onSslCertExpiry ? 1 : 0,
                     std::max(0, job.notification.onSslCertExpirySeconds),
+                    static_cast<int>(mode),
+                    selectedChannels.c_str(),
                     job.identifier.jobId);
             }
 

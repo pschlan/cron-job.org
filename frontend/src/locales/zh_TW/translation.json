@@ -217,6 +217,18 @@
       "onDisable": "由於失敗次數太多，定時工作將被停用",
       "onSslCertExpiry": "伺服器 TLS 憑證即將到期"
     },
+    "notifyVia": "Notify via...",
+    "notificationMode": {
+      "all": "All notification channels",
+      "selected": "Selected channels only",
+      "none": "No channels"
+    },
+    "notificationChannels": {
+      "noChannels": "No notification channels configured yet.",
+      "manageInSettings": "Manage channels in Settings.",
+      "accountEmail": "Account email",
+      "pendingConfirmation": "Pending confirmation"
+    },
     "requireshttpauth": "需要 HTTP 身份驗證",
     "username": "使用者名稱",
     "password": "密碼",

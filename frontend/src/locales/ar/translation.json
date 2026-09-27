@@ -232,6 +232,18 @@
       "onDisable": "عند تعطيل مهمة كرون بسبب كثرة الفشل",
       "onSslCertExpiry": "اقتراب انتهاء شهادة TLS للخادم"
     },
+    "notifyVia": "Notify via...",
+    "notificationMode": {
+      "all": "All notification channels",
+      "selected": "Selected channels only",
+      "none": "No channels"
+    },
+    "notificationChannels": {
+      "noChannels": "No notification channels configured yet.",
+      "manageInSettings": "Manage channels in Settings.",
+      "accountEmail": "Account email",
+      "pendingConfirmation": "Pending confirmation"
+    },
     "requireshttpauth": "يتطلب مصادقة HTTP",
     "username": "اسم المستخدم",
     "password": "كلمة المرور",

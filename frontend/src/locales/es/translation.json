@@ -235,6 +235,18 @@
     "notifyOnFailureRequiredTimes": "Notificar después de",
     "notifyOnFailureFailures": "fallo",
     "notifyOnFailureFailures_plural": "fallos consecutivos",
+    "notifyVia": "Notify via...",
+    "notificationMode": {
+      "all": "All notification channels",
+      "selected": "Selected channels only",
+      "none": "No channels"
+    },
+    "notificationChannels": {
+      "noChannels": "No notification channels configured yet.",
+      "manageInSettings": "Manage channels in Settings.",
+      "accountEmail": "Account email",
+      "pendingConfirmation": "Pending confirmation"
+    },
     "requireshttpauth": "Requiere autenticación HTTP",
     "username": "Usuario",
     "password": "Contraseña",

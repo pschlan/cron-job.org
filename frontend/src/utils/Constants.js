@@ -68,6 +68,12 @@ export const NotificationChannelType = {
   WEBHOOK: 1
 };
 
+export const JobNotificationMode = {
+  NONE: 0,
+  ALL: 1,
+  SELECTED: 2
+};
+
 export function notificationChannelTypeKey(code) {
   switch (code) {
     case NotificationChannelType.EMAIL:
