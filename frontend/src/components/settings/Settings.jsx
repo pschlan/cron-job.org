@@ -22,6 +22,7 @@ import ChangeEmailAddressDialog from './ChangeEmailAddressDialog';
 import CreateMFADeviceDialog from './CreateMFADeviceDialog';
 import DeleteMFADeviceDialog from './DeleteMFADeviceDialog';
 import { NotificationChannelType, notificationChannelTypeKey, RegexPatterns, SubscriptionStatus } from '../../utils/Constants';
+import { isKnownWebhookPreset } from '../../utils/WebhookPresets';
 import DeleteAccountDialog from './DeleteAccountDialog';
 import ManageSubscriptionIcon from '@material-ui/icons/CreditCard';
 import SubscriptionActiveIcon from '@material-ui/icons/FavoriteBorder';
@@ -348,7 +349,9 @@ export default function Settings() {
           />
           <div>
             <div>
-              {t('settings.notificationChannels.types.' + notificationChannelTypeKey(channel.type))}
+              {isKnownWebhookPreset(channel.preset)
+                ? t('settings.notificationChannels.types.' + channel.preset)
+                : t('settings.notificationChannels.types.' + notificationChannelTypeKey(channel.type))}
               {' · '}
               {channel.destination}
             </div>

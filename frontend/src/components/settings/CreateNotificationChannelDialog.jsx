@@ -5,8 +5,15 @@ import { useTranslation } from 'react-i18next';
 import { createNotificationChannel } from '../../utils/API';
 import { useSnackbar } from 'notistack';
 import { DEFAULT_WEBHOOK_PAYLOAD, isValidJson, NotificationChannelType, RegexPatterns } from '../../utils/Constants';
+import {
+  WEBHOOK_PRESET_IDS,
+  buildWebhookPreset,
+  getWebhookPreset,
+  validateWebhookPreset
+} from '../../utils/WebhookPresets';
 import WebhookPayloadField from './WebhookPayloadField';
 import WebhookHeadersField, { headersToApi } from './WebhookHeadersField';
+import WebhookPresetFields from './WebhookPresetFields';
 
 const useStyles = makeStyles(theme => ({
   createDialog: {
@@ -17,6 +24,8 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const WEBHOOK_URL_PATTERN = /^https?:\/\/.+/i;
+const TYPE_EMAIL = 'email';
+const TYPE_WEBHOOK = 'webhook';
 
 export default function CreateNotificationChannelDialog({ accountEmail, onClose, onRefreshChannels }) {
   const classes = useStyles();
@@ -24,31 +33,70 @@ export default function CreateNotificationChannelDialog({ accountEmail, onClose,
   const onRefreshChannelsHook = useRef(onRefreshChannels, []);
   const { t } = useTranslation();
   const { enqueueSnackbar } = useSnackbar();
-  const [ type, setType ] = useState(NotificationChannelType.WEBHOOK);
+  const [ channelKind, setChannelKind ] = useState(TYPE_WEBHOOK);
   const [ destination, setDestination ] = useState('');
   const [ payload, setPayload ] = useState(DEFAULT_WEBHOOK_PAYLOAD);
   const [ headers, setHeaders ] = useState([]);
+  const [ presetFields, setPresetFields ] = useState(() => {
+    const initial = {};
+    WEBHOOK_PRESET_IDS.forEach(id => {
+      initial[id] = getWebhookPreset(id).defaultFields();
+    });
+    return initial;
+  });
   const [ createdEmail, setCreatedEmail ] = useState(null);
 
-  const isEmail = type === NotificationChannelType.EMAIL;
+  const isEmail = channelKind === TYPE_EMAIL;
+  const isCustomWebhook = channelKind === TYPE_WEBHOOK;
+  const isPreset = WEBHOOK_PRESET_IDS.includes(channelKind);
   const usesAccountEmail = isEmail && destination.trim().toLowerCase() === (accountEmail || '').toLowerCase();
-  const destinationValid = isEmail
-    ? !!destination.match(RegexPatterns.email) && !usesAccountEmail
-    : !!destination.match(WEBHOOK_URL_PATTERN);
-  const payloadValid = isEmail || isValidJson(payload);
-  const canCreate = destinationValid && payloadValid;
+
+  let canCreate = false;
+  if (isEmail) {
+    canCreate = !!destination.match(RegexPatterns.email) && !usesAccountEmail;
+  } else if (isCustomWebhook) {
+    canCreate = !!destination.match(WEBHOOK_URL_PATTERN) && isValidJson(payload);
+  } else if (isPreset) {
+    canCreate = validateWebhookPreset(channelKind, presetFields[channelKind]);
+  }
+
+  function updatePresetFields(next) {
+    setPresetFields(prev => ({
+      ...prev,
+      [channelKind]: next
+    }));
+  }
 
   function createChannel() {
     if (!canCreate) {
       return;
     }
-    const trimmedDestination = destination.trim();
+
+    let type = NotificationChannelType.WEBHOOK;
+    let trimmedDestination = destination.trim();
+    let channelPayload = payload;
+    let channelHeaders = headersToApi(headers);
+    let preset = '';
+
+    if (isEmail) {
+      type = NotificationChannelType.EMAIL;
+      channelPayload = '';
+      channelHeaders = [];
+    } else if (isPreset) {
+      const built = buildWebhookPreset(channelKind, presetFields[channelKind]);
+      trimmedDestination = built.destination;
+      channelPayload = built.payload;
+      channelHeaders = built.headers;
+      preset = channelKind;
+    }
+
     createNotificationChannel(
       type,
       trimmedDestination,
       true,
-      isEmail ? '' : payload,
-      isEmail ? [] : headersToApi(headers)
+      channelPayload,
+      channelHeaders,
+      preset
     )
       .then(() => {
         onRefreshChannelsHook.current();
@@ -93,20 +141,24 @@ export default function CreateNotificationChannelDialog({ accountEmail, onClose,
       <FormControl fullWidth>
         <InputLabel shrink>{t('settings.notificationChannels.type')}</InputLabel>
         <Select
-          value={type}
+          value={channelKind}
           onChange={({target}) => {
-            setType(target.value);
+            setChannelKind(target.value);
             setDestination('');
             setHeaders([]);
+            setPayload(DEFAULT_WEBHOOK_PAYLOAD);
           }}
         >
-          <MenuItem value={NotificationChannelType.EMAIL}>{t('settings.notificationChannels.types.email')}</MenuItem>
-          <MenuItem value={NotificationChannelType.WEBHOOK}>{t('settings.notificationChannels.types.webhook')}</MenuItem>
+          <MenuItem value={TYPE_EMAIL}>{t('settings.notificationChannels.types.email')}</MenuItem>
+          <MenuItem value={TYPE_WEBHOOK}>{t('settings.notificationChannels.types.webhook')}</MenuItem>
+          {WEBHOOK_PRESET_IDS.map(id => (
+            <MenuItem key={id} value={id}>{t(`settings.notificationChannels.types.${id}`)}</MenuItem>
+          ))}
         </Select>
       </FormControl>
-      <FormControl fullWidth>
+      {isEmail && <FormControl fullWidth>
         <TextField
-          label={isEmail ? t('settings.notificationChannels.emailAddress') : t('settings.notificationChannels.webhookUrl')}
+          label={t('settings.notificationChannels.emailAddress')}
           onChange={({target}) => setDestination(target.value)}
           value={destination}
           InputLabelProps={{ shrink: true }}
@@ -116,9 +168,27 @@ export default function CreateNotificationChannelDialog({ accountEmail, onClose,
           required
           autoFocus
         />
-      </FormControl>
-      {!isEmail && <WebhookHeadersField value={headers} onChange={setHeaders} />}
-      {!isEmail && <WebhookPayloadField value={payload} onChange={setPayload} />}
+      </FormControl>}
+      {isCustomWebhook && <>
+        <FormControl fullWidth>
+          <TextField
+            label={t('settings.notificationChannels.webhookUrl')}
+            onChange={({target}) => setDestination(target.value)}
+            value={destination}
+            InputLabelProps={{ shrink: true }}
+            fullWidth
+            required
+            autoFocus
+          />
+        </FormControl>
+        <WebhookHeadersField value={headers} onChange={setHeaders} />
+        <WebhookPayloadField value={payload} onChange={setPayload} />
+      </>}
+      {isPreset && <WebhookPresetFields
+        presetId={channelKind}
+        fields={presetFields[channelKind]}
+        onChange={updatePresetFields}
+      />}
     </DialogContent>
     <DialogActions>
       <Button autoFocus onClick={onCloseHook.current}>
