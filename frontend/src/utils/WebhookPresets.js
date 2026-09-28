@@ -1,10 +1,14 @@
 const WEBHOOK_URL_PATTERN = /^https?:\/\/.+/i;
 const MAX_DESTINATION_LENGTH = 255;
 
+function placeholder(name) {
+  return '${' + name + '}';
+}
+
 export const DEFAULT_MESSAGE_TEMPLATE = [
-  '${jobTitle}: ${notificationType}',
-  '${status}',
-  '${jobUrl}'
+  placeholder('jobTitle') + ': ' + placeholder('notificationType'),
+  placeholder('status'),
+  placeholder('jobUrl')
 ].join('\n');
 
 export const WEBHOOK_PRESET_IDS = [
@@ -17,10 +21,6 @@ export const WEBHOOK_PRESET_IDS = [
   'googlechat',
   'ntfy'
 ];
-
-function placeholder(name) {
-  return '${' + name + '}';
-}
 
 function stringifyPayload(body) {
   return JSON.stringify(body, null, 2);
