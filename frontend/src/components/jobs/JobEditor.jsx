@@ -52,6 +52,7 @@ import StatusBadgeIcon from '@material-ui/icons/Label';
 import FolderIcon from '@material-ui/icons/FolderOutlined';
 import ApplyIcon from '@material-ui/icons/DoubleArrow';
 import CodeIcon from '@material-ui/icons/Code';
+import NotificationsIcon from '@material-ui/icons/Notifications';
 import ValidatingTextField from '../misc/ValidatingTextField';
 import clsx from 'clsx';
 import useUserProfile from '../../hooks/useUserProfile';
@@ -647,6 +648,7 @@ export default function JobEditor({ match }) {
       indicatorColor="primary"
       textColor="primary">
       <Tab label={t('jobs.common')} icon={<AlarmIcon />} value='common' />
+      <Tab label={t('jobs.notifications')} icon={<NotificationsIcon />} value='notifications' />
       <Tab label={t('jobs.advanced')} icon={<TuneIcon />} value='advanced' />
     </Tabs>
     <div hidden={tabValue!=='common'} className={classes.tabPanel}>
@@ -730,7 +732,11 @@ export default function JobEditor({ match }) {
           <FormLabel component='legend'>{t('jobs.executionSchedule')}</FormLabel>
           <JobSchedule key={scheduleKey} initialSchedule={scheduleOverride || job.schedule || {}} timezone={timezone} onChange={sched => setSchedule(sched)} />
         </fieldset>
+      </Paper>
+    </div>
 
+    <div hidden={tabValue!=='notifications'} className={classes.tabPanel}>
+      <Paper className={classes.paper}>
         <fieldset className={classes.fieldSet}>
           <FormLabel component='legend'>{t('jobs.notifymewhen')}</FormLabel>
           <FormGroup>
