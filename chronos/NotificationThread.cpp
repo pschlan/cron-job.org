@@ -1467,7 +1467,8 @@ void NotificationThread::sendWebhookNotification(const Notification &notificatio
 				}
 
 				const std::string headerKey = Utils::sanitizeHttpHeaderKey(header["key"].get<std::string>());
-				if (Utils::isBannedHeaderKey(headerKey))
+				if (Utils::isBannedHeaderKey(headerKey)
+					|| strcasecmp(headerKey.c_str(), "content-type") == 0)
 				{
 					continue;
 				}
