@@ -398,7 +398,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 14 },
+      "gridPos": { "h": 7, "w": 6, "x": 0, "y": 14 },
       "id": 9,
       "options": {
         "legend": { "calcs": ["mean"], "displayMode": "list", "placement": "bottom", "showLegend": true },
@@ -430,7 +430,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 14 },
+      "gridPos": { "h": 7, "w": 6, "x": 6, "y": 14 },
       "id": 10,
       "options": {
         "legend": { "calcs": ["mean", "max"], "displayMode": "list", "placement": "bottom", "showLegend": true },
@@ -467,7 +467,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 14 },
+      "gridPos": { "h": 7, "w": 6, "x": 12, "y": 14 },
       "id": 11,
       "options": {
         "legend": { "calcs": ["mean", "max"], "displayMode": "list", "placement": "bottom", "showLegend": true },
@@ -481,6 +481,38 @@
         }
       ],
       "title": "Scheduling jitter (p95)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 15,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "showPoints": "never"
+          },
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 7, "w": 6, "x": 18, "y": 14 },
+      "id": 29,
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "targets": [
+        {
+          "expr": "rate(chronos_schedule_dirty_jobs_refreshed_total{instance=~\"$instance\"}[$__rate_interval]) * 60",
+          "legendFormat": "dirty refreshed / min",
+          "refId": "A"
+        }
+      ],
+      "title": "Dirty jobs refreshed per minute",
       "type": "timeseries"
     },
     {
