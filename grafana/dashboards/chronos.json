@@ -394,7 +394,7 @@
             "showPoints": "never",
             "stacking": { "group": "A", "mode": "normal" }
           },
-          "unit": "ops"
+          "unit": "cpm"
         },
         "overrides": []
       },
@@ -495,7 +495,7 @@
             "lineWidth": 2,
             "showPoints": "never"
           },
-          "unit": "ops"
+          "unit": "cpm"
         },
         "overrides": []
       },
