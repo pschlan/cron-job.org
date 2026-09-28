@@ -217,6 +217,12 @@ Metrics::Metrics(const std::string &mode, int nodeId)
 		.Register(*registry_)
 		.Add({});
 
+	scheduleDirtyJobsRefreshed_ = &prometheus::BuildCounter()
+		.Name("chronos_schedule_dirty_jobs_refreshed_total")
+		.Help("Dirty job IDs re-fetched immediately before launching prefetched workers")
+		.Register(*registry_)
+		.Add({});
+
 	jobsAutoDisabled_ = &prometheus::BuildCounter()
 		.Name("chronos_jobs_auto_disabled_total")
 		.Help("Jobs automatically disabled after exceeding maxFailures")
@@ -473,6 +479,14 @@ void Metrics::observeScheduleTickDurationSeconds(double seconds)
 void Metrics::incrementScheduleTimezonesSkipped()
 {
 	scheduleTimezonesSkipped_->Increment();
+}
+
+void Metrics::incrementScheduleDirtyJobsRefreshed(uint64_t count)
+{
+	if(count > 0)
+	{
+		scheduleDirtyJobsRefreshed_->Increment(static_cast<double>(count));
+	}
 }
 
 void Metrics::incrementJobsAutoDisabled()

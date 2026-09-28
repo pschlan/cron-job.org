@@ -99,6 +99,7 @@ Worker threads are started with `detach()` — `processJobs()` returns once work
 | `chronos_schedule_tick_duration_seconds` | Histogram | — | Wall-clock duration of `processJobs()` from entry until worker threads are started (MySQL fetch, queue assignment, wait until `plannedTime`; **excludes** HTTP execution) |
 | `chronos_scheduler_loop_lag_seconds` | Gauge | — | `tm_sec − 60` at each minute tick (always ≤ 0). ~−60 when the loop detects the boundary early; values closer to 0 mean later detection. Only updated when `job_executor_enable` is set |
 | `chronos_schedule_timezones_skipped_total` | Counter | — | Time zones that failed to load (`cctz::load_time_zone`) |
+| `chronos_schedule_dirty_jobs_refreshed_total` | Counter | — | Dirty job IDs drained and reconciled immediately before launching prefetched workers (create/update/delete/auto-disable during the prefetch wait) |
 | `chronos_jobs_auto_disabled_total` | Counter | — | Jobs automatically disabled after exceeding `maxFailures` (increment in `UpdateThread::storeResult()`) |
 
 Per-job execution delay relative to the planned time is captured by `chronos_worker_jitter_seconds`, not by a schedule-level lag gauge. `processJobs()` waits until `plannedTime` before starting workers, so lag measured at worker-thread start would always be ~0.
@@ -281,6 +282,7 @@ Production fleet: **~100M executions/day on 5 executor nodes** (~20M/node/day, ~
 | `WorkerThread::jobDone()` | Update local `WorkerMetricsBatch` only (status counts + duration/jitter histogram buckets). **No prometheus-cpp calls.** |
 | End of `WorkerThread::threadMain()` | `Metrics::mergeWorkerBatch()` — merge counter deltas and histogram bucket counts under one lock per metric family |
 | `processJobsForTimeZone()` | Accumulate into local `ScheduleMetricsBatch`; flush once after `processJobs()` |
+| `refreshDirtyJobs()` | Increment `chronos_schedule_dirty_jobs_refreshed_total` by drained dirty-set size (once per tick when non-empty) |
 | `UpdateThread`, RPC, notifications | Direct prometheus-cpp writes at low frequency — no batching needed |
 
 Pre-create and cache all bounded metric label combinations at init. Never call `.Add({labels})` on the hot path.

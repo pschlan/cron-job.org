@@ -532,6 +532,8 @@ public:
                 job.identifier.jobId);
 
             db->query("COMMIT");
+
+            App::getInstance()->markJobDirty(job.identifier.jobId);
         }
         catch(const std::exception &ex)
         {
@@ -564,6 +566,8 @@ public:
             db->query("DELETE FROM `job_header` WHERE `jobid`=%v",      identifier.jobId);
             db->query("DELETE FROM `job` WHERE `jobid`=%v",             identifier.jobId);
             db->query("COMMIT");
+
+            App::getInstance()->markJobDirty(identifier.jobId);
         }
         catch(const std::exception &ex)
         {

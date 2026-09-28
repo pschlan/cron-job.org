@@ -13,6 +13,7 @@
 #define _METRICS_H_
 
 #include <atomic>
+#include <cstdint>
 #include <memory>
 #include <string>
 
@@ -45,6 +46,7 @@ namespace Chronos
 		void observeScheduleTickDurationSeconds(double seconds);
 
 		void incrementScheduleTimezonesSkipped();
+		void incrementScheduleDirtyJobsRefreshed(uint64_t count);
 		void incrementJobsAutoDisabled();
 		void incrementSocketExhaustion(const std::string &reason);
 
@@ -121,6 +123,7 @@ namespace Chronos
 		prometheus::Family<prometheus::Histogram> *scheduleTickDurationFamily_ = nullptr;
 		prometheus::Histogram *scheduleTickDuration_ = nullptr;
 		prometheus::Counter *scheduleTimezonesSkipped_ = nullptr;
+		prometheus::Counter *scheduleDirtyJobsRefreshed_ = nullptr;
 		prometheus::Counter *jobsAutoDisabled_ = nullptr;
 		prometheus::Family<prometheus::Counter> *socketExhaustionFamily_ = nullptr;
 

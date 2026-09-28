@@ -389,6 +389,7 @@ void UpdateThread::storeResults(const std::vector<std::unique_ptr<JobResult>> &r
 					db->query("UPDATE `job` SET `enabled`=0,`fail_counter`=0,`unfiltered_fail_counter`=0 WHERE `jobid`=%d",
 						result->jobID);
 					Metrics::instance().incrementJobsAutoDisabled();
+					App::getInstance()->markJobDirty(result->jobID);
 				}
 				catch(const std::exception &ex)
 				{
