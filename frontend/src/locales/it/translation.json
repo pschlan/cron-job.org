@@ -229,7 +229,9 @@
       "noChannels": "Nessun canale di notifica configurato.",
       "manageInSettings": "Gestisci i canali nelle Impostazioni.",
       "accountEmail": "Email dell'account",
-      "pendingConfirmation": "Conferma in sospeso"
+      "pendingConfirmation": "Conferma in sospeso",
+      "disabled": "disattivato",
+      "disabledNote": "I canali disattivati non riceveranno notifiche."
     },
     "requireshttpauth": "Richiede autenticazione HTTP",
     "username": "Username",

@@ -242,7 +242,9 @@
       "noChannels": "لم يتم تكوين أي قنوات إشعار بعد.",
       "manageInSettings": "إدارة القنوات في الإعدادات.",
       "accountEmail": "بريد الحساب",
-      "pendingConfirmation": "بانتظار التأكيد"
+      "pendingConfirmation": "بانتظار التأكيد",
+      "disabled": "معطّل",
+      "disabledNote": "القنوات المعطّلة لن تستلم إشعارات."
     },
     "requireshttpauth": "يتطلب مصادقة HTTP",
     "username": "اسم المستخدم",

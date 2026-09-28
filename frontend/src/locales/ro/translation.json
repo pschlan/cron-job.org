@@ -229,7 +229,9 @@
       "noChannels": "Nu există încă canale de notificare configurate.",
       "manageInSettings": "Gestionează canalele în Setări.",
       "accountEmail": "E-mailul contului",
-      "pendingConfirmation": "Confirmare în așteptare"
+      "pendingConfirmation": "Confirmare în așteptare",
+      "disabled": "dezactivat",
+      "disabledNote": "Canalele dezactivate nu vor primi notificări."
     },
     "requireshttpauth": "Necesită autentificare HTTP",
     "username": "Nume de utilizator",

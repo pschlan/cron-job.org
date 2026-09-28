@@ -231,7 +231,9 @@
       "noChannels": "Még nincsenek értesítési csatornák beállítva.",
       "manageInSettings": "Csatornák kezelése a Beállításokban.",
       "accountEmail": "Fiók e-mail",
-      "pendingConfirmation": "Megerősítésre vár"
+      "pendingConfirmation": "Megerősítésre vár",
+      "disabled": "kikapcsolva",
+      "disabledNote": "A kikapcsolt csatornák nem kapnak értesítéseket."
     },
     "requireshttpauth": "HTTP hitelesítés szükséges",
     "username": "Felhasználónév",

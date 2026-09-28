@@ -229,7 +229,9 @@
       "noChannels": "Nie skonfigurowano jeszcze żadnych kanałów powiadomień.",
       "manageInSettings": "Zarządzaj kanałami w Ustawieniach.",
       "accountEmail": "E-mail konta",
-      "pendingConfirmation": "Oczekuje na potwierdzenie"
+      "pendingConfirmation": "Oczekuje na potwierdzenie",
+      "disabled": "wyłączony",
+      "disabledNote": "Wyłączone kanały nie będą otrzymywać powiadomień."
     },
     "requireshttpauth": "Wymaga uwierzytelnienia HTTP",
     "username": "Nazwa użytkownika",

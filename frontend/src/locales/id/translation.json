@@ -245,7 +245,9 @@
       "noChannels": "Belum ada saluran notifikasi yang dikonfigurasi.",
       "manageInSettings": "Kelola saluran di Pengaturan.",
       "accountEmail": "Email akun",
-      "pendingConfirmation": "Menunggu konfirmasi"
+      "pendingConfirmation": "Menunggu konfirmasi",
+      "disabled": "nonaktif",
+      "disabledNote": "Saluran yang nonaktif tidak akan menerima notifikasi."
     },
     "requireshttpauth": "Memerlukan otentikasi HTTP",
     "username": "Nama pengguna",

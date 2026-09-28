@@ -220,7 +220,9 @@
       "noChannels": "Каналы уведомлений ещё не настроены.",
       "manageInSettings": "Управлять каналами в Настройках.",
       "accountEmail": "E-mail аккаунта",
-      "pendingConfirmation": "Ожидает подтверждения"
+      "pendingConfirmation": "Ожидает подтверждения",
+      "disabled": "отключен",
+      "disabledNote": "Отключённые каналы не будут получать уведомления."
     },
     "requireshttpauth": "Требует HTTP аутентификации",
     "username": "Имя пользователя",

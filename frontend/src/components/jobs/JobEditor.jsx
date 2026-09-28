@@ -134,6 +134,11 @@ const useStyles = makeStyles((theme) => ({
     '& > svg': {
       fontSize: 18
     }
+  },
+  channelStatusNote: {
+    marginLeft: theme.spacing(0.75),
+    fontSize: '0.75em',
+    color: theme.palette.text.secondary
   }
 }));
 
@@ -302,14 +307,20 @@ export default function JobEditor({ match }) {
     const destination = channel.builtIn
       ? t('jobs.notificationChannels.accountEmail')
       : formatNotificationChannelIdentity(channel);
-    let text = destination ? `${typeLabel} · ${destination}` : typeLabel;
-    if (!channel.builtIn && channel.type === NotificationChannelType.EMAIL && !channel.confirmed) {
-      text += ` (${t('jobs.notificationChannels.pendingConfirmation')})`;
+    const text = destination ? `${typeLabel} · ${destination}` : typeLabel;
+    let statusNote = null;
+    if (!channel.enabled) {
+      statusNote = t('jobs.notificationChannels.disabled');
+    } else if (!channel.builtIn && channel.type === NotificationChannelType.EMAIL && !channel.confirmed) {
+      statusNote = t('jobs.notificationChannels.pendingConfirmation');
     }
     return (
       <span className={classes.channelLabel}>
         <span className={classes.channelIcon}>{notificationChannelTypeIcon(typeKey)}</span>
-        <span>{text}</span>
+        <span>
+          {text}
+          {statusNote && <span className={classes.channelStatusNote}>({statusNote})</span>}
+        </span>
       </span>
     );
   }
@@ -844,6 +855,14 @@ export default function JobEditor({ match }) {
               control={<Radio color='primary' />}
               label={t('jobs.notificationMode.all')}
             />
+            {!notificationChannelsLoading
+              && (notification.mode == null || notification.mode === JobNotificationMode.ALL)
+              && notificationChannels.some(channel => !channel.enabled) && (
+              <Typography variant='caption' color='textSecondary' className={classes.channelHint} component='div'>
+                {t('jobs.notificationChannels.disabledNote')}{' '}
+                <MuiLink component={RouterLink} to='/settings'>{t('jobs.notificationChannels.manageInSettings')}</MuiLink>
+              </Typography>
+            )}
             <FormControlLabel
               value={String(JobNotificationMode.SELECTED)}
               control={<Radio color='primary' />}
@@ -873,6 +892,12 @@ export default function JobEditor({ match }) {
                     />
                   ))}
                   <Typography variant='caption' color='textSecondary'>
+                    {(notification.selectedChannels || []).some(id => {
+                      const channel = notificationChannels.find(c => c.channelId === id);
+                      return channel && !channel.enabled;
+                    }) && <>
+                      {t('jobs.notificationChannels.disabledNote')}{' '}
+                    </>}
                     <MuiLink component={RouterLink} to='/settings'>{t('jobs.notificationChannels.manageInSettings')}</MuiLink>
                   </Typography>
                 </FormGroup>

@@ -231,7 +231,9 @@
       "noChannels": "Henüz yapılandırılmış bildirim kanalı yok.",
       "manageInSettings": "Kanalları Ayarlar’dan yönetin.",
       "accountEmail": "Hesap e-postası",
-      "pendingConfirmation": "Onay bekleniyor"
+      "pendingConfirmation": "Onay bekleniyor",
+      "disabled": "devre dışı",
+      "disabledNote": "Devre dışı kanallar bildirim almaz."
     },
     "requireshttpauth": "HTTP kimlik doğrulaması gerektirir",
     "username": "Kullanıcı adı",

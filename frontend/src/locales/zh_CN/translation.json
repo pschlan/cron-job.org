@@ -227,7 +227,9 @@
       "noChannels": "尚未配置任何通知渠道。",
       "manageInSettings": "在设置中管理渠道。",
       "accountEmail": "账户电子邮件",
-      "pendingConfirmation": "待确认"
+      "pendingConfirmation": "待确认",
+      "disabled": "已禁用",
+      "disabledNote": "已禁用的渠道不会收到通知。"
     },
     "requireshttpauth": "需要 HTTP 身份验证",
     "username": "用户名",

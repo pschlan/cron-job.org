@@ -237,7 +237,9 @@
       "noChannels": "Ingen notifikationskanaler konfigureret endnu.",
       "manageInSettings": "Administrer kanaler under Indstillinger.",
       "accountEmail": "Konto-e-mail",
-      "pendingConfirmation": "Afventer bekræftelse"
+      "pendingConfirmation": "Afventer bekræftelse",
+      "disabled": "deaktiveret",
+      "disabledNote": "Deaktiverede kanaler modtager ikke notifikationer."
     },
     "requireshttpauth": "Kræver HTTP-godkendelse",
     "username": "Brugernavn",

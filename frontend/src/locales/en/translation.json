@@ -261,7 +261,9 @@
       "noChannels": "No notification channels configured yet.",
       "manageInSettings": "Manage channels in Settings.",
       "accountEmail": "Account email",
-      "pendingConfirmation": "Pending confirmation"
+      "pendingConfirmation": "Pending confirmation",
+      "disabled": "disabled",
+      "disabledNote": "Disabled channels will not receive notifications."
     },
     "requireshttpauth": "Requires HTTP authentication",
     "username": "Username",

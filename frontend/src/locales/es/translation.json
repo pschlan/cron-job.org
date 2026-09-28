@@ -245,7 +245,9 @@
       "noChannels": "Aún no hay canales de notificación configurados.",
       "manageInSettings": "Gestionar canales en Ajustes.",
       "accountEmail": "Correo de la cuenta",
-      "pendingConfirmation": "Confirmación pendiente"
+      "pendingConfirmation": "Confirmación pendiente",
+      "disabled": "desactivado",
+      "disabledNote": "Los canales desactivados no recibirán notificaciones."
     },
     "requireshttpauth": "Requiere autenticación HTTP",
     "username": "Usuario",

@@ -261,7 +261,9 @@
       "noChannels": "Noch keine Benachrichtigungskanäle konfiguriert.",
       "manageInSettings": "Kanäle in den Einstellungen verwalten.",
       "accountEmail": "Konto-E-Mail",
-      "pendingConfirmation": "Bestätigung ausstehend"
+      "pendingConfirmation": "Bestätigung ausstehend",
+      "disabled": "deaktiviert",
+      "disabledNote": "Deaktivierte Kanäle empfangen keine Benachrichtigungen."
     },
     "requireshttpauth": "Erfordert HTTP-Authentifizierung",
     "username": "Benutzername",

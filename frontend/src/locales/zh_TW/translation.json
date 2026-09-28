@@ -227,7 +227,9 @@
       "noChannels": "尚未設定任何通知頻道。",
       "manageInSettings": "在設定中管理頻道。",
       "accountEmail": "帳戶電子郵件",
-      "pendingConfirmation": "待確認"
+      "pendingConfirmation": "待確認",
+      "disabled": "已停用",
+      "disabledNote": "已停用的管道不會收到通知。"
     },
     "requireshttpauth": "需要 HTTP 身份驗證",
     "username": "使用者名稱",
