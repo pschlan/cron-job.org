@@ -96,13 +96,11 @@ function webhookPlaceholder(name) {
   return '${' + name + '}';
 }
 
-export const DEFAULT_WEBHOOK_PAYLOAD = JSON.stringify({
-  jobTitle: webhookPlaceholder('jobTitle'),
-  jobUrl: webhookPlaceholder('jobUrl'),
-  notificationType: webhookPlaceholder('notificationType'),
-  status: webhookPlaceholder('status'),
-  executed: webhookPlaceholder('executed')
-}, null, 2);
+export const DEFAULT_WEBHOOK_PAYLOAD = JSON.stringify(
+  Object.fromEntries(WEBHOOK_PAYLOAD_VARIABLES.map(name => [name, webhookPlaceholder(name)])),
+  null,
+  2
+);
 
 export function isValidJson(value) {
   try {
