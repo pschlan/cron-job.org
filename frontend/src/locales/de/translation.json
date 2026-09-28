@@ -253,9 +253,9 @@
     "notifyOnSslCertExpiryDays_plural": "Tage",
     "notifyVia": "Benachrichtigen über...",
     "notificationMode": {
-      "all": "Alle Benachrichtigungskanäle",
-      "selected": "Nur ausgewählte Kanäle",
-      "none": "Keine Kanäle"
+      "all": "alle Benachrichtigungskanäle",
+      "selected": "nur ausgewählte Kanäle",
+      "none": "keine Kanäle"
     },
     "notificationChannels": {
       "noChannels": "Noch keine Benachrichtigungskanäle konfiguriert.",

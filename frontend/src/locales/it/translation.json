@@ -219,17 +219,17 @@
       "onDisable": "il cronjob sarà disabilitato a causa di troppo fallimenti",
       "onSslCertExpiry": "il certificato TLS del server sta per scadere"
     },
-    "notifyVia": "Notify via...",
+    "notifyVia": "Notifica tramite…",
     "notificationMode": {
-      "all": "All notification channels",
-      "selected": "Selected channels only",
-      "none": "No channels"
+      "all": "tutti i canali di notifica",
+      "selected": "solo canali selezionati",
+      "none": "nessun canale"
     },
     "notificationChannels": {
-      "noChannels": "No notification channels configured yet.",
-      "manageInSettings": "Manage channels in Settings.",
-      "accountEmail": "Account email",
-      "pendingConfirmation": "Pending confirmation"
+      "noChannels": "Nessun canale di notifica configurato.",
+      "manageInSettings": "Gestisci i canali nelle Impostazioni.",
+      "accountEmail": "Email dell'account",
+      "pendingConfirmation": "Conferma in sospeso"
     },
     "requireshttpauth": "Richiede autenticazione HTTP",
     "username": "Username",
