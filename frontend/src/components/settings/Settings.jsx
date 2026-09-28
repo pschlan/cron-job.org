@@ -22,7 +22,7 @@ import ChangeEmailAddressDialog from './ChangeEmailAddressDialog';
 import CreateMFADeviceDialog from './CreateMFADeviceDialog';
 import DeleteMFADeviceDialog from './DeleteMFADeviceDialog';
 import { NotificationChannelType, notificationChannelTypeKey, RegexPatterns, SubscriptionStatus } from '../../utils/Constants';
-import { isKnownWebhookPreset } from '../../utils/WebhookPresets';
+import { isKnownWebhookPreset, formatNotificationChannelIdentity } from '../../utils/WebhookPresets';
 import DeleteAccountDialog from './DeleteAccountDialog';
 import ManageSubscriptionIcon from '@material-ui/icons/CreditCard';
 import SubscriptionActiveIcon from '@material-ui/icons/FavoriteBorder';
@@ -47,7 +47,7 @@ import EditAPIKeyDialog from './EditAPIKeyDialog';
 import CreateNotificationChannelDialog from './CreateNotificationChannelDialog';
 import EditNotificationChannelDialog from './EditNotificationChannelDialog';
 import DeleteNotificationChannelDialog from './DeleteNotificationChannelDialog';
-import NotificationsIcon from '@material-ui/icons/Notifications';
+import { notificationChannelTypeIcon } from './NotificationChannelTypeIcon';
 
 const useStyles = makeStyles(theme => ({
   grid: {
@@ -342,9 +342,15 @@ export default function Settings() {
   const NOTIFICATION_CHANNEL_COLUMNS = [
     {
       head: t('settings.notificationChannels.destination'),
-      cell: channel => <div style={{display: 'flex', alignItems: 'center'}}>
+      cell: channel => {
+        const identity = formatNotificationChannelIdentity(channel);
+        return <div style={{display: 'flex', alignItems: 'center'}}>
           <IconAvatar
-            icon={channel.type === NotificationChannelType.EMAIL ? <EmailIcon /> : <NotificationsIcon />}
+            icon={notificationChannelTypeIcon(
+              isKnownWebhookPreset(channel.preset)
+                ? channel.preset
+                : notificationChannelTypeKey(channel.type)
+            )}
             color={channel.enabled && channel.confirmed !== false ? 'green' : 'default'}
           />
           <div>
@@ -352,8 +358,7 @@ export default function Settings() {
               {isKnownWebhookPreset(channel.preset)
                 ? t('settings.notificationChannels.types.' + channel.preset)
                 : t('settings.notificationChannels.types.' + notificationChannelTypeKey(channel.type))}
-              {' · '}
-              {channel.destination}
+              {identity ? ` · ${identity}` : ''}
             </div>
             {channel.builtIn && <Typography variant='caption' color='textSecondary'>
               {t('settings.notificationChannels.accountEmail')}
@@ -365,7 +370,8 @@ export default function Settings() {
                 </Typography>
               </Tooltip>}
           </div>
-        </div>
+        </div>;
+      }
     },
     {
       head: t('settings.notificationChannels.enabled'),

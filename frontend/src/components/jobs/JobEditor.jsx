@@ -27,6 +27,8 @@ import {
   NotificationChannelType,
   notificationChannelTypeKey
 } from '../../utils/Constants';
+import { isKnownWebhookPreset, formatNotificationChannelIdentity } from '../../utils/WebhookPresets';
+import { notificationChannelTypeIcon } from '../settings/NotificationChannelTypeIcon';
 import { looksLikeHttpCommand, parseHttpCommand, looksLikeCrontabLine, parseCrontabLine } from '../../utils/CommandParser';
 import useTimezones from '../../hooks/useTimezones';
 import NotFound from '../misc/NotFound';
@@ -115,6 +117,23 @@ const useStyles = makeStyles((theme) => ({
   channelHint: {
     marginLeft: theme.spacing(4),
     marginBottom: theme.spacing(1)
+  },
+  channelLabel: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: theme.spacing(1)
+  },
+  channelIcon: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 18,
+    height: 18,
+    flexShrink: 0,
+    color: theme.palette.text.secondary,
+    '& > svg': {
+      fontSize: 18
+    }
   }
 }));
 
@@ -276,15 +295,23 @@ export default function JobEditor({ match }) {
   }
 
   function channelLabel(channel) {
-    const typeLabel = t('settings.notificationChannels.types.' + notificationChannelTypeKey(channel.type));
+    const typeKey = isKnownWebhookPreset(channel.preset)
+      ? channel.preset
+      : notificationChannelTypeKey(channel.type);
+    const typeLabel = t('settings.notificationChannels.types.' + typeKey);
     const destination = channel.builtIn
       ? t('jobs.notificationChannels.accountEmail')
-      : channel.destination;
-    let label = `${typeLabel} · ${destination}`;
+      : formatNotificationChannelIdentity(channel);
+    let text = destination ? `${typeLabel} · ${destination}` : typeLabel;
     if (!channel.builtIn && channel.type === NotificationChannelType.EMAIL && !channel.confirmed) {
-      label += ` (${t('jobs.notificationChannels.pendingConfirmation')})`;
+      text += ` (${t('jobs.notificationChannels.pendingConfirmation')})`;
     }
-    return label;
+    return (
+      <span className={classes.channelLabel}>
+        <span className={classes.channelIcon}>{notificationChannelTypeIcon(typeKey)}</span>
+        <span>{text}</span>
+      </span>
+    );
   }
 
   useEffect(() => {

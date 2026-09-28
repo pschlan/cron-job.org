@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, InputLabel, makeStyles, MenuItem, Select, TextField } from '@material-ui/core';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, InputLabel, makeStyles, MenuItem, Select, TextField } from '@material-ui/core';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import { useTranslation } from 'react-i18next';
 import { createNotificationChannel } from '../../utils/API';
@@ -14,11 +14,29 @@ import {
 import WebhookPayloadField from './WebhookPayloadField';
 import WebhookHeadersField, { headersToApi } from './WebhookHeadersField';
 import WebhookPresetFields from './WebhookPresetFields';
+import { notificationChannelTypeIcon } from './NotificationChannelTypeIcon';
 
 const useStyles = makeStyles(theme => ({
   createDialog: {
     '& > *': {
       marginBottom: theme.spacing(2)
+    }
+  },
+  typeOption: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(1.5)
+  },
+  typeIcon: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 20,
+    height: 20,
+    flexShrink: 0,
+    color: theme.palette.text.secondary,
+    '& > svg': {
+      fontSize: 20
     }
   }
 }));
@@ -26,6 +44,15 @@ const useStyles = makeStyles(theme => ({
 const WEBHOOK_URL_PATTERN = /^https?:\/\/.+/i;
 const TYPE_EMAIL = 'email';
 const TYPE_WEBHOOK = 'webhook';
+
+function TypeOption({ kind, label, classes }) {
+  return (
+    <Box className={classes.typeOption}>
+      <span className={classes.typeIcon}>{notificationChannelTypeIcon(kind)}</span>
+      <span>{label}</span>
+    </Box>
+  );
+}
 
 export default function CreateNotificationChannelDialog({ accountEmail, onClose, onRefreshChannels }) {
   const classes = useStyles();
@@ -65,6 +92,10 @@ export default function CreateNotificationChannelDialog({ accountEmail, onClose,
       ...prev,
       [channelKind]: next
     }));
+  }
+
+  function typeLabel(kind) {
+    return t(`settings.notificationChannels.types.${kind}`);
   }
 
   function createChannel() {
@@ -148,11 +179,20 @@ export default function CreateNotificationChannelDialog({ accountEmail, onClose,
             setHeaders([]);
             setPayload(DEFAULT_WEBHOOK_PAYLOAD);
           }}
+          renderValue={value => (
+            <TypeOption kind={value} label={typeLabel(value)} classes={classes} />
+          )}
         >
-          <MenuItem value={TYPE_EMAIL}>{t('settings.notificationChannels.types.email')}</MenuItem>
-          <MenuItem value={TYPE_WEBHOOK}>{t('settings.notificationChannels.types.webhook')}</MenuItem>
+          <MenuItem value={TYPE_EMAIL}>
+            <TypeOption kind={TYPE_EMAIL} label={typeLabel(TYPE_EMAIL)} classes={classes} />
+          </MenuItem>
+          <MenuItem value={TYPE_WEBHOOK}>
+            <TypeOption kind={TYPE_WEBHOOK} label={typeLabel(TYPE_WEBHOOK)} classes={classes} />
+          </MenuItem>
           {WEBHOOK_PRESET_IDS.map(id => (
-            <MenuItem key={id} value={id}>{t(`settings.notificationChannels.types.${id}`)}</MenuItem>
+            <MenuItem key={id} value={id}>
+              <TypeOption kind={id} label={typeLabel(id)} classes={classes} />
+            </MenuItem>
           ))}
         </Select>
       </FormControl>

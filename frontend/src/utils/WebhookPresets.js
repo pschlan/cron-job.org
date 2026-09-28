@@ -315,3 +315,52 @@ export function validateWebhookPreset(id, fields) {
   }
   return preset.validate(fields);
 }
+
+function maskWebhookUrl(url) {
+  try {
+    const parsed = new URL(url);
+    const path = parsed.pathname.replace(/\/+$/, '');
+    const tail = path.length <= 4 ? path : path.slice(-4);
+    return `${parsed.host}/…${tail}`;
+  } catch (e) {
+    return '…';
+  }
+}
+
+/** Safe public label for a channel destination (never includes Telegram bot tokens etc.). */
+export function formatNotificationChannelIdentity(channel) {
+  if (!channel) {
+    return '';
+  }
+  if (!isKnownWebhookPreset(channel.preset)) {
+    return channel.destination || '';
+  }
+
+  const fields = parseWebhookPreset(channel.preset, channel);
+  switch (channel.preset) {
+    case 'telegram':
+      return fields.chatId || '';
+    case 'pushover':
+      return fields.userKey || '';
+    case 'ntfy': {
+      const topic = fields.topic || '';
+      const server = (fields.serverUrl || '').replace(/\/+$/, '');
+      if (topic && server && server !== 'https://ntfy.sh') {
+        try {
+          return `${new URL(server).host}/${topic}`;
+        } catch (e) {
+          return topic;
+        }
+      }
+      return topic;
+    }
+    case 'slack':
+    case 'discord':
+    case 'teams':
+    case 'mattermost':
+    case 'googlechat':
+      return maskWebhookUrl(fields.webhookUrl || channel.destination || '');
+    default:
+      return '';
+  }
+}
