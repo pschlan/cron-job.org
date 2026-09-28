@@ -31,6 +31,13 @@ enum JobType
     MONITORING          = 1
 }
 
+enum JobNotificationMode
+{
+    NONE                = 0,
+    ALL                 = 1,
+    SELECTED            = 2
+}
+
 struct JobIdentifier
 {
     1: i64 jobId;
@@ -97,6 +104,8 @@ struct JobNotification
     4: i32 onFailureCount;
     5: bool onSslCertExpiry;
     6: i32 onSslCertExpirySeconds; // in s before certificate expiry
+    7: JobNotificationMode mode; // which channels to use
+    8: list<i64> selectedChannels; // channel IDs when mode=SELECTED
 }
 
 struct Job

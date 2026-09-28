@@ -51,6 +51,21 @@ class JobNotification
             'isRequired' => false,
             'type' => TType::I32,
         ),
+        7 => array(
+            'var' => 'mode',
+            'isRequired' => false,
+            'type' => TType::I32,
+            'class' => '\chronos\JobNotificationMode',
+        ),
+        8 => array(
+            'var' => 'selectedChannels',
+            'isRequired' => false,
+            'type' => TType::LST,
+            'etype' => TType::I64,
+            'elem' => array(
+                'type' => TType::I64,
+            ),
+        ),
     );
 
     /**
@@ -77,6 +92,14 @@ class JobNotification
      * @var int
      */
     public $onSslCertExpirySeconds = null;
+    /**
+     * @var int
+     */
+    public $mode = null;
+    /**
+     * @var int[]
+     */
+    public $selectedChannels = null;
 
     public function __construct($vals = null)
     {
@@ -98,6 +121,12 @@ class JobNotification
             }
             if (isset($vals['onSslCertExpirySeconds'])) {
                 $this->onSslCertExpirySeconds = $vals['onSslCertExpirySeconds'];
+            }
+            if (isset($vals['mode'])) {
+                $this->mode = $vals['mode'];
+            }
+            if (isset($vals['selectedChannels'])) {
+                $this->selectedChannels = $vals['selectedChannels'];
             }
         }
     }
@@ -163,6 +192,29 @@ class JobNotification
                         $xfer += $input->skip($ftype);
                     }
                     break;
+                case 7:
+                    if ($ftype == TType::I32) {
+                        $xfer += $input->readI32($this->mode);
+                    } else {
+                        $xfer += $input->skip($ftype);
+                    }
+                    break;
+                case 8:
+                    if ($ftype == TType::LST) {
+                        $this->selectedChannels = array();
+                        $_size = 0;
+                        $_etype = 0;
+                        $xfer += $input->readListBegin($_etype, $_size);
+                        for ($_i = 0; $_i < $_size; ++$_i) {
+                            $elem = null;
+                            $xfer += $input->readI64($elem);
+                            $this->selectedChannels[] = $elem;
+                        }
+                        $xfer += $input->readListEnd();
+                    } else {
+                        $xfer += $input->skip($ftype);
+                    }
+                    break;
                 default:
                     $xfer += $input->skip($ftype);
                     break;
@@ -205,6 +257,20 @@ class JobNotification
         if ($this->onSslCertExpirySeconds !== null) {
             $xfer += $output->writeFieldBegin('onSslCertExpirySeconds', TType::I32, 6);
             $xfer += $output->writeI32($this->onSslCertExpirySeconds);
+            $xfer += $output->writeFieldEnd();
+        }
+        if ($this->mode !== null) {
+            $xfer += $output->writeFieldBegin('mode', TType::I32, 7);
+            $xfer += $output->writeI32($this->mode);
+            $xfer += $output->writeFieldEnd();
+        }
+        if ($this->selectedChannels !== null) {
+            $xfer += $output->writeFieldBegin('selectedChannels', TType::LST, 8);
+            $output->writeListBegin(TType::I64, count($this->selectedChannels));
+            foreach ($this->selectedChannels as $iter) {
+                $xfer += $output->writeI64($iter);
+            }
+            $output->writeListEnd();
             $xfer += $output->writeFieldEnd();
         }
         $xfer += $output->writeFieldStop();

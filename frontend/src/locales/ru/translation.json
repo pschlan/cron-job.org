@@ -210,6 +210,18 @@
       "onDisable": "cron задание будет отключена по причине слишком большого количества провалов",
       "onSslCertExpiry": "срок действия TLS-сертификата сервера скоро истечёт"
     },
+    "notifyVia": "Уведомлять через…",
+    "notificationMode": {
+      "all": "Все каналы уведомлений",
+      "selected": "Только выбранные каналы",
+      "none": "Без каналов"
+    },
+    "notificationChannels": {
+      "noChannels": "Каналы уведомлений ещё не настроены.",
+      "manageInSettings": "Управлять каналами в Настройках.",
+      "accountEmail": "E-mail аккаунта",
+      "pendingConfirmation": "Ожидает подтверждения"
+    },
     "requireshttpauth": "Требует HTTP аутентификации",
     "username": "Имя пользователя",
     "password": "Пароль",
@@ -513,43 +525,43 @@
       "saved": "Ваши изменения в ключе API успешно сохранены."
     },
     "notificationChannels": {
-      "channels": "Notification Channels",
-      "add": "Add Channel",
-      "noChannels": "You don't have any additional notification channels yet.",
-      "accountEmail": "Account email",
-      "type": "Type",
+      "channels": "Каналы уведомлений",
+      "add": "Добавить канал",
+      "noChannels": "У вас пока нет дополнительных каналов уведомлений.",
+      "accountEmail": "E-mail аккаунта",
+      "type": "Тип",
       "types": {
-        "email": "Email",
+        "email": "E-mail",
         "webhook": "Webhook"
       },
-      "destination": "Destination",
-      "emailAddress": "Email address",
-      "webhookUrl": "Webhook URL",
-      "payload": "JSON payload",
-      "payloadHelp": "Placeholders in JSON string values are replaced when the notification is sent.",
-      "payloadInvalid": "Please enter valid JSON.",
-      "enabled": "Enabled",
-      "statusEnabled": "Enabled",
-      "statusDisabled": "Disabled",
-      "addText": "Notifications for your cronjobs are sent to all enabled channels. You can add extra email addresses or webhook URLs.",
-      "createError": "Sorry, we could not create the notification channel. Please try again later.",
-      "created": "The notification channel has been created successfully.",
-      "editChannel": "Edit notification channel",
-      "saveError": "Sorry, we could not save your changes. Please try again later.",
-      "saved": "Your changes to the notification channel have been saved successfully.",
-      "deleteChannel": "Delete notification channel",
-      "confirmDelete": "Do you really want to delete this notification channel? It will no longer receive notifications.",
-      "deleteError": "Sorry, we could not delete the notification channel. Please try again later.",
-      "deleted": "The notification channel has been deleted successfully.",
-      "cannotUseAccountEmail": "This address is already used by your account email channel.",
-      "cannotEdit": "The account email channel cannot be edited.",
-      "cannotDelete": "The account email channel cannot be deleted.",
-      "pendingConfirmation": "Pending confirmation",
-      "pendingConfirmationHint": "Check this inbox for a confirmation link. If you did not get the email, delete this channel and add it again.",
-      "cannotEditEmail": "Email channels cannot be edited. Delete this channel and add a new one to change the address.",
-      "cannotEnableUnconfirmed": "This channel must be confirmed before it can be enabled.",
-      "createdCheckInbox": "We sent a confirmation email to {{email}}. Click the link in that message to activate this channel.",
-      "createdCheckInboxTitle": "Confirm the email address"
+      "destination": "Назначение",
+      "emailAddress": "Адрес электронной почты",
+      "webhookUrl": "URL вебхука",
+      "payload": "JSON-полезная нагрузка",
+      "payloadHelp": "Плейсхолдеры в строковых значениях JSON заменяются при отправке уведомления.",
+      "payloadInvalid": "Введите корректный JSON.",
+      "enabled": "Включён",
+      "statusEnabled": "Включён",
+      "statusDisabled": "Отключён",
+      "addText": "Уведомления о ваших cron-задачах отправляются на все включённые каналы. Вы можете добавить дополнительные адреса электронной почты или URL вебхуков.",
+      "createError": "К сожалению, не удалось создать канал уведомлений. Попробуйте позже.",
+      "created": "Канал уведомлений успешно создан.",
+      "editChannel": "Редактировать канал уведомлений",
+      "saveError": "К сожалению, не удалось сохранить изменения. Попробуйте позже.",
+      "saved": "Изменения канала уведомлений успешно сохранены.",
+      "deleteChannel": "Удалить канал уведомлений",
+      "confirmDelete": "Вы действительно хотите удалить этот канал уведомлений? Он больше не будет получать уведомления.",
+      "deleteError": "К сожалению, не удалось удалить канал уведомлений. Попробуйте позже.",
+      "deleted": "Канал уведомлений успешно удалён.",
+      "cannotUseAccountEmail": "Этот адрес уже используется каналом e-mail аккаунта.",
+      "cannotEdit": "Канал e-mail аккаунта нельзя редактировать.",
+      "cannotDelete": "Канал e-mail аккаунта нельзя удалить.",
+      "pendingConfirmation": "Ожидает подтверждения",
+      "pendingConfirmationHint": "Проверьте этот почтовый ящик на наличие ссылки для подтверждения. Если письмо не пришло, удалите этот канал и добавьте его снова.",
+      "cannotEditEmail": "Каналы e-mail нельзя редактировать. Удалите этот канал и добавьте новый, чтобы изменить адрес.",
+      "cannotEnableUnconfirmed": "Этот канал необходимо подтвердить, прежде чем его можно будет включить.",
+      "createdCheckInbox": "Мы отправили письмо с подтверждением на {{email}}. Перейдите по ссылке в письме, чтобы активировать этот канал.",
+      "createdCheckInboxTitle": "Подтвердите адрес электронной почты"
     }
   },
   "statistics": {
@@ -566,7 +578,7 @@
     "error": "К сожалению, мы не смогли подтвердить изменение вашего адреса электронной почты. Ссылка для подтверждения недействительна, просрочена или уже использовалась."
   },
   "confirmNotificationChannel": {
-    "success": "This email address has been confirmed and will now receive cron job notifications.",
-    "error": "Sorry, we could not confirm this email address. The confirmation link is invalid, expired or has already been used."
+    "success": "Этот адрес электронной почты подтверждён и теперь будет получать уведомления о cron-задачах.",
+    "error": "К сожалению, не удалось подтвердить этот адрес электронной почты. Ссылка для подтверждения недействительна, истекла или уже была использована."
   }
 }

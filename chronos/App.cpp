@@ -372,7 +372,7 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 
 	const int64_t expiryCompareVal = year * 10000000000 + month * 100000000 + mday * 1000000 + hour * 10000 + minute * 100;
 
-	auto res = db->query("SELECT TRIM(`url`),`job`.`jobid`,`auth_enable`,`auth_user`,`auth_pass`,`notify_failure`,`notify_success`,`notify_disable`,`fail_counter`,`save_responses`,`job`.`userid`,`request_method`,COUNT(`job_header`.`jobheaderid`),`job_body`.`body`,`title`,`job`.`type`,`usergroupid`,`request_timeout`,`redirect_success`,`unfiltered_fail_counter`,`notify_failure_count`,`notify_ssl_cert_expiry`,`notify_ssl_cert_expiry_seconds` FROM `job` "
+	auto res = db->query("SELECT TRIM(`url`),`job`.`jobid`,`auth_enable`,`auth_user`,`auth_pass`,`notify_failure`,`notify_success`,`notify_disable`,`fail_counter`,`save_responses`,`job`.`userid`,`request_method`,COUNT(`job_header`.`jobheaderid`),`job_body`.`body`,`title`,`job`.`type`,`usergroupid`,`request_timeout`,`redirect_success`,`unfiltered_fail_counter`,`notify_failure_count`,`notify_ssl_cert_expiry`,`notify_ssl_cert_expiry_seconds`,`notification_mode`,`selected_notification_channels` FROM `job` "
 									"INNER JOIN `job_hours` ON `job_hours`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_mdays` ON `job_mdays`.`jobid`=`job`.`jobid` "
 									"INNER JOIN `job_wdays` ON `job_wdays`.`jobid`=`job`.`jobid` "
@@ -439,6 +439,11 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 			req->result->saveResponses	= strcmp(row[9], "1") == 0;
 			req->result->notifySslCertExpiry = strcmp(row[21], "1") == 0;
 			req->result->notifySslCertExpirySeconds = std::max(0, atoi(row[22]));
+			{
+				const int mode = atoi(row[23]);
+				req->result->notificationMode = (mode >= 0 && mode <= 2) ? mode : 1;
+			}
+			req->result->selectedNotificationChannels = row[24] != nullptr ? row[24] : "";
 			if(atoi(row[2]) == 1)
 			{
 				req->useAuth 		= true;

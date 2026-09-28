@@ -22,6 +22,7 @@
 #include <random>
 #include <regex>
 #include <sstream>
+#include <unordered_set>
 
 #include <stdlib.h>
 #include <time.h>
@@ -1345,6 +1346,40 @@ void NotificationThread::processNotification(Notification &notification)
 		emailChannel.settings = {};
 		notificationChannels.emplace_back(std::move(emailChannel));
 	}
+
+	// Filter channels according to the job's notification mode
+	const int notificationMode = notification.notificationMode;
+	if (notificationMode == 0) // NONE
+	{
+		return;
+	}
+	else if (notificationMode == 2) // SELECTED
+	{
+		std::unordered_set<int64_t> selectedIds;
+		std::stringstream ss(notification.selectedNotificationChannels);
+		std::string item;
+		while (std::getline(ss, item, ','))
+		{
+			if (item.empty())
+				continue;
+			try
+			{
+				selectedIds.insert(std::stoll(item));
+			}
+			catch (const std::exception &)
+			{
+				// ignore malformed entries
+			}
+		}
+
+		notificationChannels.erase(
+			std::remove_if(notificationChannels.begin(), notificationChannels.end(),
+				[&](const NotificationChannel &channel) {
+					return selectedIds.find(channel.channelId) == selectedIds.end();
+				}),
+			notificationChannels.end());
+	}
+	// mode == 1 (ALL) or unknown: keep all channels
 
 	// Remove query part of URL (might contain sensitive data)
 	std::size_t qmPos = notification.url.find('?');

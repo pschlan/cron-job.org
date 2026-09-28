@@ -219,6 +219,18 @@
       "onDisable": "il cronjob sarà disabilitato a causa di troppo fallimenti",
       "onSslCertExpiry": "il certificato TLS del server sta per scadere"
     },
+    "notifyVia": "Notifica tramite…",
+    "notificationMode": {
+      "all": "tutti i canali di notifica",
+      "selected": "solo canali selezionati",
+      "none": "nessun canale"
+    },
+    "notificationChannels": {
+      "noChannels": "Nessun canale di notifica configurato.",
+      "manageInSettings": "Gestisci i canali nelle Impostazioni.",
+      "accountEmail": "Email dell'account",
+      "pendingConfirmation": "Conferma in sospeso"
+    },
     "requireshttpauth": "Richiede autenticazione HTTP",
     "username": "Username",
     "password": "Password",

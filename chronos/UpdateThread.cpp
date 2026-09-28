@@ -372,6 +372,8 @@ void UpdateThread::storeResults(const std::vector<std::unique_ptr<JobResult>> &r
 				n.httpStatus = result->httpStatus;
 				n.failCounter = notificationFailCounter;
 				n.sslCertExpiry = sslCertExpiry;
+				n.notificationMode = result->notificationMode;
+				n.selectedNotificationChannels = result->selectedNotificationChannels;
 
 				NotificationThread::getInstance()->addNotification(std::move(n));
 			};

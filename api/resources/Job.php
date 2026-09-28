@@ -32,6 +32,41 @@ class JobNotification {
   public $onDisable = false;
   public $onSslCertExpiry = false;
   public $onSslCertExpirySeconds = 604800;
+  public $mode = \chronos\JobNotificationMode::ALL;
+  public $selectedChannels = [];
+
+  public static function normalizeMode($mode) {
+    $mode = intval($mode);
+    if (in_array($mode, [
+      \chronos\JobNotificationMode::NONE,
+      \chronos\JobNotificationMode::ALL,
+      \chronos\JobNotificationMode::SELECTED
+    ], true)) {
+      return $mode;
+    }
+    return \chronos\JobNotificationMode::ALL;
+  }
+
+  public static function normalizeSelectedChannels($channels) {
+    if (!is_array($channels)) {
+      return [];
+    }
+
+    $result = [];
+    $seen = [];
+    foreach ($channels as $channelId) {
+      if (!is_numeric($channelId)) {
+        continue;
+      }
+      $channelId = intval($channelId);
+      if ($channelId < 0 || isset($seen[$channelId])) {
+        continue;
+      }
+      $seen[$channelId] = true;
+      $result[] = $channelId;
+    }
+    return $result;
+  }
 }
 
 class JobAuthentication {
@@ -113,6 +148,12 @@ class Job {
       $result->notification->onDisable  = $job->notification->onDisable;
       $result->notification->onSslCertExpiry = $job->notification->onSslCertExpiry;
       $result->notification->onSslCertExpirySeconds = $job->notification->onSslCertExpirySeconds;
+      $result->notification->mode = isset($job->notification->mode)
+        ? JobNotification::normalizeMode($job->notification->mode)
+        : \chronos\JobNotificationMode::ALL;
+      $result->notification->selectedChannels = isset($job->notification->selectedChannels)
+        ? JobNotification::normalizeSelectedChannels($job->notification->selectedChannels)
+        : [];
     } else {
       unset($result->notification);
     }
@@ -186,6 +227,12 @@ class Job {
     $job->notification->onFailureCount = $this->notification->onFailureCount;
     $job->notification->onSslCertExpiry = $this->notification->onSslCertExpiry;
     $job->notification->onSslCertExpirySeconds = max(0, $this->notification->onSslCertExpirySeconds);
+    $job->notification->mode = JobNotification::normalizeMode(
+      isset($this->notification->mode) ? $this->notification->mode : \chronos\JobNotificationMode::ALL
+    );
+    $job->notification->selectedChannels = JobNotification::normalizeSelectedChannels(
+      isset($this->notification->selectedChannels) ? $this->notification->selectedChannels : []
+    );
 
     $job->schedule                  = new \chronos\JobSchedule;
     $job->schedule->hours           = $this->toThriftSet($this->schedule->hours,    0,  23);
@@ -233,6 +280,12 @@ class Job {
     $this->notification->onSslCertExpiry = !!$request->job->notification->onSslCertExpiry;
     if (isset($request->job->notification->onSslCertExpirySeconds)) {
       $this->notification->onSslCertExpirySeconds = max(0, intval($request->job->notification->onSslCertExpirySeconds));
+    }
+    if (isset($request->job->notification->mode)) {
+      $this->notification->mode = JobNotification::normalizeMode($request->job->notification->mode);
+    }
+    if (isset($request->job->notification->selectedChannels)) {
+      $this->notification->selectedChannels = JobNotification::normalizeSelectedChannels($request->job->notification->selectedChannels);
     }
 
     $this->url                        = trim($request->job->url);
@@ -326,6 +379,14 @@ class Job {
 
     if (isset($request->job->notification) && isset($request->job->notification->onSslCertExpirySeconds)) {
       $this->notification->onSslCertExpirySeconds = max(0, intval($request->job->notification->onSslCertExpirySeconds));
+    }
+
+    if (isset($request->job->notification) && isset($request->job->notification->mode)) {
+      $this->notification->mode = JobNotification::normalizeMode($request->job->notification->mode);
+    }
+
+    if (isset($request->job->notification) && isset($request->job->notification->selectedChannels)) {
+      $this->notification->selectedChannels = JobNotification::normalizeSelectedChannels($request->job->notification->selectedChannels);
     }
 
     if (isset($request->job->url)) {

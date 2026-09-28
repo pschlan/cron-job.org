@@ -251,6 +251,18 @@
     "notifyOnSslCertExpiryLeadTime": "Benachrichtigung vor Ablauf",
     "notifyOnSslCertExpiryDays": "Tag",
     "notifyOnSslCertExpiryDays_plural": "Tage",
+    "notifyVia": "Benachrichtigen über...",
+    "notificationMode": {
+      "all": "alle Benachrichtigungskanäle",
+      "selected": "nur ausgewählte Kanäle",
+      "none": "keine Kanäle"
+    },
+    "notificationChannels": {
+      "noChannels": "Noch keine Benachrichtigungskanäle konfiguriert.",
+      "manageInSettings": "Kanäle in den Einstellungen verwalten.",
+      "accountEmail": "Konto-E-Mail",
+      "pendingConfirmation": "Bestätigung ausstehend"
+    },
     "requireshttpauth": "Erfordert HTTP-Authentifizierung",
     "username": "Benutzername",
     "password": "Passwort",

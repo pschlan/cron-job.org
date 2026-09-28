@@ -210,6 +210,18 @@
       "onDisable": "le cronjob sera désactivé en raison d'un trop grand nombre d'échecs.",
       "onSslCertExpiry": "le certificat TLS du serveur est sur le point d'expirer"
     },
+    "notifyVia": "Notifier via…",
+    "notificationMode": {
+      "all": "tous les canaux de notification",
+      "selected": "canaux sélectionnés uniquement",
+      "none": "aucun canal"
+    },
+    "notificationChannels": {
+      "noChannels": "Aucun canal de notification configuré pour le moment.",
+      "manageInSettings": "Gérer les canaux dans les Paramètres.",
+      "accountEmail": "E-mail du compte",
+      "pendingConfirmation": "Confirmation en attente"
+    },
     "requireshttpauth": "Nécessite une authentification HTTP",
     "username": "Utilisateur",
     "password": "Mot de passe",

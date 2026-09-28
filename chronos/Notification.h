@@ -40,6 +40,8 @@ namespace Chronos
 		int httpStatus = 0;
 		int failCounter = 0;
 		uint64_t sslCertExpiry = 0;	// in s, for SSL_CERT_EXPIRY notifications
+		int notificationMode = 1; // 0=none, 1=all, 2=selected
+		std::string selectedNotificationChannels; // comma-separated channel IDs
 	};
 };
 
