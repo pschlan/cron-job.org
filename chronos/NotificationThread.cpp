@@ -1351,8 +1351,6 @@ void NotificationThread::processNotification(Notification &notification)
 	const int notificationMode = notification.notificationMode;
 	if (notificationMode == 0) // NONE
 	{
-		std::cout << "NotificationThread::processNotification(): Job " << notification.jobID
-			<< " notification mode is none, skipping delivery" << std::endl;
 		return;
 	}
 	else if (notificationMode == 2) // SELECTED
@@ -1380,10 +1378,6 @@ void NotificationThread::processNotification(Notification &notification)
 					return selectedIds.find(channel.channelId) == selectedIds.end();
 				}),
 			notificationChannels.end());
-
-		std::cout << "NotificationThread::processNotification(): Job " << notification.jobID
-			<< " notification mode is selected, " << notificationChannels.size()
-			<< " channel(s) match" << std::endl;
 	}
 	// mode == 1 (ALL) or unknown: keep all channels
 
