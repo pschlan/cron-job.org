@@ -15,6 +15,9 @@
 #include <iostream>
 #include <functional>
 #include <algorithm>
+#include <unordered_map>
+#include <unordered_set>
+#include <sstream>
 
 #include <cctz/civil_time.h>
 #include <cctz/time_zone.h>
@@ -31,6 +34,7 @@
 #include "UpdateThread.h"
 #include "NotificationThread.h"
 #include "WorkerThread.h"
+#include "HTTPRequest.h"
 #include "NodeService.h"
 #include "TestRunThread.h"
 #include "MasterService.h"
@@ -122,6 +126,7 @@ struct App::Private
 {
 public:
 	using UserGroupMap = std::unordered_map<int64_t, UserGroup>;
+	using DirtyJobIdSet = std::unordered_set<int64_t>;
 
 	void swapUserGroups(UserGroupMap &userGroups)
 	{
@@ -148,10 +153,87 @@ public:
 		return UserGroup();
 	}
 
+	void markJobDirty(int64_t jobId)
+	{
+		std::unique_lock<std::mutex> lock(dirtyJobIdsMutex);
+		dirtyJobIds.insert(jobId);
+	}
+
+	DirtyJobIdSet swapDirtyJobIds()
+	{
+		DirtyJobIdSet drained;
+		std::unique_lock<std::mutex> lock(dirtyJobIdsMutex);
+		dirtyJobIds.swap(drained);
+		return drained;
+	}
+
 private:
 	UserGroupMap userGroups;
 	std::mutex userGroupsMutex;
+	DirtyJobIdSet dirtyJobIds;
+	std::mutex dirtyJobIdsMutex;
 };
+
+namespace
+{
+
+struct CivilTimeParts
+{
+	int hour = 0;
+	int minute = 0;
+	int month = 0;
+	int mday = 0;
+	int wday = -1;
+	int year = 0;
+};
+
+bool civilTimeForTimeZone(time_t forTime, const std::string &timeZone, CivilTimeParts &out)
+{
+	cctz::time_zone tz;
+	if(!cctz::load_time_zone(timeZone, &tz))
+	{
+		return false;
+	}
+
+	auto civilTime = cctz::convert(std::chrono::system_clock::from_time_t(forTime), tz);
+	auto cWDay = cctz::get_weekday(cctz::civil_day(civilTime));
+	switch(cWDay)
+	{
+	case cctz::weekday::monday:		out.wday = 1;	break;
+	case cctz::weekday::tuesday:	out.wday = 2;	break;
+	case cctz::weekday::wednesday:	out.wday = 3;	break;
+	case cctz::weekday::thursday:	out.wday = 4;	break;
+	case cctz::weekday::friday:		out.wday = 5;	break;
+	case cctz::weekday::saturday:	out.wday = 6;	break;
+	case cctz::weekday::sunday:		out.wday = 0;	break;
+	default:						out.wday = -1;	break;
+	}
+
+	out.hour = civilTime.hour();
+	out.minute = civilTime.minute();
+	out.month = civilTime.month();
+	out.mday = civilTime.day();
+	out.year = civilTime.year();
+	return true;
+}
+
+std::string joinJobIds(const std::unordered_set<int64_t> &jobIds)
+{
+	std::ostringstream oss;
+	bool first = true;
+	for(int64_t jobId : jobIds)
+	{
+		if(!first)
+		{
+			oss << ',';
+		}
+		oss << jobId;
+		first = false;
+	}
+	return oss.str();
+}
+
+}
 
 App::App(int argc, char *argv[])
 	: priv{std::make_unique<Private>()}
@@ -269,31 +351,35 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 			continue;
 		}
 
-		cctz::time_zone tz;
-		if(!cctz::load_time_zone(timeZone, &tz))
+		CivilTimeParts civilTime;
+		if(!civilTimeForTimeZone(forTime, timeZone, civilTime))
 		{
 			std::cout << "App::processJobs(): Failed to load time zone: " << timeZone << ", skipping" << std::endl;
 			Metrics::instance().incrementScheduleTimezonesSkipped();
 			continue;
 		}
 
-		auto civilTime = cctz::convert(std::chrono::system_clock::from_time_t(forTime), tz);
-		auto cWDay = cctz::get_weekday(cctz::civil_day(civilTime));
-		int wday = -1;
-		switch(cWDay)
-		{
-		case cctz::weekday::monday:		wday = 1;	break;
-		case cctz::weekday::tuesday:	wday = 2;	break;
-		case cctz::weekday::wednesday:	wday = 3;	break;
-		case cctz::weekday::thursday:	wday = 4;	break;
-		case cctz::weekday::friday:		wday = 5;	break;
-		case cctz::weekday::saturday:	wday = 6;	break;
-		case cctz::weekday::sunday:		wday = 0;	break;
-		default:						wday = -1;	break;
-		}
-
-		processJobsForTimeZone(civilTime.hour(), civilTime.minute(), civilTime.month(), civilTime.day(), wday, civilTime.year(),
+		processJobsForTimeZone(civilTime.hour, civilTime.minute, civilTime.month, civilTime.mday, civilTime.wday, civilTime.year,
 			plannedTime, timeZone, requestsByPriority, scheduleBatch);
+	}
+
+	std::cout << "App::processJobs(): Waiting for plannedTime = " << plannedTime << ", curTime = " << time(nullptr) << "..." << std::endl;
+	while(time(nullptr) < plannedTime && !stop)
+	{
+		usleep(1*1000);
+	}
+	std::cout << "App::processJobs(): Done waiting for plannedTime = " << plannedTime << "." << std::endl;
+
+	if(stop)
+	{
+		std::cout << "App::processJobs(): Stop requested, aborting." << std::endl;
+		return;
+	}
+
+	auto dirtyJobIds = priv->swapDirtyJobIds();
+	if(!dirtyJobIds.empty())
+	{
+		refreshDirtyJobs(forTime, plannedTime, requestsByPriority, scheduleBatch, dirtyJobIds);
 	}
 
 	// Add jobs to worker threads
@@ -314,19 +400,6 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 		}
 	}
 	requestsByPriority.clear();
-
-	std::cout << "App::processJobs(): Waiting for plannedTime = " << plannedTime << ", curTime = " << time(nullptr) << "..." << std::endl;
-	while(time(nullptr) < plannedTime && !stop)
-	{
-		usleep(1*1000);
-	}
-	std::cout << "App::processJobs(): Done waiting for plannedTime = " << plannedTime << "." << std::endl;
-
-	if(stop)
-	{
-		std::cout << "App::processJobs(): Stop requested, aborting." << std::endl;
-		return;
-	}
 
 	for(std::size_t i = 0; i < numThreads + numMonitoringThreads; ++i)
 	{
@@ -352,7 +425,8 @@ void App::processJobs(time_t forTime, time_t plannedTime)
 }
 
 void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int wday, int year, time_t timestamp, const std::string &timeZone,
-	std::map<uint8_t, std::vector<std::unique_ptr<HTTPRequest>>> &requestsByPriority, ScheduleMetricsBatch &scheduleBatch)
+	std::map<uint8_t, std::vector<std::unique_ptr<HTTPRequest>>> &requestsByPriority, ScheduleMetricsBatch &scheduleBatch,
+	const std::unordered_set<int64_t> *jobIdFilter)
 {
 	std::cout 	<< "App::processJobsForTimeZone(): Called for "
 				<< "hour = " << hour << ", "
@@ -364,6 +438,11 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 				<< "timeZone = " << timeZone
 				<< std::endl;
 
+	if(jobIdFilter != nullptr && jobIdFilter->empty())
+	{
+		return;
+	}
+
 	auto userGroups = priv->getUserGroups();
 	const size_t defaultMaxSize = App::getInstance()->config->getInt("request_max_size");
 	const int defaultRequestTimeout = App::getInstance()->config->getInt("request_timeout");
@@ -372,28 +451,38 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 
 	const int64_t expiryCompareVal = year * 10000000000 + month * 100000000 + mday * 1000000 + hour * 10000 + minute * 100;
 
-	auto res = db->query("SELECT TRIM(`url`),`job`.`jobid`,`auth_enable`,`auth_user`,`auth_pass`,`notify_failure`,`notify_success`,`notify_disable`,`fail_counter`,`save_responses`,`job`.`userid`,`request_method`,COUNT(`job_header`.`jobheaderid`),`job_body`.`body`,`title`,`job`.`type`,`usergroupid`,`request_timeout`,`redirect_success`,`unfiltered_fail_counter`,`notify_failure_count`,`notify_ssl_cert_expiry`,`notify_ssl_cert_expiry_seconds`,`notification_mode`,`selected_notification_channels` FROM `job` "
-									"INNER JOIN `job_hours` ON `job_hours`.`jobid`=`job`.`jobid` "
-									"INNER JOIN `job_mdays` ON `job_mdays`.`jobid`=`job`.`jobid` "
-									"INNER JOIN `job_wdays` ON `job_wdays`.`jobid`=`job`.`jobid` "
-									"INNER JOIN `job_minutes` ON `job_minutes`.`jobid`=`job`.`jobid` "
-									"INNER JOIN `job_months` ON `job_months`.`jobid`=`job`.`jobid` "
-									"LEFT JOIN `job_header` ON `job_header`.`jobid`=`job`.`jobid` "
-									"LEFT JOIN `job_body` ON `job_body`.`jobid`=`job`.`jobid` "
-									"WHERE (`hour`=-1 OR `hour`=%d) "
-									"AND (`minute`=-1 OR `minute`=%d) "
-									"AND ("
-									"    (`mday`=-1 AND `wday`=-1)"
-									" OR (`mday`=-1 AND `wday`=%d)"
-									" OR (`mday`=%d AND `wday`=-1)"
-									" OR (`mday`!=-1 AND `wday`!=-1 AND (`wday`=%d OR `mday`=%d))"
-									") "
-									"AND (`month`=-1 OR `month`=%d) "
-									"AND `job`.`timezone`='%q' "
-									"AND (`job`.`expires_at`=0 OR `job`.`expires_at`>=%u) "
-									"AND `enabled`=1 "
-									"GROUP BY `job`.`jobid` "
-									"ORDER BY `unfiltered_fail_counter` ASC, `job`.`jobid` ASC",
+	std::string jobIdFilterClause;
+	if(jobIdFilter != nullptr)
+	{
+		jobIdFilterClause = "AND `job`.`jobid` IN (" + joinJobIds(*jobIdFilter) + ") ";
+	}
+
+	const std::string query =
+		"SELECT TRIM(`url`),`job`.`jobid`,`auth_enable`,`auth_user`,`auth_pass`,`notify_failure`,`notify_success`,`notify_disable`,`fail_counter`,`save_responses`,`job`.`userid`,`request_method`,COUNT(`job_header`.`jobheaderid`),`job_body`.`body`,`title`,`job`.`type`,`usergroupid`,`request_timeout`,`redirect_success`,`unfiltered_fail_counter`,`notify_failure_count`,`notify_ssl_cert_expiry`,`notify_ssl_cert_expiry_seconds`,`notification_mode`,`selected_notification_channels` FROM `job` "
+		"INNER JOIN `job_hours` ON `job_hours`.`jobid`=`job`.`jobid` "
+		"INNER JOIN `job_mdays` ON `job_mdays`.`jobid`=`job`.`jobid` "
+		"INNER JOIN `job_wdays` ON `job_wdays`.`jobid`=`job`.`jobid` "
+		"INNER JOIN `job_minutes` ON `job_minutes`.`jobid`=`job`.`jobid` "
+		"INNER JOIN `job_months` ON `job_months`.`jobid`=`job`.`jobid` "
+		"LEFT JOIN `job_header` ON `job_header`.`jobid`=`job`.`jobid` "
+		"LEFT JOIN `job_body` ON `job_body`.`jobid`=`job`.`jobid` "
+		"WHERE (`hour`=-1 OR `hour`=%d) "
+		"AND (`minute`=-1 OR `minute`=%d) "
+		"AND ("
+		"    (`mday`=-1 AND `wday`=-1)"
+		" OR (`mday`=-1 AND `wday`=%d)"
+		" OR (`mday`=%d AND `wday`=-1)"
+		" OR (`mday`!=-1 AND `wday`!=-1 AND (`wday`=%d OR `mday`=%d))"
+		") "
+		"AND (`month`=-1 OR `month`=%d) "
+		"AND `job`.`timezone`='%q' "
+		"AND (`job`.`expires_at`=0 OR `job`.`expires_at`>=%u) "
+		"AND `enabled`=1 "
+		+ jobIdFilterClause +
+		"GROUP BY `job`.`jobid` "
+		"ORDER BY `unfiltered_fail_counter` ASC, `job`.`jobid` ASC";
+
+	auto res = db->query(query.c_str(),
 									hour, minute, wday, mday, wday, mday, month, timeZone.c_str(), expiryCompareVal);
 
 	int jobCount = res->numRows();
@@ -481,9 +570,63 @@ void App::processJobsForTimeZone(int hour, int minute, int month, int mday, int 
 	std::cout << "App::processJobsForTimeZone(): Finished" << std::endl;
 }
 
+void App::refreshDirtyJobs(time_t forTime, time_t plannedTime,
+	std::map<uint8_t, std::vector<std::unique_ptr<HTTPRequest>>> &requestsByPriority,
+	ScheduleMetricsBatch &scheduleBatch,
+	const std::unordered_set<int64_t> &dirtyJobIds)
+{
+	std::cout << "App::refreshDirtyJobs(): Refreshing " << dirtyJobIds.size() << " dirty job(s)" << std::endl;
+
+	for(auto &prioSlot : requestsByPriority)
+	{
+		auto &jobs = prioSlot.second;
+		jobs.erase(std::remove_if(jobs.begin(), jobs.end(),
+			[&dirtyJobIds](const std::unique_ptr<HTTPRequest> &req) {
+				return dirtyJobIds.find(req->result->jobID) != dirtyJobIds.end();
+			}),
+			jobs.end());
+	}
+
+	const std::string jobIdList = joinJobIds(dirtyJobIds);
+	auto res = db->query(("SELECT `jobid`,`timezone` FROM `job` WHERE `jobid` IN (" + jobIdList + ")").c_str());
+
+	std::unordered_map<std::string, std::unordered_set<int64_t>> jobIdsByTimeZone;
+	MYSQL_ROW row;
+	while((row = res->fetchRow()) != nullptr)
+	{
+		if(row[1] == nullptr || row[1][0] == '\0')
+		{
+			continue;
+		}
+		jobIdsByTimeZone[row[1]].insert(std::stoll(row[0]));
+	}
+	res.reset();
+
+	for(const auto &entry : jobIdsByTimeZone)
+	{
+		CivilTimeParts civilTime;
+		if(!civilTimeForTimeZone(forTime, entry.first, civilTime))
+		{
+			std::cout << "App::refreshDirtyJobs(): Failed to load time zone: " << entry.first << ", skipping" << std::endl;
+			Metrics::instance().incrementScheduleTimezonesSkipped();
+			continue;
+		}
+
+		processJobsForTimeZone(civilTime.hour, civilTime.minute, civilTime.month, civilTime.mday, civilTime.wday, civilTime.year,
+			plannedTime, entry.first, requestsByPriority, scheduleBatch, &entry.second);
+	}
+
+	Metrics::instance().incrementScheduleDirtyJobsRefreshed(dirtyJobIds.size());
+}
+
 UserGroup App::getUserGroupById(uint64_t userGroupId)
 {
 	return priv->getUserGroupById(userGroupId);
+}
+
+void App::markJobDirty(int64_t jobId)
+{
+	priv->markJobDirty(jobId);
 }
 
 void App::syncUserGroups()

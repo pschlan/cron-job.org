@@ -12,8 +12,11 @@
 #ifndef _APP_H_
 #define _APP_H_
 
+#include <cstdint>
 #include <memory>
+#include <map>
 #include <thread>
+#include <unordered_set>
 #include <vector>
 #include <atomic>
 
@@ -66,6 +69,7 @@ namespace Chronos
 		std::unique_ptr<MySQL_DB> createMySQLConnection();
 		std::unique_ptr<MySQL_DB> createMasterMySQLConnection();
 		UserGroup getUserGroupById(uint64_t userGroupId);
+		void markJobDirty(int64_t jobId);
 
 	private:
 		void startUpdateThread();
@@ -83,7 +87,12 @@ namespace Chronos
 		void processJobs(time_t forTime, time_t plannedTime);
 		void processJobsForTimeZone(int hour, int minute, int month, int mday, int wday, int year, time_t timestamp, const std::string &timeZone,
 									std::map<uint8_t, std::vector<std::unique_ptr<HTTPRequest>>> &requestsByPriority,
-									ScheduleMetricsBatch &scheduleBatch);
+									ScheduleMetricsBatch &scheduleBatch,
+									const std::unordered_set<int64_t> *jobIdFilter = nullptr);
+		void refreshDirtyJobs(time_t forTime, time_t plannedTime,
+									std::map<uint8_t, std::vector<std::unique_ptr<HTTPRequest>>> &requestsByPriority,
+									ScheduleMetricsBatch &scheduleBatch,
+									const std::unordered_set<int64_t> &dirtyJobIds);
 		void cleanUpNotifications();
 		void syncUserGroups();
 
