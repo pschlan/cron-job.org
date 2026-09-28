@@ -58,6 +58,11 @@ class NotificationItem {
   public $executionStatus;
   public $executionStatusText;
   public $httpStatus;
+  public $channelId;
+  public $channelType;
+  public $channelDestination;
+  public $result;
+  public $resultDetails;
 
   public static function fromThriftNotificationEntry($notification) {
     $result = new NotificationItem;
@@ -73,6 +78,11 @@ class NotificationItem {
     $result->executionStatus      = $notification->executionStatus;
     $result->executionStatusText  = $notification->executionStatusText;
     $result->httpStatus           = $notification->httpStatus;
+    $result->channelId            = $notification->notificationChannelId;
+    $result->channelType          = $notification->notificationChannelType;
+    $result->channelDestination   = $notification->notificationChannelDestination;
+    $result->result               = $notification->result;
+    $result->resultDetails        = $notification->resultDetails;
 
     return $result;
   }

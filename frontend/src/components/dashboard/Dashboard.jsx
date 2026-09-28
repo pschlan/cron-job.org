@@ -11,7 +11,7 @@ import { setDashboardData, setUserProfile } from '../../redux/actions';
 import Breadcrumbs from '../misc/Breadcrumbs';
 import Heading from '../misc/Heading';
 import moment from 'moment';
-import { JobStatus, jobStatusText, notificationTypeText, SubscriptionStatus } from '../../utils/Constants';
+import { JobStatus, jobStatusText, NotificationChannelType, NotificationResult, notificationChannelTypeKey, notificationTypeText, SubscriptionStatus } from '../../utils/Constants';
 import JobIcon from '../jobs/JobIcon';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import IconAvatar from '../misc/IconAvatar';
@@ -71,19 +71,36 @@ function EventDescription({ type, details }) {
       </div>
     </div>;
   } else if (type === 'NotificationItem') {
+    const success = details.result === NotificationResult.SUCCESS;
+    const icon = details.channelType === NotificationChannelType.EMAIL ? EmailIcon : NotificationsIcon;
+    const captionParts = [];
+    if (details.channelDestination) {
+      captionParts.push(t('events.channelDestination', {
+        channel: t('events.channels.' + notificationChannelTypeKey(details.channelType)),
+        destination: details.channelDestination
+      }));
+    }
+    if (!success && details.resultDetails) {
+      captionParts.push(details.resultDetails);
+    }
+    if (!captionParts.length && details.url) {
+      captionParts.push(details.url);
+    }
+    const caption = captionParts.join(' · ');
+    const captionTitle = details.url && details.url !== caption ? `${caption}\n${details.url}` : caption;
     return <div style={{display: 'flex', alignItems: 'center'}}>
-      <IconAvatar icon={NotificationsIcon} color='blue' />
-      <div>
+      <IconAvatar icon={icon} color={success ? 'green' : 'orange'} />
+      <div style={{minWidth: 0, overflow: 'hidden'}}>
         <div>
-          {t('events.notificationSent', {
+          {t(success ? 'events.notificationSent' : 'events.notificationFailed', {
             notificationType: t('events.notifications.' + notificationTypeText(details.type))
           })}
         </div>
-        <div>
-          <Typography variant="caption">
-            {details.url}
+        {caption ? <div>
+          <Typography variant="caption" title={captionTitle} style={{display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
+            {caption}
           </Typography>
-        </div>
+        </div> : null}
       </div>
     </div>;
   }

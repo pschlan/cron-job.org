@@ -159,6 +159,13 @@
   "events": {
     "cronjobExecution": "Cronjob-kørsel: {{statusText}}",
     "notificationSent": "Notifikation sendt: {{notificationType}}",
+    "notificationFailed": "Notifikation mislykkedes: {{notificationType}}",
+    "channelDestination": "{{channel}} · {{destination}}",
+    "channels": {
+      "email": "E-mail",
+      "webhook": "Webhook",
+      "unknown": "Kanal"
+    },
     "notifications": {
       "FAILURE": "Kørsel mislykkedes",
       "SUCCESS": "Kørsel lykkedes",
@@ -481,6 +488,7 @@
       "maxFailures": "Maks. fejl før deaktivering",
       "maxStatusPages": "Maks. statussider/overvågninger",
       "maxApiCallsPerDay": "Maks. API-kald pr. dag",
+      "maxNotificationChannels": "Maks. antal notifikationskanaler",
       "price": "Pris",
       "free": "gratis",
       "subscriptionPrices": "5, 10 eller 20 EUR om måneden \neller 12, 24 eller 36 EUR om året",
@@ -553,6 +561,45 @@
       "editKey": "Rediger API-nøgle: {{title}}",
       "saveError": "Kunne ikke gemme ændringer. Prøv igen senere.",
       "saved": "Ændringer gemt."
+    },
+    "notificationChannels": {
+      "channels": "Notification Channels",
+      "add": "Add Channel",
+      "noChannels": "You don't have any additional notification channels yet.",
+      "accountEmail": "Account email",
+      "type": "Type",
+      "types": {
+        "email": "Email",
+        "webhook": "Webhook"
+      },
+      "destination": "Destination",
+      "emailAddress": "Email address",
+      "webhookUrl": "Webhook URL",
+      "payload": "JSON payload",
+      "payloadHelp": "Placeholders in JSON string values are replaced when the notification is sent.",
+      "payloadInvalid": "Please enter valid JSON.",
+      "enabled": "Enabled",
+      "statusEnabled": "Enabled",
+      "statusDisabled": "Disabled",
+      "addText": "Notifications for your cronjobs are sent to all enabled channels. You can add extra email addresses or webhook URLs.",
+      "createError": "Sorry, we could not create the notification channel. Please try again later.",
+      "created": "The notification channel has been created successfully.",
+      "editChannel": "Edit notification channel",
+      "saveError": "Sorry, we could not save your changes. Please try again later.",
+      "saved": "Your changes to the notification channel have been saved successfully.",
+      "deleteChannel": "Delete notification channel",
+      "confirmDelete": "Do you really want to delete this notification channel? It will no longer receive notifications.",
+      "deleteError": "Sorry, we could not delete the notification channel. Please try again later.",
+      "deleted": "The notification channel has been deleted successfully.",
+      "cannotUseAccountEmail": "This address is already used by your account email channel.",
+      "cannotEdit": "The account email channel cannot be edited.",
+      "cannotDelete": "The account email channel cannot be deleted.",
+      "pendingConfirmation": "Afventer bekræftelse",
+      "pendingConfirmationHint": "Tjek indbakken for et bekræftelseslink. Hvis du ikke fik e-mailen, slet kanalen og tilføj den igen.",
+      "cannotEditEmail": "E-mailkanaler kan ikke redigeres. Slet kanalen og tilføj en ny for at ændre adressen.",
+      "cannotEnableUnconfirmed": "Kanalen skal bekræftes, før den kan aktiveres.",
+      "createdCheckInbox": "Vi har sendt en bekræftelsesmail til {{email}}. Klik på linket i beskeden for at aktivere kanalen.",
+      "createdCheckInboxTitle": "Bekræft e-mailadressen"
     }
   },
   "statistics": {
@@ -567,5 +614,9 @@
   "confirmEmailChange": {
     "success": "Din konto’s e-mailadresse er ændret. Du kan nu logge ind med den nye adresse.",
     "error": "Beklager, vi kunne ikke bekræfte din e-mailændring. Linket er ugyldigt, udløbet eller allerede brugt."
+  },
+  "confirmNotificationChannel": {
+    "success": "E-mailadressen er bekræftet og vil nu modtage cronjob-notifikationer.",
+    "error": "Vi kunne ikke bekræfte e-mailadressen. Linket er ugyldigt, udløbet eller allerede brugt."
   }
 }

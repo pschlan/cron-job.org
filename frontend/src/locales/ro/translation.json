@@ -156,6 +156,13 @@
   "events": {
     "cronjobExecution": "Execuție cronjob: {{statusText}}",
     "notificationSent": "Notificare trimisă: {{notificationType}}",
+    "notificationFailed": "Notificare eșuată: {{notificationType}}",
+    "channelDestination": "{{channel}} · {{destination}}",
+    "channels": {
+      "email": "E-mail",
+      "webhook": "Webhook",
+      "unknown": "Canal"
+    },
     "notifications": {
       "FAILURE": "Execuție eșuată",
       "SUCCESS": "Execuție reușită",
@@ -473,6 +480,7 @@
       "maxFailures": "Număr maxim de eșecuri înainte de a dezactiva o sarcină",
       "maxStatusPages": "Număr maxim de pagini stare/monitoare",
       "maxApiCallsPerDay": "Număr maxim de apeluri API pe zi",
+      "maxNotificationChannels": "Număr maxim de canale de notificare",
       "price": "Preț",
       "free": "gratuit",
       "subscriptionPrices": "5, 10 sau 20 EUR pe lună \nsau 12, 24 sau 36 EUR pe an (la alegere)",
@@ -545,6 +553,45 @@
       "editKey": "Editare cheie API: {{title}}",
       "saveError": "Ne pare rău, nu am putut salva modificările tale. Te rugăm să încerci din nou mai târziu.",
       "saved": "Modificările tale la cheia API au fost salvate cu succes."
+    },
+    "notificationChannels": {
+      "channels": "Notification Channels",
+      "add": "Add Channel",
+      "noChannels": "You don't have any additional notification channels yet.",
+      "accountEmail": "Account email",
+      "type": "Type",
+      "types": {
+        "email": "Email",
+        "webhook": "Webhook"
+      },
+      "destination": "Destination",
+      "emailAddress": "Email address",
+      "webhookUrl": "Webhook URL",
+      "payload": "JSON payload",
+      "payloadHelp": "Placeholders in JSON string values are replaced when the notification is sent.",
+      "payloadInvalid": "Please enter valid JSON.",
+      "enabled": "Enabled",
+      "statusEnabled": "Enabled",
+      "statusDisabled": "Disabled",
+      "addText": "Notifications for your cronjobs are sent to all enabled channels. You can add extra email addresses or webhook URLs.",
+      "createError": "Sorry, we could not create the notification channel. Please try again later.",
+      "created": "The notification channel has been created successfully.",
+      "editChannel": "Edit notification channel",
+      "saveError": "Sorry, we could not save your changes. Please try again later.",
+      "saved": "Your changes to the notification channel have been saved successfully.",
+      "deleteChannel": "Delete notification channel",
+      "confirmDelete": "Do you really want to delete this notification channel? It will no longer receive notifications.",
+      "deleteError": "Sorry, we could not delete the notification channel. Please try again later.",
+      "deleted": "The notification channel has been deleted successfully.",
+      "cannotUseAccountEmail": "This address is already used by your account email channel.",
+      "cannotEdit": "The account email channel cannot be edited.",
+      "cannotDelete": "The account email channel cannot be deleted.",
+      "pendingConfirmation": "Confirmare în așteptare",
+      "pendingConfirmationHint": "Verifică această căsuță pentru linkul de confirmare. Dacă nu ai primit e-mailul, șterge canalul și adaugă-l din nou.",
+      "cannotEditEmail": "Canalele de e-mail nu pot fi editate. Șterge canalul și adaugă unul nou pentru a schimba adresa.",
+      "cannotEnableUnconfirmed": "Acest canal trebuie confirmat înainte de a putea fi activat.",
+      "createdCheckInbox": "Am trimis un e-mail de confirmare la {{email}}. Apasă pe linkul din mesaj pentru a activa canalul.",
+      "createdCheckInboxTitle": "Confirmă adresa de e-mail"
     }
   },
   "statistics": {
@@ -559,5 +606,9 @@
   "confirmEmailChange": {
     "success": "Adresa de email a contului tău a fost schimbată cu succes. Acum te poți autentifica cu noua adresă de email.",
     "error": "Ne pare rău, nu am putut confirma modificarea adresei tale de email. Legătura de confirmare nu este validă, a expirat sau a fost deja folosită."
+  },
+  "confirmNotificationChannel": {
+    "success": "Această adresă de e-mail a fost confirmată și va primi acum notificări pentru sarcini cron.",
+    "error": "Nu am putut confirma această adresă de e-mail. Linkul este invalid, a expirat sau a fost deja folosit."
   }
 }

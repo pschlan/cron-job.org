@@ -10,6 +10,16 @@ $lang = [
     . '如果您沒有請求此更改，「不要」點擊確認連結，請忽略並刪除這封電子郵件。' . "\n\n"
     . '感謝您，' . "\n\n"
     . '$projectName',
+  'confirmNotificationChannelEmail.footer' => '您收到此電子郵件是因為有人將您的電子郵件地址新增為通知頻道。如果這不是您本人操作，請忽略並刪除此郵件。',
+  'confirmNotificationChannelEmail.subject' => '$projectName：確認通知電子郵件地址',
+  'confirmNotificationChannelEmail.body' =>
+      'Hi,' . "\n\n"
+    . '有人請求將 $projectName 排程工作通知傳送到 $email。' . "\n\n"
+    . '請點擊以下連結以確認此電子郵件地址。' . "\n\n"
+    . '{link|$confirmationLink|確認電子郵件地址}' . "\n\n"
+    . '如果這不是您本人操作，請不要點擊確認連結，忽略並刪除此郵件。' . "\n\n"
+    . '此致，' . "\n\n"
+    . '$projectName',
   'lostPasswordEmail.footer' => '您收到此電子郵件是因為有人試圖重設您帳戶的密碼，如果您沒有提出要求，請忽略並刪除這封電子郵件。',
   'lostPasswordEmail.subject' => '$projectName: 重設密碼',
   'lostPasswordEmail.body' =>

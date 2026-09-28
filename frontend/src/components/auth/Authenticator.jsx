@@ -9,6 +9,7 @@ import { Config } from '../../utils/Config';
 import Footer from '../misc/Footer';
 import SessionKeepalive from './SessionKeepalive';
 import ConfirmEmailChange from './ConfirmEmailChange';
+import ConfirmNotificationChannel from './ConfirmNotificationChannel';
 import LostPassword from './LostPassword';
 import ResetPassword from './ResetPassword';
 import Signup from './Signup';
@@ -42,6 +43,7 @@ export default function Authenticator({ children }) {
             <Route path="/lostPassword" exact component={LostPassword} />
             <Route path="/confirmAccount/:token" exact component={ConfirmAccount} />
             <Route path="/confirmEmailChange/:token" exact component={ConfirmEmailChange} />
+            <Route path="/confirmNotificationChannel/:token" exact component={ConfirmNotificationChannel} />
             <Route path="/resetPassword/:token" exact component={ResetPassword} />
             <Redirect to="/login" />
           </Switch>

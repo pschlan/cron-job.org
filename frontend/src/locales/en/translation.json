@@ -149,6 +149,13 @@
   "events": {
     "cronjobExecution": "Cronjob execution: {{statusText}}",
     "notificationSent": "Notification sent: {{notificationType}}",
+    "notificationFailed": "Notification failed: {{notificationType}}",
+    "channelDestination": "{{channel}} · {{destination}}",
+    "channels": {
+      "email": "Email",
+      "webhook": "Webhook",
+      "unknown": "Channel"
+    },
     "notifications": {
       "FAILURE": "Execution failed",
       "SUCCESS": "Execution successful",
@@ -565,6 +572,7 @@
       "maxFailures": "Max failures before disabling a job",
       "maxStatusPages": "Max status pages / monitors",
       "maxApiCallsPerDay": "Max API calls per day",
+      "maxNotificationChannels": "Max notification channels",
       "price": "Price",
       "free": "free",
       "subscriptionPrices": "5, 10 or 20 EUR a month \nor 12, 24 or 36 EUR a year (at your choice)",
@@ -637,6 +645,45 @@
       "editKey": "Edit API Key: {{title}}",
       "saveError": "Sorry, we could not save your changes. Please try again later.",
       "saved": "Your changes to the API key have been saved successfully."
+    },
+    "notificationChannels": {
+      "channels": "Notification Channels",
+      "add": "Add Channel",
+      "noChannels": "You don't have any additional notification channels yet.",
+      "accountEmail": "Account email",
+      "type": "Type",
+      "types": {
+        "email": "Email",
+        "webhook": "Webhook"
+      },
+      "destination": "Destination",
+      "emailAddress": "Email address",
+      "webhookUrl": "Webhook URL",
+      "payload": "JSON payload",
+      "payloadHelp": "Placeholders in JSON string values are replaced when the notification is sent.",
+      "payloadInvalid": "Please enter valid JSON.",
+      "enabled": "Enabled",
+      "statusEnabled": "Enabled",
+      "statusDisabled": "Disabled",
+      "addText": "Notifications for your cronjobs are sent to all enabled channels. You can add extra email addresses or webhook URLs.",
+      "createError": "Sorry, we could not create the notification channel. Please try again later.",
+      "created": "The notification channel has been created successfully.",
+      "editChannel": "Edit notification channel",
+      "saveError": "Sorry, we could not save your changes. Please try again later.",
+      "saved": "Your changes to the notification channel have been saved successfully.",
+      "deleteChannel": "Delete notification channel",
+      "confirmDelete": "Do you really want to delete this notification channel? It will no longer receive notifications.",
+      "deleteError": "Sorry, we could not delete the notification channel. Please try again later.",
+      "deleted": "The notification channel has been deleted successfully.",
+      "cannotUseAccountEmail": "This address is already used by your account email channel.",
+      "cannotEdit": "The account email channel cannot be edited.",
+      "cannotDelete": "The account email channel cannot be deleted.",
+      "pendingConfirmation": "Pending confirmation",
+      "pendingConfirmationHint": "Check this inbox for a confirmation link. If you did not get the email, delete this channel and add it again.",
+      "cannotEditEmail": "Email channels cannot be edited. Delete this channel and add a new one to change the address.",
+      "cannotEnableUnconfirmed": "This channel must be confirmed before it can be enabled.",
+      "createdCheckInbox": "We sent a confirmation email to {{email}}. Click the link in that message to activate this channel.",
+      "createdCheckInboxTitle": "Confirm the email address"
     }
   },
   "statistics": {
@@ -651,5 +698,9 @@
   "confirmEmailChange": {
     "success": "Your account's email address has been changed successfully. You can now log in with your new email address.",
     "error": "Sorry, we could not confirm your email address change. The confirmation link is invalid, expired or has already been used."
+  },
+  "confirmNotificationChannel": {
+    "success": "This email address has been confirmed and will now receive cron job notifications.",
+    "error": "Sorry, we could not confirm this email address. The confirmation link is invalid, expired or has already been used."
   }
 }

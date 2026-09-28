@@ -11,6 +11,16 @@ $lang = [
     . 'Saygılarımızla,' . "\n\n"
     . '$projectName',
 
+  'confirmNotificationChannelEmail.footer' => 'Bu e-postayı, birinin e-posta adresinizi bildirim kanalı olarak eklediği için alıyorsunuz. Bunu siz talep etmediyseniz lütfen yok sayın ve silin.',
+  'confirmNotificationChannelEmail.subject' => '$projectName: Bildirim e-posta adresini onayla',
+  'confirmNotificationChannelEmail.body' =>
+      'Hi,' . "\n\n"
+    . 'birisi $projectName cron işi bildirimlerinin $email adresine gönderilmesini istedi.' . "\n\n"
+    . 'Bu e-posta adresini onaylamak için aşağıdaki bağlantıya tıklayın.' . "\n\n"
+    . '{link|$confirmationLink|E-posta adresini onayla}' . "\n\n"
+    . 'Bunu siz talep etmediyseniz onay bağlantısına TIKLAMAYIN; bu e-postayı yok sayın ve silin.' . "\n\n"
+    . 'Saygılarımızla,' . "\n\n"
+    . '$projectName',
   'lostPasswordEmail.footer' => 'Bu e-postayı, birinin hesabınızın şifresini sıfırlamaya çalıştığı için alıyorsunuz. Eğer bu işlemi siz talep etmediyseniz, lütfen bu e-postayı göz ardı edin ve silin.',
   'lostPasswordEmail.subject' => '$projectName: Şifre sıfırlama',
   'lostPasswordEmail.body' =>

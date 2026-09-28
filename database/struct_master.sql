@@ -36,6 +36,7 @@ CREATE TABLE `user` (
   `newsletter_subscribe` enum('yes', 'no', 'undefined') NOT NULL DEFAULT 'undefined',
   `notifications_auto_disabled` tinyint(4) NOT NULL DEFAULT 0,
   `last_password_change` int(11) NOT NULL DEFAULT '0',
+  `email_notifications_enabled` tinyint(4) NOT NULL DEFAULT 1,
   PRIMARY KEY (`userid`),
   KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -68,10 +69,23 @@ CREATE TABLE `usergroup`(
     `execution_priority` tinyint(4) NOT NULL DEFAULT 0,
     `api_requests_per_day` int(11) NOT NULL DEFAULT '100',
     `max_api_keys` int(11) NOT NULL DEFAULT '1',
+    `max_notification_channels` int(11) NOT NULL DEFAULT '1',
     `enable_waf_validator` tinyint(4) NOT NULL DEFAULT '1',
     PRIMARY KEY(`usergroupid`)
 ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 INSERT INTO `usergroup`(`usergroupid`, `title`) VALUES(1, 'Default');
+
+CREATE TABLE `notificationchannel`(
+    `channelid` int(11) NOT NULL AUTO_INCREMENT,
+    `userid` int(11) NOT NULL DEFAULT 0,
+    `type` tinyint(4) NOT NULL DEFAULT 0,
+    `destination` varchar(255) NOT NULL DEFAULT '',
+    `enabled` tinyint(4) NOT NULL DEFAULT 0,
+    `confirmed` tinyint(4) NOT NULL DEFAULT 0,
+    `settings` text NOT NULL,
+    PRIMARY KEY(`channelid`),
+    KEY(`userid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `node`(
     `nodeid` int(11) NOT NULL AUTO_INCREMENT,
@@ -285,9 +299,11 @@ CREATE TABLE `bouncelog` (
   `userid` int NOT NULL DEFAULT '0',
   `jobid` int NOT NULL DEFAULT '0',
   `notification_type` tinyint NOT NULL DEFAULT '0',
+  `notificationchannelid` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`bouncelogid`),
   KEY `userid` (`userid`),
-  KEY `jobid` (`jobid`)
+  KEY `jobid` (`jobid`),
+  KEY `notificationchannelid` (`notificationchannelid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `bouncemessage` (

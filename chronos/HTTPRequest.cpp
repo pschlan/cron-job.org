@@ -23,6 +23,7 @@
 #include <strings.h>
 
 #include <netinet/in.h>
+#include <sys/socket.h>
 
 #include "WorkerThread.h"
 #include "CurlWorker.h"
@@ -128,7 +129,7 @@ uint64_t extractSslCertExpiry(CURL *easy)
 	return 0;
 }
 
-curl_socket_t curlOpenSocketFunction(void *userdata, curlsocktype purpose, struct curl_sockaddr *address)
+curl_socket_t curlOpenSocketFunction(void * /*userdata*/, curlsocktype purpose, struct curl_sockaddr *address)
 {
 	if(purpose != CURLSOCKTYPE_IPCXN)
 	{
@@ -136,7 +137,7 @@ curl_socket_t curlOpenSocketFunction(void *userdata, curlsocktype purpose, struc
 		return CURL_SOCKET_BAD;
 	}
 
-	if(!static_cast<HTTPRequest *>(userdata)->verifyPeerAddress(address->addrlen, &address->addr))
+	if(address == nullptr || !App::getInstance()->verifyPeerAddress(address->addrlen, &address->addr))
 	{
 		return CURL_SOCKET_BAD;
 	}
@@ -200,39 +201,6 @@ int curlDebugFunction(CURL *handle, curl_infotype type, char *data, size_t size,
 
 	static_cast<HTTPRequest *>(userdata)->onVerboseData(dt, stringData);
 	return 0;
-}
-
-std::string sanitizeHttpHeaderKey(std::string key)
-{
-	static const std::unordered_set<char> forbiddenChars = {
-		// CTLs
-		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-		21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 127,
-		// Separators
-		'(', ')', '<', '>', '@',
-		',', ';', ':', '\\', '"',
-		'/', '[', ']', '?', '=',
-		'{', '}', ' '
-	};
-
-	key.erase(std::remove_if(key.begin(), key.end(),
-			[] (char c) { return forbiddenChars.count(c) != 0;  }),
-		key.end());
-
-	return key;
-}
-
-std::string sanitizeHttpHeaderValue(std::string value)
-{
-	static const std::unordered_set<char> forbiddenChars = {
-		10, 13
-	};
-
-	value.erase(std::remove_if(value.begin(), value.end(),
-			[] (char c) { return forbiddenChars.count(c) != 0;  }),
-		value.end());
-
-	return value;
 }
 
 }
@@ -335,25 +303,6 @@ bool HTTPRequest::processData(const char *data, size_t size)
 		result->responseBody.append(data, size);
 	}
 	return true;
-}
-
-bool HTTPRequest::verifyPeerAddress(unsigned int addressLength, const struct sockaddr *address) const
-{
-	//! @note We don't support IPv6 at the moment.
-	if(address->sa_family != AF_INET)
-	{
-		std::cerr << "Unsupported sa_family: " << address->sa_family << std::endl;
-		return false;
-	}
-
-	if(addressLength != sizeof(struct sockaddr_in))
-	{
-		std::cerr << "Invalid AF_INET address length: " << addressLength << std::endl;
-		return false;
-	}
-
-	const struct sockaddr_in *inAddress = reinterpret_cast<const struct sockaddr_in *>(address);
-	return !App::getInstance()->isIpAddressBlocked(inAddress->sin_addr.s_addr);
 }
 
 void HTTPRequest::done(CURLcode res)
@@ -490,7 +439,7 @@ void HTTPRequest::setupEasyHandle()
 	curl_easy_setopt(easy, CURLOPT_FORBID_REUSE,		1);
 	curl_easy_setopt(easy, CURLOPT_FRESH_CONNECT,		1);
 	curl_easy_setopt(easy, CURLOPT_PRIVATE,				this);
-	curl_easy_setopt(easy, CURLOPT_PROTOCOLS,			CURLPROTO_HTTP | CURLPROTO_HTTPS);
+	curl_easy_setopt(easy, CURLOPT_PROTOCOLS_STR,		"http,https");
 	curl_easy_setopt(easy, CURLOPT_FOLLOWLOCATION, 		0);
 	curl_easy_setopt(easy, CURLOPT_NOPROGRESS,			1);
 	curl_easy_setopt(easy, CURLOPT_ERRORBUFFER,			curlError);
@@ -586,12 +535,12 @@ void HTTPRequest::submit(CurlWorker *worker)
 	{
 		for(const auto &header : requestHeaders)
 		{
-			const std::string headerKey = sanitizeHttpHeaderKey(header.first);
-			if (strcasecmp(headerKey.c_str(), "user-agent") == 0
-				|| strcasecmp(headerKey.c_str(), "connection") == 0
-				|| strcasecmp(headerKey.c_str(), "x-forwarded-for") == 0)
+			const std::string headerKey = Utils::sanitizeHttpHeaderKey(header.first);
+			if (Utils::isBannedHeaderKey(headerKey))
+			{
 				continue;
-			std::string head = headerKey + ": " + sanitizeHttpHeaderValue(header.second);
+			}
+			std::string head = headerKey + ": " + Utils::sanitizeHttpHeaderValue(header.second);
 			headerList = curl_slist_append(headerList, head.c_str());
 		}
 

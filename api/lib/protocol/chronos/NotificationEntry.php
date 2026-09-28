@@ -79,6 +79,33 @@ class NotificationEntry
             'isRequired' => false,
             'type' => TType::I16,
         ),
+        12 => array(
+            'var' => 'notificationChannelId',
+            'isRequired' => false,
+            'type' => TType::I64,
+        ),
+        13 => array(
+            'var' => 'notificationChannelType',
+            'isRequired' => false,
+            'type' => TType::I32,
+            'class' => '\chronos\NotificationChannelType',
+        ),
+        14 => array(
+            'var' => 'notificationChannelDestination',
+            'isRequired' => false,
+            'type' => TType::STRING,
+        ),
+        15 => array(
+            'var' => 'result',
+            'isRequired' => false,
+            'type' => TType::I32,
+            'class' => '\chronos\NotificationResult',
+        ),
+        16 => array(
+            'var' => 'resultDetails',
+            'isRequired' => false,
+            'type' => TType::STRING,
+        ),
     );
 
     /**
@@ -125,6 +152,26 @@ class NotificationEntry
      * @var int
      */
     public $httpStatus = null;
+    /**
+     * @var int
+     */
+    public $notificationChannelId = null;
+    /**
+     * @var int
+     */
+    public $notificationChannelType = null;
+    /**
+     * @var string
+     */
+    public $notificationChannelDestination = null;
+    /**
+     * @var int
+     */
+    public $result = null;
+    /**
+     * @var string
+     */
+    public $resultDetails = null;
 
     public function __construct($vals = null)
     {
@@ -161,6 +208,21 @@ class NotificationEntry
             }
             if (isset($vals['httpStatus'])) {
                 $this->httpStatus = $vals['httpStatus'];
+            }
+            if (isset($vals['notificationChannelId'])) {
+                $this->notificationChannelId = $vals['notificationChannelId'];
+            }
+            if (isset($vals['notificationChannelType'])) {
+                $this->notificationChannelType = $vals['notificationChannelType'];
+            }
+            if (isset($vals['notificationChannelDestination'])) {
+                $this->notificationChannelDestination = $vals['notificationChannelDestination'];
+            }
+            if (isset($vals['result'])) {
+                $this->result = $vals['result'];
+            }
+            if (isset($vals['resultDetails'])) {
+                $this->resultDetails = $vals['resultDetails'];
             }
         }
     }
@@ -262,6 +324,41 @@ class NotificationEntry
                         $xfer += $input->skip($ftype);
                     }
                     break;
+                case 12:
+                    if ($ftype == TType::I64) {
+                        $xfer += $input->readI64($this->notificationChannelId);
+                    } else {
+                        $xfer += $input->skip($ftype);
+                    }
+                    break;
+                case 13:
+                    if ($ftype == TType::I32) {
+                        $xfer += $input->readI32($this->notificationChannelType);
+                    } else {
+                        $xfer += $input->skip($ftype);
+                    }
+                    break;
+                case 14:
+                    if ($ftype == TType::STRING) {
+                        $xfer += $input->readString($this->notificationChannelDestination);
+                    } else {
+                        $xfer += $input->skip($ftype);
+                    }
+                    break;
+                case 15:
+                    if ($ftype == TType::I32) {
+                        $xfer += $input->readI32($this->result);
+                    } else {
+                        $xfer += $input->skip($ftype);
+                    }
+                    break;
+                case 16:
+                    if ($ftype == TType::STRING) {
+                        $xfer += $input->readString($this->resultDetails);
+                    } else {
+                        $xfer += $input->skip($ftype);
+                    }
+                    break;
                 default:
                     $xfer += $input->skip($ftype);
                     break;
@@ -332,6 +429,31 @@ class NotificationEntry
         if ($this->httpStatus !== null) {
             $xfer += $output->writeFieldBegin('httpStatus', TType::I16, 11);
             $xfer += $output->writeI16($this->httpStatus);
+            $xfer += $output->writeFieldEnd();
+        }
+        if ($this->notificationChannelId !== null) {
+            $xfer += $output->writeFieldBegin('notificationChannelId', TType::I64, 12);
+            $xfer += $output->writeI64($this->notificationChannelId);
+            $xfer += $output->writeFieldEnd();
+        }
+        if ($this->notificationChannelType !== null) {
+            $xfer += $output->writeFieldBegin('notificationChannelType', TType::I32, 13);
+            $xfer += $output->writeI32($this->notificationChannelType);
+            $xfer += $output->writeFieldEnd();
+        }
+        if ($this->notificationChannelDestination !== null) {
+            $xfer += $output->writeFieldBegin('notificationChannelDestination', TType::STRING, 14);
+            $xfer += $output->writeString($this->notificationChannelDestination);
+            $xfer += $output->writeFieldEnd();
+        }
+        if ($this->result !== null) {
+            $xfer += $output->writeFieldBegin('result', TType::I32, 15);
+            $xfer += $output->writeI32($this->result);
+            $xfer += $output->writeFieldEnd();
+        }
+        if ($this->resultDetails !== null) {
+            $xfer += $output->writeFieldBegin('resultDetails', TType::STRING, 16);
+            $xfer += $output->writeString($this->resultDetails);
             $xfer += $output->writeFieldEnd();
         }
         $xfer += $output->writeFieldStop();

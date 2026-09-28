@@ -152,6 +152,21 @@ struct JobLogEntry
     16: optional i64 sslCertExpiry; // in s, 0 = not available (plain HTTP or no TLS)
 }
 
+enum NotificationChannelType
+{
+    EMAIL               = 0,
+    WEBHOOK             = 1
+}
+
+struct NotificationChannel
+{
+    1: i64 channelId;
+    2: NotificationChannelType type;
+    3: string destination;
+    4: bool enabled;
+    5: string settings;
+}
+
 struct UserDetails
 {
     1: i64 userId;
@@ -160,6 +175,7 @@ struct UserDetails
     4: string lastName;
     5: string language;
     6: optional bool suppressNotifications;
+    7: optional list<NotificationChannel> notificationChannels;
 }
 
 struct UserGroup
@@ -185,6 +201,14 @@ enum NotificationType
     SSL_CERT_EXPIRY     = 3
 }
 
+enum NotificationResult
+{
+    SUCCESS             = 0,
+    FAILED_PREPROCESS   = 1,
+    FAILED_SEND         = 2,
+    FAILED_OTHERS       = 3
+}
+
 struct NotificationEntry
 {
     1: i64 notificationId;
@@ -198,6 +222,11 @@ struct NotificationEntry
     9: JobStatus executionStatus;
     10: string executionStatusText;
     11: i16 httpStatus;
+    12: i64 notificationChannelId;
+    13: NotificationChannelType notificationChannelType;
+    14: string notificationChannelDestination;
+    15: NotificationResult result;
+    16: string resultDetails;
 }
 
 struct TimeSeriesDataEntry

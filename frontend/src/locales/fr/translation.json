@@ -147,6 +147,13 @@
   "events": {
     "cronjobExecution": "Exécution du Cronjob : {{statusText}}",
     "notificationSent": "Notification envoyée : {{notificationType}}",
+    "notificationFailed": "Notification échouée : {{notificationType}}",
+    "channelDestination": "{{channel}} · {{destination}}",
+    "channels": {
+      "email": "E-mail",
+      "webhook": "Webhook",
+      "unknown": "Canal"
+    },
     "notifications": {
       "FAILURE": "Exécution échoué",
       "SUCCESS": "Exécution réussie",
@@ -436,6 +443,7 @@
       "maxFailures": "Nombre maximal d'échecs avant la désactivation d'une tâche",
       "maxStatusPages": "Max pages d'état / moniteurs",
       "maxApiCallsPerDay": "Nombre maximum d'appels API par jour",
+      "maxNotificationChannels": "Nombre maximum de canaux de notification",
       "price": "Prix",
       "free": "gratuit",
       "subscriptionPrices": "5, 10 ou 20 EUR par mois \nou 12, 24 ou 36 EUR par an (à votre choix)",
@@ -506,6 +514,45 @@
       "editKey": "Modifier la clé API : {{titre}}",
       "saveError": "Désolé, nous n'avons pas pu enregistrer vos modifications. Veuillez réessayer plus tard.",
       "saved": "Vos modifications de la clé API ont été enregistrées avec succès."
+    },
+    "notificationChannels": {
+      "channels": "Canaux de notification",
+      "add": "Ajouter un canal",
+      "noChannels": "Vous n'avez pas encore de canaux de notification supplémentaires.",
+      "accountEmail": "E-mail du compte",
+      "type": "Type",
+      "types": {
+        "email": "E-mail",
+        "webhook": "Webhook"
+      },
+      "destination": "Destination",
+      "emailAddress": "Adresse e-mail",
+      "webhookUrl": "URL du webhook",
+      "payload": "Charge utile JSON",
+      "payloadHelp": "Les espaces réservés dans les chaînes JSON sont remplacés à l'envoi de la notification.",
+      "payloadInvalid": "Veuillez saisir un JSON valide.",
+      "enabled": "Activé",
+      "statusEnabled": "Activé",
+      "statusDisabled": "Désactivé",
+      "addText": "Les notifications de vos cronjobs sont envoyées à tous les canaux activés. Vous pouvez ajouter des adresses e-mail ou des URL de webhook supplémentaires.",
+      "createError": "Désolé, nous n'avons pas pu créer le canal de notification. Veuillez réessayer plus tard.",
+      "created": "Le canal de notification a été créé avec succès.",
+      "editChannel": "Modifier le canal de notification",
+      "saveError": "Désolé, nous n'avons pas pu enregistrer vos modifications. Veuillez réessayer plus tard.",
+      "saved": "Vos modifications du canal de notification ont été enregistrées avec succès.",
+      "deleteChannel": "Supprimer le canal de notification",
+      "confirmDelete": "Voulez-vous vraiment supprimer ce canal de notification ? Il ne recevra plus de notifications.",
+      "deleteError": "Désolé, nous n'avons pas pu supprimer le canal de notification. Veuillez réessayer plus tard.",
+      "deleted": "Le canal de notification a été supprimé avec succès.",
+      "cannotUseAccountEmail": "Cette adresse est déjà utilisée par le canal e-mail du compte.",
+      "cannotEdit": "Le canal e-mail du compte ne peut pas être modifié.",
+      "cannotDelete": "Le canal e-mail du compte ne peut pas être supprimé.",
+      "pendingConfirmation": "Confirmation en attente",
+      "pendingConfirmationHint": "Vérifiez cette boîte de réception pour un lien de confirmation. Si vous n'avez pas reçu l'e-mail, supprimez ce canal et ajoutez-le à nouveau.",
+      "cannotEditEmail": "Les canaux e-mail ne peuvent pas être modifiés. Supprimez ce canal et ajoutez-en un nouveau pour changer l'adresse.",
+      "cannotEnableUnconfirmed": "Ce canal doit être confirmé avant de pouvoir être activé.",
+      "createdCheckInbox": "Nous avons envoyé un e-mail de confirmation à {{email}}. Cliquez sur le lien de ce message pour activer ce canal.",
+      "createdCheckInboxTitle": "Confirmer l'adresse e-mail"
     }
   },
   "statistics": {
@@ -520,5 +567,9 @@
   "confirmEmailChange": {
     "success": "L'adresse électronique de votre compte a été modifiée avec succès. Vous pouvez maintenant vous connecter avec votre nouvelle adresse électronique.",
     "error": "Désolé, nous n'avons pas pu confirmer votre changement d'adresse électronique. Le lien de confirmation n'est pas valide, a expiré ou a déjà été utilisé."
+  },
+  "confirmNotificationChannel": {
+    "success": "Cette adresse e-mail a été confirmée et recevra désormais les notifications de tâches cron.",
+    "error": "Désolé, nous n'avons pas pu confirmer cette adresse e-mail. Le lien de confirmation est invalide, expiré ou déjà utilisé."
   }
 }

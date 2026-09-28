@@ -67,9 +67,6 @@ namespace Chronos
 		bool processData(const char *data, size_t size);
 		bool processHeaders(const char *headers, size_t size);
 
-		bool verifyPeerAddress(unsigned int addressLength, const struct sockaddr *address) const;
-
-	public:
 		std::string url;
 		bool useAuth = false;
 		std::string authUsername;

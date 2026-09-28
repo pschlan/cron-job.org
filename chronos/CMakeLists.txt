@@ -75,6 +75,7 @@ find_package(OpenSSL REQUIRED)
 
 include_directories(
 	cctz/include/
+	json/single_include/
 	${MySQLClient_INCLUDE_DIRS}
 	${CURL_INCLUDE_DIRS}
 	${LIBEV_INCLUDE_DIRS}
