@@ -52,6 +52,7 @@
     ]
   },
   "overrides": {
-    "brace-expansion": "1.1.18"
+    "brace-expansion": "1.1.21",
+    "nth-check": "2.1.1"
   }
 }
