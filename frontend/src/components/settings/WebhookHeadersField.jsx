@@ -1,27 +1,31 @@
 import React from 'react';
-import { Box, Button, FormLabel, Grid, IconButton, makeStyles, TableContainer, TextField } from '@material-ui/core';
+import { Box, Button, FormLabel, IconButton, makeStyles, TextField, Typography } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import AddIcon from '@material-ui/icons/Add';
 import { useTranslation } from 'react-i18next';
-import Table from '../misc/Table';
 
 const useStyles = makeStyles(theme => ({
-  fieldSet: {
-    margin: 0,
-    padding: theme.spacing(1.5, 1.5, 1),
-    border: `1px solid ${theme.palette.divider}`,
-    borderRadius: theme.spacing(0.5),
-    '& legend': {
-      padding: theme.spacing(0, 0.5)
-    }
+  section: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing(1)
   },
-  headersTable: {
-    '& .MuiTextField-root': {
-      margin: theme.spacing(0)
-    }
+  sectionTitle: {
+    fontWeight: 500
   },
-  tableContainer: {
-    marginBottom: theme.spacing(1)
+  row: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.4fr) auto',
+    gap: theme.spacing(1),
+    alignItems: 'center'
+  },
+  empty: {
+    fontStyle: 'italic',
+    color: theme.palette.text.secondary
+  },
+  addRow: {
+    display: 'flex',
+    justifyContent: 'flex-start'
   }
 }));
 
@@ -70,60 +74,51 @@ export default function WebhookHeadersField({ value, onChange }) {
     onChange(headers.map((x, index) => index === rowNo ? { ...x, value: headerValue.trim() } : x));
   }
 
-  const columns = [
-    {
-      cell: (item, rowNo) => <TextField
-        variant='filled'
-        label={t('jobs.key')}
-        size='small'
-        defaultValue={item.key}
-        onBlur={({target}) => updateHeaderKey(rowNo, target.value)}
-        fullWidth />
-    },
-    {
-      cell: (item, rowNo) => <TextField
-        variant='filled'
-        label={t('jobs.value')}
-        size='small'
-        defaultValue={item.value}
-        onBlur={({target}) => updateHeaderValue(rowNo, target.value)}
-        fullWidth />
-    },
-    {
-      cell: (item, rowNo) => <IconButton
-        size='small'
-        onClick={() => deleteHeader(rowNo)}
-        title={t('common.delete')}
-        aria-label={t('common.delete')}>
-        <DeleteIcon />
-      </IconButton>
-    }
-  ];
-
-  return <Box component='fieldset' className={classes.fieldSet}>
-    <FormLabel component='legend'>{t('jobs.headers')}</FormLabel>
-    <TableContainer className={classes.tableContainer}>
-      <Table
-        size='small'
-        className={classes.headersTable}
-        columns={columns}
-        items={headers}
-        empty={<em>{t('jobs.noheaders')}</em>}
-        rowIdentifier='uuid'
-        noHeader
-      />
-    </TableContainer>
-    <Grid container direction='row' justifyContent='flex-end'>
-      <Grid item>
+  return (
+    <Box className={classes.section}>
+      <FormLabel className={classes.sectionTitle}>{t('jobs.headers')}</FormLabel>
+      {headers.length === 0 && (
+        <Typography variant='body2' className={classes.empty}>
+          {t('jobs.noheaders')}
+        </Typography>
+      )}
+      {headers.map((item, rowNo) => (
+        <Box key={item.uuid} className={classes.row}>
+          <TextField
+            variant='outlined'
+            label={t('jobs.key')}
+            size='small'
+            defaultValue={item.key}
+            onBlur={({target}) => updateHeaderKey(rowNo, target.value)}
+            fullWidth
+          />
+          <TextField
+            variant='outlined'
+            label={t('jobs.value')}
+            size='small'
+            defaultValue={item.value}
+            onBlur={({target}) => updateHeaderValue(rowNo, target.value)}
+            fullWidth
+          />
+          <IconButton
+            size='small'
+            onClick={() => deleteHeader(rowNo)}
+            title={t('common.delete')}
+            aria-label={t('common.delete')}
+          >
+            <DeleteIcon fontSize='small' />
+          </IconButton>
+        </Box>
+      ))}
+      <Box className={classes.addRow}>
         <Button
-          variant='contained'
           size='small'
           startIcon={<AddIcon />}
           onClick={() => addHeader()}
         >
           {t('common.add')}
         </Button>
-      </Grid>
-    </Grid>
-  </Box>;
+      </Box>
+    </Box>
+  );
 }

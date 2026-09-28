@@ -419,8 +419,8 @@ export function getNotificationChannels() {
   return performRequest('GetNotificationChannels', {});
 }
 
-export function createNotificationChannel(type, destination, enabled, payload, headers = []) {
-  return performRequest('CreateNotificationChannel', { type, destination, enabled, payload, headers });
+export function createNotificationChannel(type, destination, enabled, payload, headers = [], preset = '') {
+  return performRequest('CreateNotificationChannel', { type, destination, enabled, payload, headers, preset });
 }
 
 export function confirmNotificationChannelEmail(token) {
@@ -429,8 +429,8 @@ export function confirmNotificationChannelEmail(token) {
   }, false);
 }
 
-export function updateNotificationChannel(channelId, destination, enabled, payload, headers = []) {
-  return performRequest('UpdateNotificationChannel', { channelId, destination, enabled, payload, headers });
+export function updateNotificationChannel(channelId, destination, enabled, payload, headers = [], preset = '') {
+  return performRequest('UpdateNotificationChannel', { channelId, destination, enabled, payload, headers, preset });
 }
 
 export function setNotificationChannelEnabled(channelId, enabled) {

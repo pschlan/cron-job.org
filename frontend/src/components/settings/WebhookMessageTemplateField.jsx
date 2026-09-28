@@ -1,26 +1,17 @@
 import React, { useRef } from 'react';
-import { FormControl, TextField, makeStyles } from '@material-ui/core';
+import { FormControl, TextField } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
-import { isValidJson } from '../../utils/Constants';
 import WebhookVariableChips from './WebhookVariableChips';
-
-const useStyles = makeStyles(() => ({
-  payload: {
-    fontFamily: 'monospace',
-    fontSize: '0.85rem'
-  }
-}));
 
 function placeholder(name) {
   return '${' + name + '}';
 }
 
-export default function WebhookPayloadField({ value, onChange }) {
-  const classes = useStyles();
+export default function WebhookMessageTemplateField({ value, onChange }) {
   const { t } = useTranslation();
   const inputRef = useRef(null);
-  const cursorRef = useRef({ start: value.length, end: value.length });
-  const valid = isValidJson(value);
+  const cursorRef = useRef({ start: (value || '').length, end: (value || '').length });
+  const valid = typeof value === 'string' && value.trim() !== '';
 
   function rememberCursor(event) {
     const el = event.target;
@@ -52,24 +43,25 @@ export default function WebhookPayloadField({ value, onChange }) {
   return (
     <FormControl fullWidth>
       <TextField
-        label={t('settings.notificationChannels.payload')}
+        label={t('settings.notificationChannels.messageTemplate')}
         value={value}
         onChange={({target}) => onChange(target.value)}
         inputRef={inputRef}
         InputLabelProps={{ shrink: true }}
-        InputProps={{ classes: { input: classes.payload } }}
         inputProps={{
           onSelect: rememberCursor,
           onKeyUp: rememberCursor,
           onClick: rememberCursor,
           onBlur: rememberCursor
         }}
-        helperText={valid ? t('settings.notificationChannels.payloadHelp') : t('settings.notificationChannels.payloadInvalid')}
+        helperText={valid
+          ? t('settings.notificationChannels.messageTemplateHelp')
+          : t('settings.notificationChannels.messageTemplateRequired')}
         error={!valid}
         fullWidth
         required
         multiline
-        rows={6}
+        rows={4}
         variant='outlined'
       />
       <WebhookVariableChips onInsert={insertVariable} />

@@ -14,6 +14,16 @@ class NotificationChannel {
   const ACCOUNT_CHANNEL_ID = 0;
   const MAX_PAYLOAD_BYTES = 16384;
   const MAX_HEADERS = 32;
+  const ALLOWED_PRESETS = [
+    'slack',
+    'discord',
+    'teams',
+    'telegram',
+    'pushover',
+    'mattermost',
+    'googlechat',
+    'ntfy'
+  ];
 
   public $channelId;
   public $type;
@@ -23,6 +33,7 @@ class NotificationChannel {
   public $builtIn;
   public $payload;
   public $headers;
+  public $preset;
 
   function __construct() {
     $this->channelId = intval($this->channelId);
@@ -35,6 +46,9 @@ class NotificationChannel {
     }
     if ($this->headers === null) {
       $this->headers = [];
+    }
+    if ($this->preset === null) {
+      $this->preset = '';
     }
   }
 }
@@ -68,9 +82,9 @@ class NotificationChannelManager {
     return $result;
   }
 
-  public function createNotificationChannel($type, $destination, $enabled, $payload, $headers, $language) {
+  public function createNotificationChannel($type, $destination, $enabled, $payload, $headers, $language, $preset = '') {
     $type = intval($type);
-    $normalized = $this->normalizeChannel($type, $destination, $payload, $headers);
+    $normalized = $this->normalizeChannel($type, $destination, $payload, $headers, $preset);
     $isEmail = $type === NotificationChannel::TYPE_EMAIL;
 
     if ($isEmail) {
@@ -84,7 +98,7 @@ class NotificationChannelManager {
       throw new QuotaExceededException();
     }
 
-    $settings = $this->encodeSettings($type, $normalized['payload'], $normalized['headers']);
+    $settings = $this->encodeSettings($type, $normalized['payload'], $normalized['headers'], $normalized['preset']);
     $confirmed = $isEmail ? 0 : 1;
     $enabledValue = $isEmail ? 0 : ($enabled ? 1 : 0);
 
@@ -113,7 +127,7 @@ class NotificationChannelManager {
     }
   }
 
-  public function updateNotificationChannel($channelId, $destination, $enabled, $payload, $headers) {
+  public function updateNotificationChannel($channelId, $destination, $enabled, $payload, $headers, $preset = '') {
     $channelId = intval($channelId);
     if ($channelId === NotificationChannel::ACCOUNT_CHANNEL_ID) {
       throw new InvalidArgumentsException();
@@ -128,8 +142,8 @@ class NotificationChannelManager {
       throw new InvalidArgumentsException();
     }
 
-    $normalized = $this->normalizeChannel($existing['type'], $destination, $payload, $headers);
-    $settings = $this->encodeSettings($existing['type'], $normalized['payload'], $normalized['headers']);
+    $normalized = $this->normalizeChannel($existing['type'], $destination, $payload, $headers, $preset);
+    $settings = $this->encodeSettings($existing['type'], $normalized['payload'], $normalized['headers'], $normalized['preset']);
 
     Database::get()->prepare('UPDATE `notificationchannel` SET `destination`=:destination, `enabled`=:enabled, `settings`=:settings WHERE `channelid`=:channelId AND `userid`=:userId')
       ->execute([
@@ -271,6 +285,7 @@ class NotificationChannelManager {
     $channel->builtIn = true;
     $channel->payload = '';
     $channel->headers = [];
+    $channel->preset = '';
     return $channel;
   }
 
@@ -285,11 +300,15 @@ class NotificationChannelManager {
     $channel->builtIn = false;
     $channel->payload = '';
     $channel->headers = [];
+    $channel->preset = '';
     if ($channel->type === NotificationChannel::TYPE_WEBHOOK) {
       if (isset($settings['payload']) && is_string($settings['payload'])) {
         $channel->payload = $settings['payload'];
       }
       $channel->headers = $this->extractStoredHeaders(isset($settings['headers']) ? $settings['headers'] : null);
+      if (isset($settings['preset']) && is_string($settings['preset'])) {
+        $channel->preset = $this->normalizePreset($settings['preset'], false);
+      }
     }
     return $channel;
   }
@@ -321,7 +340,7 @@ class NotificationChannelManager {
     return $result;
   }
 
-  private function normalizeChannel($type, $destination, $payload, $headers) {
+  private function normalizeChannel($type, $destination, $payload, $headers, $preset = '') {
     if ($type !== NotificationChannel::TYPE_EMAIL && $type !== NotificationChannel::TYPE_WEBHOOK) {
       throw new InvalidArgumentsException();
     }
@@ -333,6 +352,7 @@ class NotificationChannelManager {
 
     $normalizedPayload = '';
     $normalizedHeaders = [];
+    $normalizedPreset = '';
     if ($type === NotificationChannel::TYPE_EMAIL) {
       $destination = strtolower($destination);
       if (filter_var($destination, FILTER_VALIDATE_EMAIL) === false) {
@@ -348,13 +368,35 @@ class NotificationChannelManager {
       }
       $normalizedPayload = $this->normalizePayload($payload);
       $normalizedHeaders = $this->normalizeHeaders($headers);
+      $normalizedPreset = $this->normalizePreset($preset, true);
     }
 
     return [
       'destination' => $destination,
       'payload'     => $normalizedPayload,
-      'headers'     => $normalizedHeaders
+      'headers'     => $normalizedHeaders,
+      'preset'      => $normalizedPreset
     ];
+  }
+
+  private function normalizePreset($preset, $rejectUnknown) {
+    if ($preset === null || $preset === '') {
+      return '';
+    }
+    if (!is_string($preset)) {
+      throw new InvalidArgumentsException();
+    }
+    $preset = strtolower(trim($preset));
+    if ($preset === '') {
+      return '';
+    }
+    if (!in_array($preset, NotificationChannel::ALLOWED_PRESETS, true)) {
+      if ($rejectUnknown) {
+        throw new InvalidArgumentsException();
+      }
+      return '';
+    }
+    return $preset;
   }
 
   private function normalizePayload($payload) {
@@ -434,13 +476,17 @@ class NotificationChannelManager {
     return is_array($decoded) ? $decoded : [];
   }
 
-  private function encodeSettings($type, $payload, $headers) {
+  private function encodeSettings($type, $payload, $headers, $preset = '') {
     if ($type !== NotificationChannel::TYPE_WEBHOOK) {
       return '{}';
     }
-    return json_encode([
+    $settings = [
       'payload' => $payload,
       'headers' => $headers
-    ]);
+    ];
+    if ($preset !== '') {
+      $settings['preset'] = $preset;
+    }
+    return json_encode($settings);
   }
 }
