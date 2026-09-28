@@ -24,6 +24,7 @@ class CreateNotificationChannel extends AbstractAPIMethod {
       && isset($request->destination)
       && is_string($request->destination)
       && (!isset($request->payload) || is_string($request->payload))
+      && (!isset($request->headers) || is_array($request->headers))
     );
   }
 
@@ -35,6 +36,7 @@ class CreateNotificationChannel extends AbstractAPIMethod {
           $request->destination,
           !isset($request->enabled) || $request->enabled,
           isset($request->payload) ? $request->payload : '',
+          isset($request->headers) ? $request->headers : [],
           $language
         );
 

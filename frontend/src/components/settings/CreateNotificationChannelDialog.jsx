@@ -6,6 +6,7 @@ import { createNotificationChannel } from '../../utils/API';
 import { useSnackbar } from 'notistack';
 import { DEFAULT_WEBHOOK_PAYLOAD, isValidJson, NotificationChannelType, RegexPatterns } from '../../utils/Constants';
 import WebhookPayloadField from './WebhookPayloadField';
+import WebhookHeadersField, { headersToApi } from './WebhookHeadersField';
 
 const useStyles = makeStyles(theme => ({
   createDialog: {
@@ -26,6 +27,7 @@ export default function CreateNotificationChannelDialog({ accountEmail, onClose,
   const [ type, setType ] = useState(NotificationChannelType.WEBHOOK);
   const [ destination, setDestination ] = useState('');
   const [ payload, setPayload ] = useState(DEFAULT_WEBHOOK_PAYLOAD);
+  const [ headers, setHeaders ] = useState([]);
   const [ createdEmail, setCreatedEmail ] = useState(null);
 
   const isEmail = type === NotificationChannelType.EMAIL;
@@ -41,7 +43,13 @@ export default function CreateNotificationChannelDialog({ accountEmail, onClose,
       return;
     }
     const trimmedDestination = destination.trim();
-    createNotificationChannel(type, trimmedDestination, true, isEmail ? '' : payload)
+    createNotificationChannel(
+      type,
+      trimmedDestination,
+      true,
+      isEmail ? '' : payload,
+      isEmail ? [] : headersToApi(headers)
+    )
       .then(() => {
         onRefreshChannelsHook.current();
         if (isEmail) {
@@ -76,7 +84,7 @@ export default function CreateNotificationChannelDialog({ accountEmail, onClose,
     </Dialog>;
   }
 
-  return <Dialog open={true} onClose={onCloseHook.current} fullWidth maxWidth='sm'>
+  return <Dialog open={true} onClose={onCloseHook.current} fullWidth maxWidth={isEmail ? 'sm' : 'md'}>
     <DialogTitle>{t('settings.notificationChannels.add')}</DialogTitle>
     <DialogContent className={classes.createDialog}>
       <DialogContentText>
@@ -89,6 +97,7 @@ export default function CreateNotificationChannelDialog({ accountEmail, onClose,
           onChange={({target}) => {
             setType(target.value);
             setDestination('');
+            setHeaders([]);
           }}
         >
           <MenuItem value={NotificationChannelType.EMAIL}>{t('settings.notificationChannels.types.email')}</MenuItem>
@@ -108,6 +117,7 @@ export default function CreateNotificationChannelDialog({ accountEmail, onClose,
           autoFocus
         />
       </FormControl>
+      {!isEmail && <WebhookHeadersField value={headers} onChange={setHeaders} />}
       {!isEmail && <WebhookPayloadField value={payload} onChange={setPayload} />}
     </DialogContent>
     <DialogActions>

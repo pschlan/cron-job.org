@@ -25,6 +25,7 @@ class UpdateNotificationChannel extends AbstractAPIMethod {
       && is_string($request->destination)
       && isset($request->enabled)
       && (!isset($request->payload) || is_string($request->payload))
+      && (!isset($request->headers) || is_array($request->headers))
     );
   }
 
@@ -35,7 +36,8 @@ class UpdateNotificationChannel extends AbstractAPIMethod {
           $request->channelId,
           $request->destination,
           $request->enabled,
-          isset($request->payload) ? $request->payload : ''
+          isset($request->payload) ? $request->payload : '',
+          isset($request->headers) ? $request->headers : []
         );
 
       return (object)[];

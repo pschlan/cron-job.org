@@ -13,6 +13,7 @@ class NotificationChannel {
   const TYPE_WEBHOOK = 1;
   const ACCOUNT_CHANNEL_ID = 0;
   const MAX_PAYLOAD_BYTES = 16384;
+  const MAX_HEADERS = 32;
 
   public $channelId;
   public $type;
@@ -21,6 +22,7 @@ class NotificationChannel {
   public $confirmed;
   public $builtIn;
   public $payload;
+  public $headers;
 
   function __construct() {
     $this->channelId = intval($this->channelId);
@@ -30,6 +32,9 @@ class NotificationChannel {
     $this->builtIn = intval($this->builtIn) != 0;
     if ($this->payload === null) {
       $this->payload = '';
+    }
+    if ($this->headers === null) {
+      $this->headers = [];
     }
   }
 }
@@ -63,9 +68,9 @@ class NotificationChannelManager {
     return $result;
   }
 
-  public function createNotificationChannel($type, $destination, $enabled, $payload, $language) {
+  public function createNotificationChannel($type, $destination, $enabled, $payload, $headers, $language) {
     $type = intval($type);
-    $normalized = $this->normalizeChannel($type, $destination, $payload);
+    $normalized = $this->normalizeChannel($type, $destination, $payload, $headers);
     $isEmail = $type === NotificationChannel::TYPE_EMAIL;
 
     if ($isEmail) {
@@ -79,7 +84,7 @@ class NotificationChannelManager {
       throw new QuotaExceededException();
     }
 
-    $settings = $this->encodeSettings($type, $normalized['payload'], []);
+    $settings = $this->encodeSettings($type, $normalized['payload'], $normalized['headers']);
     $confirmed = $isEmail ? 0 : 1;
     $enabledValue = $isEmail ? 0 : ($enabled ? 1 : 0);
 
@@ -108,7 +113,7 @@ class NotificationChannelManager {
     }
   }
 
-  public function updateNotificationChannel($channelId, $destination, $enabled, $payload) {
+  public function updateNotificationChannel($channelId, $destination, $enabled, $payload, $headers) {
     $channelId = intval($channelId);
     if ($channelId === NotificationChannel::ACCOUNT_CHANNEL_ID) {
       throw new InvalidArgumentsException();
@@ -123,8 +128,8 @@ class NotificationChannelManager {
       throw new InvalidArgumentsException();
     }
 
-    $normalized = $this->normalizeChannel($existing['type'], $destination, $payload);
-    $settings = $this->encodeSettings($existing['type'], $normalized['payload'], $this->decodeSettings($existing['settings']));
+    $normalized = $this->normalizeChannel($existing['type'], $destination, $payload, $headers);
+    $settings = $this->encodeSettings($existing['type'], $normalized['payload'], $normalized['headers']);
 
     Database::get()->prepare('UPDATE `notificationchannel` SET `destination`=:destination, `enabled`=:enabled, `settings`=:settings WHERE `channelid`=:channelId AND `userid`=:userId')
       ->execute([
@@ -265,6 +270,7 @@ class NotificationChannelManager {
     $channel->confirmed = true;
     $channel->builtIn = true;
     $channel->payload = '';
+    $channel->headers = [];
     return $channel;
   }
 
@@ -278,13 +284,44 @@ class NotificationChannelManager {
     $channel->confirmed = intval($row['confirmed']) != 0;
     $channel->builtIn = false;
     $channel->payload = '';
-    if ($channel->type === NotificationChannel::TYPE_WEBHOOK && isset($settings['payload']) && is_string($settings['payload'])) {
-      $channel->payload = $settings['payload'];
+    $channel->headers = [];
+    if ($channel->type === NotificationChannel::TYPE_WEBHOOK) {
+      if (isset($settings['payload']) && is_string($settings['payload'])) {
+        $channel->payload = $settings['payload'];
+      }
+      $channel->headers = $this->extractStoredHeaders(isset($settings['headers']) ? $settings['headers'] : null);
     }
     return $channel;
   }
 
-  private function normalizeChannel($type, $destination, $payload) {
+  private function extractStoredHeaders($headers) {
+    if (!is_array($headers)) {
+      return [];
+    }
+
+    $result = [];
+    foreach ($headers as $header) {
+      if (!is_array($header)
+          || !isset($header['key'])
+          || !isset($header['value'])
+          || !is_string($header['key'])
+          || !is_string($header['value'])) {
+        continue;
+      }
+      $key = trim($header['key']);
+      $value = trim($header['value']);
+      if ($key === '' || $value === '') {
+        continue;
+      }
+      $result[] = [
+        'key'   => $key,
+        'value' => $value
+      ];
+    }
+    return $result;
+  }
+
+  private function normalizeChannel($type, $destination, $payload, $headers) {
     if ($type !== NotificationChannel::TYPE_EMAIL && $type !== NotificationChannel::TYPE_WEBHOOK) {
       throw new InvalidArgumentsException();
     }
@@ -295,6 +332,7 @@ class NotificationChannelManager {
     }
 
     $normalizedPayload = '';
+    $normalizedHeaders = [];
     if ($type === NotificationChannel::TYPE_EMAIL) {
       $destination = strtolower($destination);
       if (filter_var($destination, FILTER_VALIDATE_EMAIL) === false) {
@@ -309,11 +347,13 @@ class NotificationChannelManager {
         throw new InvalidArgumentsException();
       }
       $normalizedPayload = $this->normalizePayload($payload);
+      $normalizedHeaders = $this->normalizeHeaders($headers);
     }
 
     return [
       'destination' => $destination,
-      'payload'     => $normalizedPayload
+      'payload'     => $normalizedPayload,
+      'headers'     => $normalizedHeaders
     ];
   }
 
@@ -332,6 +372,52 @@ class NotificationChannelManager {
     return $payload;
   }
 
+  private function normalizeHeaders($headers) {
+    if ($headers === null || $headers === '') {
+      return [];
+    }
+    if (is_object($headers)) {
+      $headers = (array)$headers;
+    }
+    if (!is_array($headers)) {
+      throw new InvalidArgumentsException();
+    }
+
+    $result = [];
+    foreach ($headers as $header) {
+      if (is_object($header)) {
+        $header = (array)$header;
+      }
+      if (!is_array($header)
+          || !array_key_exists('key', $header)
+          || !array_key_exists('value', $header)
+          || !is_string($header['key'])
+          || !is_string($header['value'])) {
+        throw new InvalidArgumentsException();
+      }
+
+      $key = trim(str_replace(array("\r", "\n"), '', $header['key']));
+      $value = trim(str_replace(array("\r", "\n"), '', $header['value']));
+      if ($key === '' || $value === '') {
+        continue;
+      }
+      if (strlen($key) > 256 || strlen($value) > 4096) {
+        throw new InvalidArgumentsException();
+      }
+
+      $result[] = [
+        'key'   => $key,
+        'value' => $value
+      ];
+    }
+
+    if (count($result) > NotificationChannel::MAX_HEADERS) {
+      throw new InvalidArgumentsException();
+    }
+
+    return $result;
+  }
+
   private function isHttpUrl($url) {
     if (filter_var($url, FILTER_VALIDATE_URL) === false) {
       return false;
@@ -348,12 +434,13 @@ class NotificationChannelManager {
     return is_array($decoded) ? $decoded : [];
   }
 
-  private function encodeSettings($type, $payload, $existingSettings) {
+  private function encodeSettings($type, $payload, $headers) {
     if ($type !== NotificationChannel::TYPE_WEBHOOK) {
       return '{}';
     }
-    $settings = is_array($existingSettings) ? $existingSettings : [];
-    $settings['payload'] = $payload;
-    return json_encode($settings);
+    return json_encode([
+      'payload' => $payload,
+      'headers' => $headers
+    ]);
   }
 }

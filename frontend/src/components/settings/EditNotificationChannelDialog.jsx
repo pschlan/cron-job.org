@@ -5,6 +5,7 @@ import { updateNotificationChannel } from '../../utils/API';
 import { useSnackbar } from 'notistack';
 import { isValidJson, NotificationChannelType, RegexPatterns } from '../../utils/Constants';
 import WebhookPayloadField from './WebhookPayloadField';
+import WebhookHeadersField, { headersFromApi, headersToApi } from './WebhookHeadersField';
 
 const useStyles = makeStyles(theme => ({
   editDialog: {
@@ -25,6 +26,7 @@ export default function EditNotificationChannelDialog({ channel, accountEmail, o
   const [ destination, setDestination ] = useState(channel.destination || '');
   const [ enabled, setEnabled ] = useState(!!channel.enabled);
   const [ payload, setPayload ] = useState(channel.payload || '{}');
+  const [ headers, setHeaders ] = useState(() => headersFromApi(channel.headers));
 
   const isEmail = channel.type === NotificationChannelType.EMAIL;
   const usesAccountEmail = isEmail && destination.trim().toLowerCase() === (accountEmail || '').toLowerCase();
@@ -38,7 +40,13 @@ export default function EditNotificationChannelDialog({ channel, accountEmail, o
     if (!canSave) {
       return;
     }
-    updateNotificationChannel(channel.channelId, destination.trim(), enabled, isEmail ? '' : payload)
+    updateNotificationChannel(
+      channel.channelId,
+      destination.trim(),
+      enabled,
+      isEmail ? '' : payload,
+      isEmail ? [] : headersToApi(headers)
+    )
       .then(() => {
         enqueueSnackbar(t('settings.notificationChannels.saved'), { variant: 'success' });
         onRefreshChannelsHook.current();
@@ -49,7 +57,7 @@ export default function EditNotificationChannelDialog({ channel, accountEmail, o
       });
   }
 
-  return <Dialog open={true} onClose={onCloseHook.current} fullWidth maxWidth='sm'>
+  return <Dialog open={true} onClose={onCloseHook.current} fullWidth maxWidth={isEmail ? 'sm' : 'md'}>
     <DialogTitle>{t('settings.notificationChannels.editChannel')}</DialogTitle>
     <DialogContent className={classes.editDialog}>
       <FormControl fullWidth>
@@ -78,6 +86,7 @@ export default function EditNotificationChannelDialog({ channel, accountEmail, o
         control={<Switch checked={enabled} onChange={({target}) => setEnabled(target.checked)} />}
         label={t('settings.notificationChannels.enabled')}
       />
+      {!isEmail && <WebhookHeadersField value={headers} onChange={setHeaders} />}
       {!isEmail && <WebhookPayloadField value={payload} onChange={setPayload} />}
     </DialogContent>
     <DialogActions>
