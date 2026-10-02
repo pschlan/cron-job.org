@@ -204,7 +204,8 @@
       "FAILED_SIZE": "Eșuat (ieșire prea mare)",
       "FAILED_URL": "Eșuat (URL nevalid)",
       "FAILED_INTERNAL": "Eșuat (eroare internă)",
-      "FAILED_OTHERS": "Eșuat"
+      "FAILED_OTHERS": "Eșuat",
+      "FAILED_CHALLENGEPAGE": "Eșuat (pagină de verificare)"
     },
     "fetchedUrl": "URL preluat",
     "responseHeaders": "Anteturi răspuns",

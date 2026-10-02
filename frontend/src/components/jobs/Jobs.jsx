@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Table from '../misc/Table';
 import moment from 'moment';
 import { jobStatusText } from '../../utils/Constants';
+import { Config } from '../../utils/Config';
 import { statusExplanationToken } from '../../utils/JobStatusInfo';
 import AddIcon from '@material-ui/icons/AlarmAdd';
 import EditIcon from '@material-ui/icons/Edit';
@@ -93,7 +94,7 @@ export default function Jobs({ match }) {
           <div>{moment(job.lastExecution * 1000).calendar()}</div>
           <div><Typography variant="caption">
               {explanationToken ?
-                <Tooltip arrow title={t('jobs.statusExplanations.' + explanationToken)}>
+                <Tooltip arrow title={t('jobs.statusExplanations.' + explanationToken, { serviceName: Config.productName })}>
                   <span className={classes.statusWithHelp}>{statusText}</span>
                 </Tooltip> :
                 statusText}

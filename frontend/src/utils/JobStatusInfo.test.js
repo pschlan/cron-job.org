@@ -63,6 +63,7 @@ describe('statusExplanationToken', () => {
     expect(statusExplanationToken(JobStatus.FAILED_URL)).toBe('modes.FAILED_URL');
     expect(statusExplanationToken(JobStatus.FAILED_INTERNAL)).toBe('modes.FAILED_INTERNAL');
     expect(statusExplanationToken(JobStatus.FAILED_OTHERS)).toBe('modes.FAILED_OTHERS');
+    expect(statusExplanationToken(JobStatus.FAILED_CHALLENGEPAGE)).toBe('modes.FAILED_CHALLENGEPAGE');
   });
 
   it('delegates HTTP errors to the HTTP code explanation', () => {

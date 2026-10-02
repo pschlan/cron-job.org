@@ -217,7 +217,8 @@
       "FAILED_SIZE": "Gagal (output terlalu besar)",
       "FAILED_URL": "Gagal (URL tidak valid)",
       "FAILED_INTERNAL": "Gagal (kesalahan internal)",
-      "FAILED_OTHERS": "Gagal"
+      "FAILED_OTHERS": "Gagal",
+      "FAILED_CHALLENGEPAGE": "Gagal (halaman verifikasi)"
     },
     "fetchedUrl": "URL yang diambil",
     "responseHeaders": "Header respons",

@@ -202,7 +202,8 @@
       "FAILED_SIZE": "失败（输出过大）",
       "FAILED_URL": "失败（网址无效）",
       "FAILED_INTERNAL": "失败（内部错误）",
-      "FAILED_OTHERS": "失败"
+      "FAILED_OTHERS": "失败",
+      "FAILED_CHALLENGEPAGE": "失败（验证页面）"
     },
     "fetchedUrl": "取得的网址",
     "responseHeaders": "响应标头",

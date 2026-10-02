@@ -203,7 +203,8 @@
       "FAILED_SIZE": "Failed (output too large)",
       "FAILED_URL": "Failed (invalid URL)",
       "FAILED_INTERNAL": "Failed (internal error)",
-      "FAILED_OTHERS": "Failed"
+      "FAILED_OTHERS": "Failed",
+      "FAILED_CHALLENGEPAGE": "Failed (challenge page)"
     },
     "statusExplanations": {
       "modes": {
@@ -214,7 +215,8 @@
         "FAILED_SIZE": "The response was larger than the allowed limit and was aborted. Make the endpoint return less data.",
         "FAILED_URL": "The URL could not be parsed. Please check it for typos and make sure it starts with http:// or https://.",
         "FAILED_INTERNAL": "An internal error occurred while executing the job. If this keeps happening, please contact our support team.",
-        "FAILED_OTHERS": "The request failed for an unspecified reason."
+        "FAILED_OTHERS": "The request failed for an unspecified reason.",
+        "FAILED_CHALLENGEPAGE": "This URL returned a bot challenge page instead of the expected response. Ask your web host to allowlist {{serviceName}}, or disable bot protection for this URL."
       },
       "http": {
         "3xx": "The server returned a redirect. By default redirects are treated as a failure — you can enable \"Treat redirects as success\" in the job's advanced settings, or point the job directly at the redirect target.",

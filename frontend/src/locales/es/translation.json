@@ -217,7 +217,8 @@
       "FAILED_SIZE": "Fallido (salida demasiado grande)",
       "FAILED_URL": "Fallido (URL inválida)",
       "FAILED_INTERNAL": "Fallido (error interno)",
-      "FAILED_OTHERS": "Fallido"
+      "FAILED_OTHERS": "Fallido",
+      "FAILED_CHALLENGEPAGE": "Fallido (página de verificación)"
     },
     "fetchedUrl": "URL obtenida",
     "responseHeaders": "Encabezados de respuesta",

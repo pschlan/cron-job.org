@@ -202,7 +202,8 @@
       "FAILED_SIZE": "失敗（輸出過大）",
       "FAILED_URL": "失敗（網址無效）",
       "FAILED_INTERNAL": "失敗（內部錯誤）",
-      "FAILED_OTHERS": "失敗"
+      "FAILED_OTHERS": "失敗",
+      "FAILED_CHALLENGEPAGE": "失敗（驗證頁面）"
     },
     "fetchedUrl": "取得的網址",
     "responseHeaders": "回應標頭",

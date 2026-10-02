@@ -203,7 +203,8 @@
       "FAILED_SIZE": "Falha (saída muito grande)",
       "FAILED_URL": "Falha (URL inválido)",
       "FAILED_INTERNAL": "Falha (erro interno)",
-      "FAILED_OTHERS": "Falha"
+      "FAILED_OTHERS": "Falha",
+      "FAILED_CHALLENGEPAGE": "Falha (página de verificação)"
     },
     "fetchedUrl": "URL Buscada",
     "responseHeaders": "Cabeçalhos de resposta",

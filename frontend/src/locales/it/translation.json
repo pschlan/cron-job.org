@@ -204,7 +204,8 @@
       "FAILED_SIZE": "Fallito (output troppo grande)",
       "FAILED_URL": "Fallito (URL non valido)",
       "FAILED_INTERNAL": "Fallito (errore interno)",
-      "FAILED_OTHERS": "Fallito"
+      "FAILED_OTHERS": "Fallito",
+      "FAILED_CHALLENGEPAGE": "Fallito (pagina di verifica)"
     },
     "fetchedUrl": "URL visitato",
     "responseHeaders": "Headers della risposta",

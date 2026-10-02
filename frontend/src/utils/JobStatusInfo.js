@@ -16,6 +16,7 @@ const FAILURE_MODE_TOKENS = {
   [JobStatus.FAILED_URL]: 'modes.FAILED_URL',
   [JobStatus.FAILED_INTERNAL]: 'modes.FAILED_INTERNAL',
   [JobStatus.FAILED_OTHERS]: 'modes.FAILED_OTHERS',
+  [JobStatus.FAILED_CHALLENGEPAGE]: 'modes.FAILED_CHALLENGEPAGE',
 };
 
 // HTTP status codes that get their own dedicated explanation. Anything else

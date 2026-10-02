@@ -204,7 +204,8 @@
       "FAILED_SIZE": "Nieudane (zbyt duży rozmiar danych wyjściowych)",
       "FAILED_URL": "Nieudane (nieprawidłowy URL)",
       "FAILED_INTERNAL": "Nieudane (błąd wewnętrzny)",
-      "FAILED_OTHERS": "Nieudane"
+      "FAILED_OTHERS": "Nieudane",
+      "FAILED_CHALLENGEPAGE": "Nieudane (strona weryfikacyjna)"
     },
     "fetchedUrl": "Pobrany URL",
     "responseHeaders": "Nagłówki odpowiedzi",
