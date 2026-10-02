@@ -902,6 +902,7 @@ Value               Description
 7                   Failed (invalid URL)
 8                   Failed (internal errors)
 9                   Failed (unknown reason)
+10                  Failed (challenge page)
 =================== =========================================================
 
 JobType
