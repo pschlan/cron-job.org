@@ -373,8 +373,55 @@
       "type": "timeseries"
     },
     {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "opacity",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "decimals": 1,
+          "unit": "cpm"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 13 },
+      "id": 30,
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(chronos_jobs_executed_total{instance=~\"$instance\", job_type=~\"$job_type\", status=\"failed_challengepage\"}[$__rate_interval])) * 60",
+          "legendFormat": "challenge pages / min",
+          "refId": "A"
+        }
+      ],
+      "title": "Challenge pages",
+      "type": "timeseries"
+    },
+    {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 13 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 21 },
       "id": 101,
       "panels": [],
       "title": "Scheduling",
@@ -398,7 +445,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 7, "w": 6, "x": 0, "y": 14 },
+      "gridPos": { "h": 7, "w": 6, "x": 0, "y": 22 },
       "id": 9,
       "options": {
         "legend": { "calcs": ["mean"], "displayMode": "list", "placement": "bottom", "showLegend": true },
@@ -430,7 +477,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 7, "w": 6, "x": 6, "y": 14 },
+      "gridPos": { "h": 7, "w": 6, "x": 6, "y": 22 },
       "id": 10,
       "options": {
         "legend": { "calcs": ["mean", "max"], "displayMode": "list", "placement": "bottom", "showLegend": true },
@@ -467,7 +514,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 7, "w": 6, "x": 12, "y": 14 },
+      "gridPos": { "h": 7, "w": 6, "x": 12, "y": 22 },
       "id": 11,
       "options": {
         "legend": { "calcs": ["mean", "max"], "displayMode": "list", "placement": "bottom", "showLegend": true },
@@ -499,7 +546,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 7, "w": 6, "x": 18, "y": 14 },
+      "gridPos": { "h": 7, "w": 6, "x": 18, "y": 22 },
       "id": 29,
       "options": {
         "legend": { "calcs": ["mean", "max"], "displayMode": "list", "placement": "bottom", "showLegend": true },
@@ -517,7 +564,7 @@
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 21 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 29 },
       "id": 102,
       "panels": [],
       "title": "Workers & resources",
@@ -539,7 +586,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 7, "w": 6, "x": 0, "y": 22 },
+      "gridPos": { "h": 7, "w": 6, "x": 0, "y": 30 },
       "id": 12,
       "options": {
         "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
@@ -585,7 +632,7 @@
           }
         ]
       },
-      "gridPos": { "h": 7, "w": 6, "x": 6, "y": 22 },
+      "gridPos": { "h": 7, "w": 6, "x": 6, "y": 30 },
       "id": 13,
       "options": {
         "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
@@ -622,7 +669,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 7, "w": 6, "x": 12, "y": 22 },
+      "gridPos": { "h": 7, "w": 6, "x": 12, "y": 30 },
       "id": 28,
       "options": {
         "legend": { "calcs": ["mean", "max"], "displayMode": "list", "placement": "bottom", "showLegend": true },
@@ -658,7 +705,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 7, "w": 6, "x": 18, "y": 22 },
+      "gridPos": { "h": 7, "w": 6, "x": 18, "y": 30 },
       "id": 14,
       "options": {
         "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
@@ -686,7 +733,7 @@
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 29 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 37 },
       "id": 103,
       "panels": [],
       "title": "Persistence (UpdateThread)",
@@ -707,7 +754,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 30 },
+      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 38 },
       "id": 15,
       "options": {
         "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
@@ -738,7 +785,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 30 },
+      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 38 },
       "id": 16,
       "options": {
         "legend": { "calcs": ["mean", "max"], "displayMode": "list", "placement": "bottom", "showLegend": true },
@@ -769,7 +816,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 30 },
+      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 38 },
       "id": 17,
       "options": {
         "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
@@ -802,7 +849,7 @@
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 37 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 45 },
       "id": 104,
       "panels": [],
       "title": "Notifications",
@@ -823,7 +870,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 7, "w": 6, "x": 0, "y": 38 },
+      "gridPos": { "h": 7, "w": 6, "x": 0, "y": 46 },
       "id": 18,
       "options": {
         "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
@@ -870,7 +917,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 7, "w": 9, "x": 6, "y": 38 },
+      "gridPos": { "h": 7, "w": 9, "x": 6, "y": 46 },
       "id": 19,
       "options": {
         "legend": { "displayMode": "table", "placement": "bottom", "showLegend": true },
@@ -911,7 +958,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 7, "w": 9, "x": 15, "y": 38 },
+      "gridPos": { "h": 7, "w": 9, "x": 15, "y": 46 },
       "id": 20,
       "options": {
         "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
@@ -944,7 +991,7 @@
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 45 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 53 },
       "id": 105,
       "panels": [],
       "title": "RPC & master client",
@@ -966,7 +1013,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 46 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 54 },
       "id": 21,
       "options": {
         "legend": { "calcs": ["mean"], "displayMode": "table", "placement": "bottom", "showLegend": true },
@@ -997,7 +1044,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 46 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 54 },
       "id": 22,
       "options": {
         "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true },
@@ -1028,7 +1075,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 54 },
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 62 },
       "id": 23,
       "options": {
         "legend": { "displayMode": "table", "placement": "bottom", "showLegend": true },
@@ -1059,7 +1106,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 54 },
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 62 },
       "id": 24,
       "options": {
         "legend": { "displayMode": "table", "placement": "bottom", "showLegend": true },
@@ -1082,7 +1129,7 @@
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 61 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 69 },
       "id": 106,
       "panels": [],
       "title": "Test runs & nodes",
@@ -1103,7 +1150,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 62 },
+      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 70 },
       "id": 25,
       "options": {
         "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
@@ -1139,7 +1186,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 62 },
+      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 70 },
       "id": 26,
       "options": {
         "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
@@ -1184,7 +1231,7 @@
           }
         ]
       },
-      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 62 },
+      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 70 },
       "id": 27,
       "options": {
         "cellHeight": "sm",
