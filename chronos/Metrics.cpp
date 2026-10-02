@@ -55,7 +55,8 @@ const std::vector<double> kRpcDurationBuckets = {
 const char *kJobTypeLabels[] = { "default", "monitoring" };
 const char *kStatusLabels[] = {
 	"ok", "failed_dns", "failed_connect", "failed_httperror", "failed_timeout",
-	"failed_size", "failed_url", "failed_internal", "failed_others", "unknown"
+	"failed_size", "failed_url", "failed_internal", "failed_others", "unknown",
+	"failed_challengepage"
 };
 const char *kPriorityLabels[] = { "low", "default", "high" };
 

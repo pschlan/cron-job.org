@@ -206,7 +206,8 @@
       "FAILED_SIZE": "Meghibásodott (túl nagy kimenet)",
       "FAILED_URL": "Meghibásodott (érvénytelen URL)",
       "FAILED_INTERNAL": "Meghibásodott (belső hiba)",
-      "FAILED_OTHERS": "Meghibásodott"
+      "FAILED_OTHERS": "Meghibásodott",
+      "FAILED_CHALLENGEPAGE": "Meghibásodott (ellenőrző oldal)"
     },
     "fetchedUrl": "Lekért URL",
     "responseHeaders": "Válaszüzenetek fejléc",

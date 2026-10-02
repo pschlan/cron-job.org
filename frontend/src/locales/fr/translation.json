@@ -195,7 +195,8 @@
       "FAILED_SIZE": "Échec (sortie trop grande)",
       "FAILED_URL": "Échec (URL non valide)",
       "FAILED_INTERNAL": "Échec (erreur interne)",
-      "FAILED_OTHERS": "Échec"
+      "FAILED_OTHERS": "Échec",
+      "FAILED_CHALLENGEPAGE": "Échec (page de défi)"
     },
     "fetchedUrl": "URL récupérée",
     "responseHeaders": "En-têtes de la réponse",

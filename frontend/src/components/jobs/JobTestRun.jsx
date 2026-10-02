@@ -199,7 +199,7 @@ export default function JobTestRun({ job, jobId, onClose, onUpdateUrl = () => nu
           const explanationToken = statusExplanationToken(status.result, status.httpStatus);
           return explanationToken && <Box mt={2}>
             <Alert severity='info'>
-              {t('jobs.statusExplanations.' + explanationToken)}
+              {t('jobs.statusExplanations.' + explanationToken, { serviceName: Config.productName })}
             </Alert>
           </Box>;
         })()}

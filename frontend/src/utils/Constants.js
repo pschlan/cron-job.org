@@ -16,7 +16,8 @@ export const JobStatus = {
   FAILED_SIZE: 6,
   FAILED_URL: 7,
   FAILED_INTERNAL: 8,
-  FAILED_OTHERS: 9
+  FAILED_OTHERS: 9,
+  FAILED_CHALLENGEPAGE: 10
 };
 
 export const RequestMethod = {

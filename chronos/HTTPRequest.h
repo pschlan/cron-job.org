@@ -19,6 +19,8 @@
 
 #include <curl/curl.h>
 
+#include "BodyPatternMatcher.h"
+
 namespace Chronos
 {
 	class WorkerThread;
@@ -93,6 +95,7 @@ namespace Chronos
 		char curlError[CURL_ERROR_SIZE];
 		size_t maxSize;
 		int requestTimeout;
+		BodyPatternMatcher bodyMatcher_;
 	};
 };
 

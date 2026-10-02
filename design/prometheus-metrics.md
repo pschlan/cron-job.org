@@ -40,7 +40,7 @@ Keep label cardinality low. Avoid unbounded labels such as `job_id`, `user_id`, 
 | Label | Values | Notes |
 |---|---|---|
 | `job_type` | `default`, `monitoring` | From `JobType_t` |
-| `status` | `ok`, `failed_dns`, `failed_connect`, `failed_httperror`, `failed_timeout`, `failed_size`, `failed_url`, `failed_internal`, `failed_others`, `unknown` | Maps to `JOBSTATUS_*`; omit `http_status` here |
+| `status` | `ok`, `failed_dns`, `failed_connect`, `failed_httperror`, `failed_timeout`, `failed_size`, `failed_url`, `failed_internal`, `failed_others`, `unknown`, `failed_challengepage` | Maps to `JOBSTATUS_*`; omit `http_status` here |
 | `type` | `failure`, `success`, `disable`, `ssl_cert_expiry` | Notification type |
 | `service` | `node`, `master` | Inbound Thrift service |
 | `method` | Thrift RPC method name | Bounded by service definition (~20 methods total) |

@@ -11,6 +11,8 @@
 
 #include "HTTPRequest.h"
 
+#include "ChallengePagePatterns.h"
+
 #include <algorithm>
 #include <cctype>
 #include <ctime>
@@ -209,6 +211,7 @@ HTTPRequest::HTTPRequest(size_t maxSize, int requestTimeout)
 	: result{std::make_unique<JobResult>()}
 	, maxSize{maxSize}
 	, requestTimeout{requestTimeout}
+	, bodyMatcher_(getChallengePagePatterns())
 {
 	if(maxSize == 0 || requestTimeout <= 0)
 	{
@@ -290,6 +293,8 @@ bool HTTPRequest::processData(const char *data, size_t size)
 	{
 		return false;
 	}
+
+	bodyMatcher_.feed(data, size);
 
 	result->responseBodySize += size;
 	if(result->responseBodySize + result->responseHeadersSize > maxSize)
@@ -416,6 +421,12 @@ void HTTPRequest::done(CURLcode res)
 		result->status 			= JOBSTATUS_FAILED_OTHERS;
 		result->statusText 		= std::string("Other error: ") + curlError + std::string(" (") + std::to_string(res) + std::string(")");
 		break;
+	}
+
+	if(bodyMatcher_.didMatch())
+	{
+		result->status = JOBSTATUS_FAILED_CHALLENGEPAGE;
+		result->statusText = "Challenge page";
 	}
 
 	result->dateDone	= Utils::getTimestampMS();

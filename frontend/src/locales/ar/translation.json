@@ -217,7 +217,8 @@
       "FAILED_SIZE": "فشل (الإخراج كبير جدًا)",
       "FAILED_URL": "فشل (رابط غير صالح)",
       "FAILED_INTERNAL": "فشل (خطأ داخلي)",
-      "FAILED_OTHERS": "فشل"
+      "FAILED_OTHERS": "فشل",
+      "FAILED_CHALLENGEPAGE": "فشل (صفحة تحقق)"
     },
     "fetchedUrl": "الرابط المسترجع",
     "responseHeaders": "ترويسات الاستجابة",

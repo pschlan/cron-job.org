@@ -206,7 +206,8 @@
       "FAILED_SIZE": "Başarısız (çıkış çok büyük)",
       "FAILED_URL": "Başarısız (geçersiz URL)",
       "FAILED_INTERNAL": "Başarısız (iç hata)",
-      "FAILED_OTHERS": "Başarısız"
+      "FAILED_OTHERS": "Başarısız",
+      "FAILED_CHALLENGEPAGE": "Başarısız (doğrulama sayfası)"
     },
     "fetchedUrl": "Alınan URL",
     "responseHeaders": "Yanıt başlıkları",

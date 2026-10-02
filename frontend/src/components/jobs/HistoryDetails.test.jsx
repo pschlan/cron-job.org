@@ -69,6 +69,14 @@ describe('HistoryDetails status explanation', () => {
     );
   });
 
+  it('shows the challenge page explanation', async () => {
+    renderDetails({ status: JobStatus.FAILED_CHALLENGEPAGE });
+    await waitFor(() =>
+      expect(screen.getByText(/bot challenge page/i)).toBeInTheDocument()
+    );
+    expect(screen.getByText(/allowlist/i)).toBeInTheDocument();
+  });
+
   it('does not show any explanation for a successful execution', async () => {
     renderDetails({ status: JobStatus.OK, httpStatus: 200, statusText: 'OK' });
     // The status itself still renders (await it so the async load settles)...

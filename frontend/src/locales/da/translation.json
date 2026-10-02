@@ -212,7 +212,8 @@
       "FAILED_SIZE": "Mislykkedes (output for stort)",
       "FAILED_URL": "Mislykkedes (ugyldig URL)",
       "FAILED_INTERNAL": "Mislykkedes (intern fejl)",
-      "FAILED_OTHERS": "Mislykkedes"
+      "FAILED_OTHERS": "Mislykkedes",
+      "FAILED_CHALLENGEPAGE": "Mislykkedes (verifikationsside)"
     },
     "fetchedUrl": "Hentet URL",
     "responseHeaders": "Respons-headers",

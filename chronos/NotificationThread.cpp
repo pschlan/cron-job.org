@@ -1270,8 +1270,9 @@ std::string NotificationThread::formatStatus(const std::string &lang, const Noti
 	case JOBSTATUS_OK:					result = getPhrase(lang, "job.status.ok");		break;
 	case JOBSTATUS_FAILED_TIMEOUT:		result = getPhrase(lang, "job.status.timeout");	break;
 	case JOBSTATUS_FAILED_SIZE:			result = getPhrase(lang, "job.status.size");	break;
-	case JOBSTATUS_FAILED_URL:			result = getPhrase(lang, "job.status.url");		break;
-	default:							result = getPhrase(lang, "job.status.failed");	break;
+	case JOBSTATUS_FAILED_URL:				result = getPhrase(lang, "job.status.url");			break;
+	case JOBSTATUS_FAILED_CHALLENGEPAGE:	result = getPhrase(lang, "job.status.challengePage");	break;
+	default:								result = getPhrase(lang, "job.status.failed");		break;
 	}
 
 	switch(notification.status)

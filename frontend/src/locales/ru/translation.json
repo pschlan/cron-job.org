@@ -195,7 +195,8 @@
       "FAILED_SIZE": "Провалено (вывод слишком большой)",
       "FAILED_URL": "Провалено (невалидный URL)",
       "FAILED_INTERNAL": "Провалено (внутенняя ошибка)",
-      "FAILED_OTHERS": "Провалено"
+      "FAILED_OTHERS": "Провалено",
+      "FAILED_CHALLENGEPAGE": "Провалено (страница проверки)"
     },
     "fetchedUrl": "URL получения",
     "responseHeaders": "Заголовки ответа",

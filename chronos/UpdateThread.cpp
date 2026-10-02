@@ -323,7 +323,7 @@ void UpdateThread::storeResults(const std::vector<std::unique_ptr<JobResult>> &r
 			{
 				query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`ssl_cert_expiry`=%d,`fail_counter`=0,`unfiltered_fail_counter`=0 WHERE `jobid`=%d";
 			}
-			else if(result->status == JOBSTATUS_FAILED_TIMEOUT)
+			else if(result->status == JOBSTATUS_FAILED_TIMEOUT || result->status == JOBSTATUS_FAILED_CHALLENGEPAGE)
 			{
 				query = "UPDATE `job` SET `last_status`=%d,`last_fetch`=%d,`last_duration`=%d,`ssl_cert_expiry`=%d,`fail_counter`=GREATEST(`fail_counter`,1),`unfiltered_fail_counter`=`unfiltered_fail_counter`+1 WHERE `jobid`=%d";
 			}

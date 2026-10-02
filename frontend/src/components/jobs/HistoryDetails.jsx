@@ -3,6 +3,7 @@ import { Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography, 
 import { Alert } from '@material-ui/lab';
 import { useTranslation } from 'react-i18next';
 import { JobStatus, jobStatusText } from '../../utils/Constants';
+import { Config } from '../../utils/Config';
 import { statusExplanationToken } from '../../utils/JobStatusInfo';
 import { getJobHistoryDetails } from '../../utils/API';
 import Timing from './Timing';
@@ -56,7 +57,7 @@ export default function HistoryDetails({ log, open, onClose, moment }) {
         </Typography>
 
         {explanationToken && <Alert severity='info' className={classes.statusExplanation}>
-          {t('jobs.statusExplanations.' + explanationToken)}
+          {t('jobs.statusExplanations.' + explanationToken, { serviceName: Config.productName })}
         </Alert>}
 
         <Timing stats={details && details.stats} header={<Typography variant='overline'>{t('jobs.timing')}</Typography>} />

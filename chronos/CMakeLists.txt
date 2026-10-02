@@ -29,6 +29,8 @@ set(SOURCES
 	App.cpp
 	Config.cpp
 	HTTPRequest.cpp
+	BodyPatternMatcher.cpp
+	ChallengePagePatterns.cpp
 	MySQL_DB.cpp
 	MySQL_Result.cpp
 	SQLite.cpp
