@@ -1,15 +1,16 @@
 enum JobStatus
 {
-    UNKNOWN			    = 0,
-    OK				    = 1,
-    FAILED_DNS		    = 2,
-    FAILED_CONNECT	    = 3,
-    FAILED_HTTPERROR	= 4,
-    FAILED_TIMEOUT	    = 5,
-    FAILED_SIZE		    = 6,
-    FAILED_URL		    = 7,
-    FAILED_INTERNAL	    = 8,
-    FAILED_OTHERS 	    = 9
+    UNKNOWN			        = 0,
+    OK				        = 1,
+    FAILED_DNS		        = 2,
+    FAILED_CONNECT	        = 3,
+    FAILED_HTTPERROR	    = 4,
+    FAILED_TIMEOUT	        = 5,
+    FAILED_SIZE		        = 6,
+    FAILED_URL		        = 7,
+    FAILED_INTERNAL	        = 8,
+    FAILED_OTHERS 	        = 9,
+    FAILED_CHALLENGEPAGE    = 10
 }
 
 enum RequestMethod

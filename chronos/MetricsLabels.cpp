@@ -39,6 +39,7 @@ std::string statusLabel(JobStatus_t status)
 	case JOBSTATUS_FAILED_URL:        return "failed_url";
 	case JOBSTATUS_FAILED_INTERNAL:   return "failed_internal";
 	case JOBSTATUS_FAILED_OTHERS:     return "failed_others";
+	case JOBSTATUS_FAILED_CHALLENGEPAGE: return "failed_challengepage";
 	case JOBSTATUS_UNKNOWN:
 	default:                          return "unknown";
 	}
@@ -107,6 +108,7 @@ int statusIndex(JobStatus_t status)
 	case JOBSTATUS_FAILED_URL:        return 6;
 	case JOBSTATUS_FAILED_INTERNAL:   return 7;
 	case JOBSTATUS_FAILED_OTHERS:     return 8;
+	case JOBSTATUS_FAILED_CHALLENGEPAGE: return 10;
 	case JOBSTATUS_UNKNOWN:
 	default:                          return 9;
 	}

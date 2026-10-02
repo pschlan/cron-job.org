@@ -22,7 +22,7 @@ namespace Chronos
 	struct WorkerMetricsBatch
 	{
 		static constexpr int NUM_JOB_TYPES = 2;
-		static constexpr int NUM_STATUSES = 10;
+		static constexpr int NUM_STATUSES = 11;
 
 		uint64_t statusCount[NUM_JOB_TYPES][NUM_STATUSES] = {};
 		std::vector<double> durationSeconds[NUM_JOB_TYPES];
