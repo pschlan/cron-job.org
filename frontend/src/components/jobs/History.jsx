@@ -1,6 +1,6 @@
 import React from 'react';
 import Breadcrumbs from '../misc/Breadcrumbs';
-import { TableContainer, Paper, LinearProgress, Typography, Button, useTheme, Box, Switch, Tooltip as MuiTooltip } from '@material-ui/core';
+import { TableContainer, Paper, LinearProgress, Typography, Button, useTheme, Box, Switch, Tooltip as MuiTooltip, makeStyles } from '@material-ui/core';
 import { useTranslation } from 'react-i18next';
 import { useJob } from '../../hooks/useJobs';
 import NotFound from '../misc/NotFound';
@@ -15,6 +15,8 @@ import ScheduleIcon from '@material-ui/icons/Schedule';
 import EditIcon from '@material-ui/icons/Edit';
 import IconAvatar from '../misc/IconAvatar';
 import { JobStatus, jobStatusText, TimingFields, ChartColors, ChartColorsDark } from '../../utils/Constants';
+import { Config } from '../../utils/Config';
+import { statusExplanationToken } from '../../utils/JobStatusInfo';
 import HistoryDetailsButton from './HistoryDetailsButton';
 import Heading from '../misc/Heading';
 import { Link as RouterLink } from 'react-router-dom';
@@ -22,6 +24,14 @@ import { ResponsiveContainer, AreaChart, XAxis, Area, YAxis, Tooltip } from 'rec
 import { formatMs } from '../../utils/Units';
 import useViewport from '../../hooks/useViewport';
 import useFolder from '../../hooks/useFolder';
+
+const useStyles = makeStyles(() => ({
+  statusWithHelp: {
+    textDecorationLine: 'underline',
+    textDecorationStyle: 'dotted',
+    cursor: 'help'
+  }
+}));
 
 const REFRESH_INTERVAL = 60000;
 
@@ -36,6 +46,7 @@ export default function History({ match }) {
   const [ chartData, setChartData ] = useState(null);
   const [ useJobTimezone, setUseJobTimezone ] = useState(false);
   const { isMobile } = useViewport();
+  const classes = useStyles();
   const theme = useTheme();
   const tick = { fill: theme.palette.text.primary };
   const localTimezone = moment.tz.guess();
@@ -124,12 +135,25 @@ export default function History({ match }) {
     },
     {
       head: t('jobs.status'),
-      cell: log => log.isPrediction ? t('jobs.scheduled') : <>
-        <div>{t('jobs.statuses.' + jobStatusText(log.status))}</div>
-        {[JobStatus.OK, JobStatus.FAILED_HTTPERROR].includes(log.status) && <div><Typography variant="caption">
-            {log.httpStatus} {log.statusText}
-          </Typography></div>}
-      </>
+      cell: log => {
+        if (log.isPrediction) {
+          return t('jobs.scheduled');
+        }
+        const statusText = t('jobs.statuses.' + jobStatusText(log.status));
+        const explanationToken = statusExplanationToken(log.status, log.httpStatus);
+        return <>
+          <div>
+            {explanationToken ?
+              <MuiTooltip arrow title={t('jobs.statusExplanations.' + explanationToken, { serviceName: Config.productName })}>
+                <span className={classes.statusWithHelp}>{statusText}</span>
+              </MuiTooltip> :
+              statusText}
+          </div>
+          {[JobStatus.OK, JobStatus.FAILED_HTTPERROR].includes(log.status) && <div><Typography variant="caption">
+              {log.httpStatus} {log.statusText}
+            </Typography></div>}
+        </>;
+      }
     },
     {
       head: t('common.actions'),
