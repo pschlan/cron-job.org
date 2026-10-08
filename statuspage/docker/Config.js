@@ -18,7 +18,8 @@ export const Config = {
       'hu': 'Magyar',
       'tr': 'Türkçe',
       'id': 'Bahasa Indonesia',
-      'es': 'Español'
+      'es': 'Español',
+      'uk': 'Українська'
     },
     'fallbackLanguage': 'en',
   };

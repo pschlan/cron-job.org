@@ -26,6 +26,7 @@ import translationHU from './locales/hu/translation.json';
 import translationTrTR from './locales/tr_TR/translation.json';
 import translationID from './locales/id/translation.json';
 import translationES from './locales/es/translation.json';
+import translationUK from './locales/uk/translation.json';
 
 import 'moment/locale/da';
 import 'moment/locale/de';
@@ -41,6 +42,7 @@ import 'moment/locale/hu';
 import 'moment/locale/tr';
 import 'moment/locale/id';
 import 'moment/locale/es';
+import 'moment/locale/uk';
 import moment from 'moment';
 import { Config } from './utils/Config';
 
@@ -89,6 +91,9 @@ const LANGUAGE_RESOURCES = {
   },
   es: {
     translation: translationES
+  },
+  uk: {
+    translation: translationUK
   }
 };
 

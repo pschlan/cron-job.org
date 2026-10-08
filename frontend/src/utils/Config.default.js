@@ -37,7 +37,8 @@ export const Config = {
     'tr_TR': 'Türkçe',
     'ar': 'عربي',
     'id': 'Bahasa Indonesia',
-    'es': 'Español'
+    'es': 'Español',
+    'uk': 'Українська'
   },
 
   //! @note Fallback language to use when the user's auto-determined language is not supported.
