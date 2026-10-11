@@ -147,6 +147,7 @@ export default function CreateMFADeviceDialog({ onClose, onRefreshMFADevices, us
         {t('settings.mfa.totpDevice.pairInstructions')}
         <Box textAlign='center' m={2}>
           <QRCode value={`otpauth://totp/${encodeURIComponent(Config.productName)}:${encodeURIComponent(username)}?secret=${mfaDevice.secret}&issuer=${encodeURIComponent(Config.productName)}`} />
+          <Box fontFamily='monospace' mt={1} style={{userSelect: 'all', wordBreak: 'break-all'}}>{mfaDevice.secret}</Box>
         </Box>
 
         <FormControl fullWidth>
