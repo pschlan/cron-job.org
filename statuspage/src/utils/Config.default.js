@@ -30,7 +30,8 @@ export const Config = {
     'hu': 'Magyar',
     'tr': 'Türkçe',
     'id': 'Bahasa Indonesia',
-    'es': 'Español'
+    'es': 'Español',
+    'uk': 'Українська'
   },
 
   //! @note Fallback language to use when the user's auto-determined language is not supported.

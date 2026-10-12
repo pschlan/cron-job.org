@@ -30,6 +30,7 @@ import translationtrTR from './locales/tr_TR/translation.json';
 import translationAR from './locales/ar/translation.json';
 import translationID from './locales/id/translation.json';
 import translationES from './locales/es/translation.json';
+import translationUK from './locales/uk/translation.json';
 
 import AppMenu from './components/AppMenu';
 import Dashboard from './components/dashboard/Dashboard';
@@ -60,6 +61,7 @@ import 'moment/locale/tr';
 import 'moment/locale/ar';
 import 'moment/locale/id';
 import 'moment/locale/es';
+import 'moment/locale/uk';
 import moment from 'moment';
 import useLanguageCode, { getLanguageCode } from './hooks/useLanguageCode';
 import { Config } from './utils/Config';
@@ -122,6 +124,9 @@ const LANGUAGE_RESOURCES = {
   },
   es: {
     translation: translationES
+  },
+  uk: {
+    translation: translationUK
   }
 };
 

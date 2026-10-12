@@ -1,0 +1,48 @@
+{
+  "common": {
+    "poweredBy": "на базі",
+    "refresh": "Оновити"
+  },
+  "timespan": {
+    "1year": "1 рік",
+    "6months": "6 місяців",
+    "1month": "1 місяць",
+    "1week": "1 тиждень",
+    "1day": "1 день"
+  },
+  "incidents": {
+    "active": "Поточні інциденти",
+    "past": "Попередні інциденти",
+    "startedToday": "Почався сьогодні о {{time}}",
+    "startedYesterday": "Почався вчора о {{time}}",
+    "startedWeekday": "Почався о {{time}} ({{weekday}})",
+    "startedOn": "Почався {{date}}",
+    "endedToday": "Завершився сьогодні о {{time}}",
+    "endedYesterday": "Завершився вчора о {{time}}",
+    "endedWeekday": "Завершився о {{time}} ({{weekday}})",
+    "endedOn": "Завершився {{date}}"
+  },
+  "status": {
+    "availability": "Аптайм",
+    "availabilityWarning": "Часткові збої",
+    "availabilityError": "Значні збої",
+    "lowAvailabilityText": "За останні 30 хвилин аптайм знизився до {{percent}} %.",
+    "latency": "Затримка",
+    "latencyWarning": "Підвищена затримка",
+    "latencyError": "Висока затримка",
+    "highLatencyText": "За останні 30 хвилин затримка зросла до {{ms}} мс.",
+    "healthy": "Працює",
+    "allSystemsRunAsExpected": "Усі системи працюють у штатному режимі.",
+    "disabled": "Вимкнено"
+  },
+  "error": {
+    "404": {
+      "title": "Сторінку не знайдено",
+      "text": "Не вдалося знайти сторінку статусу. Перевірте посилання та спробуйте ще раз."
+    },
+    "other": {
+      "title": "Помилка завантаження сторінки статусу",
+      "text": "Не вдалося завантажити сторінку статусу. Спробуйте пізніше."
+    }
+  }
+}
