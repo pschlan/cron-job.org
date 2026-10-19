@@ -7,19 +7,20 @@ describe('turnstileFailureAction', () => {
   it('lets Turnstile retry retryable codes on the first two attempts', () => {
     for (const code of retryableCodes) {
       expect(turnstileFailureAction(code, 1)).toBe('retry');
-      expect(turnstileFailureAction(code, 2)).toBe('retry');
+      expect(turnstileFailureAction(String(code), 1)).toBe('retry');
+      expect(turnstileFailureAction(String(code), 2)).toBe('retry');
     }
   });
 
   it('fails retryable codes after the retry window', () => {
     for (const code of retryableCodes) {
-      expect(turnstileFailureAction(code, 3)).toBe('fail');
+      expect(turnstileFailureAction(String(code), 3)).toBe('fail');
     }
   });
 
   it('fails non-retryable codes immediately', () => {
     for (const code of terminalCodes) {
-      expect(turnstileFailureAction(code, 1)).toBe('fail');
+      expect(turnstileFailureAction(String(code), 1)).toBe('fail');
     }
   });
 
