@@ -105,6 +105,7 @@
     "repeatPassword": "Passwort (wiederholen)",
     "passwordsDontMatch": "Die Passwörter stimmen nicht überein.",
     "recaptchaError": "Entschuldigung, aber wir konnten Ihre Registrierung nicht bestätigen. Wenn Sie dies für einen Fehler halten, kontaktieren Sie bitte unser Support-Team.",
+    "turnstileRetry": "Erneut versuchen",
     "createAccount": "Account erstellen",
     "signupError": "Bei der Erstellung Ihres Accounts ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
     "signupConflict": "Es gibt bereits einen Account mit dieser E-Mail-Adresse. Bitte verwenden Sie eine andere E-Mail-Adresse oder loggen Sie sich in Ihren bestehenden Account ein.",

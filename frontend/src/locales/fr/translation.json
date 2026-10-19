@@ -118,6 +118,7 @@
     "repeatPassword": "Mot de passe (répéter)",
     "passwordsDontMatch": "Les mots de passe ne correspondent pas.",
     "recaptchaError": "Désolé, nous n'avons pas pu vérifier votre inscription. Si vous pensez qu'il s'agit d'une erreur, veuillez contacter notre équipe d'assistance.",
+    "turnstileRetry": "Réessayer",
     "createAccount": "Créer un compte",
     "signupError": "Une erreur s'est produite lors de la création de votre compte. Veuillez réessayer plus tard.",
     "signupConflict": "Il existe déjà un compte avec cette adresse électronique. Veuillez utiliser une autre adresse électronique ou vous connecter à votre compte existant.",

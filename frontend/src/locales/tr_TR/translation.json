@@ -121,6 +121,7 @@
     "repeatPassword": "Şifre (tekrar)",
     "passwordsDontMatch": "Şifreler eşleşmiyor.",
     "recaptchaError": "Üzgünüz, kaydınızı doğrulayamadık. Bunun bir hata olduğunu düşünüyorsanız, lütfen destek ekibimizle iletişime geçin.",
+    "turnstileRetry": "Tekrar dene",
     "createAccount": "Hesap oluştur",
     "signupError": "Hesabınızı oluştururken bir hata oluştu. Lütfen daha sonra tekrar deneyin.",
     "signupConflict": "Bu e-posta adresiyle zaten bir hesap var. Lütfen başka bir e-posta adresi kullanın veya mevcut hesabınıza giriş yapın.",

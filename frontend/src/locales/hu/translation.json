@@ -121,6 +121,7 @@
     "repeatPassword": "Jelszó (megismétlés)",
     "passwordsDontMatch": "A jelszavak nem egyeznek.",
     "recaptchaError": "Sajnáljuk, nem tudtuk ellenőrizni a regisztrációját. Ha úgy gondolja, hogy ez hiba, kérjük, lépjen kapcsolatba az ügyfélszolgálatunkkal.",
+    "turnstileRetry": "Próbálja újra",
     "createAccount": "Fiók létrehozása",
     "signupError": "Hiba történt a fiók létrehozása során. Kérjük, próbálkozzon később.",
     "signupConflict": "Már létezik egy fiók ezzel az e-mail címmel. Kérjük, használjon egy másik e-mail címet, vagy jelentkezzen be a meglévő fiókjába.",

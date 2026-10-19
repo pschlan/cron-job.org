@@ -119,6 +119,7 @@
     "repeatPassword": "Hasło (powtórz)",
     "passwordsDontMatch": "Hasła nie są identyczne.",
     "recaptchaError": "Przepraszamy, nie mogliśmy zweryfikować Twojej rejestracji. Jeśli uważasz, że to błąd, skontaktuj się z naszym zespołem pomocy technicznej.",
+    "turnstileRetry": "Spróbuj ponownie",
     "createAccount": "Utwórz konto",
     "signupError": "Wystąpił błąd podczas tworzenia Twojego konta. Proszę spróbuj ponownie później.",
     "signupConflict": "Istnieje już konto z tym adresem e-mail. Proszę użyj innego adresu e-mail lub zaloguj się na istniejące konto.",

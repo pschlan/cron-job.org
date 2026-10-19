@@ -126,6 +126,7 @@
     "repeatPassword": "Ulangi kata sandi",
     "passwordsDontMatch": "Kata sandi tidak cocok.",
     "recaptchaError": "Maaf, kami tidak dapat memverifikasi pendaftaran Anda. Jika menurut Anda ini adalah kesalahan, silakan hubungi tim dukungan kami.",
+    "turnstileRetry": "Coba lagi",
     "createAccount": "Buat akun",
     "signupError": "Terjadi kesalahan saat membuat akun Anda. Silakan coba lagi nanti.",
     "signupConflict": "Sudah ada akun dengan alamat email ini. Silakan gunakan alamat email lain atau masuk ke akun Anda yang sudah ada.",

@@ -122,6 +122,7 @@
     "repeatPassword": "Gentag adgangskode",
     "passwordsDontMatch": "Adgangskoderne matcher ikke.",
     "recaptchaError": "Beklager, vi kunne ikke bekræfte din tilmelding. Kontakt support, hvis du mener, det er en fejl.",
+    "turnstileRetry": "Prøv igen",
     "createAccount": "Opret konto",
     "signupError": "Der opstod en fejl under oprettelse af kontoen. Prøv igen senere.",
     "signupConflict": "Der findes allerede en konto med denne e-mailadresse. Brug en anden e-mail eller log ind på den eksisterende konto.",

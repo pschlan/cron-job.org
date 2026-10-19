@@ -105,6 +105,7 @@
     "repeatPassword": "Password (repeat)",
     "passwordsDontMatch": "The passwords don't match.",
     "recaptchaError": "Sorry, we couldn't verify your registration. If you think this is an error, please contact our support team.",
+    "turnstileRetry": "Try again",
     "createAccount": "Create account",
     "signupError": "An error occurred while creating your account. Please try again later.",
     "signupConflict": "There is already an account with this email address. Please use another email address or sign in to your existing account.",
