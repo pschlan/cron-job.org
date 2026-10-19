@@ -117,6 +117,7 @@
     "repeatPassword": "重复密码",
     "passwordsDontMatch": "密码不相符。",
     "recaptchaError": "很抱歉，我们无法验证您的注册。如果您认为这是一个错误，请联系我们的支持团队。",
+    "turnstileRetry": "重试",
     "createAccount": "创建帐号",
     "signupError": "创建您的帐号时发生错误，请稍后重试。",
     "signupConflict": "此电子邮件地址已经有一个帐号，请使用另一个电子邮件地址或登录到您目前的帐号。",

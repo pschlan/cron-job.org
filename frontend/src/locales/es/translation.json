@@ -126,6 +126,7 @@
     "repeatPassword": "Contraseña (repetir)",
     "passwordsDontMatch": "Las contraseñas no coinciden.",
     "recaptchaError": "Lo sentimos, no pudimos verificar tu registro. Si crees que esto es un error, por favor contacta con nuestro equipo de soporte.",
+    "turnstileRetry": "Intentar de nuevo",
     "createAccount": "Crear cuenta",
     "signupError": "Ocurrió un error al crear tu cuenta. Por favor, inténtalo de nuevo más tarde.",
     "signupConflict": "Ya existe una cuenta con esta dirección de correo electrónico. Por favor, usa otra dirección de correo o inicia sesión en tu cuenta existente.",

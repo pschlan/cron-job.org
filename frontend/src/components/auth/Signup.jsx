@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Box, Button, Checkbox, FormControlLabel, Grid, Link, makeStyles, Typography, useTheme } from '@material-ui/core';
+import React, { useRef, useState } from 'react';
+import { Box, Button, Checkbox, FormControlLabel, Grid, Link, makeStyles, Typography } from '@material-ui/core';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import Turnstile from 'react-turnstile';
 import { Link as RouterLink } from 'react-router-dom';
@@ -8,6 +8,7 @@ import { createAccount } from '../../utils/API';
 import ValidatingTextField from '../misc/ValidatingTextField';
 import { RegexPatterns } from '../../utils/Constants';
 import { Config } from '../../utils/Config';
+import { turnstileFailureAction } from '../../utils/TurnstileError';
 import moment from 'moment-timezone';
 
 const useStyles = makeStyles(themes => ({
@@ -35,9 +36,47 @@ export default function Signup() {
   const [acceptPrivacy, setAcceptPrivacy] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState();
-  const theme = useTheme();
   const [ turnstileToken, setTurnstileToken ] = useState(null);
+  const [ turnstileFailed, setTurnstileFailed ] = useState(false);
+  const turnstileFailures = useRef(0);
+  const turnstileBound = useRef(null);
   const turnstileReady = Config.turnstileSiteKey === null || turnstileToken !== null;
+
+  function handleTurnstileLoad(_widgetId, bound) {
+    turnstileBound.current = bound;
+  }
+
+  function handleTurnstileVerify(token) {
+    turnstileFailures.current = 0;
+    setTurnstileToken(token);
+    setTurnstileFailed(false);
+  }
+
+  function handleTurnstileError(error, bound) {
+    if (bound) {
+      turnstileBound.current = bound;
+    }
+
+    turnstileFailures.current += 1;
+    if (turnstileFailureAction(error, turnstileFailures.current) === 'retry') {
+      return false;
+    }
+
+    console.error('Turnstile signup error', error);
+    setTurnstileToken(null);
+    setTurnstileFailed(true);
+    return true;
+  }
+
+  function retryTurnstile() {
+    turnstileFailures.current = 0;
+    setTurnstileFailed(false);
+    if (turnstileBound.current) {
+      turnstileBound.current.reset();
+    } else {
+      window.location.reload();
+    }
+  }
 
   function submit(event) {
     event.preventDefault();
@@ -99,6 +138,16 @@ export default function Signup() {
     <form noValidate className={classes.form} onSubmit={submit}>
       {message && <Alert severity={message.severity} className={classes.error}>
         {message.text}
+      </Alert>}
+      {turnstileFailed && <Alert
+        severity="error"
+        className={classes.error}
+        action={
+          <Button color="inherit" size="small" type="button" onClick={retryTurnstile}>
+            {t('signup.turnstileRetry')}
+          </Button>
+        }>
+        {t('signup.recaptchaError')}
       </Alert>}
       {(!message || message.severity!=='success') && <>
         <Grid container spacing={1}>
@@ -178,15 +227,11 @@ export default function Signup() {
         </Grid>
         {Config.turnstileSiteKey !== null && <Turnstile
           sitekey={Config.turnstileSiteKey}
-          theme={theme.palette.type === 'dark' ? 'dark' : 'light'}
+          theme="auto"
           size='invisible'
-          onVerify={(token) => setTurnstileToken(token)}
-          onError={() => {
-            setMessage({
-              severity: 'error',
-              text: t('signup.recaptchaError')
-            });
-          }}
+          onLoad={handleTurnstileLoad}
+          onVerify={handleTurnstileVerify}
+          onError={handleTurnstileError}
           />}
         {(password1.length > 0 && password2.length > 0 && password1 !== password2) &&
           <Alert severity='error'>
