@@ -164,7 +164,7 @@ export default function JobTestRun({ job, jobId, onClose, onUpdateUrl = () => nu
         {Config.turnstileSiteKey !== null && <Turnstile
           sitekey={Config.turnstileSiteKey}
           theme={theme.palette.type === 'dark' ? 'dark' : 'light'}
-          size='invisible'
+          appearance="interaction-only"
           onVerify={(token) => setTurnstileToken(token)}
           onError={() => { enqueueSnackbar(t('jobs.testRun.recaptchaError'), { variant: 'error' }); }}
           />}

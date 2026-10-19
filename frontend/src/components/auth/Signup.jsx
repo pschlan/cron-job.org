@@ -228,7 +228,7 @@ export default function Signup() {
         {Config.turnstileSiteKey !== null && <Turnstile
           sitekey={Config.turnstileSiteKey}
           theme="auto"
-          size='invisible'
+          appearance="interaction-only"
           onLoad={handleTurnstileLoad}
           onVerify={handleTurnstileVerify}
           onError={handleTurnstileError}
