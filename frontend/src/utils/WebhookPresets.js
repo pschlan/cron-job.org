@@ -43,12 +43,6 @@ function isHttpUrl(value) {
   return isNonEmpty(value) && WEBHOOK_URL_PATTERN.test(value.trim());
 }
 
-function joinServerTopic(server, topic) {
-  const base = (server || 'https://ntfy.sh').trim().replace(/\/+$/, '');
-  const cleanTopic = (topic || '').trim().replace(/^\/+/, '');
-  return `${base}/${cleanTopic}`;
-}
-
 function headerValue(headers, key) {
   if (!Array.isArray(headers)) {
     return '';
@@ -214,7 +208,10 @@ const ntfy = {
     };
   },
   build(fields) {
-    const serverUrl = (fields.serverUrl || 'https://ntfy.sh').trim() || 'https://ntfy.sh';
+    // JSON publish must go to the ntfy root URL (not /topic). Posting JSON to the
+    // topic URL makes ntfy treat the whole body as the plain-text message.
+    // See https://docs.ntfy.sh/publish/#publish-as-json
+    const serverUrl = (fields.serverUrl || 'https://ntfy.sh').trim().replace(/\/+$/, '') || 'https://ntfy.sh';
     const topic = (fields.topic || '').trim();
     const accessToken = (fields.accessToken || '').trim();
     const messageTemplate = (fields.messageTemplate || '').trim();
@@ -223,7 +220,7 @@ const ntfy = {
       headers.push({ key: 'Authorization', value: `Bearer ${accessToken}` });
     }
     return {
-      destination: joinServerTopic(serverUrl, topic),
+      destination: serverUrl,
       payload: stringifyPayload({
         topic,
         title: placeholder('jobTitle'),
@@ -242,6 +239,7 @@ const ntfy = {
         const url = new URL(dest);
         const path = url.pathname.replace(/^\/+|\/+$/g, '');
         serverUrl = `${url.protocol}//${url.host}`;
+        // Legacy channels posted to /topic; prefer payload.topic when present.
         if (!topic && path) {
           topic = path;
         }
@@ -257,12 +255,11 @@ const ntfy = {
     };
   },
   validate(fields) {
-    const destination = joinServerTopic(fields.serverUrl || 'https://ntfy.sh', fields.topic);
-    return isHttpUrl(fields.serverUrl || 'https://ntfy.sh')
+    const serverUrl = (fields.serverUrl || 'https://ntfy.sh').trim().replace(/\/+$/, '') || 'https://ntfy.sh';
+    return isHttpUrl(serverUrl)
       && isNonEmpty(fields.topic)
       && isNonEmpty(fields.messageTemplate)
-      && destination.length <= MAX_DESTINATION_LENGTH
-      && isHttpUrl(destination);
+      && serverUrl.length <= MAX_DESTINATION_LENGTH;
   }
 };
 
