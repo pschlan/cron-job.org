@@ -116,11 +116,12 @@ class SessionTokenHandler {
       return false;
     }
 
-    $stmt = Database::get()->prepare('SELECT `last_password_change` AS `lastPasswordChange` FROM `user` WHERE `userid`=:userId');
+    $stmt = Database::get()->prepare('SELECT `last_password_change` AS `lastPasswordChange`, `status` AS `userStatus` FROM `user` WHERE `userid`=:userId');
     $stmt->execute([':userId' => $sessionToken->userId]);
 
     if ($userRow = $stmt->fetch(PDO::FETCH_OBJ)) {
-      if (intval($userRow->lastPasswordChange) < ($sessionToken->expires - $config['sessionTokenLifetime'])) {
+      if (intval($userRow->userStatus) === UserProfile::STATUS_VERIFIED
+          && intval($userRow->lastPasswordChange) < ($sessionToken->expires - $config['sessionTokenLifetime'])) {
         return true;
       }
     }
