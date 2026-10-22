@@ -134,6 +134,7 @@ CREATE TABLE `userdeletelog` (
 
 CREATE TABLE `refreshtoken`(
     `token` varchar(64) NOT NULL DEFAULT '',
+    `token_hashed` TINYINT(1) NOT NULL DEFAULT 0,
     `userid` int(11) NOT NULL DEFAULT 0,
     `device` varchar(255) NOT NULL DEFAULT '',
     `expires` int(11) NOT NULL DEFAULT 0,

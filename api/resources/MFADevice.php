@@ -4,6 +4,7 @@ require_once('lib/Database.php');
 require_once('lib/Exceptions.php');
 require_once('lib/TOTP.php');
 require_once('lib/YubicoOTP.php');
+require_once('resources/User.php');
 
 class InvalidMFATypeException extends Exception {}
 class MFADeviceNotFoundException extends Exception {}
@@ -109,6 +110,11 @@ class MFADeviceManager {
     ]);
 
     $mfaDeviceId = Database::get()->insertId();
+
+    if ($enabled) {
+      (new UserManager($this->authToken))->revokeOtherRefreshTokens();
+    }
+
     return $this->getMFADevice($mfaDeviceId);
   }
 
@@ -136,6 +142,8 @@ class MFADeviceManager {
           ':userId'       => $this->authToken->userId,
           ':mfaDeviceId'  => $mfaDeviceId
         ]);
+
+      (new UserManager($this->authToken))->revokeOtherRefreshTokens();
       break;
 
     default:

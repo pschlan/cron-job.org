@@ -11,9 +11,11 @@
 
 #include "TestRunThread.h"
 
+#include <cerrno>
 #include <ctime>
 #include <iostream>
-#include <random>
+#include <stdexcept>
+#include <sys/random.h>
 
 #include "App.h"
 #include "CurlWorker.h"
@@ -30,13 +32,30 @@ struct HandleGenerator
     static std::string generate()
     {
         std::string result;
-        result.resize(LENGTH);
+        result.reserve(LENGTH);
 
+        unsigned char buffer[LENGTH];
+        while(result.size() < LENGTH)
         {
-            std::unique_lock<std::mutex> lock(rngMutex);
-            for(std::size_t i = 0; i < LENGTH; ++i)
+            std::size_t filled = 0;
+            while(filled < sizeof(buffer))
             {
-                result[i] = CHARS[dist(rng)];
+                const ssize_t n = getrandom(buffer + filled, sizeof(buffer) - filled, 0);
+                if(n > 0)
+                {
+                    filled += static_cast<std::size_t>(n);
+                    continue;
+                }
+                if(n < 0 && errno == EINTR)
+                    continue;
+                throw std::runtime_error("Failed to generate random test run handle");
+            }
+
+            for(std::size_t i = 0; i < sizeof(buffer) && result.size() < LENGTH; ++i)
+            {
+                // Rejecting bytes >= UNBIASED_BYTE_LIMIT keeps the modulo mapping uniform
+                if(buffer[i] < UNBIASED_BYTE_LIMIT)
+                    result.push_back(CHARS[buffer[i] % NUM_CHARS]);
             }
         }
 
@@ -46,15 +65,11 @@ struct HandleGenerator
 private:
     static constexpr const std::size_t LENGTH = 64;
     static constexpr const char CHARS[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/._-=?:!()*$";
-    static std::mutex rngMutex;
-    static std::mt19937 rng;
-    static std::uniform_int_distribution<> dist;
+    static constexpr const std::size_t NUM_CHARS = sizeof(CHARS) - 1;
+    static constexpr const std::size_t UNBIASED_BYTE_LIMIT = 256 - (256 % NUM_CHARS);
 };
 
 constexpr const char HandleGenerator::CHARS[];
-std::mutex HandleGenerator::rngMutex;
-std::mt19937 HandleGenerator::rng{std::random_device{}()};
-std::uniform_int_distribution<> HandleGenerator::dist(0, sizeof(HandleGenerator::CHARS)-2);
 
 const int TESTRUN_RESULT_EXPIRY_SECONDS = 60;
 

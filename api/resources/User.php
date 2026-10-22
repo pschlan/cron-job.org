@@ -116,11 +116,12 @@ class SessionTokenHandler {
       return false;
     }
 
-    $stmt = Database::get()->prepare('SELECT `last_password_change` AS `lastPasswordChange` FROM `user` WHERE `userid`=:userId');
+    $stmt = Database::get()->prepare('SELECT `last_password_change` AS `lastPasswordChange`, `status` AS `userStatus` FROM `user` WHERE `userid`=:userId');
     $stmt->execute([':userId' => $sessionToken->userId]);
 
     if ($userRow = $stmt->fetch(PDO::FETCH_OBJ)) {
-      if (intval($userRow->lastPasswordChange) < ($sessionToken->expires - $config['sessionTokenLifetime'])) {
+      if (intval($userRow->userStatus) === UserProfile::STATUS_VERIFIED
+          && intval($userRow->lastPasswordChange) < ($sessionToken->expires - $config['sessionTokenLifetime'])) {
         return true;
       }
     }
@@ -135,16 +136,11 @@ class RefreshTokenHandler {
       return false;
     }
 
-    $stmt = Database::get()->prepare('SELECT `refreshtoken`.`userid` AS `userId`, `refreshtoken`.`expires` AS `expires`, `user`.`status` AS `userStatus` FROM `refreshtoken` '
-      . 'INNER JOIN `user` ON `user`.`userid`=`refreshtoken`.`userid` WHERE `refreshtoken`.`token`=:token');
-    $stmt->execute([':token' => $refreshToken]);
-
-    if ($tokenRow = $stmt->fetch(PDO::FETCH_OBJ)) {
-      if (intval($tokenRow->userId) === intval($userId)
-          && $tokenRow->expires > time()
-          && $tokenRow->userStatus == UserProfile::STATUS_VERIFIED) {
-        return true;
-      }
+    $tokenRow = UserManager::lookupRefreshToken($refreshToken, $userId);
+    if ($tokenRow
+        && $tokenRow->expires > time()
+        && intval($tokenRow->userStatus) === UserProfile::STATUS_VERIFIED) {
+      return true;
     }
 
     return false;
@@ -320,13 +316,13 @@ class UserManager {
 
   public function logout() {
     if (isset($_COOKIE['refreshToken']) && !empty($_COOKIE['refreshToken'])) {
-      $stmt = Database::get()->prepare('DELETE FROM `refreshtoken` WHERE `token`=:token AND `userId`=:userId');
-      $stmt->execute([
-        ':token'  => $_COOKIE['refreshToken'],
-        ':userId' => $this->authToken->userId
-      ]);
+      self::deleteRefreshTokenForUser($_COOKIE['refreshToken'], $this->authToken->userId);
     }
     self::setRefreshTokenCookie('');
+  }
+
+  public function revokeOtherRefreshTokens() {
+    self::deleteOtherRefreshTokensForUser($this->authToken->userId);
   }
 
   private static function setRefreshTokenCookie($value) {
@@ -341,15 +337,93 @@ class UserManager {
     ]);
   }
 
+  private static function hashRefreshToken($token) {
+    return hash('sha256', $token);
+  }
+
+  public static function lookupRefreshToken($plainToken, $userId) {
+    $hash = self::hashRefreshToken($plainToken);
+
+    $stmt = Database::get()->prepare('SELECT `refreshtoken`.`userid` AS `userId`, `refreshtoken`.`expires` AS `expires`, `user`.`status` AS `userStatus` FROM `refreshtoken` '
+      . 'INNER JOIN `user` ON `user`.`userid`=`refreshtoken`.`userid` '
+      . 'WHERE BINARY `refreshtoken`.`token`=:token AND `refreshtoken`.`token_hashed`=1 AND `refreshtoken`.`userid`=:userId');
+    $stmt->execute([
+      ':token'  => $hash,
+      ':userId' => $userId
+    ]);
+    if ($tokenRow = $stmt->fetch(PDO::FETCH_OBJ)) {
+      return $tokenRow;
+    }
+
+    $stmt = Database::get()->prepare('SELECT `refreshtoken`.`userid` AS `userId`, `refreshtoken`.`expires` AS `expires`, `user`.`status` AS `userStatus` FROM `refreshtoken` '
+      . 'INNER JOIN `user` ON `user`.`userid`=`refreshtoken`.`userid` '
+      . 'WHERE BINARY `refreshtoken`.`token`=:token AND `refreshtoken`.`token_hashed`=0 AND `refreshtoken`.`userid`=:userId');
+    $stmt->execute([
+      ':token'  => $plainToken,
+      ':userId' => $userId
+    ]);
+    if ($tokenRow = $stmt->fetch(PDO::FETCH_OBJ)) {
+      Database::get()
+        ->prepare('UPDATE `refreshtoken` SET `token`=:hash, `token_hashed`=1 WHERE BINARY `token`=:plain AND `token_hashed`=0 AND `userid`=:userId')
+        ->execute([
+          ':hash'   => $hash,
+          ':plain'  => $plainToken,
+          ':userId' => $userId
+        ]);
+      return $tokenRow;
+    }
+
+    return false;
+  }
+
+  private static function deleteRefreshTokenForUser($plainToken, $userId) {
+    $hash = self::hashRefreshToken($plainToken);
+
+    Database::get()
+      ->prepare('DELETE FROM `refreshtoken` WHERE `userid`=:userId AND ('
+        . '(BINARY `token`=:hash AND `token_hashed`=1) OR (BINARY `token`=:plain AND `token_hashed`=0)'
+        . ')')
+      ->execute([
+        ':hash'   => $hash,
+        ':plain'  => $plainToken,
+        ':userId' => $userId
+      ]);
+  }
+
+  private static function deleteOtherRefreshTokensForUser($userId) {
+    $plainToken = isset($_COOKIE['refreshToken']) && !empty($_COOKIE['refreshToken'])
+      ? $_COOKIE['refreshToken']
+      : '';
+
+    if ($plainToken === '') {
+      Database::get()
+        ->prepare('DELETE FROM `refreshtoken` WHERE `userid`=:userId')
+        ->execute([':userId' => $userId]);
+      return;
+    }
+
+    $hash = self::hashRefreshToken($plainToken);
+
+    Database::get()
+      ->prepare('DELETE FROM `refreshtoken` WHERE `userid`=:userId AND NOT ('
+        . '(BINARY `token`=:hash AND `token_hashed`=1) OR (BINARY `token`=:plain AND `token_hashed`=0)'
+        . ')')
+      ->execute([
+        ':hash'   => $hash,
+        ':plain'  => $plainToken,
+        ':userId' => $userId
+      ]);
+  }
+
   private static function createRefreshToken($userId, $device) {
     global $config;
 
     $token = self::generateToken($config['refreshTokenLength']);
     $expires = time() + $config['refreshTokenValiditySeconds'];
 
-    $stmt = Database::get()->prepare('INSERT INTO `refreshtoken`(`token`, `userid`, `device`, `expires`) VALUES(:token, :userId, :device, :expires)');
+    $stmt = Database::get()->prepare('INSERT INTO `refreshtoken`(`token`, `token_hashed`, `userid`, `device`, `expires`) VALUES(:token, 1, :userId, :device, :expires)');
     $stmt->execute([
-      ':token'    => $token,
+      ':token'    => self::hashRefreshToken($token),
       ':userId'   => $userId,
       ':device'   => $device,
       ':expires'  => $expires
@@ -666,11 +740,7 @@ class UserManager {
     ]);
 
     // Revoke all refresh tokens for other sessions
-    $stmt = Database::get()->prepare('DELETE FROM `refreshtoken` WHERE `userId`=:userId AND `token`!=:token');
-    $stmt->execute([
-      ':token'  => isset($_COOKIE['refreshToken']) && !empty($_COOKIE['refreshToken']) ? $_COOKIE['refreshToken'] : '',
-      ':userId' => $this->authToken->userId
-    ]);
+    self::deleteOtherRefreshTokensForUser($this->authToken->userId);
 
     return true;
   }
