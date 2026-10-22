@@ -1,6 +1,7 @@
 <?php
 require_once('lib/APIMethod.php');
 require_once('lib/Database.php');
+require_once('lib/RateLimiter.php');
 require_once('lib/SessionToken.php');
 require_once('resources/User.php');
 
@@ -28,8 +29,21 @@ class Login extends AbstractAPIMethod {
   }
 
   public function execute($request, $sessionToken, $language) {
+    $email = trim($request->email);
+    $emailKey = implode(':', [
+      'login',
+      'email',
+      hash('sha256', strtolower($email)),
+      (int)floor(time() / (15 * RateLimit::MINUTE))
+    ]);
+    if (!RateLimiter::checkWithKey($emailKey, 15 * RateLimit::MINUTE + 1, function ($value) {
+      return $value < 10;
+    })) {
+      throw new TooManyRequestsAPIException();
+    }
+
     try {
-      $result = UserManager::login(trim($request->email),
+      $result = UserManager::login($email,
         $request->password,
         isset($request->rememberMe) && $request->rememberMe,
         $language,
