@@ -693,7 +693,7 @@ class JobManager {
       $node = (new NodeManager($this->authToken))->getJobNode($jobId);
     }
 
-    if ($node === null) {
+    if (!$node) {
       throw new InternalErrorException();
     }
 
@@ -716,6 +716,7 @@ class JobManager {
 
       $handle = $client->submitJobTestRun($thriftJob, $xForwardedFor);
       if ($handle) {
+        $redis->set(implode(':', ['testRun', $handle, 'userId']), intval($this->authToken->userId), $config['testRunLifetime']);
         $redis->set(implode(':', ['testRun', $handle, 'nodeId']), $node->nodeId, $config['testRunLifetime']);
         return $handle;
       } else {
@@ -726,14 +727,17 @@ class JobManager {
     }
   }
 
-  public function getJobTestRunStatus($handle) {
+  private function getJobTestRunNode($handle) {
     $redis = RedisConnection::get();
     if ($redis === null) {
       throw new InternalErrorException();
     }
 
+    $ownerUserId = $redis->get(implode(':', ['testRun', $handle, 'userId']));
     $nodeId = $redis->get(implode(':', ['testRun', $handle, 'nodeId']));
-    if ($nodeId === false) {
+    if ($ownerUserId === false
+        || $nodeId === false
+        || intval($ownerUserId) !== intval($this->authToken->userId)) {
       throw new InvalidArgumentsException();
     }
 
@@ -741,6 +745,12 @@ class JobManager {
     if (!$node) {
       throw new InternalErrorException();
     }
+
+    return $node;
+  }
+
+  public function getJobTestRunStatus($handle) {
+    $node = $this->getJobTestRunNode($handle);
 
     try {
       $client = $node->connect();
@@ -752,20 +762,7 @@ class JobManager {
   }
 
   public function deleteJobTestRun($handle) {
-    $redis = RedisConnection::get();
-    if ($redis === null) {
-      throw new InternalErrorException();
-    }
-
-    $nodeId = $redis->get(implode(':', ['testRun', $handle, 'nodeId']));
-    if ($nodeId === false) {
-      throw new InvalidArgumentsException();
-    }
-
-    $node = (new NodeManager($this->authToken))->getNode(intval($nodeId));
-    if (!$node) {
-      throw new InternalErrorException();
-    }
+    $node = $this->getJobTestRunNode($handle);
 
     try {
       $client = $node->connect();
