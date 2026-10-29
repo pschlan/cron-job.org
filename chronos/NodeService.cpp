@@ -201,9 +201,10 @@ public:
         return true;
     }
 
-    void searchJobsByUrl(SearchJobsResult &_return, const std::string &query) override
+    void searchJobsByUrl(SearchJobsResult &_return, const std::string &query, const bool enabledOnly) override
     {
-        std::cout << "ChronosNodeHandler::searchJobsByUrl(" << query.size() << ")" << std::endl;
+        std::cout << "ChronosNodeHandler::searchJobsByUrl(" << query.size()
+            << ", enabledOnly=" << (enabledOnly ? "true" : "false") << ")" << std::endl;
 
         constexpr const int MAX_RESULTS = 100;
         constexpr const int MIN_QUERY_LENGTH = 3;
@@ -220,6 +221,13 @@ public:
             std::unique_ptr<Chronos::MySQL_DB> db(Chronos::App::getInstance()->createMySQLConnection());
 
             _return.result = listJobs([&](const char *fields) {
+                if (enabledOnly)
+                {
+                    return db->query("SELECT %s FROM `job` WHERE LOCATE('%q', `url`)>0 AND `enabled`=1 LIMIT %d",
+                        fields,
+                        trimmedQuery.c_str(),
+                        MAX_RESULTS + 1);
+                }
                 return db->query("SELECT %s FROM `job` WHERE LOCATE('%q', `url`)>0 LIMIT %d",
                     fields,
                     trimmedQuery.c_str(),

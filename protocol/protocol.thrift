@@ -338,7 +338,7 @@ service ChronosNode
     double getUserScheduleLoad(1: i64 userId) throws(1: InternalError ie);
     list<UserInfo> getUserInfoForAllUsers() throws(1: InternalError ie);
 
-    SearchJobsResult searchJobsByUrl(1: string query) throws(1: InternalError ie, 2: InvalidArguments ia);
+    SearchJobsResult searchJobsByUrl(1: string query, 2: bool enabledOnly = false) throws(1: InternalError ie, 2: InvalidArguments ia);
 
     TestRunHandle submitJobTestRun(1: Job job, 2: string xForwardedFor) throws(1: InternalError ie, 2: InvalidArguments ia, 3: FeatureNotAvailable na);
     TestRunStatus getJobTestRunStatus(1: TestRunHandle handle) throws(1: InvalidArguments ia, 2: FeatureNotAvailable na);
