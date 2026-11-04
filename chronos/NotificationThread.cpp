@@ -56,6 +56,9 @@ namespace {
 
 constexpr int PHRASE_SYNC_INTERVAL_SECONDS = 300;
 constexpr int MASTER_SYNC_TIMEOUT_MS = 1000;
+// Recv must cover a slow master. A short timeout leaves the reply on the
+// connection for the next notification to read as its own user.
+constexpr int MASTER_RECV_TIMEOUT_MS = 10000;
 
 constexpr size_t MIME_ENCODED_WORD_MAX_LEN = 75;
 constexpr size_t MIME_ENCODED_WORD_PREFIX_LEN = 10; // =?UTF-8?Q?
@@ -1069,15 +1072,7 @@ NotificationThread::NotificationThread()
 
 	NotificationThread::instance = this;
 
-	masterSocket = std::make_shared<apache::thrift::transport::TSocket>(
-		App::getInstance()->config->get("master_service_address"),
-		App::getInstance()->config->getInt("master_service_port"));
-	masterSocket->setConnTimeout(MASTER_SYNC_TIMEOUT_MS);
-	masterSocket->setRecvTimeout(MASTER_SYNC_TIMEOUT_MS);
-	masterSocket->setSendTimeout(MASTER_SYNC_TIMEOUT_MS);
-	masterTransport = std::make_shared<apache::thrift::transport::TBufferedTransport>(masterSocket);
-	masterProtocol = std::make_shared<apache::thrift::protocol::TBinaryProtocol>(masterTransport);
-	masterClient = std::make_shared<ChronosMasterClient>(masterProtocol);
+	connectMaster();
 
 	defaultLang = App::getInstance()->config->get("default_lang");
 	mailFrom = App::getInstance()->config->get("notification_mail_from");
@@ -1098,6 +1093,44 @@ NotificationThread *NotificationThread::getInstance()
 	if(NotificationThread::instance == nullptr)
 		throw std::runtime_error("No notification thread instance available");
 	return(NotificationThread::instance);
+}
+
+void NotificationThread::connectMaster()
+{
+	masterSocket = std::make_shared<apache::thrift::transport::TSocket>(
+		App::getInstance()->config->get("master_service_address"),
+		App::getInstance()->config->getInt("master_service_port"));
+	masterSocket->setConnTimeout(MASTER_SYNC_TIMEOUT_MS);
+	masterSocket->setRecvTimeout(MASTER_RECV_TIMEOUT_MS);
+	masterSocket->setSendTimeout(MASTER_SYNC_TIMEOUT_MS);
+	masterTransport = std::make_shared<apache::thrift::transport::TBufferedTransport>(masterSocket);
+	masterProtocol = std::make_shared<apache::thrift::protocol::TBinaryProtocol>(masterTransport);
+	masterClient = std::make_shared<ChronosMasterClient>(masterProtocol);
+}
+
+void NotificationThread::resetMaster()
+{
+	// Recreate the client. TBufferedTransport::close() does not discard bytes
+	// already sitting in its read buffer, so reopening the same object would
+	// parse a previous user's reply as the next getUserDetails result.
+	if(masterTransport)
+	{
+		try
+		{
+			if(masterTransport->isOpen())
+				masterTransport->close();
+		}
+		catch(const apache::thrift::TException &ex)
+		{
+			std::cerr << "NotificationThread::resetMaster(): " << ex.what() << std::endl;
+		}
+	}
+
+	masterClient.reset();
+	masterProtocol.reset();
+	masterTransport.reset();
+	masterSocket.reset();
+	connectMaster();
 }
 
 void NotificationThread::addNotification(Notification &&notification)
@@ -1150,12 +1183,13 @@ void NotificationThread::run()
 		{
 			try
 			{
-				masterTransport->open();
+				if(!masterTransport->isOpen())
+					masterTransport->open();
 
 				if(phrases.empty() || (tLastPhraseSync + PHRASE_SYNC_INTERVAL_SECONDS < time(nullptr)))
 				{
-					syncPhrases();
-					tLastPhraseSync = time(nullptr);
+					if(syncPhrases())
+						tLastPhraseSync = time(nullptr);
 				}
 
 				while(!tempQueue.empty())
@@ -1165,11 +1199,13 @@ void NotificationThread::run()
 					processNotification(notification);
 				}
 
-				masterTransport->close();
+				if(masterTransport->isOpen())
+					masterTransport->close();
 			}
 			catch (const apache::thrift::TException &ex)
 			{
 				std::cerr << "NotificationThread::run(): Caught thrift exception: " << ex.what() << std::endl;
+				resetMaster();
 
 				// Sleep a bit to avoid too frequent retries
 				std::this_thread::sleep_for(std::chrono::milliseconds(250));
@@ -1192,7 +1228,7 @@ void NotificationThread::run()
 	std::cout << "NotificationThread::run(): Finished" << std::endl;
 }
 
-void NotificationThread::syncPhrases()
+bool NotificationThread::syncPhrases()
 {
 	try
 	{
@@ -1208,12 +1244,66 @@ void NotificationThread::syncPhrases()
 			}
 		}
 		Metrics::instance().incrementPhraseSync();
+		return true;
 	}
 	catch (const apache::thrift::TException &ex)
 	{
 		std::cerr << "NotificationThread::syncPhrases(): Failed to sync phrases: " << ex.what() << std::endl;
 		Metrics::instance().incrementPhraseSyncError();
+		resetMaster();
+		return false;
 	}
+}
+
+bool NotificationThread::fetchUserDetails(const Notification &notification, UserDetails &userDetails, std::string &error, bool &userMismatch)
+{
+	constexpr int MAX_ATTEMPTS = 2;
+
+	error.clear();
+	userMismatch = false;
+
+	for(int attempt = 1; attempt <= MAX_ATTEMPTS && !stop; ++attempt)
+	{
+		userDetails = UserDetails();
+
+		try
+		{
+			if(!masterTransport->isOpen())
+				masterTransport->open();
+
+			callMaster("getUserDetails", [&]() {
+				masterClient->getUserDetails(userDetails, notification.userID);
+			});
+
+			if(userDetails.userId == static_cast<int64_t>(notification.userID))
+				return true;
+
+			error = "User mismatch: notification user " + std::to_string(notification.userID)
+				+ ", master returned " + std::to_string(userDetails.userId);
+			std::cerr << "NotificationThread::fetchUserDetails(): " << error << std::endl;
+			userMismatch = true;
+			resetMaster();
+			return false;
+		}
+		catch(const apache::thrift::TException &ex)
+		{
+			error = ex.what();
+			std::cerr << "NotificationThread::fetchUserDetails(): " << error
+				<< " (attempt " << attempt << "/" << MAX_ATTEMPTS << ")" << std::endl;
+		}
+
+		// The reply stream is no longer aligned with this request. Drop the
+		// transport, including any bytes already buffered, before retrying.
+		resetMaster();
+
+		if(attempt < MAX_ATTEMPTS && !stop)
+			std::this_thread::sleep_for(std::chrono::milliseconds(250));
+	}
+
+	if(error.empty())
+		error = "Stopping";
+
+	return false;
 }
 
 std::string NotificationThread::getPhrase(const std::string &lang, const std::string &key) const
@@ -1295,24 +1385,21 @@ void NotificationThread::processNotification(Notification &notification)
 	Metrics::instance().incrementNotificationsProcessed(MetricsLabels::notificationTypeLabel(notification.type));
 
 	UserDetails userDetails;
+	std::string userDetailsError;
+	bool userMismatch = false;
 
-	try
+	if(!fetchUserDetails(notification, userDetails, userDetailsError, userMismatch))
 	{
-		callMaster("getUserDetails", [&]() {
-			masterClient->getUserDetails(userDetails, notification.userID);
-		});
-	}
-	catch (const apache::thrift::TException &ex)
-	{
-		std::cerr << "NotificationThread::processNotification(): Failed to retrieve user details: " << ex.what() << std::endl;
+		std::cerr << "NotificationThread::processNotification(): Failed to retrieve user details for user "
+			<< notification.userID << ": " << userDetailsError << std::endl;
 
 		NotificationChannel dummyChannel;
 		dummyChannel.channelId = 0;
 		dummyChannel.destination = {};
 		storeNotification(notification, dummyChannel, NotificationResult::FAILED_PREPROCESS,
-			"Exception during user details retrieval: " +std::string(ex.what()), db);
+			"Exception during user details retrieval: " + userDetailsError, db);
 
-		Metrics::instance().incrementNotificationsDropped("user_details_failed");
+		Metrics::instance().incrementNotificationsDropped(userMismatch ? "user_mismatch" : "user_details_failed");
 
 		return;
 	}
@@ -1326,16 +1413,16 @@ void NotificationThread::processNotification(Notification &notification)
 	std::vector<NotificationChannel> notificationChannels;
 	if (userDetails.__isset.notificationChannels)
 	{
-		std::cout << "NotificationThread::processNotification(): User " << userDetails.userId << " has " << userDetails.notificationChannels.size() << " notification channels" << std::endl;
+		std::cout << "NotificationThread::processNotification(): User " << notification.userID << " has " << userDetails.notificationChannels.size() << " notification channels" << std::endl;
 		notificationChannels = std::move(userDetails.notificationChannels);
 	}
 	else
 	{
-		std::cout << "NotificationThread::processNotification(): User " << userDetails.userId << " has no notification channels, using default email channel" << std::endl;
+		std::cout << "NotificationThread::processNotification(): User " << notification.userID << " has no notification channels, using default email channel" << std::endl;
 
 		if (userDetails.__isset.suppressNotifications && userDetails.suppressNotifications)
 		{
-			std::cerr << "NotificationThread::processNotification(): Notifications suppressed for user " << userDetails.userId << std::endl;
+			std::cerr << "NotificationThread::processNotification(): Notifications suppressed for user " << notification.userID << std::endl;
 			return;
 		}
 

@@ -158,9 +158,9 @@ MySQL errors in `storeResult()` are not caught today; instrumentation should wra
 | `chronos_emails_sent_total` | Counter | `type` | Legacy alias of `chronos_notifications_sent_total{channel="email"}` |
 | `chronos_emails_suppressed_total` | Counter | `type` | Synthetic account-email channel omitted because `userDetails.suppressNotifications` is set |
 | `chronos_email_send_errors_total` | Counter | — | Legacy alias of `chronos_notification_send_errors_total{channel="email"}` |
-| `chronos_notifications_dropped_total` | Counter | `reason` | Abandoned before a send is submitted. `reason`: `user_details_failed`, `unknown_type`, `unknown_channel_type`, `preprocess_failed` |
+| `chronos_notifications_dropped_total` | Counter | `reason` | Abandoned before a send is submitted. `reason`: `user_details_failed`, `user_mismatch`, `unknown_type`, `unknown_channel_type`, `preprocess_failed` |
 
-**Notification flow:** `processNotification()` increments `processed` once, then fans out to N channels. Each enabled channel is either submitted (later `sent` or `send_errors`) or counted as `dropped{reason="preprocess_failed"|"unknown_channel_type"}`. `user_details_failed` / `unknown_type` drop the whole notification. `emails_suppressed` is independent of webhook/other-email delivery. Store failures after a send increment `chronos_mysql_write_errors_total{operation="notification_insert"}`.
+**Notification flow:** `processNotification()` increments `processed` once, then fans out to N channels. Each enabled channel is either submitted (later `sent` or `send_errors`) or counted as `dropped{reason="preprocess_failed"|"unknown_channel_type"}`. `user_details_failed` / `user_mismatch` / `unknown_type` drop the whole notification. `user_mismatch` means `getUserDetails` returned a different user, so nothing was sent and the master connection was recreated. `emails_suppressed` is independent of webhook/other-email delivery. Store failures after a send increment `chronos_mysql_write_errors_total{operation="notification_insert"}`.
 
 Webhook retries: only transient curl/HTTP failures (connect/timeout/DNS, 408/429/5xx), in-memory with exponential backoff + jitter, capped attempts and delayed-queue size. `Retry-After` is honored when present and clamped to `webhook_retry_max_delay_ms`. Email is not retried. A 2xx after a limiter `CURLE_WRITE_ERROR` counts as `sent`.
 

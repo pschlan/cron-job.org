@@ -63,7 +63,7 @@ const char *kPriorityLabels[] = { "low", "default", "high" };
 const char *kNotificationTypes[] = { "failure", "success", "disable", "ssl_cert_expiry", "unknown" };
 const char *kNotificationChannels[] = { "email", "webhook", "unknown" };
 const char *kNotificationDroppedReasons[] = {
-	"user_details_failed", "unknown_type", "unknown_channel_type", "preprocess_failed"
+	"user_details_failed", "user_mismatch", "unknown_type", "unknown_channel_type", "preprocess_failed"
 };
 
 }

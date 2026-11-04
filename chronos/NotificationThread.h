@@ -66,7 +66,10 @@ namespace Chronos
 		void addNotification(Notification &&notification);
 
 	private:
-		void syncPhrases();
+		void connectMaster();
+		void resetMaster();
+		bool syncPhrases();
+		bool fetchUserDetails(const Notification &notification, UserDetails &userDetails, std::string &error, bool &userMismatch);
 		std::string getPhrase(const std::string &lang, const std::string &key) const;
 		std::string formatDate(const std::string &lang, const uint64_t date) const;
 		std::string formatStatus(const std::string &lang, const Notification &notification) const;
