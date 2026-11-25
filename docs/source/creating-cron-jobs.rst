@@ -17,5 +17,5 @@ Variable            Description                                                E
 %cjo:uuid4%         A UUID v4 unique identifier (not for cryptographic usage)  ``bd901c8b-11ea-431c-9311-90348e9b3a7f``
 ================    ========================================================== ===============
 
-Using a variable multiple times will cause the corresponding value to be re-generated for each occurence of
+Using a variable multiple times will cause the corresponding value to be re-generated for each occurrence of
 the variable. For example, using the ``%cjo:uuid4%`` variable twice will produce two different UUIDs.
