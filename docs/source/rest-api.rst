@@ -3,7 +3,7 @@ REST API
 
 Introduction
 ------------
-cron-job.org provides an API which enables users to programatically create, update, delete and view cron jobs.
+cron-job.org provides an API which enables users to programmatically create, update, delete and view cron jobs.
 The API provides a REST-like interface with API-key based authorization and JSON request and response payload.
 Given this, the API should be easily usable from virtually any programming language.
 
