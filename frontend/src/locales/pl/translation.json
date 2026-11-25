@@ -75,7 +75,7 @@
       "sameElse": "L"
     },
     "quotaIndicator": "Limit: {{cur}} / {{max}}",
-    "selectedItems": "Wybrano {{count}} element",
+    "selectedItems_one": "Wybrano {{count}} element",
     "selectedItems_plural": "Wybrano {{count}} elementów",
     "enable": "Włącz",
     "disable": "Wyłącz",
@@ -83,9 +83,9 @@
     "massActionFailed": "Nie udało się wykonać akcji. Spróbuj ponownie później.",
     "sustainingMemberThanks": "Jesteś Członkiem Wspierającym - dziękujemy za wsparcie i utrzymanie tego projektu przy życiu!",
     "export": "Eksportuj",
-    "confirmMassDeleteTitle": "Usuń wybrany element",
+    "confirmMassDeleteTitle_one": "Usuń wybrany element",
     "confirmMassDeleteTitle_plural": "Usuń {{count}} wybranych elementów",
-    "confirmMassDeleteText": "Czy na pewno chcesz usunąć wybrany element?",
+    "confirmMassDeleteText_one": "Czy na pewno chcesz usunąć wybrany element?",
     "confirmMassDeleteText_plural": "Czy na pewno chcesz usunąć {{count}} wybranych elementów?"
   },
   "login": {
@@ -254,9 +254,9 @@
       "months": "Miesiące",
       "hours": "Godziny",
       "minutes": "Minuty",
-      "minutesSmall": "minuta",
+      "minutesSmall_one": "minuta",
       "minutesSmall_plural": "minuty",
-      "hoursSmall": "godzina",
+      "hoursSmall_one": "godzina",
       "hoursSmall_plural": "godziny",
       "every": "Co",
       "every2": "Co",
@@ -362,10 +362,10 @@
       "folderDeleted": "Folder został usunięty."
     },
     "move": "Przenieś",
-    "moveText": "Przenieś wybrany element do:",
+    "moveText_one": "Przenieś wybrany element do:",
     "moveText_plural": "Przenieś {{count}} wybrane elementy do:",
     "notifyOnSslCertExpiryLeadTime": "Powiadom przed wygaśnięciem",
-    "notifyOnSslCertExpiryDays": "dzień",
+    "notifyOnSslCertExpiryDays_one": "dzień",
     "notifyOnSslCertExpiryDays_plural": "dni"
   },
   "statuspages": {

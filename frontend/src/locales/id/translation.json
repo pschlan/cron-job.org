@@ -75,7 +75,7 @@
       "sameElse": "L"
     },
     "quotaIndicator": "Kuota: {{cur}} / {{max}}",
-    "selectedItems": "{{count}} item terpilih",
+    "selectedItems_one": "{{count}} item terpilih",
     "selectedItems_plural": "{{count}} item terpilih",
     "enable": "Aktifkan",
     "disable": "Nonaktifkan",
@@ -83,9 +83,9 @@
     "massActionFailed": "Gagal mengeksekusi Action. Silakan coba lagi nanti.",
     "sustainingMemberThanks": "Anda adalah Anggota Pendukung - terima kasih banyak telah mendukung kami dan menjaga proyek ini tetap hidup!",
     "export": "Ekspor",
-    "confirmMassDeleteTitle": "Hapus item yang dipilih",
+    "confirmMassDeleteTitle_one": "Hapus item yang dipilih",
     "confirmMassDeleteTitle_plural": "Hapus {{count}} item yang dipilih",
-    "confirmMassDeleteText": "Apakah Anda benar-benar ingin menghapus item yang dipilih?",
+    "confirmMassDeleteText_one": "Apakah Anda benar-benar ingin menghapus item yang dipilih?",
     "confirmMassDeleteText_plural": "Apakah Anda benar-benar ingin menghapus {{count}} item yang dipilih?",
     "selectAll": "Pilih semua",
     "deselectAll": "Batal pilih semua",
@@ -235,7 +235,7 @@
       "onSslCertExpiry": "sertifikat TLS server akan segera kedaluwarsa"
     },
     "notifyOnFailureRequiredTimes": "Beri tahu setelah",
-    "notifyOnFailureFailures": "kegagalan",
+    "notifyOnFailureFailures_one": "kegagalan",
     "notifyOnFailureFailures_plural": "kegagalan berturut-turut",
     "notifyVia": "Beritahu melalui…",
     "notificationMode": {
@@ -270,9 +270,9 @@
       "months": "Bulan",
       "hours": "Jam",
       "minutes": "Menit",
-      "minutesSmall": "menit",
+      "minutesSmall_one": "menit",
       "minutesSmall_plural": "menit",
-      "hoursSmall": "jam",
+      "hoursSmall_one": "jam",
       "hoursSmall_plural": "jam",
       "every": "Setiap",
       "every2": "Setiap",
@@ -381,7 +381,7 @@
       "folderDeleted": "Folder telah dihapus."
     },
     "move": "Pindahkan",
-    "moveText": "Pindahkan item yang dipilih ke:",
+    "moveText_one": "Pindahkan item yang dipilih ke:",
     "moveText_plural": "Pindahkan {{count}} item yang dipilih ke:",
     "statusBadge": "Badge status",
     "statusBadgeFor": "Badge status untuk: {{jobTitle}}",
@@ -395,7 +395,7 @@
     "statusBadgeURLNote": "Saat membagikan URL Badge status, perlu diingat bahwa siapa pun yang memiliki URL tersebut dapat melihat status job Anda dan informasi lain yang dipilih.",
     "someFailed": "Kami tidak dapat mengambil beberapa job Anda saat ini karena masalah teknis. Tim kami telah diberi tahu. Silakan coba lagi nanti. Jika masalah ini berlanjut, silakan hubungi tim dukungan kami.",
     "notifyOnSslCertExpiryLeadTime": "Beri tahu sebelum kedaluwarsa",
-    "notifyOnSslCertExpiryDays": "hari",
+    "notifyOnSslCertExpiryDays_one": "hari",
     "notifyOnSslCertExpiryDays_plural": "hari"
   },
   "statuspages": {

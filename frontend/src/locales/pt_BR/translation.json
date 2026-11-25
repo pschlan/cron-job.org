@@ -74,18 +74,18 @@
       "sameElse": "L"
     },
     "quotaIndicator": "Contingente: {{cur}} / {{max}}",
-    "selectedItems": "{{count}} item selecionado",
-    "selectedItems_plural": "{{count}} itens selecionados",
+    "selectedItems_one": "{{count}} item selecionado",
+    "selectedItems_other": "{{count}} itens selecionados",
     "enable": "Habilitar",
     "disable": "Desabilitar",
     "massActionSucceeded": "A ação foi executada com sucesso.",
     "massActionFailed": "Falha ao executar a ação. Por favor, tente novamente mais tarde.",
     "sustainingMemberThanks": "You're a Sustaining Member - thanks so much for supporting us and keeping this project alive!",
     "export": "Exportar",
-    "confirmMassDeleteTitle": "Deletar item selecionado",
-    "confirmMassDeleteTitle_plural": "Deletar {{count}} itens selecionados",
-    "confirmMassDeleteText": "Você realmente deseja excluir o item selecionado?",
-    "confirmMassDeleteText_plural": "Você realmente deseja excluir os {{count}} itens selecionados?"
+    "confirmMassDeleteTitle_one": "Deletar item selecionado",
+    "confirmMassDeleteTitle_other": "Deletar {{count}} itens selecionados",
+    "confirmMassDeleteText_one": "Você realmente deseja excluir o item selecionado?",
+    "confirmMassDeleteText_other": "Você realmente deseja excluir os {{count}} itens selecionados?"
   },
   "login": {
     "emailAddress": "Endereço de email",
@@ -253,10 +253,10 @@
       "months": "Meses",
       "hours": "Horas",
       "minutes": "Minutos",
-      "minutesSmall": "minuto",
-      "minutesSmall_plural": "minutos",
-      "hoursSmall": "hora",
-      "hoursSmall_plural": "horas",
+      "minutesSmall_one": "minuto",
+      "minutesSmall_other": "minutos",
+      "hoursSmall_one": "hora",
+      "hoursSmall_other": "horas",
       "every": "Todo(a)",
       "every2": "Todo(a)",
       "everydayat": "Todos os dias às",
@@ -361,11 +361,11 @@
       "folderDeleted": "A pasta foi excluída."
     },
     "move": "Mover",
-    "moveText": "Mover item selecionado para:",
-    "moveText_plural": "Mova {{count}} itens selecionados para:",
+    "moveText_one": "Mover item selecionado para:",
+    "moveText_other": "Mova {{count}} itens selecionados para:",
     "notifyOnSslCertExpiryLeadTime": "Notificar antes do vencimento",
-    "notifyOnSslCertExpiryDays": "dia",
-    "notifyOnSslCertExpiryDays_plural": "dias"
+    "notifyOnSslCertExpiryDays_one": "dia",
+    "notifyOnSslCertExpiryDays_other": "dias"
   },
   "statuspages": {
     "title": "Título",

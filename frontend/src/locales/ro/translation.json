@@ -75,7 +75,7 @@
       "sameElse": "L"
     },
     "quotaIndicator": "Cotă: {{cur}} / {{max}}",
-    "selectedItems": "{{count}} element selectat",
+    "selectedItems_one": "{{count}} element selectat",
     "selectedItems_plural": "{{count}} elemente selectate",
     "enable": "Activează",
     "disable": "Dezactivează",
@@ -83,9 +83,9 @@
     "massActionFailed": "Eroare la executarea acțiunii. Te rugăm să încerci din nou mai târziu.",
     "sustainingMemberThanks": "Ești membru susținător - îți mulțumim foarte mult pentru că ne susții și menții acest proiect în viață!",
     "export": "Exportă",
-    "confirmMassDeleteTitle": "Șterge element selectat",
+    "confirmMassDeleteTitle_one": "Șterge element selectat",
     "confirmMassDeleteTitle_plural": "Șterge {{count}} elemente selectate",
-    "confirmMassDeleteText": "Sigur vrei să ștergi elementul selectat?",
+    "confirmMassDeleteText_one": "Sigur vrei să ștergi elementul selectat?",
     "confirmMassDeleteText_plural": "Sigur vrei să ștergi {{count}} elemente selectate?"
   },
   "login": {
@@ -254,9 +254,9 @@
       "months": "Luni",
       "hours": "Ore",
       "minutes": "Minute",
-      "minutesSmall": "minut",
+      "minutesSmall_one": "minut",
       "minutesSmall_plural": "minute",
-      "hoursSmall": "oră",
+      "hoursSmall_one": "oră",
       "hoursSmall_plural": "ore",
       "every": "La fiecare",
       "every2": "La fiecare",
@@ -362,10 +362,10 @@
       "folderDeleted": "Dosarul a fost șters."
     },
     "move": "Mută",
-    "moveText": "Mută elementul selectat în:",
+    "moveText_one": "Mută elementul selectat în:",
     "moveText_plural": "Mută {{count}} elemente selectate în:",
     "notifyOnSslCertExpiryLeadTime": "Notificare înainte de expirare",
-    "notifyOnSslCertExpiryDays": "zi",
+    "notifyOnSslCertExpiryDays_one": "zi",
     "notifyOnSslCertExpiryDays_plural": "zile"
   },
   "statuspages": {

@@ -74,7 +74,7 @@
       "sameElse": "L"
     },
     "quotaIndicator": "Квота: {{cur}} / {{max}}",
-    "selectedItems": "{{count}} элемент выбран",
+    "selectedItems_one": "{{count}} элемент выбран",
     "selectedItems_plural": "{{count}} элементов выбрано",
     "enable": "Включить",
     "disable": "Выключить",
@@ -82,9 +82,9 @@
     "massActionFailed": "Не удалось выполнить действие. Пожалуйста, повторите попытку позже.",
     "sustainingMemberThanks": "Вы являетесь волонтером - большое спасибо за поддержку и сохранение этого проекта!",
     "export": "Экспорт",
-    "confirmMassDeleteTitle": "Удалить выбранный элемент",
+    "confirmMassDeleteTitle_one": "Удалить выбранный элемент",
     "confirmMassDeleteTitle_plural": "Удалить {{count}} выбранных элементов",
-    "confirmMassDeleteText": "Вы действительно хотите удалить выбранный элемент?",
+    "confirmMassDeleteText_one": "Вы действительно хотите удалить выбранный элемент?",
     "confirmMassDeleteText_plural": "Вы действительно хотите удалить {{count}} выбранных элементов?"
   },
   "login": {
@@ -325,7 +325,7 @@
     },
     "exportData": "Экспортировать данные",
     "notifyOnSslCertExpiryLeadTime": "Уведомить до истечения",
-    "notifyOnSslCertExpiryDays": "день",
+    "notifyOnSslCertExpiryDays_one": "день",
     "notifyOnSslCertExpiryDays_plural": "дней"
   },
   "statuspages": {
