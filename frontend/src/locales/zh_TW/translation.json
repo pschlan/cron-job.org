@@ -73,7 +73,7 @@
       "sameElse": "L"
     },
     "quotaIndicator": "配額：{{cur}} / {{max}}",
-    "selectedItems": "已選擇 {{count}} 項",
+    "selectedItems_one": "已選擇 {{count}} 項",
     "selectedItems_plural": "已選擇 {{count}} 項",
     "enable": "啟用",
     "disable": "停用",
@@ -81,9 +81,9 @@
     "massActionFailed": "操作執行失敗，請稍後再試。",
     "sustainingMemberThanks": "您是 Sustaining 會員 - 非常感謝您支持我們並讓這個專案保持活力！",
     "export": "匯出",
-    "confirmMassDeleteTitle": "刪除所選項目",
+    "confirmMassDeleteTitle_one": "刪除所選項目",
     "confirmMassDeleteTitle_plural": "刪除 {{count}} 個選定的項目",
-    "confirmMassDeleteText": "您確定要刪除所選項目嗎？",
+    "confirmMassDeleteText_one": "您確定要刪除所選項目嗎？",
     "confirmMassDeleteText_plural": "您確定要刪除 {{count}} 個選中的項目嗎？"
   },
   "login": {
@@ -357,10 +357,10 @@
       "folderDeleted": "已刪除資料夾。"
     },
     "move": "移動",
-    "moveText": "將所選項目移動至：",
+    "moveText_one": "將所選項目移動至：",
     "moveText_plural": "將所選的 {{count}} 個項目移動至：",
     "notifyOnSslCertExpiryLeadTime": "到期前通知",
-    "notifyOnSslCertExpiryDays": "天",
+    "notifyOnSslCertExpiryDays_one": "天",
     "notifyOnSslCertExpiryDays_plural": "天"
   },
   "statuspages": {

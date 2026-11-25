@@ -6,7 +6,7 @@ import YubicoOTPDeviceIcon from '@material-ui/icons/VpnKey';
 import { useEffect } from 'react';
 import { confirmMFADevice, createMFADevice } from '../../utils/API';
 import { useSnackbar } from 'notistack';
-import QRCode from 'qrcode.react';
+import { QRCodeSVG as QRCode } from 'qrcode.react';
 import { Config } from '../../utils/Config';
 
 const STATE_INITIAL = 0;

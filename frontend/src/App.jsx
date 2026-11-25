@@ -135,7 +135,9 @@ i18n
   .use(initReactI18next)
   .init({
     resources: LANGUAGE_RESOURCES,
+    supportedLngs: Object.keys(LANGUAGE_RESOURCES),
     fallbackLng: Config.fallbackLanguage,
+    nonExplicitSupportedLngs: true,
     interpolation: {
       escapeValue: false
     }

@@ -75,7 +75,7 @@
       "sameElse": "L"
     },
     "quotaIndicator": "الحصة: {{cur}} / {{max}}",
-    "selectedItems": "تم تحديد {{count}} عنصر",
+    "selectedItems_one": "تم تحديد {{count}} عنصر",
     "selectedItems_plural": "تم تحديد {{count}} عناصر",
     "enable": "تفعيل",
     "disable": "تعطيل",
@@ -83,9 +83,9 @@
     "massActionFailed": "فشل تنفيذ الإجراء. يرجى المحاولة لاحقًا.",
     "sustainingMemberThanks": "أنت عضو داعم - شكرًا جزيلاً لدعمك ومساهمتك في استمرار هذا المشروع!",
     "export": "تصدير",
-    "confirmMassDeleteTitle": "حذف العنصر المحدد",
+    "confirmMassDeleteTitle_one": "حذف العنصر المحدد",
     "confirmMassDeleteTitle_plural": "حذف {{count}} عناصر محددة",
-    "confirmMassDeleteText": "هل تريد حقًا حذف العنصر المحدد؟",
+    "confirmMassDeleteText_one": "هل تريد حقًا حذف العنصر المحدد؟",
     "confirmMassDeleteText_plural": "هل تريد حقًا حذف {{count}} عناصر محددة؟",
     "selectAll": "تحديد الكل",
     "deselectAll": "إلغاء تحديد الكل",
@@ -372,7 +372,7 @@
       "folderDeleted": "تم حذف المجلد."
     },
     "move": "نقل",
-    "moveText": "نقل العنصر المحدد إلى:",
+    "moveText_one": "نقل العنصر المحدد إلى:",
     "moveText_plural": "نقل {{count}} عناصر محددة إلى:",
     "statusBadge": "شارة الحالة",
     "statusBadgeFor": "شارة الحالة لـ: {{jobTitle}}",
@@ -386,7 +386,7 @@
     "statusBadgeURLNote": "عند مشاركة رابط الشارة، يرجى العلم أن أي شخص لديه الرابط يمكنه رؤية حالة المهمة والمعلومات الأخرى المحددة.",
     "someFailed": "تعذر استرجاع بعض المهام بسبب مشكلة تقنية. تم إخطار فريقنا. يرجى المحاولة لاحقًا. إذا استمرت المشكلة، يرجى التواصل مع فريق الدعم.",
     "notifyOnSslCertExpiryLeadTime": "إشعار قبل انتهاء الصلاحية",
-    "notifyOnSslCertExpiryDays": "يوم",
+    "notifyOnSslCertExpiryDays_one": "يوم",
     "notifyOnSslCertExpiryDays_plural": "أيام"
   },
   "statuspages": {

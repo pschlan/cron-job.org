@@ -74,18 +74,18 @@
       "sameElse": "L"
     },
     "quotaIndicator": "Quota : {{cur}} / {{max}}",
-    "selectedItems": "{{count}} article choisi",
-    "selectedItems_plural": "{{count}} itarticles selectionées",
+    "selectedItems_one": "{{count}} article choisi",
+    "selectedItems_other": "{{count}} itarticles selectionées",
     "enable": "Activer",
     "disable": "Désactiver",
     "massActionSucceeded": "L'action a été exécutée avec succès.",
     "massActionFailed": "L'exécution de l'action a échoué. Veuillez réessayer plus tard.",
     "sustainingMemberThanks": "Vous êtes un supporter. Merci beaucoup de nous soutenir et de maintenir ce projet en vie !",
     "export": "Exportation",
-    "confirmMassDeleteTitle": "Supprimer l'élément sélectionné",
-    "confirmMassDeleteTitle_plural": "Supprimer {{count}} élément(s) sélectionné(s) ",
-    "confirmMassDeleteText": "Voulez-vous vraiment supprimer l'élément sélectionné ?",
-    "confirmMassDeleteText_plural": "Voulez-vous vraiment supprimer les {{count}} éléments sélectionnés ?"
+    "confirmMassDeleteTitle_one": "Supprimer l'élément sélectionné",
+    "confirmMassDeleteTitle_other": "Supprimer {{count}} élément(s) sélectionné(s) ",
+    "confirmMassDeleteText_one": "Voulez-vous vraiment supprimer l'élément sélectionné ?",
+    "confirmMassDeleteText_other": "Voulez-vous vraiment supprimer les {{count}} éléments sélectionnés ?"
   },
   "login": {
     "emailAddress": "Adresse électronique",
@@ -245,10 +245,10 @@
       "months": "Mois",
       "hours": "Heures",
       "minutes": "Minutes",
-      "minutesSmall": "minute",
-      "minutesSmall_plural": "minutes",
-      "hoursSmall": "heure",
-      "hoursSmall_plural": "heures",
+      "minutesSmall_one": "minute",
+      "minutesSmall_other": "minutes",
+      "hoursSmall_one": "heure",
+      "hoursSmall_other": "heures",
       "every": "Chaque",
       "every2": "Chaque",
       "everydayat": "Tous les jours à",
@@ -328,8 +328,8 @@
     },
     "exportData": "Exportation des données",
     "notifyOnSslCertExpiryLeadTime": "Notifier avant l'expiration",
-    "notifyOnSslCertExpiryDays": "jour",
-    "notifyOnSslCertExpiryDays_plural": "jours"
+    "notifyOnSslCertExpiryDays_one": "jour",
+    "notifyOnSslCertExpiryDays_other": "jours"
   },
   "statuspages": {
     "title": "Titre",
